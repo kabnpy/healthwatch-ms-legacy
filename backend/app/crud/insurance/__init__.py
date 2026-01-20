@@ -1,6 +1,4 @@
-from .item import create_item
-from .user import authenticate, create_user, get_user_by_email, update_user
-from .insurance.catalog import (
+from .catalog import (
     create_insurer,
     get_insurer_by_name,
     create_product,
@@ -8,7 +6,7 @@ from .insurance.catalog import (
     update_insurer,
     update_product,
 )
-from .insurance.client import (
+from .client import (
     create_client,
     get_client_by_kra_pin,
     get_client_by_email,
@@ -16,14 +14,14 @@ from .insurance.client import (
     create_correspondence,
     update_correspondence,
 )
-from .insurance.payment import (
+from .payment import (
     create_payment,
     get_payment_by_receipt_number,
     update_payment,
     create_payment_allocation,
     update_payment_allocation,
 )
-from .insurance.policy import (
+from .policy import (
     create_policy,
     get_policy_by_policy_number,
     get_policies_by_client_id,
@@ -40,11 +38,6 @@ from .insurance.policy import (
 )
 
 __all__ = [
-    "create_item",
-    "authenticate",
-    "create_user",
-    "get_user_by_email",
-    "update_user",
     "create_insurer",
     "get_insurer_by_name",
     "create_product",

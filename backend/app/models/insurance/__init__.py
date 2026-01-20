@@ -1,21 +1,4 @@
-from sqlmodel import SQLModel
-
-from .item import Item, ItemBase, ItemCreate, ItemPublic, ItemsPublic, ItemUpdate
-from .message import Message
-from .token import Token, TokenPayload
-from .user import (
-    NewPassword,
-    UpdatePassword,
-    User,
-    UserBase,
-    UserCreate,
-    UserPublic,
-    UserRegister,
-    UsersPublic,
-    UserUpdate,
-    UserUpdateMe,
-)
-from .insurance.catalog import (
+from .catalog import (
     Insurer,
     InsurerBase,
     InsurerCreate,
@@ -29,7 +12,7 @@ from .insurance.catalog import (
     ProductsPublic,
     ProductUpdate,
 )
-from .insurance.client import (
+from .client import (
     Client,
     ClientBase,
     ClientCreate,
@@ -43,7 +26,7 @@ from .insurance.client import (
     CorrespondencesPublic,
     CorrespondenceUpdate,
 )
-from .insurance.payment import (
+from .payment import (
     Payment,
     PaymentAllocation,
     PaymentAllocationBase,
@@ -57,7 +40,7 @@ from .insurance.payment import (
     PaymentsPublic,
     PaymentUpdate,
 )
-from .insurance.policy import (
+from .policy import (
     Claim,
     ClaimBase,
     ClaimCreate,
@@ -91,25 +74,6 @@ from .insurance.policy import (
 )
 
 __all__ = [
-    "Item",
-    "ItemBase",
-    "ItemCreate",
-    "ItemPublic",
-    "ItemsPublic",
-    "ItemUpdate",
-    "Message",
-    "Token",
-    "TokenPayload",
-    "User",
-    "UserBase",
-    "UserCreate",
-    "UserPublic",
-    "UserRegister",
-    "UsersPublic",
-    "UserUpdate",
-    "UserUpdateMe",
-    "NewPassword",
-    "UpdatePassword",
     "Insurer",
     "InsurerBase",
     "InsurerCreate",

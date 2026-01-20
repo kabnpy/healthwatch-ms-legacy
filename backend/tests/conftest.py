@@ -2,12 +2,26 @@ from collections.abc import Generator
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import Session, delete
+from sqlmodel import Session, SQLModel, delete
 
 from app.core.config import settings
 from app.core.db import engine, init_db
 from app.main import app
-from app.models import Item, User
+from app.models import (
+    Item,
+    User,
+    Insurer,
+    Product,
+    Client,
+    Correspondence,
+    Payment,
+    PaymentAllocation,
+    Policy,
+    RiskItem,
+    RiskNote,
+    Claim,
+    PolicyDocument,
+)
 from tests.utils.user import authentication_token_from_email
 from tests.utils.utils import get_superuser_token_headers
 
@@ -15,8 +29,32 @@ from tests.utils.utils import get_superuser_token_headers
 @pytest.fixture(scope="session", autouse=True)
 def db() -> Generator[Session, None, None]:
     with Session(engine) as session:
+        SQLModel.metadata.create_all(engine)
         init_db(session)
         yield session
+        # Delete records in correct order to avoid foreign key constraint violations
+        statement = delete(PolicyDocument)
+        session.execute(statement)
+        statement = delete(Claim)
+        session.execute(statement)
+        statement = delete(PaymentAllocation)
+        session.execute(statement)
+        statement = delete(RiskItem)
+        session.execute(statement)
+        statement = delete(RiskNote)
+        session.execute(statement)
+        statement = delete(Policy)
+        session.execute(statement)
+        statement = delete(Product)
+        session.execute(statement)
+        statement = delete(Correspondence)
+        session.execute(statement)
+        statement = delete(Payment)
+        session.execute(statement)
+        statement = delete(Client)
+        session.execute(statement)
+        statement = delete(Insurer)
+        session.execute(statement)
         statement = delete(Item)
         session.execute(statement)
         statement = delete(User)
