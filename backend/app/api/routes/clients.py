@@ -89,7 +89,9 @@ def update_client(
 
 
 @router.delete("/{id}", response_model=Message)
-def delete_client(session: SessionDep, _current_user: CurrentUser, id: uuid.UUID) -> Any:
+def delete_client(
+    session: SessionDep, _current_user: CurrentUser, id: uuid.UUID
+) -> Any:
     """
     Delete a client.
     """
