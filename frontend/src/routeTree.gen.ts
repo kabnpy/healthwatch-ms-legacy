@@ -18,6 +18,9 @@ import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
 import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
 import { Route as LayoutItemsRouteImport } from './routes/_layout/items'
 import { Route as LayoutAdminRouteImport } from './routes/_layout/admin'
+import { Route as LayoutClientsIndexRouteImport } from './routes/_layout/clients.index'
+import { Route as PrintRiskNotesIdRouteImport } from './routes/print/risk-notes.$id'
+import { Route as LayoutClientsClientIdRouteImport } from './routes/_layout/clients.$clientId'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -63,8 +66,24 @@ const LayoutAdminRoute = LayoutAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutClientsIndexRoute = LayoutClientsIndexRouteImport.update({
+  id: '/clients/',
+  path: '/clients/',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const PrintRiskNotesIdRoute = PrintRiskNotesIdRouteImport.update({
+  id: '/print/risk-notes/$id',
+  path: '/print/risk-notes/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LayoutClientsClientIdRoute = LayoutClientsClientIdRouteImport.update({
+  id: '/clients/$clientId',
+  path: '/clients/$clientId',
+  getParentRoute: () => LayoutRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof LayoutIndexRoute
   '/login': typeof LoginRoute
   '/recover-password': typeof RecoverPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -72,7 +91,9 @@ export interface FileRoutesByFullPath {
   '/admin': typeof LayoutAdminRoute
   '/items': typeof LayoutItemsRoute
   '/settings': typeof LayoutSettingsRoute
-  '/': typeof LayoutIndexRoute
+  '/clients/$clientId': typeof LayoutClientsClientIdRoute
+  '/print/risk-notes/$id': typeof PrintRiskNotesIdRoute
+  '/clients/': typeof LayoutClientsIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -83,6 +104,9 @@ export interface FileRoutesByTo {
   '/items': typeof LayoutItemsRoute
   '/settings': typeof LayoutSettingsRoute
   '/': typeof LayoutIndexRoute
+  '/clients/$clientId': typeof LayoutClientsClientIdRoute
+  '/print/risk-notes/$id': typeof PrintRiskNotesIdRoute
+  '/clients': typeof LayoutClientsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -95,10 +119,14 @@ export interface FileRoutesById {
   '/_layout/items': typeof LayoutItemsRoute
   '/_layout/settings': typeof LayoutSettingsRoute
   '/_layout/': typeof LayoutIndexRoute
+  '/_layout/clients/$clientId': typeof LayoutClientsClientIdRoute
+  '/print/risk-notes/$id': typeof PrintRiskNotesIdRoute
+  '/_layout/clients/': typeof LayoutClientsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/'
     | '/login'
     | '/recover-password'
     | '/reset-password'
@@ -106,7 +134,9 @@ export interface FileRouteTypes {
     | '/admin'
     | '/items'
     | '/settings'
-    | '/'
+    | '/clients/$clientId'
+    | '/print/risk-notes/$id'
+    | '/clients/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -117,6 +147,9 @@ export interface FileRouteTypes {
     | '/items'
     | '/settings'
     | '/'
+    | '/clients/$clientId'
+    | '/print/risk-notes/$id'
+    | '/clients'
   id:
     | '__root__'
     | '/_layout'
@@ -128,6 +161,9 @@ export interface FileRouteTypes {
     | '/_layout/items'
     | '/_layout/settings'
     | '/_layout/'
+    | '/_layout/clients/$clientId'
+    | '/print/risk-notes/$id'
+    | '/_layout/clients/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -136,6 +172,7 @@ export interface RootRouteChildren {
   RecoverPasswordRoute: typeof RecoverPasswordRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
+  PrintRiskNotesIdRoute: typeof PrintRiskNotesIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -171,7 +208,7 @@ declare module '@tanstack/react-router' {
     '/_layout': {
       id: '/_layout'
       path: ''
-      fullPath: ''
+      fullPath: '/'
       preLoaderRoute: typeof LayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -203,6 +240,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutAdminRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/clients/': {
+      id: '/_layout/clients/'
+      path: '/clients'
+      fullPath: '/clients/'
+      preLoaderRoute: typeof LayoutClientsIndexRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/print/risk-notes/$id': {
+      id: '/print/risk-notes/$id'
+      path: '/print/risk-notes/$id'
+      fullPath: '/print/risk-notes/$id'
+      preLoaderRoute: typeof PrintRiskNotesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_layout/clients/$clientId': {
+      id: '/_layout/clients/$clientId'
+      path: '/clients/$clientId'
+      fullPath: '/clients/$clientId'
+      preLoaderRoute: typeof LayoutClientsClientIdRouteImport
+      parentRoute: typeof LayoutRoute
+    }
   }
 }
 
@@ -211,6 +269,8 @@ interface LayoutRouteChildren {
   LayoutItemsRoute: typeof LayoutItemsRoute
   LayoutSettingsRoute: typeof LayoutSettingsRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
+  LayoutClientsClientIdRoute: typeof LayoutClientsClientIdRoute
+  LayoutClientsIndexRoute: typeof LayoutClientsIndexRoute
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
@@ -218,6 +278,8 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutItemsRoute: LayoutItemsRoute,
   LayoutSettingsRoute: LayoutSettingsRoute,
   LayoutIndexRoute: LayoutIndexRoute,
+  LayoutClientsClientIdRoute: LayoutClientsClientIdRoute,
+  LayoutClientsIndexRoute: LayoutClientsIndexRoute,
 }
 
 const LayoutRouteWithChildren =
@@ -229,6 +291,7 @@ const rootRouteChildren: RootRouteChildren = {
   RecoverPasswordRoute: RecoverPasswordRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
+  PrintRiskNotesIdRoute: PrintRiskNotesIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
