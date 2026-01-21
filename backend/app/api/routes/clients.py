@@ -2,15 +2,18 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
-from sqlmodel import func, select
 
 from app.api.deps import CurrentUser, SessionDep
 from app.crud.insurance.client import (
     count_clients,
-    create_client as crud_create_client,
-    delete_client as crud_delete_client,
     get_client_by_kra_pin,
     get_clients,
+)
+from app.crud.insurance.client import (
+    create_client as crud_create_client,
+)
+from app.crud.insurance.client import (
+    delete_client as crud_delete_client,
 )
 from app.crud.insurance.client import (
     update_client as crud_update_client,

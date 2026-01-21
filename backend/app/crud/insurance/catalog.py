@@ -1,4 +1,5 @@
 import uuid
+
 from sqlmodel import Session, select
 
 from app.models.insurance.catalog import (
@@ -66,6 +67,7 @@ def get_insurers(session: Session, *, skip: int = 0, limit: int = 100) -> list[I
 
 def count_insurers(session: Session) -> int:
     from sqlmodel import func
+
     statement = select(func.count()).select_from(Insurer)
     return session.exec(statement).one()
 
@@ -76,7 +78,11 @@ def delete_insurer(session: Session, *, db_insurer: Insurer) -> None:
 
 
 def get_products(
-    session: Session, *, skip: int = 0, limit: int = 100, insurer_id: uuid.UUID | None = None
+    session: Session,
+    *,
+    skip: int = 0,
+    limit: int = 100,
+    insurer_id: uuid.UUID | None = None,
 ) -> list[Product]:
     statement = select(Product)
     if insurer_id:
@@ -87,6 +93,7 @@ def get_products(
 
 def count_products(session: Session, *, insurer_id: uuid.UUID | None = None) -> int:
     from sqlmodel import func
+
     statement = select(Product)
     if insurer_id:
         statement = statement.where(Product.insurer_id == insurer_id)

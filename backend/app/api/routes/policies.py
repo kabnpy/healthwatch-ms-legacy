@@ -2,15 +2,18 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
-from sqlmodel import func, select
 
 from app.api.deps import CurrentUser, SessionDep
 from app.crud.insurance.policy import (
     count_policies,
-    create_policy as crud_create_policy,
-    delete_policy as crud_delete_policy,
     get_policies,
     get_policy_by_policy_number,
+)
+from app.crud.insurance.policy import (
+    create_policy as crud_create_policy,
+)
+from app.crud.insurance.policy import (
+    delete_policy as crud_delete_policy,
 )
 from app.crud.insurance.policy import (
     update_policy as crud_update_policy,

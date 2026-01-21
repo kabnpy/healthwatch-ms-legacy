@@ -2,16 +2,21 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
-from sqlmodel import func, select
 
 from app.api.deps import CurrentUser, SessionDep
 from app.crud.insurance.payment import (
     count_payments,
-    create_payment as crud_create_payment,
-    create_payment_allocation as crud_create_payment_allocation,
-    delete_payment as crud_delete_payment,
     get_payment_by_receipt_number,
     get_payments,
+)
+from app.crud.insurance.payment import (
+    create_payment as crud_create_payment,
+)
+from app.crud.insurance.payment import (
+    create_payment_allocation as crud_create_payment_allocation,
+)
+from app.crud.insurance.payment import (
+    delete_payment as crud_delete_payment,
 )
 from app.crud.insurance.payment import (
     update_payment as crud_update_payment,

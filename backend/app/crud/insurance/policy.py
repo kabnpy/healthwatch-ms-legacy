@@ -142,7 +142,11 @@ def update_policy_document(
 
 
 def get_policies(
-    session: Session, *, skip: int = 0, limit: int = 100, client_id: uuid.UUID | None = None
+    session: Session,
+    *,
+    skip: int = 0,
+    limit: int = 100,
+    client_id: uuid.UUID | None = None,
 ) -> list[Policy]:
     statement = select(Policy)
     if client_id:
@@ -153,6 +157,7 @@ def get_policies(
 
 def count_policies(session: Session, *, client_id: uuid.UUID | None = None) -> int:
     from sqlmodel import func
+
     statement = select(Policy)
     if client_id:
         statement = statement.where(Policy.client_id == client_id)
@@ -189,6 +194,7 @@ def count_claims(
     client_id: uuid.UUID | None = None,
 ) -> int:
     from sqlmodel import func
+
     statement = select(Claim)
     if policy_id:
         statement = statement.where(Claim.policy_id == policy_id)
@@ -204,7 +210,11 @@ def delete_claim(session: Session, *, db_claim: Claim) -> None:
 
 
 def get_risk_items(
-    session: Session, *, skip: int = 0, limit: int = 100, policy_id: uuid.UUID | None = None
+    session: Session,
+    *,
+    skip: int = 0,
+    limit: int = 100,
+    policy_id: uuid.UUID | None = None,
 ) -> list[RiskItem]:
     statement = select(RiskItem)
     if policy_id:
@@ -215,6 +225,7 @@ def get_risk_items(
 
 def count_risk_items(session: Session, *, policy_id: uuid.UUID | None = None) -> int:
     from sqlmodel import func
+
     statement = select(RiskItem)
     if policy_id:
         statement = statement.where(RiskItem.policy_id == policy_id)
@@ -228,7 +239,11 @@ def delete_risk_item(session: Session, *, db_risk_item: RiskItem) -> None:
 
 
 def get_risk_notes(
-    session: Session, *, skip: int = 0, limit: int = 100, policy_id: uuid.UUID | None = None
+    session: Session,
+    *,
+    skip: int = 0,
+    limit: int = 100,
+    policy_id: uuid.UUID | None = None,
 ) -> list[RiskNote]:
     statement = select(RiskNote)
     if policy_id:
@@ -239,6 +254,7 @@ def get_risk_notes(
 
 def count_risk_notes(session: Session, *, policy_id: uuid.UUID | None = None) -> int:
     from sqlmodel import func
+
     statement = select(RiskNote)
     if policy_id:
         statement = statement.where(RiskNote.policy_id == policy_id)
@@ -275,6 +291,7 @@ def count_policy_documents(
     claim_id: uuid.UUID | None = None,
 ) -> int:
     from sqlmodel import func
+
     statement = select(PolicyDocument)
     if policy_id:
         statement = statement.where(PolicyDocument.policy_id == policy_id)

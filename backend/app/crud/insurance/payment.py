@@ -1,4 +1,5 @@
 import uuid
+
 from sqlmodel import Session, select
 
 from app.models.insurance.payment import (
@@ -68,6 +69,7 @@ def get_payments(session: Session, *, skip: int = 0, limit: int = 100) -> list[P
 
 def count_payments(session: Session) -> int:
     from sqlmodel import func
+
     statement = select(func.count()).select_from(Payment)
     return session.exec(statement).one()
 
@@ -101,6 +103,7 @@ def count_payment_allocations(
     risk_note_id: uuid.UUID | None = None,
 ) -> int:
     from sqlmodel import func
+
     statement = select(PaymentAllocation)
     if payment_id:
         statement = statement.where(PaymentAllocation.payment_id == payment_id)
