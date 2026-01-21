@@ -55,6 +55,437 @@ export const Body_login_login_access_tokenSchema = {
     title: 'Body_login-login_access_token'
 } as const;
 
+export const ClaimCreateSchema = {
+    properties: {
+        claim_number: {
+            type: 'string',
+            title: 'Claim Number'
+        },
+        policy_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Policy Id'
+        },
+        risk_item_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Risk Item Id'
+        },
+        date_of_loss: {
+            type: 'string',
+            format: 'date',
+            title: 'Date Of Loss'
+        },
+        description: {
+            type: 'string',
+            title: 'Description'
+        },
+        status: {
+            type: 'string',
+            title: 'Status',
+            default: 'Open'
+        },
+        reserve_amount: {
+            type: 'number',
+            title: 'Reserve Amount',
+            default: 0
+        }
+    },
+    type: 'object',
+    required: ['claim_number', 'policy_id', 'date_of_loss', 'description'],
+    title: 'ClaimCreate'
+} as const;
+
+export const ClaimPublicSchema = {
+    properties: {
+        claim_number: {
+            type: 'string',
+            title: 'Claim Number'
+        },
+        policy_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Policy Id'
+        },
+        risk_item_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Risk Item Id'
+        },
+        date_of_loss: {
+            type: 'string',
+            format: 'date',
+            title: 'Date Of Loss'
+        },
+        description: {
+            type: 'string',
+            title: 'Description'
+        },
+        status: {
+            type: 'string',
+            title: 'Status',
+            default: 'Open'
+        },
+        reserve_amount: {
+            type: 'number',
+            title: 'Reserve Amount',
+            default: 0
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        }
+    },
+    type: 'object',
+    required: ['claim_number', 'policy_id', 'date_of_loss', 'description', 'id'],
+    title: 'ClaimPublic'
+} as const;
+
+export const ClaimUpdateSchema = {
+    properties: {
+        claim_number: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Claim Number'
+        },
+        policy_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Policy Id'
+        },
+        risk_item_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Risk Item Id'
+        },
+        date_of_loss: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Date Of Loss'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        status: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Status'
+        },
+        reserve_amount: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Reserve Amount'
+        }
+    },
+    type: 'object',
+    title: 'ClaimUpdate'
+} as const;
+
+export const ClaimsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/ClaimPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'ClaimsPublic'
+} as const;
+
+export const ClientCreateSchema = {
+    properties: {
+        client_type: {
+            type: 'string',
+            title: 'Client Type',
+            default: 'Individual'
+        },
+        name: {
+            type: 'string',
+            title: 'Name'
+        },
+        kra_pin: {
+            type: 'string',
+            title: 'Kra Pin'
+        },
+        email: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Email'
+        },
+        phone: {
+            type: 'string',
+            title: 'Phone'
+        },
+        physical_address: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Physical Address'
+        },
+        contact_person: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Contact Person'
+        }
+    },
+    type: 'object',
+    required: ['name', 'kra_pin', 'phone'],
+    title: 'ClientCreate'
+} as const;
+
+export const ClientPublicSchema = {
+    properties: {
+        client_type: {
+            type: 'string',
+            title: 'Client Type',
+            default: 'Individual'
+        },
+        name: {
+            type: 'string',
+            title: 'Name'
+        },
+        kra_pin: {
+            type: 'string',
+            title: 'Kra Pin'
+        },
+        email: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Email'
+        },
+        phone: {
+            type: 'string',
+            title: 'Phone'
+        },
+        physical_address: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Physical Address'
+        },
+        contact_person: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Contact Person'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        }
+    },
+    type: 'object',
+    required: ['name', 'kra_pin', 'phone', 'id'],
+    title: 'ClientPublic'
+} as const;
+
+export const ClientUpdateSchema = {
+    properties: {
+        client_type: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Client Type'
+        },
+        name: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Name'
+        },
+        kra_pin: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Kra Pin'
+        },
+        email: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Email'
+        },
+        phone: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Phone'
+        },
+        physical_address: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Physical Address'
+        },
+        contact_person: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Contact Person'
+        }
+    },
+    type: 'object',
+    title: 'ClientUpdate'
+} as const;
+
+export const ClientsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/ClientPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'ClientsPublic'
+} as const;
+
 export const HTTPValidationErrorSchema = {
     properties: {
         detail: {
@@ -67,6 +498,138 @@ export const HTTPValidationErrorSchema = {
     },
     type: 'object',
     title: 'HTTPValidationError'
+} as const;
+
+export const InsurerCreateSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            title: 'Name'
+        },
+        email: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Email'
+        },
+        phone: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Phone'
+        }
+    },
+    type: 'object',
+    required: ['name'],
+    title: 'InsurerCreate'
+} as const;
+
+export const InsurerPublicSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            title: 'Name'
+        },
+        email: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Email'
+        },
+        phone: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Phone'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        }
+    },
+    type: 'object',
+    required: ['name', 'id'],
+    title: 'InsurerPublic'
+} as const;
+
+export const InsurerUpdateSchema = {
+    properties: {
+        name: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Name'
+        },
+        email: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Email'
+        },
+        phone: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Phone'
+        }
+    },
+    type: 'object',
+    title: 'InsurerUpdate'
+} as const;
+
+export const InsurersPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/InsurerPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'InsurersPublic'
 } as const;
 
 export const ItemCreateSchema = {
@@ -212,6 +775,340 @@ export const NewPasswordSchema = {
     title: 'NewPassword'
 } as const;
 
+export const PaymentAllocationCreateSchema = {
+    properties: {
+        payment_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Payment Id'
+        },
+        risk_note_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Risk Note Id'
+        },
+        amount_allocated: {
+            type: 'number',
+            title: 'Amount Allocated'
+        }
+    },
+    type: 'object',
+    required: ['payment_id', 'risk_note_id', 'amount_allocated'],
+    title: 'PaymentAllocationCreate'
+} as const;
+
+export const PaymentAllocationPublicSchema = {
+    properties: {
+        payment_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Payment Id'
+        },
+        risk_note_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Risk Note Id'
+        },
+        amount_allocated: {
+            type: 'number',
+            title: 'Amount Allocated'
+        }
+    },
+    type: 'object',
+    required: ['payment_id', 'risk_note_id', 'amount_allocated'],
+    title: 'PaymentAllocationPublic'
+} as const;
+
+export const PaymentCreateSchema = {
+    properties: {
+        receipt_number: {
+            type: 'string',
+            title: 'Receipt Number'
+        },
+        date_received: {
+            type: 'string',
+            format: 'date',
+            title: 'Date Received'
+        },
+        amount: {
+            type: 'number',
+            title: 'Amount'
+        },
+        mode: {
+            type: 'string',
+            title: 'Mode'
+        },
+        reference: {
+            type: 'string',
+            title: 'Reference'
+        }
+    },
+    type: 'object',
+    required: ['receipt_number', 'date_received', 'amount', 'mode', 'reference'],
+    title: 'PaymentCreate'
+} as const;
+
+export const PaymentPublicSchema = {
+    properties: {
+        receipt_number: {
+            type: 'string',
+            title: 'Receipt Number'
+        },
+        date_received: {
+            type: 'string',
+            format: 'date',
+            title: 'Date Received'
+        },
+        amount: {
+            type: 'number',
+            title: 'Amount'
+        },
+        mode: {
+            type: 'string',
+            title: 'Mode'
+        },
+        reference: {
+            type: 'string',
+            title: 'Reference'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        }
+    },
+    type: 'object',
+    required: ['receipt_number', 'date_received', 'amount', 'mode', 'reference', 'id'],
+    title: 'PaymentPublic'
+} as const;
+
+export const PaymentUpdateSchema = {
+    properties: {
+        receipt_number: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Receipt Number'
+        },
+        date_received: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Date Received'
+        },
+        amount: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Amount'
+        },
+        mode: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Mode'
+        },
+        reference: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Reference'
+        }
+    },
+    type: 'object',
+    title: 'PaymentUpdate'
+} as const;
+
+export const PaymentsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/PaymentPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'PaymentsPublic'
+} as const;
+
+export const PoliciesPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/PolicyPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'PoliciesPublic'
+} as const;
+
+export const PolicyCreateSchema = {
+    properties: {
+        policy_number: {
+            type: 'string',
+            title: 'Policy Number'
+        },
+        client_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Client Id'
+        },
+        product_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Product Id'
+        },
+        status: {
+            type: 'string',
+            title: 'Status',
+            default: 'Active'
+        }
+    },
+    type: 'object',
+    required: ['policy_number', 'client_id'],
+    title: 'PolicyCreate'
+} as const;
+
+export const PolicyPublicSchema = {
+    properties: {
+        policy_number: {
+            type: 'string',
+            title: 'Policy Number'
+        },
+        client_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Client Id'
+        },
+        product_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Product Id'
+        },
+        status: {
+            type: 'string',
+            title: 'Status',
+            default: 'Active'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        }
+    },
+    type: 'object',
+    required: ['policy_number', 'client_id', 'id'],
+    title: 'PolicyPublic'
+} as const;
+
+export const PolicyUpdateSchema = {
+    properties: {
+        policy_number: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Policy Number'
+        },
+        client_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Client Id'
+        },
+        product_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Product Id'
+        },
+        status: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Status'
+        }
+    },
+    type: 'object',
+    title: 'PolicyUpdate'
+} as const;
+
 export const PrivateUserCreateSchema = {
     properties: {
         email: {
@@ -235,6 +1132,530 @@ export const PrivateUserCreateSchema = {
     type: 'object',
     required: ['email', 'password', 'full_name'],
     title: 'PrivateUserCreate'
+} as const;
+
+export const ProductCreateSchema = {
+    properties: {
+        insurer_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Insurer Id'
+        },
+        name: {
+            type: 'string',
+            title: 'Name'
+        },
+        class_of_insurance: {
+            type: 'string',
+            title: 'Class Of Insurance'
+        },
+        default_benefits: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Default Benefits'
+        },
+        default_clauses: {
+            items: {
+                type: 'string'
+            },
+            type: 'array',
+            title: 'Default Clauses'
+        },
+        default_commission_rate: {
+            type: 'number',
+            title: 'Default Commission Rate',
+            default: 10
+        }
+    },
+    type: 'object',
+    required: ['insurer_id', 'name', 'class_of_insurance'],
+    title: 'ProductCreate'
+} as const;
+
+export const ProductPublicSchema = {
+    properties: {
+        insurer_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Insurer Id'
+        },
+        name: {
+            type: 'string',
+            title: 'Name'
+        },
+        class_of_insurance: {
+            type: 'string',
+            title: 'Class Of Insurance'
+        },
+        default_benefits: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Default Benefits'
+        },
+        default_clauses: {
+            items: {
+                type: 'string'
+            },
+            type: 'array',
+            title: 'Default Clauses'
+        },
+        default_commission_rate: {
+            type: 'number',
+            title: 'Default Commission Rate',
+            default: 10
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        }
+    },
+    type: 'object',
+    required: ['insurer_id', 'name', 'class_of_insurance', 'id'],
+    title: 'ProductPublic'
+} as const;
+
+export const ProductUpdateSchema = {
+    properties: {
+        insurer_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Insurer Id'
+        },
+        name: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Name'
+        },
+        class_of_insurance: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Class Of Insurance'
+        },
+        default_benefits: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Default Benefits'
+        },
+        default_clauses: {
+            anyOf: [
+                {
+                    items: {
+                        type: 'string'
+                    },
+                    type: 'array'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Default Clauses'
+        },
+        default_commission_rate: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Default Commission Rate'
+        }
+    },
+    type: 'object',
+    title: 'ProductUpdate'
+} as const;
+
+export const ProductsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/ProductPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'ProductsPublic'
+} as const;
+
+export const RiskItemPublicSchema = {
+    properties: {
+        policy_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Policy Id'
+        },
+        identifier: {
+            type: 'string',
+            title: 'Identifier'
+        },
+        description: {
+            type: 'string',
+            title: 'Description'
+        },
+        sum_insured: {
+            type: 'number',
+            title: 'Sum Insured'
+        },
+        details: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Details'
+        },
+        benefits: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Benefits'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        }
+    },
+    type: 'object',
+    required: ['policy_id', 'identifier', 'description', 'sum_insured', 'id'],
+    title: 'RiskItemPublic'
+} as const;
+
+export const RiskItemsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/RiskItemPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'RiskItemsPublic'
+} as const;
+
+export const RiskNoteCreateSchema = {
+    properties: {
+        risk_note_number: {
+            type: 'string',
+            title: 'Risk Note Number'
+        },
+        policy_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Policy Id'
+        },
+        transaction_type: {
+            type: 'string',
+            title: 'Transaction Type'
+        },
+        start_date: {
+            type: 'string',
+            format: 'date',
+            title: 'Start Date'
+        },
+        end_date: {
+            type: 'string',
+            format: 'date',
+            title: 'End Date'
+        },
+        basic_premium: {
+            type: 'number',
+            title: 'Basic Premium'
+        },
+        training_levy: {
+            type: 'number',
+            title: 'Training Levy',
+            default: 0
+        },
+        phcf_levy: {
+            type: 'number',
+            title: 'Phcf Levy',
+            default: 0
+        },
+        stamp_duty: {
+            type: 'number',
+            title: 'Stamp Duty',
+            default: 40
+        },
+        gross_premium: {
+            type: 'number',
+            title: 'Gross Premium'
+        },
+        commission_amount: {
+            type: 'number',
+            title: 'Commission Amount'
+        },
+        special_clauses: {
+            items: {
+                type: 'string'
+            },
+            type: 'array',
+            title: 'Special Clauses'
+        }
+    },
+    type: 'object',
+    required: ['risk_note_number', 'policy_id', 'transaction_type', 'start_date', 'end_date', 'basic_premium', 'gross_premium', 'commission_amount'],
+    title: 'RiskNoteCreate'
+} as const;
+
+export const RiskNotePublicSchema = {
+    properties: {
+        risk_note_number: {
+            type: 'string',
+            title: 'Risk Note Number'
+        },
+        policy_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Policy Id'
+        },
+        transaction_type: {
+            type: 'string',
+            title: 'Transaction Type'
+        },
+        start_date: {
+            type: 'string',
+            format: 'date',
+            title: 'Start Date'
+        },
+        end_date: {
+            type: 'string',
+            format: 'date',
+            title: 'End Date'
+        },
+        basic_premium: {
+            type: 'number',
+            title: 'Basic Premium'
+        },
+        training_levy: {
+            type: 'number',
+            title: 'Training Levy',
+            default: 0
+        },
+        phcf_levy: {
+            type: 'number',
+            title: 'Phcf Levy',
+            default: 0
+        },
+        stamp_duty: {
+            type: 'number',
+            title: 'Stamp Duty',
+            default: 40
+        },
+        gross_premium: {
+            type: 'number',
+            title: 'Gross Premium'
+        },
+        commission_amount: {
+            type: 'number',
+            title: 'Commission Amount'
+        },
+        special_clauses: {
+            items: {
+                type: 'string'
+            },
+            type: 'array',
+            title: 'Special Clauses'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        }
+    },
+    type: 'object',
+    required: ['risk_note_number', 'policy_id', 'transaction_type', 'start_date', 'end_date', 'basic_premium', 'gross_premium', 'commission_amount', 'id'],
+    title: 'RiskNotePublic'
+} as const;
+
+export const RiskNoteUpdateSchema = {
+    properties: {
+        risk_note_number: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Risk Note Number'
+        },
+        transaction_type: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Transaction Type'
+        },
+        start_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Start Date'
+        },
+        end_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'End Date'
+        },
+        basic_premium: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Basic Premium'
+        },
+        training_levy: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Training Levy'
+        },
+        phcf_levy: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Phcf Levy'
+        },
+        stamp_duty: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Stamp Duty'
+        },
+        gross_premium: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Gross Premium'
+        },
+        commission_amount: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Commission Amount'
+        },
+        special_clauses: {
+            anyOf: [
+                {
+                    items: {
+                        type: 'string'
+                    },
+                    type: 'array'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Special Clauses'
+        }
+    },
+    type: 'object',
+    title: 'RiskNoteUpdate'
+} as const;
+
+export const RiskNotesPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/RiskNotePublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'RiskNotesPublic'
 } as const;
 
 export const TokenSchema = {

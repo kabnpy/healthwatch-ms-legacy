@@ -3,7 +3,342 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { ClaimsReadClaimsData, ClaimsReadClaimsResponse, ClaimsCreateClaimData, ClaimsCreateClaimResponse, ClaimsReadClaimData, ClaimsReadClaimResponse, ClaimsUpdateClaimData, ClaimsUpdateClaimResponse, ClaimsDeleteClaimData, ClaimsDeleteClaimResponse, ClientsReadClientsData, ClientsReadClientsResponse, ClientsCreateClientData, ClientsCreateClientResponse, ClientsReadClientData, ClientsReadClientResponse, ClientsUpdateClientData, ClientsUpdateClientResponse, ClientsDeleteClientData, ClientsDeleteClientResponse, InsurersReadInsurersData, InsurersReadInsurersResponse, InsurersCreateInsurerData, InsurersCreateInsurerResponse, InsurersReadInsurerData, InsurersReadInsurerResponse, InsurersUpdateInsurerData, InsurersUpdateInsurerResponse, InsurersDeleteInsurerData, InsurersDeleteInsurerResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PaymentsReadPaymentsData, PaymentsReadPaymentsResponse, PaymentsCreatePaymentData, PaymentsCreatePaymentResponse, PaymentsReadPaymentData, PaymentsReadPaymentResponse, PaymentsUpdatePaymentData, PaymentsUpdatePaymentResponse, PaymentsDeletePaymentData, PaymentsDeletePaymentResponse, PaymentsCreatePaymentAllocationData, PaymentsCreatePaymentAllocationResponse, PoliciesReadPoliciesData, PoliciesReadPoliciesResponse, PoliciesCreatePolicyData, PoliciesCreatePolicyResponse, PoliciesReadPolicyData, PoliciesReadPolicyResponse, PoliciesUpdatePolicyData, PoliciesUpdatePolicyResponse, PoliciesDeletePolicyData, PoliciesDeletePolicyResponse, PoliciesReadPolicyRiskNotesData, PoliciesReadPolicyRiskNotesResponse, PoliciesReadPolicyRiskItemsData, PoliciesReadPolicyRiskItemsResponse, PrivateCreateUserData, PrivateCreateUserResponse, ProductsReadProductsData, ProductsReadProductsResponse, ProductsCreateProductData, ProductsCreateProductResponse, ProductsReadProductData, ProductsReadProductResponse, ProductsUpdateProductData, ProductsUpdateProductResponse, ProductsDeleteProductData, ProductsDeleteProductResponse, RiskNotesReadRiskNotesData, RiskNotesReadRiskNotesResponse, RiskNotesCreateRiskNoteData, RiskNotesCreateRiskNoteResponse, RiskNotesReadRiskNoteData, RiskNotesReadRiskNoteResponse, RiskNotesUpdateRiskNoteData, RiskNotesUpdateRiskNoteResponse, RiskNotesDeleteRiskNoteData, RiskNotesDeleteRiskNoteResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+
+export class ClaimsService {
+    /**
+     * Read Claims
+     * Retrieve claims.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @param data.policyId
+     * @returns ClaimsPublic Successful Response
+     * @throws ApiError
+     */
+    public static readClaims(data: ClaimsReadClaimsData = {}): CancelablePromise<ClaimsReadClaimsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/claims/',
+            query: {
+                skip: data.skip,
+                limit: data.limit,
+                policy_id: data.policyId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Claim
+     * Create new claim.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns ClaimPublic Successful Response
+     * @throws ApiError
+     */
+    public static createClaim(data: ClaimsCreateClaimData): CancelablePromise<ClaimsCreateClaimResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/claims/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Claim
+     * Get claim by ID.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns ClaimPublic Successful Response
+     * @throws ApiError
+     */
+    public static readClaim(data: ClaimsReadClaimData): CancelablePromise<ClaimsReadClaimResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/claims/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Claim
+     * Update a claim.
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns ClaimPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateClaim(data: ClaimsUpdateClaimData): CancelablePromise<ClaimsUpdateClaimResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/claims/{id}',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Claim
+     * Delete a claim.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteClaim(data: ClaimsDeleteClaimData): CancelablePromise<ClaimsDeleteClaimResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/claims/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class ClientsService {
+    /**
+     * Read Clients
+     * Retrieve clients.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @returns ClientsPublic Successful Response
+     * @throws ApiError
+     */
+    public static readClients(data: ClientsReadClientsData = {}): CancelablePromise<ClientsReadClientsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/clients/',
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Client
+     * Create new client.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns ClientPublic Successful Response
+     * @throws ApiError
+     */
+    public static createClient(data: ClientsCreateClientData): CancelablePromise<ClientsCreateClientResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/clients/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Client
+     * Get client by ID.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns ClientPublic Successful Response
+     * @throws ApiError
+     */
+    public static readClient(data: ClientsReadClientData): CancelablePromise<ClientsReadClientResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/clients/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Client
+     * Update a client.
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns ClientPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateClient(data: ClientsUpdateClientData): CancelablePromise<ClientsUpdateClientResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/clients/{id}',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Client
+     * Delete a client.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteClient(data: ClientsDeleteClientData): CancelablePromise<ClientsDeleteClientResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/clients/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class InsurersService {
+    /**
+     * Read Insurers
+     * Retrieve insurers.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @returns InsurersPublic Successful Response
+     * @throws ApiError
+     */
+    public static readInsurers(data: InsurersReadInsurersData = {}): CancelablePromise<InsurersReadInsurersResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/insurers/',
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Insurer
+     * Create new insurer.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns InsurerPublic Successful Response
+     * @throws ApiError
+     */
+    public static createInsurer(data: InsurersCreateInsurerData): CancelablePromise<InsurersCreateInsurerResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/insurers/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Insurer
+     * Get insurer by ID.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns InsurerPublic Successful Response
+     * @throws ApiError
+     */
+    public static readInsurer(data: InsurersReadInsurerData): CancelablePromise<InsurersReadInsurerResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/insurers/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Insurer
+     * Update an insurer.
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns InsurerPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateInsurer(data: InsurersUpdateInsurerData): CancelablePromise<InsurersUpdateInsurerResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/insurers/{id}',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Insurer
+     * Delete an insurer.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteInsurer(data: InsurersDeleteInsurerData): CancelablePromise<InsurersDeleteInsurerResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/insurers/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
 
 export class ItemsService {
     /**
@@ -213,6 +548,296 @@ export class LoginService {
     }
 }
 
+export class PaymentsService {
+    /**
+     * Read Payments
+     * Retrieve payments.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @returns PaymentsPublic Successful Response
+     * @throws ApiError
+     */
+    public static readPayments(data: PaymentsReadPaymentsData = {}): CancelablePromise<PaymentsReadPaymentsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/payments/',
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Payment
+     * Create new payment (Receipt).
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns PaymentPublic Successful Response
+     * @throws ApiError
+     */
+    public static createPayment(data: PaymentsCreatePaymentData): CancelablePromise<PaymentsCreatePaymentResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/payments/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Payment
+     * Get payment by ID.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns PaymentPublic Successful Response
+     * @throws ApiError
+     */
+    public static readPayment(data: PaymentsReadPaymentData): CancelablePromise<PaymentsReadPaymentResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/payments/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Payment
+     * Update a payment.
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns PaymentPublic Successful Response
+     * @throws ApiError
+     */
+    public static updatePayment(data: PaymentsUpdatePaymentData): CancelablePromise<PaymentsUpdatePaymentResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/payments/{id}',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Payment
+     * Delete a payment.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deletePayment(data: PaymentsDeletePaymentData): CancelablePromise<PaymentsDeletePaymentResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/payments/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Payment Allocation
+     * Allocate payment to a risk note.
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns PaymentAllocationPublic Successful Response
+     * @throws ApiError
+     */
+    public static createPaymentAllocation(data: PaymentsCreatePaymentAllocationData): CancelablePromise<PaymentsCreatePaymentAllocationResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/payments/{id}/allocations',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class PoliciesService {
+    /**
+     * Read Policies
+     * Retrieve policies.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @param data.clientId
+     * @returns PoliciesPublic Successful Response
+     * @throws ApiError
+     */
+    public static readPolicies(data: PoliciesReadPoliciesData = {}): CancelablePromise<PoliciesReadPoliciesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/policies/',
+            query: {
+                skip: data.skip,
+                limit: data.limit,
+                client_id: data.clientId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Policy
+     * Create new policy.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns PolicyPublic Successful Response
+     * @throws ApiError
+     */
+    public static createPolicy(data: PoliciesCreatePolicyData): CancelablePromise<PoliciesCreatePolicyResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/policies/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Policy
+     * Get policy by ID.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns PolicyPublic Successful Response
+     * @throws ApiError
+     */
+    public static readPolicy(data: PoliciesReadPolicyData): CancelablePromise<PoliciesReadPolicyResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/policies/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Policy
+     * Update a policy.
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns PolicyPublic Successful Response
+     * @throws ApiError
+     */
+    public static updatePolicy(data: PoliciesUpdatePolicyData): CancelablePromise<PoliciesUpdatePolicyResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/policies/{id}',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Policy
+     * Delete a policy.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deletePolicy(data: PoliciesDeletePolicyData): CancelablePromise<PoliciesDeletePolicyResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/policies/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Policy Risk Notes
+     * Get risk notes for a policy.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns RiskNotesPublic Successful Response
+     * @throws ApiError
+     */
+    public static readPolicyRiskNotes(data: PoliciesReadPolicyRiskNotesData): CancelablePromise<PoliciesReadPolicyRiskNotesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/policies/{id}/risk-notes',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Policy Risk Items
+     * Get risk items for a policy.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns RiskItemsPublic Successful Response
+     * @throws ApiError
+     */
+    public static readPolicyRiskItems(data: PoliciesReadPolicyRiskItemsData): CancelablePromise<PoliciesReadPolicyRiskItemsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/policies/{id}/risk-items',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
 export class PrivateService {
     /**
      * Create User
@@ -228,6 +853,232 @@ export class PrivateService {
             url: '/api/v1/private/users/',
             body: data.requestBody,
             mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class ProductsService {
+    /**
+     * Read Products
+     * Retrieve products.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @param data.insurerId
+     * @returns ProductsPublic Successful Response
+     * @throws ApiError
+     */
+    public static readProducts(data: ProductsReadProductsData = {}): CancelablePromise<ProductsReadProductsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/products/',
+            query: {
+                skip: data.skip,
+                limit: data.limit,
+                insurer_id: data.insurerId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Product
+     * Create new product.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns ProductPublic Successful Response
+     * @throws ApiError
+     */
+    public static createProduct(data: ProductsCreateProductData): CancelablePromise<ProductsCreateProductResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/products/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Product
+     * Get product by ID.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns ProductPublic Successful Response
+     * @throws ApiError
+     */
+    public static readProduct(data: ProductsReadProductData): CancelablePromise<ProductsReadProductResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/products/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Product
+     * Update a product.
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns ProductPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateProduct(data: ProductsUpdateProductData): CancelablePromise<ProductsUpdateProductResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/products/{id}',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Product
+     * Delete a product.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteProduct(data: ProductsDeleteProductData): CancelablePromise<ProductsDeleteProductResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/products/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class RiskNotesService {
+    /**
+     * Read Risk Notes
+     * Retrieve risk notes.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @param data.policyId
+     * @returns RiskNotesPublic Successful Response
+     * @throws ApiError
+     */
+    public static readRiskNotes(data: RiskNotesReadRiskNotesData = {}): CancelablePromise<RiskNotesReadRiskNotesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/risk-notes/',
+            query: {
+                skip: data.skip,
+                limit: data.limit,
+                policy_id: data.policyId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Risk Note
+     * Create new risk note.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns RiskNotePublic Successful Response
+     * @throws ApiError
+     */
+    public static createRiskNote(data: RiskNotesCreateRiskNoteData): CancelablePromise<RiskNotesCreateRiskNoteResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/risk-notes/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Risk Note
+     * Get risk note by ID.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns RiskNotePublic Successful Response
+     * @throws ApiError
+     */
+    public static readRiskNote(data: RiskNotesReadRiskNoteData): CancelablePromise<RiskNotesReadRiskNoteResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/risk-notes/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Risk Note
+     * Update a risk note.
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns RiskNotePublic Successful Response
+     * @throws ApiError
+     */
+    public static updateRiskNote(data: RiskNotesUpdateRiskNoteData): CancelablePromise<RiskNotesUpdateRiskNoteResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/risk-notes/{id}',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Risk Note
+     * Delete a risk note.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteRiskNote(data: RiskNotesDeleteRiskNoteData): CancelablePromise<RiskNotesDeleteRiskNoteResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/risk-notes/{id}',
+            path: {
+                id: data.id
+            },
             errors: {
                 422: 'Validation Error'
             }
