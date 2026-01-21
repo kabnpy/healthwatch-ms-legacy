@@ -6,10 +6,11 @@ from sqlmodel import func, select
 
 from app.api.deps import CurrentUser, SessionDep
 from app.crud.insurance.client import (
+    count_clients,
     create_client as crud_create_client,
-)
-from app.crud.insurance.client import (
+    delete_client as crud_delete_client,
     get_client_by_kra_pin,
+    get_clients,
 )
 from app.crud.insurance.client import (
     update_client as crud_update_client,
@@ -33,10 +34,8 @@ def read_clients(
     """
     Retrieve clients.
     """
-    count_statement = select(func.count()).select_from(Client)
-    count = session.exec(count_statement).one()
-    statement = select(Client).offset(skip).limit(limit)
-    clients = session.exec(statement).all()
+    count = count_clients(session=session)
+    clients = get_clients(session=session, skip=skip, limit=limit)
     return ClientsPublic(data=clients, count=count)
 
 
@@ -98,6 +97,5 @@ def delete_client(
     client = session.get(Client, id)
     if not client:
         raise HTTPException(status_code=404, detail="Client not found")
-    session.delete(client)
-    session.commit()
+    crud_delete_client(session=session, db_client=client)
     return Message(message="Client deleted successfully")

@@ -6,18 +6,18 @@ from sqlmodel import func, select
 
 from app.api.deps import CurrentUser, SessionDep
 from app.crud.insurance.payment import (
+    count_payments,
     create_payment as crud_create_payment,
-)
-from app.crud.insurance.payment import (
     create_payment_allocation as crud_create_payment_allocation,
-)
-from app.crud.insurance.payment import (
+    delete_payment as crud_delete_payment,
     get_payment_by_receipt_number,
+    get_payments,
 )
 from app.crud.insurance.payment import (
     update_payment as crud_update_payment,
 )
 from app.models import (
+    Message,
     Payment,
     PaymentAllocationCreate,
     PaymentAllocationPublic,
@@ -37,10 +37,8 @@ def read_payments(
     """
     Retrieve payments.
     """
-    count_statement = select(func.count()).select_from(Payment)
-    count = session.exec(count_statement).one()
-    statement = select(Payment).offset(skip).limit(limit)
-    payments = session.exec(statement).all()
+    count = count_payments(session=session)
+    payments = get_payments(session=session, skip=skip, limit=limit)
     return PaymentsPublic(data=payments, count=count)
 
 
@@ -94,6 +92,20 @@ def update_payment(
         session=session, db_payment=payment, payment_in=payment_in
     )
     return payment
+
+
+@router.delete("/{id}", response_model=Message)
+def delete_payment(
+    session: SessionDep, _current_user: CurrentUser, id: uuid.UUID
+) -> Any:
+    """
+    Delete a payment.
+    """
+    payment = session.get(Payment, id)
+    if not payment:
+        raise HTTPException(status_code=404, detail="Payment not found")
+    crud_delete_payment(session=session, db_payment=payment)
+    return Message(message="Payment deleted successfully")
 
 
 @router.post("/{id}/allocations", response_model=PaymentAllocationPublic)

@@ -1,3 +1,4 @@
+import uuid
 from sqlmodel import Session, select
 
 from app.models.insurance.client import (
@@ -61,3 +62,45 @@ def update_correspondence(
     session.commit()
     session.refresh(db_correspondence)
     return db_correspondence
+
+
+def get_clients(
+    session: Session, *, skip: int = 0, limit: int = 100
+) -> list[Client]:
+    statement = select(Client).offset(skip).limit(limit)
+    return list(session.exec(statement).all())
+
+
+def count_clients(session: Session) -> int:
+    from sqlmodel import func
+    statement = select(func.count()).select_from(Client)
+    return session.exec(statement).one()
+
+
+def delete_client(session: Session, *, db_client: Client) -> None:
+    session.delete(db_client)
+    session.commit()
+
+
+def get_correspondences(
+    session: Session, *, skip: int = 0, limit: int = 100, client_id: uuid.UUID | None = None
+) -> list[Correspondence]:
+    statement = select(Correspondence)
+    if client_id:
+        statement = statement.where(Correspondence.client_id == client_id)
+    statement = statement.offset(skip).limit(limit)
+    return list(session.exec(statement).all())
+
+
+def count_correspondences(session: Session, *, client_id: uuid.UUID | None = None) -> int:
+    from sqlmodel import func
+    statement = select(Correspondence)
+    if client_id:
+        statement = statement.where(Correspondence.client_id == client_id)
+    count_statement = select(func.count()).select_from(statement.subquery())
+    return session.exec(count_statement).one()
+
+
+def delete_correspondence(session: Session, *, db_correspondence: Correspondence) -> None:
+    session.delete(db_correspondence)
+    session.commit()

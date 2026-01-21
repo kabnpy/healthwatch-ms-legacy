@@ -1,3 +1,4 @@
+import uuid
 from sqlmodel import Session, select
 
 from app.models.insurance.catalog import (
@@ -56,3 +57,43 @@ def update_product(
     session.commit()
     session.refresh(db_product)
     return db_product
+
+
+def get_insurers(session: Session, *, skip: int = 0, limit: int = 100) -> list[Insurer]:
+    statement = select(Insurer).offset(skip).limit(limit)
+    return list(session.exec(statement).all())
+
+
+def count_insurers(session: Session) -> int:
+    from sqlmodel import func
+    statement = select(func.count()).select_from(Insurer)
+    return session.exec(statement).one()
+
+
+def delete_insurer(session: Session, *, db_insurer: Insurer) -> None:
+    session.delete(db_insurer)
+    session.commit()
+
+
+def get_products(
+    session: Session, *, skip: int = 0, limit: int = 100, insurer_id: uuid.UUID | None = None
+) -> list[Product]:
+    statement = select(Product)
+    if insurer_id:
+        statement = statement.where(Product.insurer_id == insurer_id)
+    statement = statement.offset(skip).limit(limit)
+    return list(session.exec(statement).all())
+
+
+def count_products(session: Session, *, insurer_id: uuid.UUID | None = None) -> int:
+    from sqlmodel import func
+    statement = select(Product)
+    if insurer_id:
+        statement = statement.where(Product.insurer_id == insurer_id)
+    count_statement = select(func.count()).select_from(statement.subquery())
+    return session.exec(count_statement).one()
+
+
+def delete_product(session: Session, *, db_product: Product) -> None:
+    session.delete(db_product)
+    session.commit()

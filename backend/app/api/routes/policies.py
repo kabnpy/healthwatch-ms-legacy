@@ -6,9 +6,10 @@ from sqlmodel import func, select
 
 from app.api.deps import CurrentUser, SessionDep
 from app.crud.insurance.policy import (
+    count_policies,
     create_policy as crud_create_policy,
-)
-from app.crud.insurance.policy import (
+    delete_policy as crud_delete_policy,
+    get_policies,
     get_policy_by_policy_number,
 )
 from app.crud.insurance.policy import (
@@ -21,6 +22,8 @@ from app.models import (
     PolicyCreate,
     PolicyPublic,
     PolicyUpdate,
+    RiskItemsPublic,
+    RiskNotesPublic,
 )
 
 router = APIRouter()
@@ -37,15 +40,10 @@ def read_policies(
     """
     Retrieve policies.
     """
-    statement = select(Policy)
-    if client_id:
-        statement = statement.where(Policy.client_id == client_id)
-
-    count_statement = select(func.count()).select_from(statement.subquery())
-    count = session.exec(count_statement).one()
-
-    statement = statement.offset(skip).limit(limit)
-    policies = session.exec(statement).all()
+    count = count_policies(session=session, client_id=client_id)
+    policies = get_policies(
+        session=session, skip=skip, limit=limit, client_id=client_id
+    )
     return PoliciesPublic(data=policies, count=count)
 
 
@@ -109,6 +107,33 @@ def delete_policy(
     policy = session.get(Policy, id)
     if not policy:
         raise HTTPException(status_code=404, detail="Policy not found")
-    session.delete(policy)
-    session.commit()
+    crud_delete_policy(session=session, db_policy=policy)
     return Message(message="Policy deleted successfully")
+
+
+@router.get("/{id}/risk-notes", response_model=RiskNotesPublic)
+def read_policy_risk_notes(
+    session: SessionDep, _current_user: CurrentUser, id: uuid.UUID
+) -> Any:
+    """
+    Get risk notes for a policy.
+    """
+    from app.crud.insurance.policy import count_risk_notes, get_risk_notes
+
+    count = count_risk_notes(session=session, policy_id=id)
+    risk_notes = get_risk_notes(session=session, policy_id=id)
+    return RiskNotesPublic(data=risk_notes, count=count)
+
+
+@router.get("/{id}/risk-items", response_model=RiskItemsPublic)
+def read_policy_risk_items(
+    session: SessionDep, _current_user: CurrentUser, id: uuid.UUID
+) -> Any:
+    """
+    Get risk items for a policy.
+    """
+    from app.crud.insurance.policy import count_risk_items, get_risk_items
+
+    count = count_risk_items(session=session, policy_id=id)
+    risk_items = get_risk_items(session=session, policy_id=id)
+    return RiskItemsPublic(data=risk_items, count=count)

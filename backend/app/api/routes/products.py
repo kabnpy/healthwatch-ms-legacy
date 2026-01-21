@@ -6,10 +6,11 @@ from sqlmodel import func, select
 
 from app.api.deps import CurrentUser, SessionDep
 from app.crud.insurance.catalog import (
+    count_products,
     create_product as crud_create_product,
-)
-from app.crud.insurance.catalog import (
+    delete_product as crud_delete_product,
     get_product_by_name,
+    get_products,
 )
 from app.crud.insurance.catalog import (
     update_product as crud_update_product,
@@ -28,15 +29,19 @@ router = APIRouter()
 
 @router.get("/", response_model=ProductsPublic)
 def read_products(
-    session: SessionDep, _current_user: CurrentUser, skip: int = 0, limit: int = 100
+    session: SessionDep,
+    _current_user: CurrentUser,
+    skip: int = 0,
+    limit: int = 100,
+    insurer_id: uuid.UUID | None = None,
 ) -> Any:
     """
     Retrieve products.
     """
-    count_statement = select(func.count()).select_from(Product)
-    count = session.exec(count_statement).one()
-    statement = select(Product).offset(skip).limit(limit)
-    products = session.exec(statement).all()
+    count = count_products(session=session, insurer_id=insurer_id)
+    products = get_products(
+        session=session, skip=skip, limit=limit, insurer_id=insurer_id
+    )
     return ProductsPublic(data=products, count=count)
 
 
@@ -102,6 +107,5 @@ def delete_product(
     product = session.get(Product, id)
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
-    session.delete(product)
-    session.commit()
+    crud_delete_product(session=session, db_product=product)
     return Message(message="Product deleted successfully")

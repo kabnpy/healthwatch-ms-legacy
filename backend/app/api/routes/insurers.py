@@ -6,10 +6,11 @@ from sqlmodel import func, select
 
 from app.api.deps import CurrentUser, SessionDep
 from app.crud.insurance.catalog import (
+    count_insurers,
     create_insurer as crud_create_insurer,
-)
-from app.crud.insurance.catalog import (
+    delete_insurer as crud_delete_insurer,
     get_insurer_by_name,
+    get_insurers,
 )
 from app.crud.insurance.catalog import (
     update_insurer as crud_update_insurer,
@@ -33,10 +34,8 @@ def read_insurers(
     """
     Retrieve insurers.
     """
-    count_statement = select(func.count()).select_from(Insurer)
-    count = session.exec(count_statement).one()
-    statement = select(Insurer).offset(skip).limit(limit)
-    insurers = session.exec(statement).all()
+    count = count_insurers(session=session)
+    insurers = get_insurers(session=session, skip=skip, limit=limit)
     return InsurersPublic(data=insurers, count=count)
 
 
@@ -100,6 +99,5 @@ def delete_insurer(
     insurer = session.get(Insurer, id)
     if not insurer:
         raise HTTPException(status_code=404, detail="Insurer not found")
-    session.delete(insurer)
-    session.commit()
+    crud_delete_insurer(session=session, db_insurer=insurer)
     return Message(message="Insurer deleted successfully")

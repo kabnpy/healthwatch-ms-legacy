@@ -6,7 +6,10 @@ from sqlmodel import func, select
 
 from app.api.deps import CurrentUser, SessionDep
 from app.crud.insurance.policy import (
+    count_claims,
     create_claim as crud_create_claim,
+    delete_claim as crud_delete_claim,
+    get_claims,
 )
 from app.crud.insurance.policy import (
     update_claim as crud_update_claim,
@@ -25,15 +28,17 @@ router = APIRouter()
 
 @router.get("/", response_model=ClaimsPublic)
 def read_claims(
-    session: SessionDep, _current_user: CurrentUser, skip: int = 0, limit: int = 100
+    session: SessionDep,
+    _current_user: CurrentUser,
+    skip: int = 0,
+    limit: int = 100,
+    policy_id: uuid.UUID | None = None,
 ) -> Any:
     """
     Retrieve claims.
     """
-    count_statement = select(func.count()).select_from(Claim)
-    count = session.exec(count_statement).one()
-    statement = select(Claim).offset(skip).limit(limit)
-    claims = session.exec(statement).all()
+    count = count_claims(session=session, policy_id=policy_id)
+    claims = get_claims(session=session, skip=skip, limit=limit, policy_id=policy_id)
     return ClaimsPublic(data=claims, count=count)
 
 
@@ -86,6 +91,5 @@ def delete_claim(session: SessionDep, _current_user: CurrentUser, id: uuid.UUID)
     claim = session.get(Claim, id)
     if not claim:
         raise HTTPException(status_code=404, detail="Claim not found")
-    session.delete(claim)
-    session.commit()
+    crud_delete_claim(session=session, db_claim=claim)
     return Message(message="Claim deleted successfully")
