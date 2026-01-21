@@ -30,7 +30,9 @@ def create_policy(*, session: Session, policy_in: PolicyCreate) -> Policy:
     return db_obj
 
 
-def get_policy_by_policy_number(session: Session, *, policy_number: str) -> Policy | None:
+def get_policy_by_policy_number(
+    session: Session, *, policy_number: str
+) -> Policy | None:
     statement = select(Policy).where(Policy.policy_number == policy_number)
     return session.exec(statement).first()
 
@@ -42,7 +44,9 @@ def get_policies_by_client_id(
     return session.exec(statement).all()
 
 
-def update_policy(*, session: Session, db_policy: Policy, policy_in: PolicyUpdate) -> Policy:
+def update_policy(
+    *, session: Session, db_policy: Policy, policy_in: PolicyUpdate
+) -> Policy:
     policy_data = policy_in.model_dump(exclude_unset=True)
     db_policy.sqlmodel_update(policy_data)
     session.add(db_policy)
@@ -59,7 +63,9 @@ def create_risk_item(*, session: Session, risk_item_in: RiskItemCreate) -> RiskI
     return db_obj
 
 
-def get_risk_item_by_identifier(session: Session, *, identifier: str) -> RiskItem | None:
+def get_risk_item_by_identifier(
+    session: Session, *, identifier: str
+) -> RiskItem | None:
     statement = select(RiskItem).where(RiskItem.identifier == identifier)
     return session.exec(statement).first()
 

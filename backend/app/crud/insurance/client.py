@@ -28,7 +28,9 @@ def get_client_by_email(session: Session, *, email: str) -> Client | None:
     return session.exec(statement).first()
 
 
-def update_client(*, session: Session, db_client: Client, client_in: ClientUpdate) -> Client:
+def update_client(
+    *, session: Session, db_client: Client, client_in: ClientUpdate
+) -> Client:
     client_data = client_in.model_dump(exclude_unset=True)
     db_client.sqlmodel_update(client_data)
     session.add(db_client)
@@ -48,7 +50,10 @@ def create_correspondence(
 
 
 def update_correspondence(
-    *, session: Session, db_correspondence: Correspondence, correspondence_in: CorrespondenceUpdate
+    *,
+    session: Session,
+    db_correspondence: Correspondence,
+    correspondence_in: CorrespondenceUpdate,
 ) -> Correspondence:
     correspondence_data = correspondence_in.model_dump(exclude_unset=True)
     db_correspondence.sqlmodel_update(correspondence_data)
