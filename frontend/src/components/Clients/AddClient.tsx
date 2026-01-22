@@ -41,7 +41,7 @@ const formSchema = z.object({
   kra_pin: z.string().min(11, "KRA PIN must be 11 characters").max(11),
   email: z.string().email("Invalid email").or(z.literal("")),
   phone: z.string().min(10, "Phone number is required"),
-  physical_address: z.string().optional(),
+  postal_address: z.string().optional(),
   contact_person: z.string().optional(),
 })
 
@@ -60,7 +60,7 @@ export const AddClient = () => {
       kra_pin: "",
       email: "",
       phone: "",
-      physical_address: "",
+      postal_address: "",
       contact_person: "",
     },
   })
@@ -69,7 +69,7 @@ export const AddClient = () => {
     const clientData: ClientCreate = {
         ...data,
         email: data.email === "" ? null : data.email,
-        physical_address: data.physical_address || null,
+        postal_address: data.postal_address || null,
         contact_person: data.contact_person || null,
     }
     createClient.mutate(clientData, {
@@ -183,12 +183,12 @@ export const AddClient = () => {
 
             <FormField
               control={form.control}
-              name="physical_address"
+              name="postal_address"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Physical Address</FormLabel>
+                  <FormLabel>Postal Address</FormLabel>
                   <FormControl>
-                    <Input placeholder="Street, Building, City" {...field} />
+                    <Input placeholder="P.O. Box 1234, Nairobi" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

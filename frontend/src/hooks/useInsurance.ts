@@ -87,3 +87,49 @@ export const useProducts = (insurerId?: string, skip = 0, limit = 100) => {
     queryFn: () => ProductsService.readProducts({ insurerId, skip, limit }),
   });
 };
+
+// 5. RISK ITEMS
+export const useRiskItems = (policyId: string) => {
+  return useQuery({
+    queryKey: ["risk-items", policyId],
+    queryFn: () => PoliciesService.readPolicyRiskItems({ id: policyId }),
+    enabled: !!policyId,
+  });
+};
+
+export const useCreateRiskItem = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ policyId, data }: { policyId: string; data: any }) => 
+      PoliciesService.createPolicyRiskItem({ id: policyId, requestBody: data }),
+    onSuccess: (_, { policyId }) => {
+      queryClient.invalidateQueries({ queryKey: ["risk-items", policyId] });
+    },
+  });
+};
+
+// 6. DASHBOARD AGGREGATOR
+export const usePolicyDashboard = (policyId: string) => {
+  const policyQuery = usePolicy(policyId);
+  const riskNotesQuery = useRiskNotes(policyId);
+  const riskItemsQuery = useRiskItems(policyId);
+
+  // Helper to find latest risk note (most recent start date)
+  const latestRiskNote = riskNotesQuery.data?.data?.sort((a, b) => 
+    new Date(b.start_date).getTime() - new Date(a.start_date).getTime()
+  )[0];
+
+  // Helper to find active risk item (assuming first one is active for MVP or filtered)
+  // Real implementation might filter by 'is_active' or date range
+  const activeItem = riskItemsQuery.data?.data?.[0];
+
+  return {
+    policy: policyQuery.data,
+    latestRiskNote,
+    activeItem,
+    riskNotes: riskNotesQuery.data?.data || [],
+    riskItems: riskItemsQuery.data?.data || [],
+    isLoading: policyQuery.isLoading || riskNotesQuery.isLoading || riskItemsQuery.isLoading,
+    error: policyQuery.error || riskNotesQuery.error || riskItemsQuery.error
+  };
+};

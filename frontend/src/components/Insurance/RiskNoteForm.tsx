@@ -1,10 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useEffect } from "react"
 import { useForm, type SubmitHandler } from "react-hook-form"
 import { z } from "zod"
 
 import type { ApiError, RiskNoteCreate } from "@/client"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Form,
   FormControl,
@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input"
 import { LoadingButton } from "@/components/ui/loading-button"
 import { useCreateRiskNote } from "@/hooks/useInsurance"
 import useCustomToast from "@/hooks/useCustomToast"
+import { calculatePremium } from "@/lib/calculator"
 import { handleError } from "@/utils"
 
 const formSchema = z.object({
@@ -26,12 +27,10 @@ const formSchema = z.object({
   start_date: z.string(),
   end_date: z.string(),
   sum_insured: z.coerce.number().min(0),
-  basic_premium: z.coerce.number().min(0),
-  training_levy: z.coerce.number().min(0),
-  phcf_levy: z.coerce.number().min(0),
-  stamp_duty: z.coerce.number().min(0),
-  gross_premium: z.coerce.number().min(0),
-  commission_amount: z.coerce.number().min(0),
+  rate: z.coerce.number().min(0).default(4),
+  hasPVT: z.boolean().default(false),
+  hasExcessProtector: z.boolean().default(false),
+  commission_rate: z.coerce.number().min(0).default(12.5),
 })
 
 interface FormData {
@@ -41,12 +40,10 @@ interface FormData {
   start_date: string
   end_date: string
   sum_insured: number
-  basic_premium: number
-  training_levy: number
-  phcf_levy: number
-  stamp_duty: number
-  gross_premium: number
-  commission_amount: number
+  rate: number
+  hasPVT: boolean
+  hasExcessProtector: boolean
+  commission_rate: number
 }
 
 interface RiskNoteFormProps {
@@ -68,37 +65,47 @@ export const RiskNoteForm = ({ policyId, onSuccess, onCancel }: RiskNoteFormProp
       start_date: new Date().toISOString().split("T")[0],
       end_date: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split("T")[0],
       sum_insured: 0,
-      basic_premium: 0,
-      training_levy: 0,
-      phcf_levy: 0,
-      stamp_duty: 40,
-      gross_premium: 0,
-      commission_amount: 0,
+      rate: 4,
+      hasPVT: false,
+      hasExcessProtector: false,
+      commission_rate: 12.5,
     },
   })
 
+  // Watch fields for real-time calculation
   const sumInsured = form.watch("sum_insured")
+  const rate = form.watch("rate")
+  const hasPVT = form.watch("hasPVT")
+  const hasExcessProtector = form.watch("hasExcessProtector")
 
-  useEffect(() => {
-    if (sumInsured > 0) {
-      const basic = sumInsured * 0.04
-      const training = basic * 0.002
-      const phcf = basic * 0.0025
-      const stamp = 40
-      const gross = basic + training + phcf + stamp
-      const commission = basic * 0.125 // 12.5% default
+  // Calculate premium on the fly
+  const calculation = calculatePremium({
+    sumInsured,
+    rate,
+    hasPVT,
+    hasExcessProtector,
+  })
 
-      form.setValue("basic_premium", basic)
-      form.setValue("training_levy", parseFloat(training.toFixed(2)))
-      form.setValue("phcf_levy", parseFloat(phcf.toFixed(2)))
-      form.setValue("gross_premium", parseFloat(gross.toFixed(2)))
-      form.setValue("commission_amount", parseFloat(commission.toFixed(2)))
-    }
-  }, [sumInsured, form])
+  const { breakdown } = calculation
 
   const onSubmit: SubmitHandler<FormData> = (data) => {
-    const { sum_insured, ...rest } = data
-    const riskNoteData: RiskNoteCreate = rest
+    // 1. Prepare the JSON blobs
+    const premiumBreakdown = calculation.breakdown
+    
+    // 2. Prepare the payload
+    const riskNoteData: RiskNoteCreate = {
+      policy_id: data.policy_id,
+      risk_note_number: data.risk_note_number,
+      transaction_type: data.transaction_type,
+      start_date: data.start_date,
+      end_date: data.end_date,
+      commission_amount: breakdown.basic * (data.commission_rate / 100),
+      premium_breakdown: premiumBreakdown,
+      benefits_snapshot: {}, // Placeholder for now
+      risk_item_snapshot: {}, // Placeholder for now
+      special_clauses: [],
+    }
+
     createRiskNote.mutate(riskNoteData, {
       onSuccess: () => {
         showSuccessToast("Risk Note created successfully")
@@ -142,8 +149,21 @@ export const RiskNoteForm = ({ policyId, onSuccess, onCancel }: RiskNoteFormProp
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <FormField
+            control={form.control}
+            name="rate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Rate (%)</FormLabel>
+                <FormControl>
+                  <Input type="number" step="0.01" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+           <FormField
             control={form.control}
             name="start_date"
             render={({ field }) => (
@@ -171,26 +191,80 @@ export const RiskNoteForm = ({ policyId, onSuccess, onCancel }: RiskNoteFormProp
           />
         </div>
 
-        <div className="bg-muted/30 p-4 rounded-lg space-y-2">
+        {/* Extensions Toggles */}
+        <div className="flex gap-6 p-4 border rounded-md bg-muted/20">
+          <FormField
+            control={form.control}
+            name="hasPVT"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel>
+                    Include PVT (0.25%)
+                  </FormLabel>
+                </div>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="hasExcessProtector"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel>
+                    Include Excess Protector (0.25%)
+                  </FormLabel>
+                </div>
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Live Calculation Preview */}
+        <div className="bg-muted/50 p-4 rounded-lg space-y-2 border border-muted-foreground/20">
           <div className="flex justify-between text-sm">
-            <span>Basic Premium (4%):</span>
-            <span className="font-mono">{form.watch("basic_premium").toLocaleString()}</span>
+            <span>Basic Premium ({rate}%):</span>
+            <span className="font-mono">{breakdown.basic.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
           </div>
+          
+          {breakdown.extensions.map((ext) => (
+            <div key={ext.name} className="flex justify-between text-sm text-blue-600">
+              <span>+ {ext.name}:</span>
+              <span>{ext.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+            </div>
+          ))}
+
+          <div className="border-t my-2 border-dashed" />
+
           <div className="flex justify-between text-sm text-muted-foreground">
             <span>Training Levy (0.2%):</span>
-            <span>{form.watch("training_levy")}</span>
+            <span>{breakdown.levies.trainingLevy.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
           </div>
           <div className="flex justify-between text-sm text-muted-foreground">
             <span>PHCF Levy (0.25%):</span>
-            <span>{form.watch("phcf_levy")}</span>
+            <span>{breakdown.levies.phcf.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
           </div>
           <div className="flex justify-between text-sm text-muted-foreground">
             <span>Stamp Duty:</span>
-            <span>40.00</span>
+            <span>{breakdown.levies.stampDuty.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
           </div>
-          <div className="flex justify-between font-bold border-t pt-2 mt-2">
-            <span>GROSS PREMIUM:</span>
-            <span>{form.watch("gross_premium").toLocaleString()}</span>
+          
+          <div className="flex justify-between font-bold border-t border-black pt-2 mt-2 text-lg">
+            <span>TOTAL PAYABLE:</span>
+            <span>{breakdown.total.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
           </div>
         </div>
 
@@ -199,7 +273,7 @@ export const RiskNoteForm = ({ policyId, onSuccess, onCancel }: RiskNoteFormProp
             Cancel
           </Button>
           <LoadingButton type="submit" loading={createRiskNote.isPending}>
-            Create Risk Note
+            Generate Risk Note
           </LoadingButton>
         </div>
       </form>
