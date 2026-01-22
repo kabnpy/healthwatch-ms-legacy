@@ -30,9 +30,10 @@ export function NewBusinessWizard({ clientId, isOpen, onClose, onSuccess }: NewB
   const createRiskNote = useCreateRiskNote()
 
   const [state, setState] = useState<Partial<WizardState>>({
+    product_id: "",
     asset: {
       identifier: "",
-      makeModel: "",
+      description: "",
       details: {},
     },
     financials: {
@@ -62,8 +63,9 @@ export function NewBusinessWizard({ clientId, isOpen, onClose, onSuccess }: NewB
     try {
       // 1. Create Policy
       const policy = await createPolicy.mutateAsync({
-        policy_number: `P/${Math.floor(Math.random() * 1000000)}`, // Should be user input or auto-gen
+        policy_number: `P/${Math.floor(Math.random() * 1000000)}`,
         client_id: clientId,
+        product_id: state.product_id,
         status: "Active",
       })
 
@@ -73,7 +75,7 @@ export function NewBusinessWizard({ clientId, isOpen, onClose, onSuccess }: NewB
         data: {
           policy_id: policy.id,
           identifier: state.asset?.identifier || "",
-          description: state.asset?.makeModel || "",
+          description: state.asset?.description || "",
           sum_insured: state.financials?.sumInsured || 0,
           details: state.asset?.details || {},
           benefits: {},
@@ -81,8 +83,6 @@ export function NewBusinessWizard({ clientId, isOpen, onClose, onSuccess }: NewB
       })
 
       // 3. Create Risk Note
-      // Logic for calculating breakdown is inside StepFinancials or a shared lib
-      // For now, assume state has the final payload ready or calculate here
       const { calculatePremium } = await import("@/lib/calculator")
       const calc = calculatePremium({
         sumInsured: state.financials?.sumInsured || 0,
@@ -135,8 +135,8 @@ export function NewBusinessWizard({ clientId, isOpen, onClose, onSuccess }: NewB
 
           {step === 0 && (
             <StepAsset 
-              defaultValues={state.asset} 
-              onNext={(data) => handleNext({ asset: data })} 
+              defaultValues={{ product_id: state.product_id, asset: state.asset }} 
+              onNext={(data) => handleNext(data)} 
             />
           )}
           {step === 1 && (

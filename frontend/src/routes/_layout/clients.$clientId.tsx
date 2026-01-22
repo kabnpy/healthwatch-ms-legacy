@@ -11,6 +11,7 @@ import { RiskNoteDocument } from "@/components/Documents/RiskNoteDocument"
 import { columns as policyColumns } from "@/components/Policies/columns"
 import { getColumns as getRiskNoteColumns } from "@/components/RiskNotes/columns"
 import { NewBusinessWizard } from "@/components/Insurance/Wizard/NewBusinessWizard"
+import { ClientDocuments } from "@/components/Clients/ClientDocuments"
 import { Button } from "@/components/ui/button"
 import PendingItems from "@/components/Pending/PendingItems"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -130,7 +131,7 @@ function ClientHubContent({ clientId }: { clientId: string }) {
         <TabsList>
           <TabsTrigger value="policies">Policies</TabsTrigger>
           <TabsTrigger value="risk-notes">Risk Notes</TabsTrigger>
-          <TabsTrigger value="correspondence">Correspondence</TabsTrigger>
+          <TabsTrigger value="documents">Documents</TabsTrigger>
         </TabsList>
         <TabsContent value="policies" className="space-y-4 pt-4">
           <div className="flex items-center justify-between">
@@ -165,11 +166,8 @@ function ClientHubContent({ clientId }: { clientId: string }) {
             <DataTable columns={riskNoteColumns} data={clientRiskNotes} />
           )}
         </TabsContent>
-        <TabsContent value="correspondence" className="pt-4">
-          <div className="flex flex-col items-center justify-center text-center py-12 border rounded-lg bg-muted/10">
-            <h3 className="text-lg font-semibold">No correspondence yet</h3>
-            <p className="text-muted-foreground">Logs and documents will appear here</p>
-          </div>
+        <TabsContent value="documents" className="pt-4">
+          <ClientDocuments clientId={clientId} />
         </TabsContent>
       </Tabs>
 

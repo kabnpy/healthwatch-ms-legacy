@@ -1,8 +1,10 @@
 export interface WizardState {
+  product_id: string; // The selected product (e.g. Motor Private)
+  
   // Step 1: The Asset
   asset: {
-    identifier: string;       // "KCA 123B"
-    makeModel: string;        // "Toyota Harrier"
+    identifier: string;       // "KCA 123B" or "Plot No 4"
+    description: string;      // "Toyota Harrier" or "Residential House"
     details: Record<string, any>; // { chassis: "...", engine: "..." }
   };
 

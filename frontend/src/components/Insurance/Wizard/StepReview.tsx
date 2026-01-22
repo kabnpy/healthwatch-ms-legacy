@@ -30,14 +30,14 @@ export function StepReview({ state, onIssue, onBack, isSubmitting }: StepReviewP
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Registration:</span>
+              <span className="text-muted-foreground">Identifier:</span>
               <span className="font-bold">{state.asset.identifier}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Make & Model:</span>
-              <span className="font-medium">{state.asset.makeModel}</span>
+              <span className="text-muted-foreground">Description:</span>
+              <span className="font-medium">{state.asset.description}</span>
             </div>
-            {state.asset.details.chassis && (
+            {state.asset.details?.chassis && (
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Chassis:</span>
                 <span className="text-xs font-mono uppercase">{state.asset.details.chassis}</span>
