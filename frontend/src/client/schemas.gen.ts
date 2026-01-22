@@ -292,7 +292,7 @@ export const ClientCreateSchema = {
             type: 'string',
             title: 'Phone'
         },
-        physical_address: {
+        postal_address: {
             anyOf: [
                 {
                     type: 'string'
@@ -301,7 +301,7 @@ export const ClientCreateSchema = {
                     type: 'null'
                 }
             ],
-            title: 'Physical Address'
+            title: 'Postal Address'
         },
         contact_person: {
             anyOf: [
@@ -350,7 +350,7 @@ export const ClientPublicSchema = {
             type: 'string',
             title: 'Phone'
         },
-        physical_address: {
+        postal_address: {
             anyOf: [
                 {
                     type: 'string'
@@ -359,7 +359,7 @@ export const ClientPublicSchema = {
                     type: 'null'
                 }
             ],
-            title: 'Physical Address'
+            title: 'Postal Address'
         },
         contact_person: {
             anyOf: [
@@ -440,7 +440,7 @@ export const ClientUpdateSchema = {
             ],
             title: 'Phone'
         },
-        physical_address: {
+        postal_address: {
             anyOf: [
                 {
                     type: 'string'
@@ -449,7 +449,7 @@ export const ClientUpdateSchema = {
                     type: 'null'
                 }
             ],
-            title: 'Physical Address'
+            title: 'Postal Address'
         },
         contact_person: {
             anyOf: [
@@ -1312,6 +1312,41 @@ export const ProductsPublicSchema = {
     title: 'ProductsPublic'
 } as const;
 
+export const RiskItemCreateSchema = {
+    properties: {
+        policy_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Policy Id'
+        },
+        identifier: {
+            type: 'string',
+            title: 'Identifier'
+        },
+        description: {
+            type: 'string',
+            title: 'Description'
+        },
+        sum_insured: {
+            type: 'number',
+            title: 'Sum Insured'
+        },
+        details: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Details'
+        },
+        benefits: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Benefits'
+        }
+    },
+    type: 'object',
+    required: ['policy_id', 'identifier', 'description', 'sum_insured'],
+    title: 'RiskItemCreate'
+} as const;
+
 export const RiskItemPublicSchema = {
     properties: {
         policy_id: {
@@ -1396,28 +1431,20 @@ export const RiskNoteCreateSchema = {
             format: 'date',
             title: 'End Date'
         },
-        basic_premium: {
-            type: 'number',
-            title: 'Basic Premium'
+        premium_breakdown: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Premium Breakdown'
         },
-        training_levy: {
-            type: 'number',
-            title: 'Training Levy',
-            default: 0
+        benefits_snapshot: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Benefits Snapshot'
         },
-        phcf_levy: {
-            type: 'number',
-            title: 'Phcf Levy',
-            default: 0
-        },
-        stamp_duty: {
-            type: 'number',
-            title: 'Stamp Duty',
-            default: 40
-        },
-        gross_premium: {
-            type: 'number',
-            title: 'Gross Premium'
+        risk_item_snapshot: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Risk Item Snapshot'
         },
         commission_amount: {
             type: 'number',
@@ -1432,7 +1459,7 @@ export const RiskNoteCreateSchema = {
         }
     },
     type: 'object',
-    required: ['risk_note_number', 'policy_id', 'transaction_type', 'start_date', 'end_date', 'basic_premium', 'gross_premium', 'commission_amount'],
+    required: ['risk_note_number', 'policy_id', 'transaction_type', 'start_date', 'end_date', 'commission_amount'],
     title: 'RiskNoteCreate'
 } as const;
 
@@ -1461,28 +1488,20 @@ export const RiskNotePublicSchema = {
             format: 'date',
             title: 'End Date'
         },
-        basic_premium: {
-            type: 'number',
-            title: 'Basic Premium'
+        premium_breakdown: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Premium Breakdown'
         },
-        training_levy: {
-            type: 'number',
-            title: 'Training Levy',
-            default: 0
+        benefits_snapshot: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Benefits Snapshot'
         },
-        phcf_levy: {
-            type: 'number',
-            title: 'Phcf Levy',
-            default: 0
-        },
-        stamp_duty: {
-            type: 'number',
-            title: 'Stamp Duty',
-            default: 40
-        },
-        gross_premium: {
-            type: 'number',
-            title: 'Gross Premium'
+        risk_item_snapshot: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Risk Item Snapshot'
         },
         commission_amount: {
             type: 'number',
@@ -1502,7 +1521,7 @@ export const RiskNotePublicSchema = {
         }
     },
     type: 'object',
-    required: ['risk_note_number', 'policy_id', 'transaction_type', 'start_date', 'end_date', 'basic_premium', 'gross_premium', 'commission_amount', 'id'],
+    required: ['risk_note_number', 'policy_id', 'transaction_type', 'start_date', 'end_date', 'commission_amount', 'id'],
     title: 'RiskNotePublic'
 } as const;
 
@@ -1554,60 +1573,41 @@ export const RiskNoteUpdateSchema = {
             ],
             title: 'End Date'
         },
-        basic_premium: {
+        premium_breakdown: {
             anyOf: [
                 {
-                    type: 'number'
+                    additionalProperties: true,
+                    type: 'object'
                 },
                 {
                     type: 'null'
                 }
             ],
-            title: 'Basic Premium'
+            title: 'Premium Breakdown'
         },
-        training_levy: {
+        benefits_snapshot: {
             anyOf: [
                 {
-                    type: 'number'
+                    additionalProperties: true,
+                    type: 'object'
                 },
                 {
                     type: 'null'
                 }
             ],
-            title: 'Training Levy'
+            title: 'Benefits Snapshot'
         },
-        phcf_levy: {
+        risk_item_snapshot: {
             anyOf: [
                 {
-                    type: 'number'
+                    additionalProperties: true,
+                    type: 'object'
                 },
                 {
                     type: 'null'
                 }
             ],
-            title: 'Phcf Levy'
-        },
-        stamp_duty: {
-            anyOf: [
-                {
-                    type: 'number'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Stamp Duty'
-        },
-        gross_premium: {
-            anyOf: [
-                {
-                    type: 'number'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Gross Premium'
+            title: 'Risk Item Snapshot'
         },
         commission_amount: {
             anyOf: [

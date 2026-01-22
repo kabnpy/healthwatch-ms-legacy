@@ -51,7 +51,7 @@ export type ClientCreate = {
     kra_pin: string;
     email?: (string | null);
     phone: string;
-    physical_address?: (string | null);
+    postal_address?: (string | null);
     contact_person?: (string | null);
 };
 
@@ -61,7 +61,7 @@ export type ClientPublic = {
     kra_pin: string;
     email?: (string | null);
     phone: string;
-    physical_address?: (string | null);
+    postal_address?: (string | null);
     contact_person?: (string | null);
     id: string;
 };
@@ -77,7 +77,7 @@ export type ClientUpdate = {
     kra_pin?: (string | null);
     email?: (string | null);
     phone?: (string | null);
-    physical_address?: (string | null);
+    postal_address?: (string | null);
     contact_person?: (string | null);
 };
 
@@ -255,6 +255,19 @@ export type ProductUpdate = {
     default_commission_rate?: (number | null);
 };
 
+export type RiskItemCreate = {
+    policy_id: string;
+    identifier: string;
+    description: string;
+    sum_insured: number;
+    details?: {
+        [key: string]: unknown;
+    };
+    benefits?: {
+        [key: string]: unknown;
+    };
+};
+
 export type RiskItemPublic = {
     policy_id: string;
     identifier: string;
@@ -280,11 +293,15 @@ export type RiskNoteCreate = {
     transaction_type: string;
     start_date: string;
     end_date: string;
-    basic_premium: number;
-    training_levy?: number;
-    phcf_levy?: number;
-    stamp_duty?: number;
-    gross_premium: number;
+    premium_breakdown?: {
+        [key: string]: unknown;
+    };
+    benefits_snapshot?: {
+        [key: string]: unknown;
+    };
+    risk_item_snapshot?: {
+        [key: string]: unknown;
+    };
     commission_amount: number;
     special_clauses?: Array<(string)>;
 };
@@ -295,11 +312,15 @@ export type RiskNotePublic = {
     transaction_type: string;
     start_date: string;
     end_date: string;
-    basic_premium: number;
-    training_levy?: number;
-    phcf_levy?: number;
-    stamp_duty?: number;
-    gross_premium: number;
+    premium_breakdown?: {
+        [key: string]: unknown;
+    };
+    benefits_snapshot?: {
+        [key: string]: unknown;
+    };
+    risk_item_snapshot?: {
+        [key: string]: unknown;
+    };
     commission_amount: number;
     special_clauses?: Array<(string)>;
     id: string;
@@ -315,11 +336,15 @@ export type RiskNoteUpdate = {
     transaction_type?: (string | null);
     start_date?: (string | null);
     end_date?: (string | null);
-    basic_premium?: (number | null);
-    training_levy?: (number | null);
-    phcf_levy?: (number | null);
-    stamp_duty?: (number | null);
-    gross_premium?: (number | null);
+    premium_breakdown?: ({
+    [key: string]: unknown;
+} | null);
+    benefits_snapshot?: ({
+    [key: string]: unknown;
+} | null);
+    risk_item_snapshot?: ({
+    [key: string]: unknown;
+} | null);
     commission_amount?: (number | null);
     special_clauses?: (Array<(string)> | null);
 };
@@ -618,6 +643,13 @@ export type PoliciesReadPolicyRiskItemsData = {
 };
 
 export type PoliciesReadPolicyRiskItemsResponse = (RiskItemsPublic);
+
+export type PoliciesCreatePolicyRiskItemData = {
+    id: string;
+    requestBody: RiskItemCreate;
+};
+
+export type PoliciesCreatePolicyRiskItemResponse = (RiskItemPublic);
 
 export type PrivateCreateUserData = {
     requestBody: PrivateUserCreate;
