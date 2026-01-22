@@ -486,6 +486,104 @@ export const ClientsPublicSchema = {
     title: 'ClientsPublic'
 } as const;
 
+export const CorrespondenceCreateSchema = {
+    properties: {
+        client_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Client Id'
+        },
+        subject: {
+            type: 'string',
+            title: 'Subject'
+        },
+        summary: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Summary'
+        },
+        file_path: {
+            type: 'string',
+            title: 'File Path'
+        },
+        date_logged: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Date Logged'
+        }
+    },
+    type: 'object',
+    required: ['client_id', 'subject', 'file_path'],
+    title: 'CorrespondenceCreate'
+} as const;
+
+export const CorrespondencePublicSchema = {
+    properties: {
+        client_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Client Id'
+        },
+        subject: {
+            type: 'string',
+            title: 'Subject'
+        },
+        summary: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Summary'
+        },
+        file_path: {
+            type: 'string',
+            title: 'File Path'
+        },
+        date_logged: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Date Logged'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        }
+    },
+    type: 'object',
+    required: ['client_id', 'subject', 'file_path', 'id'],
+    title: 'CorrespondencePublic'
+} as const;
+
+export const CorrespondencesPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/CorrespondencePublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'CorrespondencesPublic'
+} as const;
+
 export const HTTPValidationErrorSchema = {
     properties: {
         detail: {

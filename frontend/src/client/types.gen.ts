@@ -81,6 +81,28 @@ export type ClientUpdate = {
     contact_person?: (string | null);
 };
 
+export type CorrespondenceCreate = {
+    client_id: string;
+    subject: string;
+    summary?: (string | null);
+    file_path: string;
+    date_logged?: string;
+};
+
+export type CorrespondencePublic = {
+    client_id: string;
+    subject: string;
+    summary?: (string | null);
+    file_path: string;
+    date_logged?: string;
+    id: string;
+};
+
+export type CorrespondencesPublic = {
+    data: Array<CorrespondencePublic>;
+    count: number;
+};
+
 export type HTTPValidationError = {
     detail?: Array<ValidationError>;
 };
@@ -469,6 +491,19 @@ export type ClientsDeleteClientData = {
 };
 
 export type ClientsDeleteClientResponse = (Message);
+
+export type ClientsReadClientCorrespondencesData = {
+    id: string;
+};
+
+export type ClientsReadClientCorrespondencesResponse = (CorrespondencesPublic);
+
+export type ClientsCreateClientCorrespondenceData = {
+    id: string;
+    requestBody: CorrespondenceCreate;
+};
+
+export type ClientsCreateClientCorrespondenceResponse = (CorrespondencePublic);
 
 export type InsurersReadInsurersData = {
     limit?: number;

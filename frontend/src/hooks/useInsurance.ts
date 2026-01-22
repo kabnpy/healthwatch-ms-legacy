@@ -133,3 +133,23 @@ export const usePolicyDashboard = (policyId: string) => {
     error: policyQuery.error || riskNotesQuery.error || riskItemsQuery.error
   };
 };
+
+// 7. CORRESPONDENCE / DOCUMENTS
+export const useCorrespondences = (clientId: string) => {
+  return useQuery({
+    queryKey: ["correspondences", clientId],
+    queryFn: () => ClientsService.readClientCorrespondences({ id: clientId }),
+    enabled: !!clientId,
+  });
+};
+
+export const useCreateCorrespondence = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ clientId, data }: { clientId: string; data: any }) => 
+      ClientsService.createClientCorrespondence({ id: clientId, requestBody: data }),
+    onSuccess: (_, { clientId }) => {
+      queryClient.invalidateQueries({ queryKey: ["correspondences", clientId] });
+    },
+  });
+};

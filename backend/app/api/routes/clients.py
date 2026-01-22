@@ -25,6 +25,9 @@ from app.models import (
     ClientsPublic,
     ClientUpdate,
     Message,
+    CorrespondenceCreate,
+    CorrespondencePublic,
+    CorrespondencesPublic,
 )
 
 router = APIRouter()
@@ -102,3 +105,36 @@ def delete_client(
         raise HTTPException(status_code=404, detail="Client not found")
     crud_delete_client(session=session, db_client=client)
     return Message(message="Client deleted successfully")
+
+
+@router.get("/{id}/correspondences", response_model=CorrespondencesPublic)
+def read_client_correspondences(
+    session: SessionDep, _current_user: CurrentUser, id: uuid.UUID
+) -> Any:
+    """
+    Get correspondences for a client.
+    """
+    from app.crud.insurance.client import count_correspondences, get_correspondences
+
+    count = count_correspondences(session=session, client_id=id)
+    correspondences = get_correspondences(session=session, client_id=id)
+    return CorrespondencesPublic(data=correspondences, count=count)
+
+
+@router.post("/{id}/correspondences", response_model=CorrespondencePublic)
+def create_client_correspondence(
+    *,
+    session: SessionDep,
+    _current_user: CurrentUser,
+    id: uuid.UUID,
+    correspondence_in: CorrespondenceCreate,
+) -> Any:
+    """
+    Create new correspondence for a client.
+    """
+    from app.crud.insurance.client import create_correspondence
+
+    correspondence = create_correspondence(
+        session=session, correspondence_in=correspondence_in
+    )
+    return correspondence
