@@ -20,6 +20,7 @@ import { Route as LayoutItemsRouteImport } from './routes/_layout/items'
 import { Route as LayoutAdminRouteImport } from './routes/_layout/admin'
 import { Route as LayoutClientsIndexRouteImport } from './routes/_layout/clients.index'
 import { Route as PrintRiskNotesIdRouteImport } from './routes/print/risk-notes.$id'
+import { Route as LayoutPoliciesPolicyIdRouteImport } from './routes/_layout/policies.$policyId'
 import { Route as LayoutClientsClientIdRouteImport } from './routes/_layout/clients.$clientId'
 
 const SignupRoute = SignupRouteImport.update({
@@ -76,6 +77,11 @@ const PrintRiskNotesIdRoute = PrintRiskNotesIdRouteImport.update({
   path: '/print/risk-notes/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LayoutPoliciesPolicyIdRoute = LayoutPoliciesPolicyIdRouteImport.update({
+  id: '/policies/$policyId',
+  path: '/policies/$policyId',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutClientsClientIdRoute = LayoutClientsClientIdRouteImport.update({
   id: '/clients/$clientId',
   path: '/clients/$clientId',
@@ -92,6 +98,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof LayoutSettingsRoute
   '/': typeof LayoutIndexRoute
   '/clients/$clientId': typeof LayoutClientsClientIdRoute
+  '/policies/$policyId': typeof LayoutPoliciesPolicyIdRoute
   '/print/risk-notes/$id': typeof PrintRiskNotesIdRoute
   '/clients': typeof LayoutClientsIndexRoute
 }
@@ -105,6 +112,7 @@ export interface FileRoutesByTo {
   '/settings': typeof LayoutSettingsRoute
   '/': typeof LayoutIndexRoute
   '/clients/$clientId': typeof LayoutClientsClientIdRoute
+  '/policies/$policyId': typeof LayoutPoliciesPolicyIdRoute
   '/print/risk-notes/$id': typeof PrintRiskNotesIdRoute
   '/clients': typeof LayoutClientsIndexRoute
 }
@@ -120,6 +128,7 @@ export interface FileRoutesById {
   '/_layout/settings': typeof LayoutSettingsRoute
   '/_layout/': typeof LayoutIndexRoute
   '/_layout/clients/$clientId': typeof LayoutClientsClientIdRoute
+  '/_layout/policies/$policyId': typeof LayoutPoliciesPolicyIdRoute
   '/print/risk-notes/$id': typeof PrintRiskNotesIdRoute
   '/_layout/clients/': typeof LayoutClientsIndexRoute
 }
@@ -135,6 +144,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/'
     | '/clients/$clientId'
+    | '/policies/$policyId'
     | '/print/risk-notes/$id'
     | '/clients'
   fileRoutesByTo: FileRoutesByTo
@@ -148,6 +158,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/'
     | '/clients/$clientId'
+    | '/policies/$policyId'
     | '/print/risk-notes/$id'
     | '/clients'
   id:
@@ -162,6 +173,7 @@ export interface FileRouteTypes {
     | '/_layout/settings'
     | '/_layout/'
     | '/_layout/clients/$clientId'
+    | '/_layout/policies/$policyId'
     | '/print/risk-notes/$id'
     | '/_layout/clients/'
   fileRoutesById: FileRoutesById
@@ -254,6 +266,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrintRiskNotesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_layout/policies/$policyId': {
+      id: '/_layout/policies/$policyId'
+      path: '/policies/$policyId'
+      fullPath: '/policies/$policyId'
+      preLoaderRoute: typeof LayoutPoliciesPolicyIdRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/clients/$clientId': {
       id: '/_layout/clients/$clientId'
       path: '/clients/$clientId'
@@ -270,6 +289,7 @@ interface LayoutRouteChildren {
   LayoutSettingsRoute: typeof LayoutSettingsRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
   LayoutClientsClientIdRoute: typeof LayoutClientsClientIdRoute
+  LayoutPoliciesPolicyIdRoute: typeof LayoutPoliciesPolicyIdRoute
   LayoutClientsIndexRoute: typeof LayoutClientsIndexRoute
 }
 
@@ -279,6 +299,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutSettingsRoute: LayoutSettingsRoute,
   LayoutIndexRoute: LayoutIndexRoute,
   LayoutClientsClientIdRoute: LayoutClientsClientIdRoute,
+  LayoutPoliciesPolicyIdRoute: LayoutPoliciesPolicyIdRoute,
   LayoutClientsIndexRoute: LayoutClientsIndexRoute,
 }
 

@@ -1,16 +1,7 @@
 import { useSuspenseQuery } from "@tanstack/react-query"
-import { createFileRoute } from "@tanstack/react-router"
-import { Printer } from "lucide-react"
-import { Suspense } from "react"
-import { z } from "zod"
 
 import { RiskNotesService, PoliciesService, ClientsService } from "@/client"
 import { Button } from "@/components/ui/button"
-import PendingItems from "@/components/Pending/PendingItems"
-
-const searchSchema = z.object({
-  mode: z.enum(["invoice", "certificate"]).default("invoice").optional(),
-})
 
 function getRiskNoteQueryOptions(id: string) {
   return {
@@ -35,25 +26,24 @@ function getClientQueryOptions(clientId: string) {
   }
 }
 
-export const Route = createFileRoute("/print/risk-notes/$id")({
-  component: RiskNotePrint,
-  validateSearch: (search) => searchSchema.parse(search),
-})
+interface RiskNoteDocumentProps {
+  id: string
+  mode: "invoice" | "certificate"
+  onModeChange: (mode: "invoice" | "certificate") => void
+}
 
-function RiskNotePrintContent({ id }: { id: string }) {
-  const { mode } = Route.useSearch()
+export function RiskNoteDocument({ id, mode, onModeChange }: RiskNoteDocumentProps) {
   const { data: riskNote } = useSuspenseQuery(getRiskNoteQueryOptions(id))
   const { data: policy } = useSuspenseQuery(getPolicyQueryOptions(riskNote.policy_id))
   const { data: client } = useSuspenseQuery(getClientQueryOptions(policy.client_id))
 
   // Type-safe access to the JSON fields
-  // In a real app, use Zod to validate these at runtime
   const breakdown = riskNote.premium_breakdown as any || {}
 
-  const isInvoice = mode === "invoice" || !mode
+  const isInvoice = mode === "invoice"
 
   return (
-    <div className="max-w-[800px] mx-auto p-8 bg-white text-black min-h-screen border shadow-sm print:shadow-none print:border-none print:p-0 font-serif">
+    <div className="w-full h-full bg-white text-black p-8 font-serif overflow-auto relative">
       {/* Header */}
       <div className="flex justify-between items-start mb-8 border-b-2 border-black pb-6">
         <div>
@@ -106,7 +96,6 @@ function RiskNotePrintContent({ id }: { id: string }) {
                  <td className="py-2 font-bold">Sum Insured</td>
                  <td className="py-2 text-right font-mono font-bold">KES {breakdown?.basic ? (breakdown.basic / 0.04).toLocaleString() : "Refer to Schedule"}</td>
                </tr>
-               {/* Placeholder for real benefits snapshot */}
                <tr className="border-b">
                  <td className="py-2">Windscreen</td>
                  <td className="py-2 text-right">KES 50,000.00</td>
@@ -197,42 +186,25 @@ function RiskNotePrintContent({ id }: { id: string }) {
         <p>HealthWatch MS v1.0 • {riskNote.id}</p>
       </div>
 
-      <div className="fixed bottom-8 right-8 print:hidden flex flex-col gap-2">
+       <div className="absolute top-4 right-4 print:hidden flex flex-col gap-2">
          {/* Toggle Buttons */}
          <div className="flex bg-white rounded-lg shadow-lg overflow-hidden border">
            <Button 
              variant={isInvoice ? "secondary" : "ghost"} 
-             className="rounded-none"
-             onClick={() => Route.useNavigate()({ search: { mode: "invoice" } })}
+             className="rounded-none h-8 text-xs"
+             onClick={() => onModeChange("invoice")}
            >
              Invoice
            </Button>
            <Button 
              variant={!isInvoice ? "secondary" : "ghost"} 
-             className="rounded-none"
-             onClick={() => Route.useNavigate()({ search: { mode: "certificate" } })}
+             className="rounded-none h-8 text-xs"
+             onClick={() => onModeChange("certificate")}
            >
              Certificate
            </Button>
          </div>
-
-        <Button onClick={() => window.print()} size="lg" className="shadow-xl rounded-full gap-2">
-          <Printer className="size-5" />
-          Print
-        </Button>
       </div>
-    </div>
-  )
-}
-
-function RiskNotePrint() {
-  const { id } = Route.useParams()
-
-  return (
-    <div className="bg-gray-100 min-h-screen print:bg-white pb-20">
-      <Suspense fallback={<PendingItems />}>
-        <RiskNotePrintContent id={id} />
-      </Suspense>
     </div>
   )
 }

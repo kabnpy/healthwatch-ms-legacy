@@ -1,11 +1,10 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import { Printer } from "lucide-react"
-import { Link } from "@tanstack/react-router"
+import { Eye } from "lucide-react"
 
 import type { RiskNotePublic } from "@/client"
 import { Button } from "@/components/ui/button"
 
-export const columns: ColumnDef<RiskNotePublic>[] = [
+export const getColumns = (onView: (riskNote: RiskNotePublic) => void): ColumnDef<RiskNotePublic>[] => [
   {
     accessorKey: "risk_note_number",
     header: "Risk Note #",
@@ -24,26 +23,27 @@ export const columns: ColumnDef<RiskNotePublic>[] = [
   {
     accessorKey: "gross_premium",
     header: "Gross Premium",
-    cell: ({ row }) => (
-      <span className="font-bold">
-        {row.original.gross_premium.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-      </span>
-    ),
+    cell: ({ row }) => {
+      const breakdown = row.original.premium_breakdown as any
+      return (
+        <span className="font-bold">
+          {breakdown?.total?.toLocaleString(undefined, { minimumFractionDigits: 2 }) || "0.00"}
+        </span>
+      )
+    },
   },
   {
     id: "actions",
     header: () => <span className="sr-only">Actions</span>,
     cell: ({ row }) => (
       <div className="flex justify-end">
-        <Button size="sm" variant="ghost" asChild>
-          <Link
-            to="/print/risk-notes/$id"
-            params={{ id: row.original.id }}
-            target="_blank"
-          >
-            <Printer className="size-4 mr-2" />
-            Print
-          </Link>
+        <Button 
+          size="sm" 
+          variant="ghost" 
+          onClick={() => onView(row.original)}
+        >
+          <Eye className="size-4 mr-2" />
+          View
         </Button>
       </div>
     ),
