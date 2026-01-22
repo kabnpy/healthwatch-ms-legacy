@@ -116,11 +116,9 @@ class RiskNoteBase(SQLModel):
     end_date: date
 
     # Financials
-    basic_premium: float
-    training_levy: float = 0.0
-    phcf_levy: float = 0.0
-    stamp_duty: float = 40.0
-    gross_premium: float
+    premium_breakdown: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
+    benefits_snapshot: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
+    risk_item_snapshot: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
 
     commission_amount: float
 
@@ -136,11 +134,9 @@ class RiskNoteUpdate(SQLModel):
     transaction_type: str | None = None
     start_date: date | None = None
     end_date: date | None = None
-    basic_premium: float | None = None
-    training_levy: float | None = None
-    phcf_levy: float | None = None
-    stamp_duty: float | None = None
-    gross_premium: float | None = None
+    premium_breakdown: dict[str, Any] | None = None
+    benefits_snapshot: dict[str, Any] | None = None
+    risk_item_snapshot: dict[str, Any] | None = None
     commission_amount: float | None = None
     special_clauses: list[str] | None = None
 

@@ -18,7 +18,7 @@ class ClientBase(SQLModel):
     kra_pin: str = Field(unique=True, index=True)
     email: str | None = None
     phone: str
-    physical_address: str | None = None
+    postal_address: str | None = None
 
     # Corporate specific
     contact_person: str | None = None
@@ -34,7 +34,7 @@ class ClientUpdate(SQLModel):
     kra_pin: str | None = None
     email: str | None = None
     phone: str | None = None
-    physical_address: str | None = None
+    postal_address: str | None = None
     contact_person: str | None = None
 
 

@@ -25,6 +25,8 @@ from app.models import (
     PolicyCreate,
     PolicyPublic,
     PolicyUpdate,
+    RiskItemCreate,
+    RiskItemPublic,
     RiskItemsPublic,
     RiskNotesPublic,
 )
@@ -140,3 +142,20 @@ def read_policy_risk_items(
     count = count_risk_items(session=session, policy_id=id)
     risk_items = get_risk_items(session=session, policy_id=id)
     return RiskItemsPublic(data=risk_items, count=count)
+
+
+@router.post("/{id}/risk-items", response_model=RiskItemPublic)
+def create_policy_risk_item(
+    *,
+    session: SessionDep,
+    _current_user: CurrentUser,
+    id: uuid.UUID,
+    risk_item_in: RiskItemCreate,
+) -> Any:
+    """
+    Create new risk item for a policy.
+    """
+    from app.crud.insurance.policy import create_risk_item
+
+    risk_item = create_risk_item(session=session, risk_item_in=risk_item_in)
+    return risk_item
