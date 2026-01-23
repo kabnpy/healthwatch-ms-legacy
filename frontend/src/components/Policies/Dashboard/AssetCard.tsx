@@ -19,7 +19,7 @@ export function AssetCard({ item }: AssetCardProps) {
   }
 
   // Assuming details is a generic dict
-  const details = item.details as Record<string, any> || {}
+  const details = (item.details as Record<string, any>) || {}
 
   return (
     <Card className="h-full shadow-sm">
@@ -31,25 +31,34 @@ export function AssetCard({ item }: AssetCardProps) {
       </CardHeader>
       <CardContent>
         <div className="flex flex-col gap-4">
-            <div>
-                <div className="text-xl font-bold truncate">
-                    {item.identifier}
-                </div>
-                <p className="text-sm text-muted-foreground">{item.description}</p>
-            </div>
+          <div>
+            <div className="text-xl font-bold truncate">{item.identifier}</div>
+            <p className="text-sm text-muted-foreground">{item.description}</p>
+          </div>
 
-            <div className="space-y-2 text-sm">
-                 <div className="flex justify-between border-b pb-1">
-                    <span className="text-muted-foreground">Sum Insured</span>
-                    <span className="font-mono font-semibold">KES {item.sum_insured.toLocaleString()}</span>
-                 </div>
-                 {Object.entries(details).slice(0, 3).map(([key, value]) => (
-                     <div key={key} className="flex justify-between border-b pb-1 last:border-0">
-                        <span className="text-muted-foreground capitalize">{key.replace(/_/g, " ")}</span>
-                        <span className="font-medium text-right truncate max-w-[150px]">{String(value)}</span>
-                     </div>
-                 ))}
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between border-b pb-1">
+              <span className="text-muted-foreground">Sum Insured</span>
+              <span className="font-mono font-semibold">
+                KES {item.sum_insured.toLocaleString()}
+              </span>
             </div>
+            {Object.entries(details)
+              .slice(0, 3)
+              .map(([key, value]) => (
+                <div
+                  key={key}
+                  className="flex justify-between border-b pb-1 last:border-0"
+                >
+                  <span className="text-muted-foreground capitalize">
+                    {key.replace(/_/g, " ")}
+                  </span>
+                  <span className="font-medium text-right truncate max-w-[150px]">
+                    {String(value)}
+                  </span>
+                </div>
+              ))}
+          </div>
         </div>
       </CardContent>
     </Card>

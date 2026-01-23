@@ -5,10 +5,10 @@ import { useReactToPrint } from "react-to-print"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogClose,
 } from "@/components/ui/dialog"
 
 interface DocumentViewerModalProps {
@@ -37,7 +37,12 @@ export function DocumentViewerModal({
         <DialogHeader className="px-6 py-4 border-b flex flex-row items-center justify-between space-y-0">
           <DialogTitle>{title}</DialogTitle>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => handlePrint()} className="gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePrint()}
+              className="gap-2"
+            >
               <Printer className="size-4" />
               Print
             </Button>
@@ -49,15 +54,15 @@ export function DocumentViewerModal({
             </DialogClose>
           </div>
         </DialogHeader>
-        
+
         <div className="flex-1 overflow-auto bg-gray-100 p-8 flex justify-center">
-            {/* The Document Container - A4-ish proportions */}
-            <div 
-                ref={printRef} 
-                className="bg-white shadow-lg w-[210mm] min-h-[297mm] relative print:w-full print:h-full print:shadow-none"
-            >
-                {children}
-            </div>
+          {/* The Document Container - A4-ish proportions */}
+          <div
+            ref={printRef}
+            className="bg-white shadow-lg w-[210mm] min-h-[297mm] relative print:w-full print:h-full print:shadow-none"
+          >
+            {children}
+          </div>
         </div>
       </DialogContent>
     </Dialog>

@@ -6,9 +6,15 @@ from fastapi import APIRouter, HTTPException
 from app.api.deps import CurrentUser, SessionDep
 from app.crud.insurance.policy import (
     count_risk_notes,
-    create_risk_note as crud_create_risk_note,
-    delete_risk_note as crud_delete_risk_note,
     get_risk_notes,
+)
+from app.crud.insurance.policy import (
+    create_risk_note as crud_create_risk_note,
+)
+from app.crud.insurance.policy import (
+    delete_risk_note as crud_delete_risk_note,
+)
+from app.crud.insurance.policy import (
     update_risk_note as crud_update_risk_note,
 )
 from app.models import (
@@ -16,8 +22,8 @@ from app.models import (
     RiskNote,
     RiskNoteCreate,
     RiskNotePublic,
-    RiskNoteUpdate,
     RiskNotesPublic,
+    RiskNoteUpdate,
 )
 
 router = APIRouter()
@@ -35,12 +41,16 @@ def read_risk_notes(
     Retrieve risk notes.
     """
     count = count_risk_notes(session=session, policy_id=policy_id)
-    risk_notes = get_risk_notes(session=session, skip=skip, limit=limit, policy_id=policy_id)
+    risk_notes = get_risk_notes(
+        session=session, skip=skip, limit=limit, policy_id=policy_id
+    )
     return RiskNotesPublic(data=risk_notes, count=count)
 
 
 @router.get("/{id}", response_model=RiskNotePublic)
-def read_risk_note(session: SessionDep, _current_user: CurrentUser, id: uuid.UUID) -> Any:
+def read_risk_note(
+    session: SessionDep, _current_user: CurrentUser, id: uuid.UUID
+) -> Any:
     """
     Get risk note by ID.
     """

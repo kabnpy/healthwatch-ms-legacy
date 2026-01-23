@@ -1,10 +1,10 @@
-import { useState } from "react"
-import { FileText, Plus, ExternalLink } from "lucide-react"
-import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import type { ColumnDef } from "@tanstack/react-table"
+import { ExternalLink, FileText, Plus } from "lucide-react"
+import { useState } from "react"
+import { useForm } from "react-hook-form"
 import { z } from "zod"
-
-import { useCorrespondences, useCreateCorrespondence } from "@/hooks/useInsurance"
+import type { CorrespondencePublic } from "@/client"
 import { DataTable } from "@/components/Common/DataTable"
 import { Button } from "@/components/ui/button"
 import {
@@ -26,8 +26,10 @@ import {
 import { Input } from "@/components/ui/input"
 import { LoadingButton } from "@/components/ui/loading-button"
 import useCustomToast from "@/hooks/useCustomToast"
-import type { ColumnDef } from "@tanstack/react-table"
-import type { CorrespondencePublic } from "@/client"
+import {
+  useCorrespondences,
+  useCreateCorrespondence,
+} from "@/hooks/useInsurance"
 
 interface ClientDocumentsProps {
   clientId: string
@@ -54,7 +56,10 @@ export function ClientDocuments({ clientId }: ClientDocumentsProps) {
     {
       accessorKey: "date_logged",
       header: "Date Logged",
-      cell: ({ row }) => row.original.date_logged ? new Date(row.original.date_logged).toLocaleDateString() : "N/A",
+      cell: ({ row }) =>
+        row.original.date_logged
+          ? new Date(row.original.date_logged).toLocaleDateString()
+          : "N/A",
     },
     {
       id: "actions",
@@ -86,7 +91,9 @@ export function ClientDocuments({ clientId }: ClientDocumentsProps) {
             <FileText className="h-8 w-8 text-muted-foreground" />
           </div>
           <h3 className="text-lg font-semibold">No documents found</h3>
-          <p className="text-muted-foreground">Upload IDs, KRA PIN certificates, or letters here.</p>
+          <p className="text-muted-foreground">
+            Upload IDs, KRA PIN certificates, or letters here.
+          </p>
         </div>
       ) : (
         <DataTable columns={columns} data={correspondences.data} />
@@ -119,13 +126,13 @@ function AddCorrespondence({ clientId }: { clientId: string }) {
 
   const onSubmit = (data: CorrespondenceFormData) => {
     createCorrespondence.mutate(
-      { 
-        clientId, 
+      {
+        clientId,
         data: {
-            ...data,
-            client_id: clientId,
-            date_logged: new Date().toISOString()
-        } 
+          ...data,
+          client_id: clientId,
+          date_logged: new Date().toISOString(),
+        },
       },
       {
         onSuccess: () => {
@@ -136,7 +143,7 @@ function AddCorrespondence({ clientId }: { clientId: string }) {
         onError: () => {
           showErrorToast("Failed to add document")
         },
-      }
+      },
     )
   }
 
@@ -177,7 +184,10 @@ function AddCorrespondence({ clientId }: { clientId: string }) {
                 <FormItem>
                   <FormLabel>Summary / Notes</FormLabel>
                   <FormControl>
-                    <Input placeholder="Brief description of the document" {...field} />
+                    <Input
+                      placeholder="Brief description of the document"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -190,17 +200,27 @@ function AddCorrespondence({ clientId }: { clientId: string }) {
                 <FormItem>
                   <FormLabel>File Path / URL</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://storage.example.com/file.pdf" {...field} />
+                    <Input
+                      placeholder="https://storage.example.com/file.pdf"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <div className="flex justify-end gap-2 pt-4">
-              <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsOpen(false)}
+              >
                 Cancel
               </Button>
-              <LoadingButton type="submit" loading={createCorrespondence.isPending}>
+              <LoadingButton
+                type="submit"
+                loading={createCorrespondence.isPending}
+              >
                 Save Document
               </LoadingButton>
             </div>

@@ -3,8 +3,8 @@
 ## Finished
 - **MVP Step 1: Backend Data Injection**
     - Created `backend/app/seed_mock_data.py`.
-    - Generated and applied Alembic migration (`835e5ddfd056`) for insurance models.
-    - Seeded initial data.
+    - Generated and applied Alembic migrations for insurance models and schema updates.
+    - Seeded initial data and fixed `prestart` service failures.
 - **Backend API Extension**
     - Implemented CRUD endpoints for `risk_notes`, `policies`, and `correspondences`.
     - Added `POST /policies/{id}/risk-items` and `GET/POST /clients/{id}/correspondences`.
@@ -24,6 +24,9 @@
 - **MVP Phase 3: Generalized Wizard & Client Documents**
     - **Universal Wizard:** Upgraded `NewBusinessWizard` to handle any insurance class. Added Product Selection and dynamic asset fields (Motor vs. General).
     - **Client Documents:** Implemented the "Documents" tab in the Client Hub, allowing upload and viewing of client-level files (KRA PIN, IDs).
+- **Code Quality & Maintenance**
+    - **Linting & Formatting:** Cleaned up all linting and formatting issues in both Backend (Ruff, MyPy) and Frontend (Biome).
+    - **Bug Fixes:** Resolved `prestart` container exit due to schema mismatch (`physical_address` -> `postal_address`).
 
 ## Next Steps
 1. **Verification:** Test non-motor policy issuance via the generalized wizard.
@@ -34,3 +37,4 @@
 - **Class-Based UI:** The wizard dynamically adapts its schema and UI based on the `class_of_insurance` of the selected product.
 - **Composite Fetching:** Using custom hooks like `usePolicyDashboard` to provide a unified data object for complex screens.
 - **JSON for Flexibility:** Moved from rigid float columns to `premium_breakdown` JSON to handle dynamic taxes and extensions.
+- **ID Enforcement:** Updated API routes to enforce ID linkage from URL paths rather than relying solely on request bodies, resolving unused variable warnings and improving safety.

@@ -24,10 +24,10 @@ from app.models import (
     ClientPublic,
     ClientsPublic,
     ClientUpdate,
-    Message,
     CorrespondenceCreate,
     CorrespondencePublic,
     CorrespondencesPublic,
+    Message,
 )
 
 router = APIRouter()
@@ -134,6 +134,7 @@ def create_client_correspondence(
     """
     from app.crud.insurance.client import create_correspondence
 
+    correspondence_in.client_id = id
     correspondence = create_correspondence(
         session=session, correspondence_in=correspondence_in
     )

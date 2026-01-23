@@ -1,5 +1,5 @@
-import { useState } from "react"
 import { FilePlus } from "lucide-react"
+import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -35,9 +35,9 @@ export const AddRiskNote = ({ policyId, policyNumber }: AddRiskNoteProps) => {
             Creating risk note for policy <strong>{policyNumber}</strong>
           </DialogDescription>
         </DialogHeader>
-        <RiskNoteForm 
-          policyId={policyId} 
-          onSuccess={() => setIsOpen(false)} 
+        <RiskNoteForm
+          policyId={policyId}
+          onSuccess={() => setIsOpen(false)}
           onCancel={() => setIsOpen(false)}
         />
       </DialogContent>

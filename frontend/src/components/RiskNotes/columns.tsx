@@ -4,7 +4,9 @@ import { Eye } from "lucide-react"
 import type { RiskNotePublic } from "@/client"
 import { Button } from "@/components/ui/button"
 
-export const getColumns = (onView: (riskNote: RiskNotePublic) => void): ColumnDef<RiskNotePublic>[] => [
+export const getColumns = (
+  onView: (riskNote: RiskNotePublic) => void,
+): ColumnDef<RiskNotePublic>[] => [
   {
     accessorKey: "risk_note_number",
     header: "Risk Note #",
@@ -27,7 +29,9 @@ export const getColumns = (onView: (riskNote: RiskNotePublic) => void): ColumnDe
       const breakdown = row.original.premium_breakdown as any
       return (
         <span className="font-bold">
-          {breakdown?.total?.toLocaleString(undefined, { minimumFractionDigits: 2 }) || "0.00"}
+          {breakdown?.total?.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+          }) || "0.00"}
         </span>
       )
     },
@@ -37,11 +41,7 @@ export const getColumns = (onView: (riskNote: RiskNotePublic) => void): ColumnDe
     header: () => <span className="sr-only">Actions</span>,
     cell: ({ row }) => (
       <div className="flex justify-end">
-        <Button 
-          size="sm" 
-          variant="ghost" 
-          onClick={() => onView(row.original)}
-        >
+        <Button size="sm" variant="ghost" onClick={() => onView(row.original)}>
           <Eye className="size-4 mr-2" />
           View
         </Button>

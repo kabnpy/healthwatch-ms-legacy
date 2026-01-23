@@ -1,10 +1,10 @@
-import type { ColumnDef } from "@tanstack/react-table"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { Link } from "@tanstack/react-router"
+import type { ColumnDef } from "@tanstack/react-table"
+import { Eye } from "lucide-react"
 import type { PolicyPublic } from "@/client"
 import { AddRiskNote } from "@/components/Insurance/AddRiskNote"
-import { Eye } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 
 export const columns: ColumnDef<PolicyPublic>[] = [
   {
@@ -37,9 +37,9 @@ export const columns: ColumnDef<PolicyPublic>[] = [
             View
           </Link>
         </Button>
-        <AddRiskNote 
-          policyId={row.original.id} 
-          policyNumber={row.original.policy_number} 
+        <AddRiskNote
+          policyId={row.original.id}
+          policyNumber={row.original.policy_number}
         />
       </div>
     ),

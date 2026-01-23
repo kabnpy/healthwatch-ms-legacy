@@ -1,10 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm, type SubmitHandler } from "react-hook-form"
-import { z } from "zod"
 import { Plus } from "lucide-react"
 import { useState } from "react"
+import { type SubmitHandler, useForm } from "react-hook-form"
+import { z } from "zod"
 
-import { type PolicyCreate, type ApiError } from "@/client"
+import type { ApiError, PolicyCreate } from "@/client"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -31,8 +31,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useCreatePolicy, useProducts } from "@/hooks/useInsurance"
 import useCustomToast from "@/hooks/useCustomToast"
+import { useCreatePolicy, useProducts } from "@/hooks/useInsurance"
 import { handleError } from "@/utils"
 
 const formSchema = z.object({
@@ -120,10 +120,19 @@ export const AddPolicy = ({ clientId }: AddPolicyProps) => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Product</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder={isLoadingProducts ? "Loading products..." : "Select a product"} />
+                        <SelectValue
+                          placeholder={
+                            isLoadingProducts
+                              ? "Loading products..."
+                              : "Select a product"
+                          }
+                        />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -145,7 +154,10 @@ export const AddPolicy = ({ clientId }: AddPolicyProps) => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Status</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select status" />
@@ -164,7 +176,11 @@ export const AddPolicy = ({ clientId }: AddPolicyProps) => {
             />
 
             <div className="flex justify-end gap-4 pt-4">
-              <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsOpen(false)}
+              >
                 Cancel
               </Button>
               <LoadingButton type="submit" loading={createPolicy.isPending}>

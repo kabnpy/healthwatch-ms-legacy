@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 def init() -> None:
     with Session(engine) as session:
         init_db(session)
-    
+
     if settings.ENVIRONMENT == "local":
         logger.info("Local environment detected, seeding mock data...")
         create_mock_data()

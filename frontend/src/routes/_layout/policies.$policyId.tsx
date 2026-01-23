@@ -1,21 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { Suspense, useMemo, useState } from "react"
-
-import { usePolicyDashboard } from "@/hooks/useInsurance"
-import ErrorComponent from "@/components/Common/ErrorComponent"
-import PendingItems from "@/components/Pending/PendingItems"
+import { Suspense, useCallback, useMemo, useState } from "react"
 import { DataTable } from "@/components/Common/DataTable"
 import { DocumentViewerModal } from "@/components/Common/DocumentViewerModal"
+import ErrorComponent from "@/components/Common/ErrorComponent"
 import { RiskNoteDocument } from "@/components/Documents/RiskNoteDocument"
-import { getColumns as getRiskNoteColumns } from "@/components/RiskNotes/columns"
+import PendingItems from "@/components/Pending/PendingItems"
+import { AssetCard } from "@/components/Policies/Dashboard/AssetCard"
+import { CoverageCard } from "@/components/Policies/Dashboard/CoverageCard"
 
 import { PolicyHeader } from "@/components/Policies/Dashboard/PolicyHeader"
-import { CoverageCard } from "@/components/Policies/Dashboard/CoverageCard"
-import { AssetCard } from "@/components/Policies/Dashboard/AssetCard"
 import { QuickActions } from "@/components/Policies/Dashboard/QuickActions"
-
+import { getColumns as getRiskNoteColumns } from "@/components/RiskNotes/columns"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useClient } from "@/hooks/useInsurance"
+import { useClient, usePolicyDashboard } from "@/hooks/useInsurance"
 
 // --- Route Definition ---
 
@@ -25,22 +22,28 @@ export const Route = createFileRoute("/_layout/policies/$policyId")({
 })
 
 function PolicyDashboardContent({ policyId }: { policyId: string }) {
-  const { policy, latestRiskNote, activeItem, riskNotes, isLoading } = usePolicyDashboard(policyId)
-  
+  const { policy, latestRiskNote, activeItem, riskNotes, isLoading } =
+    usePolicyDashboard(policyId)
+
   // We need client name for breadcrumbs
   const { data: client } = useClient(policy?.client_id || "")
 
   // State for Document Viewer
   const [viewerOpen, setViewerOpen] = useState(false)
-  const [selectedRiskNoteId, setSelectedRiskNoteId] = useState<string | null>(null)
+  const [selectedRiskNoteId, setSelectedRiskNoteId] = useState<string | null>(
+    null,
+  )
   const [viewMode, setViewMode] = useState<"invoice" | "certificate">("invoice")
 
   // Handlers
-  const handleViewRiskNote = (id: string, mode: "invoice" | "certificate" = "invoice") => {
-    setSelectedRiskNoteId(id)
-    setViewMode(mode)
-    setViewerOpen(true)
-  }
+  const handleViewRiskNote = useCallback(
+    (id: string, mode: "invoice" | "certificate" = "invoice") => {
+      setSelectedRiskNoteId(id)
+      setViewMode(mode)
+      setViewerOpen(true)
+    },
+    [],
+  )
 
   const handleRenew = () => {
     alert("Renewal Wizard coming soon!")
@@ -51,9 +54,13 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
   }
 
   // Memoize columns for History Tab
-  const historyColumns = useMemo(() => getRiskNoteColumns((riskNote) => {
-    handleViewRiskNote(riskNote.id)
-  }), [])
+  const historyColumns = useMemo(
+    () =>
+      getRiskNoteColumns((riskNote) => {
+        handleViewRiskNote(riskNote.id)
+      }),
+    [handleViewRiskNote],
+  )
 
   if (isLoading || !policy || !client) {
     return <PendingItems />
@@ -61,8 +68,8 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PolicyHeader 
-        clientName={client.name} 
+      <PolicyHeader
+        clientName={client.name}
         clientId={client.id}
         policyNumber={policy.policy_number}
         status={policy.status || "Unknown"}
@@ -80,24 +87,30 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Column (2/3) */}
             <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-               <div className="h-full">
-                 <CoverageCard 
-                    riskNote={latestRiskNote} 
-                    onViewBreakdown={(rn) => handleViewRiskNote(rn.id, "invoice")}
-                 />
-               </div>
-               <div className="h-full">
-                 <AssetCard item={activeItem} />
-               </div>
+              <div className="h-full">
+                <CoverageCard
+                  riskNote={latestRiskNote}
+                  onViewBreakdown={(rn) => handleViewRiskNote(rn.id, "invoice")}
+                />
+              </div>
+              <div className="h-full">
+                <AssetCard item={activeItem} />
+              </div>
             </div>
 
             {/* Right Column (1/3) */}
             <div>
-              <QuickActions 
+              <QuickActions
                 onRenew={handleRenew}
                 onEndorse={handleEndorse}
-                onPrintCertificate={() => latestRiskNote && handleViewRiskNote(latestRiskNote.id, "certificate")}
-                onPrintDebitNote={() => latestRiskNote && handleViewRiskNote(latestRiskNote.id, "invoice")}
+                onPrintCertificate={() =>
+                  latestRiskNote &&
+                  handleViewRiskNote(latestRiskNote.id, "certificate")
+                }
+                onPrintDebitNote={() =>
+                  latestRiskNote &&
+                  handleViewRiskNote(latestRiskNote.id, "invoice")
+                }
                 disabled={!latestRiskNote}
               />
             </div>
@@ -106,21 +119,26 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
 
         {/* TAB 2: HISTORY */}
         <TabsContent value="history" className="pt-6">
-             <div className="border rounded-lg p-4 bg-card">
-                <h3 className="text-lg font-semibold mb-4">Transaction History</h3>
-                <DataTable columns={historyColumns} data={riskNotes} />
-             </div>
+          <div className="border rounded-lg p-4 bg-card">
+            <h3 className="text-lg font-semibold mb-4">Transaction History</h3>
+            <DataTable columns={historyColumns} data={riskNotes} />
+          </div>
         </TabsContent>
 
         {/* TAB 3: DOCUMENTS */}
         <TabsContent value="documents" className="pt-6">
-             <div className="flex flex-col items-center justify-center text-center py-20 border-2 border-dashed rounded-lg bg-muted/5">
-                <h3 className="text-lg font-semibold">Policy Documents</h3>
-                <p className="text-muted-foreground mb-4">Upload and manage files related to this policy.</p>
-                <button className="bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md text-sm font-medium">
-                    Upload Document
-                </button>
-             </div>
+          <div className="flex flex-col items-center justify-center text-center py-20 border-2 border-dashed rounded-lg bg-muted/5">
+            <h3 className="text-lg font-semibold">Policy Documents</h3>
+            <p className="text-muted-foreground mb-4">
+              Upload and manage files related to this policy.
+            </p>
+            <button
+              type="button"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md text-sm font-medium"
+            >
+              Upload Document
+            </button>
+          </div>
         </TabsContent>
       </Tabs>
 
@@ -132,8 +150,8 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
           title={`Risk Note Viewer`}
         >
           <Suspense fallback={<PendingItems />}>
-            <RiskNoteDocument 
-              id={selectedRiskNoteId} 
+            <RiskNoteDocument
+              id={selectedRiskNoteId}
               mode={viewMode}
               onModeChange={setViewMode}
             />

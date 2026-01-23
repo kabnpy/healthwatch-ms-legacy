@@ -4,9 +4,9 @@ import { Users } from "lucide-react"
 import { Suspense } from "react"
 
 import { ClientsService } from "@/client"
-import { DataTable } from "@/components/Common/DataTable"
-import { columns } from "@/components/Clients/columns"
 import { AddClient } from "@/components/Clients/AddClient"
+import { columns } from "@/components/Clients/columns"
+import { DataTable } from "@/components/Common/DataTable"
 import PendingItems from "@/components/Pending/PendingItems"
 
 function getClientsQueryOptions() {
@@ -37,7 +37,9 @@ function ClientsTableContent() {
           <Users className="h-8 w-8 text-muted-foreground" />
         </div>
         <h3 className="text-lg font-semibold">No clients found</h3>
-        <p className="text-muted-foreground mb-4">Add a new client to get started</p>
+        <p className="text-muted-foreground mb-4">
+          Add a new client to get started
+        </p>
         <AddClient />
       </div>
     )

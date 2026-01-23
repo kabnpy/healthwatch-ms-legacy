@@ -1,10 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm, type SubmitHandler } from "react-hook-form"
-import { z } from "zod"
 import { Plus } from "lucide-react"
 import { useState } from "react"
+import { type SubmitHandler, useForm } from "react-hook-form"
+import { z } from "zod"
 
-import { type ClientCreate, type ApiError } from "@/client"
+import type { ApiError, ClientCreate } from "@/client"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -31,8 +31,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useCreateClient } from "@/hooks/useInsurance"
 import useCustomToast from "@/hooks/useCustomToast"
+import { useCreateClient } from "@/hooks/useInsurance"
 import { handleError } from "@/utils"
 
 const formSchema = z.object({
@@ -67,10 +67,10 @@ export const AddClient = () => {
 
   const onSubmit: SubmitHandler<FormData> = (data) => {
     const clientData: ClientCreate = {
-        ...data,
-        email: data.email === "" ? null : data.email,
-        postal_address: data.postal_address || null,
-        contact_person: data.contact_person || null,
+      ...data,
+      email: data.email === "" ? null : data.email,
+      postal_address: data.postal_address || null,
+      contact_person: data.contact_person || null,
     }
     createClient.mutate(clientData, {
       onSuccess: () => {
@@ -108,7 +108,10 @@ export const AddClient = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Client Type</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select type" />
@@ -160,7 +163,11 @@ export const AddClient = () => {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input type="email" placeholder="client@example.com" {...field} />
+                      <Input
+                        type="email"
+                        placeholder="client@example.com"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -212,7 +219,11 @@ export const AddClient = () => {
             )}
 
             <div className="flex justify-end gap-4 pt-4">
-              <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsOpen(false)}
+              >
                 Cancel
               </Button>
               <LoadingButton type="submit" loading={createClient.isPending}>

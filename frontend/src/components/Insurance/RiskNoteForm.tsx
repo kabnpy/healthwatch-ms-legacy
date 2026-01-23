@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm, type SubmitHandler } from "react-hook-form"
+import { type SubmitHandler, useForm } from "react-hook-form"
 import { z } from "zod"
 
 import type { ApiError, RiskNoteCreate } from "@/client"
@@ -15,8 +15,8 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { LoadingButton } from "@/components/ui/loading-button"
-import { useCreateRiskNote } from "@/hooks/useInsurance"
 import useCustomToast from "@/hooks/useCustomToast"
+import { useCreateRiskNote } from "@/hooks/useInsurance"
 import { calculatePremium } from "@/lib/calculator"
 import { handleError } from "@/utils"
 
@@ -52,7 +52,11 @@ interface RiskNoteFormProps {
   onCancel?: () => void
 }
 
-export const RiskNoteForm = ({ policyId, onSuccess, onCancel }: RiskNoteFormProps) => {
+export const RiskNoteForm = ({
+  policyId,
+  onSuccess,
+  onCancel,
+}: RiskNoteFormProps) => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const createRiskNote = useCreateRiskNote()
 
@@ -63,7 +67,9 @@ export const RiskNoteForm = ({ policyId, onSuccess, onCancel }: RiskNoteFormProp
       risk_note_number: `RN-${Math.floor(Math.random() * 100000)}`,
       transaction_type: "New Business",
       start_date: new Date().toISOString().split("T")[0],
-      end_date: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split("T")[0],
+      end_date: new Date(new Date().setFullYear(new Date().getFullYear() + 1))
+        .toISOString()
+        .split("T")[0],
       sum_insured: 0,
       rate: 4,
       hasPVT: false,
@@ -91,7 +97,7 @@ export const RiskNoteForm = ({ policyId, onSuccess, onCancel }: RiskNoteFormProp
   const onSubmit: SubmitHandler<FormData> = (data) => {
     // 1. Prepare the JSON blobs
     const premiumBreakdown = calculation.breakdown
-    
+
     // 2. Prepare the payload
     const riskNoteData: RiskNoteCreate = {
       policy_id: data.policy_id,
@@ -163,7 +169,7 @@ export const RiskNoteForm = ({ policyId, onSuccess, onCancel }: RiskNoteFormProp
               </FormItem>
             )}
           />
-           <FormField
+          <FormField
             control={form.control}
             name="start_date"
             render={({ field }) => (
@@ -205,9 +211,7 @@ export const RiskNoteForm = ({ policyId, onSuccess, onCancel }: RiskNoteFormProp
                   />
                 </FormControl>
                 <div className="space-y-1 leading-none">
-                  <FormLabel>
-                    Include PVT (0.25%)
-                  </FormLabel>
+                  <FormLabel>Include PVT (0.25%)</FormLabel>
                 </div>
               </FormItem>
             )}
@@ -224,9 +228,7 @@ export const RiskNoteForm = ({ policyId, onSuccess, onCancel }: RiskNoteFormProp
                   />
                 </FormControl>
                 <div className="space-y-1 leading-none">
-                  <FormLabel>
-                    Include Excess Protector (0.25%)
-                  </FormLabel>
+                  <FormLabel>Include Excess Protector (0.25%)</FormLabel>
                 </div>
               </FormItem>
             )}
@@ -237,13 +239,24 @@ export const RiskNoteForm = ({ policyId, onSuccess, onCancel }: RiskNoteFormProp
         <div className="bg-muted/50 p-4 rounded-lg space-y-2 border border-muted-foreground/20">
           <div className="flex justify-between text-sm">
             <span>Basic Premium ({rate}%):</span>
-            <span className="font-mono">{breakdown.basic.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+            <span className="font-mono">
+              {breakdown.basic.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+              })}
+            </span>
           </div>
-          
+
           {breakdown.extensions.map((ext) => (
-            <div key={ext.name} className="flex justify-between text-sm text-blue-600">
+            <div
+              key={ext.name}
+              className="flex justify-between text-sm text-blue-600"
+            >
               <span>+ {ext.name}:</span>
-              <span>{ext.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+              <span>
+                {ext.amount.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                })}
+              </span>
             </div>
           ))}
 
@@ -251,20 +264,36 @@ export const RiskNoteForm = ({ policyId, onSuccess, onCancel }: RiskNoteFormProp
 
           <div className="flex justify-between text-sm text-muted-foreground">
             <span>Training Levy (0.2%):</span>
-            <span>{breakdown.levies.trainingLevy.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+            <span>
+              {breakdown.levies.trainingLevy.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+              })}
+            </span>
           </div>
           <div className="flex justify-between text-sm text-muted-foreground">
             <span>PHCF Levy (0.25%):</span>
-            <span>{breakdown.levies.phcf.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+            <span>
+              {breakdown.levies.phcf.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+              })}
+            </span>
           </div>
           <div className="flex justify-between text-sm text-muted-foreground">
             <span>Stamp Duty:</span>
-            <span>{breakdown.levies.stampDuty.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+            <span>
+              {breakdown.levies.stampDuty.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+              })}
+            </span>
           </div>
-          
+
           <div className="flex justify-between font-bold border-t border-black pt-2 mt-2 text-lg">
             <span>TOTAL PAYABLE:</span>
-            <span>{breakdown.total.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+            <span>
+              {breakdown.total.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+              })}
+            </span>
           </div>
         </div>
 

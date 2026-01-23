@@ -1,6 +1,8 @@
-import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useMemo } from "react"
+import { useForm } from "react-hook-form"
 import { z } from "zod"
+import { Button } from "@/components/ui/button"
 import {
   Form,
   FormControl,
@@ -10,7 +12,6 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
 import {
   Select,
   SelectContent,
@@ -19,18 +20,19 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useProducts } from "@/hooks/useInsurance"
-import { useMemo } from "react"
 
 const assetSchema = z.object({
   product_id: z.string().min(1, "Product is required"),
   asset: z.object({
     identifier: z.string().min(1, "Identifier is required").toUpperCase(),
     description: z.string().min(1, "Description is required"),
-    details: z.object({
-      chassis: z.string().optional().default(""),
-      engine: z.string().optional().default(""),
-      note: z.string().optional().default(""),
-    }).default({ chassis: "", engine: "", note: "" }),
+    details: z
+      .object({
+        chassis: z.string().optional().default(""),
+        engine: z.string().optional().default(""),
+        note: z.string().optional().default(""),
+      })
+      .default({ chassis: "", engine: "", note: "" }),
   }),
 })
 
@@ -41,30 +43,35 @@ interface StepAssetProps {
 
 export function StepAsset({ defaultValues, onNext }: StepAssetProps) {
   const { data: productsData } = useProducts()
-  
+
   const form = useForm({
     resolver: zodResolver(assetSchema),
     defaultValues: {
-        product_id: defaultValues?.product_id || "",
-        asset: {
-            identifier: defaultValues?.asset?.identifier || "",
-            description: defaultValues?.asset?.description || defaultValues?.asset?.makeModel || "",
-            details: {
-                chassis: defaultValues?.asset?.details?.chassis || "",
-                engine: defaultValues?.asset?.details?.engine || "",
-                note: defaultValues?.asset?.details?.note || "",
-            },
-        }
+      product_id: defaultValues?.product_id || "",
+      asset: {
+        identifier: defaultValues?.asset?.identifier || "",
+        description:
+          defaultValues?.asset?.description ||
+          defaultValues?.asset?.makeModel ||
+          "",
+        details: {
+          chassis: defaultValues?.asset?.details?.chassis || "",
+          engine: defaultValues?.asset?.details?.engine || "",
+          note: defaultValues?.asset?.details?.note || "",
+        },
+      },
     },
   })
 
   const selectedProductId = form.watch("product_id")
-  
+
   const selectedProduct = useMemo(() => {
-    return productsData?.data.find(p => p.id === selectedProductId)
+    return productsData?.data.find((p) => p.id === selectedProductId)
   }, [selectedProductId, productsData])
 
-  const isMotor = selectedProduct?.class_of_insurance.toLowerCase().includes("motor")
+  const isMotor = selectedProduct?.class_of_insurance
+    .toLowerCase()
+    .includes("motor")
 
   return (
     <Form {...form}>
@@ -100,9 +107,16 @@ export function StepAsset({ defaultValues, onNext }: StepAssetProps) {
             name="asset.identifier"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{isMotor ? "Registration Number" : "Identifier (Serial/Plot No)"}</FormLabel>
+                <FormLabel>
+                  {isMotor
+                    ? "Registration Number"
+                    : "Identifier (Serial/Plot No)"}
+                </FormLabel>
                 <FormControl>
-                  <Input placeholder={isMotor ? "KCA 123B" : "Asset ID"} {...field} />
+                  <Input
+                    placeholder={isMotor ? "KCA 123B" : "Asset ID"}
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -113,9 +127,16 @@ export function StepAsset({ defaultValues, onNext }: StepAssetProps) {
             name="asset.description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{isMotor ? "Make & Model" : "Asset Description"}</FormLabel>
+                <FormLabel>
+                  {isMotor ? "Make & Model" : "Asset Description"}
+                </FormLabel>
                 <FormControl>
-                  <Input placeholder={isMotor ? "Toyota Harrier" : "Brief description"} {...field} />
+                  <Input
+                    placeholder={
+                      isMotor ? "Toyota Harrier" : "Brief description"
+                    }
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -132,7 +153,11 @@ export function StepAsset({ defaultValues, onNext }: StepAssetProps) {
                 <FormItem>
                   <FormLabel>Chassis Number</FormLabel>
                   <FormControl>
-                    <Input placeholder="JMZ..." {...field} value={(field.value as string) || ""} />
+                    <Input
+                      placeholder="JMZ..."
+                      {...field}
+                      value={(field.value as string) || ""}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -145,7 +170,11 @@ export function StepAsset({ defaultValues, onNext }: StepAssetProps) {
                 <FormItem>
                   <FormLabel>Engine Number</FormLabel>
                   <FormControl>
-                    <Input placeholder="2AZ..." {...field} value={(field.value as string) || ""} />
+                    <Input
+                      placeholder="2AZ..."
+                      {...field}
+                      value={(field.value as string) || ""}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -155,25 +184,34 @@ export function StepAsset({ defaultValues, onNext }: StepAssetProps) {
         )}
 
         {!isMotor && selectedProductId && (
-             <div className="p-4 bg-muted/20 border rounded-md">
-                <p className="text-sm text-muted-foreground italic">Additional details for {selectedProduct?.class_of_insurance} can be added here.</p>
-                <FormField
-                    control={form.control}
-                    name="asset.details.note"
-                    render={({ field }) => (
-                        <FormItem className="mt-2">
-                        <FormLabel>Additional Notes</FormLabel>
-                        <FormControl>
-                            <Input placeholder="Specify location, serial numbers etc" {...field} value={(field.value as string) || ""} />
-                        </FormControl>
-                        </FormItem>
-                    )}
-                />
-             </div>
+          <div className="p-4 bg-muted/20 border rounded-md">
+            <p className="text-sm text-muted-foreground italic">
+              Additional details for {selectedProduct?.class_of_insurance} can
+              be added here.
+            </p>
+            <FormField
+              control={form.control}
+              name="asset.details.note"
+              render={({ field }) => (
+                <FormItem className="mt-2">
+                  <FormLabel>Additional Notes</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Specify location, serial numbers etc"
+                      {...field}
+                      value={(field.value as string) || ""}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </div>
         )}
 
         <div className="flex justify-end pt-4">
-          <Button type="submit" disabled={!selectedProductId}>Next: Coverage & Financials</Button>
+          <Button type="submit" disabled={!selectedProductId}>
+            Next: Coverage & Financials
+          </Button>
         </div>
       </form>
     </Form>

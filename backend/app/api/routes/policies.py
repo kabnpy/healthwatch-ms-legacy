@@ -157,5 +157,6 @@ def create_policy_risk_item(
     """
     from app.crud.insurance.policy import create_risk_item
 
+    risk_item_in.policy_id = id
     risk_item = create_risk_item(session=session, risk_item_in=risk_item_in)
     return risk_item

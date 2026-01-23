@@ -1,4 +1,4 @@
-import { Shield, FileText } from "lucide-react"
+import { FileText, Shield } from "lucide-react"
 import type { RiskNotePublic } from "@/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -20,7 +20,7 @@ export function CoverageCard({ riskNote, onViewBreakdown }: CoverageCardProps) {
     )
   }
 
-  const breakdown = riskNote.premium_breakdown as any || {}
+  const breakdown = (riskNote.premium_breakdown as any) || {}
 
   return (
     <Card className="h-full border-l-4 border-l-green-600 shadow-sm">
@@ -32,35 +32,42 @@ export function CoverageCard({ riskNote, onViewBreakdown }: CoverageCardProps) {
       </CardHeader>
       <CardContent>
         <div className="flex flex-col gap-4">
+          <div>
+            <div className="text-2xl font-bold">
+              KES{" "}
+              {breakdown?.total?.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+              }) || "0.00"}
+            </div>
+            <p className="text-xs text-muted-foreground">Total Premium</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 text-sm">
             <div>
-                <div className="text-2xl font-bold">
-                    KES {breakdown?.total?.toLocaleString(undefined, { minimumFractionDigits: 2 }) || "0.00"}
-                </div>
-                <p className="text-xs text-muted-foreground">Total Premium</p>
+              <span className="text-muted-foreground block text-xs uppercase">
+                Start Date
+              </span>
+              <span className="font-semibold">{riskNote.start_date}</span>
             </div>
+            <div>
+              <span className="text-muted-foreground block text-xs uppercase">
+                End Date
+              </span>
+              <span className="font-semibold">{riskNote.end_date}</span>
+            </div>
+          </div>
 
-            <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                    <span className="text-muted-foreground block text-xs uppercase">Start Date</span>
-                    <span className="font-semibold">{riskNote.start_date}</span>
-                </div>
-                <div>
-                    <span className="text-muted-foreground block text-xs uppercase">End Date</span>
-                    <span className="font-semibold">{riskNote.end_date}</span>
-                </div>
-            </div>
-
-            <div className="pt-4 border-t mt-2">
-                 <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="w-full gap-2"
-                    onClick={() => onViewBreakdown(riskNote)}
-                >
-                    <FileText className="size-4" />
-                    View Breakdown
-                 </Button>
-            </div>
+          <div className="pt-4 border-t mt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full gap-2"
+              onClick={() => onViewBreakdown(riskNote)}
+            >
+              <FileText className="size-4" />
+              View Breakdown
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
