@@ -1,8 +1,24 @@
 import { Link } from "@tanstack/react-router"
 import type { ColumnDef } from "@tanstack/react-table"
-import { ExternalLink } from "lucide-react"
+import {
+  Copy,
+  Edit,
+  ExternalLink,
+  MoreHorizontal,
+  ReceiptText,
+} from "lucide-react"
+import { toast } from "sonner"
 
 import type { ClientPublic } from "@/client"
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export const columns: ColumnDef<ClientPublic>[] = [
   {
@@ -10,23 +26,29 @@ export const columns: ColumnDef<ClientPublic>[] = [
     header: "Name",
     cell: ({ row }) => (
       <Link
-        to="/clients/$clientId"
+        to="/clients/$clientId/policies"
         params={{ clientId: row.original.id }}
-        className="font-medium hover:underline flex items-center gap-2"
+        className="font-medium hover:underline text-primary flex items-center gap-2"
       >
         {row.original.name}
-        <ExternalLink className="size-3 text-muted-foreground" />
+        <ExternalLink className="size-3 opacity-50" />
       </Link>
     ),
   },
   {
     accessorKey: "kra_pin",
     header: "KRA PIN",
+    cell: ({ row }) => (
+      <span className="font-mono text-xs">{row.original.kra_pin}</span>
+    ),
   },
   {
     accessorKey: "email",
     header: "Email",
-    cell: ({ row }) => row.original.email || "N/A",
+    cell: ({ row }) =>
+      row.original.email || (
+        <span className="text-muted-foreground italic text-xs">N/A</span>
+      ),
   },
   {
     accessorKey: "phone",
@@ -35,5 +57,63 @@ export const columns: ColumnDef<ClientPublic>[] = [
   {
     accessorKey: "client_type",
     header: "Type",
+  },
+  {
+    id: "actions",
+    header: () => <span className="sr-only">Actions</span>,
+    cell: ({ row }) => {
+      const client = row.original
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem
+              onClick={() => {
+                navigator.clipboard.writeText(client.id)
+                toast.success("Client ID copied to clipboard")
+              }}
+            >
+              <Copy className="mr-2 h-4 w-4" />
+              Copy ID
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link
+                to="/clients/$clientId/policies"
+                params={{ clientId: client.id }}
+              >
+                <ExternalLink className="mr-2 h-4 w-4" />
+                View Hub
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link
+                to="/clients/$clientId/invoices"
+                params={{ clientId: client.id }}
+              >
+                <ReceiptText className="mr-2 h-4 w-4" />
+                View Invoices
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link
+                to="/clients/$clientId/settings"
+                params={{ clientId: client.id }}
+              >
+                <Edit className="mr-2 h-4 w-4" />
+                Edit Details
+              </Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )
+    },
   },
 ]
