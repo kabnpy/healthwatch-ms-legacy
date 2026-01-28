@@ -1,8 +1,10 @@
 import uuid
 from collections.abc import Sequence
 
+from datetime import date
 from sqlmodel import Session, select
 
+from app.models.insurance.financial import Invoice, InvoiceLineItem
 from app.models.insurance.policy import (
     Claim,
     ClaimCreate,
@@ -82,8 +84,57 @@ def update_risk_item(
 
 
 def create_risk_note(*, session: Session, risk_note_in: RiskNoteCreate) -> RiskNote:
+    # 1. Create the Risk Note
     db_obj = RiskNote.model_validate(risk_note_in)
     session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+
+    # 2. Handle Invoicing Logic
+    # Get the policy to find the client
+    policy = session.get(Policy, db_obj.policy_id)
+    if not policy:
+        return db_obj
+
+    # Calculate amount from breakdown
+    premium_breakdown = db_obj.premium_breakdown or {}
+    amount = premium_breakdown.get("total", 0.0)
+
+    # Check for an existing Unpaid invoice for this client
+    statement = select(Invoice).where(
+        Invoice.client_id == policy.client_id,
+        Invoice.status == "Unpaid"
+    )
+    invoice = session.exec(statement).first()
+
+    if not invoice:
+        # Create a new invoice
+        invoice = Invoice(
+            invoice_number=f"INV-{uuid.uuid4().hex[:8].upper()}",
+            client_id=policy.client_id,
+            date_issued=date.today(),
+            total_amount=0.0,
+            balance_due=0.0,
+            status="Unpaid"
+        )
+        session.add(invoice)
+        session.commit()
+        session.refresh(invoice)
+
+    # Create Line Item linking Risk Note to Invoice
+    line_item = InvoiceLineItem(
+        invoice_id=invoice.id,
+        risk_note_id=db_obj.id,
+        amount=amount,
+        description=f"{db_obj.transaction_type} - {policy.policy_number}"
+    )
+    session.add(line_item)
+
+    # Update Invoice Totals
+    invoice.total_amount += amount
+    invoice.balance_due += amount
+    session.add(invoice)
+    
     session.commit()
     session.refresh(db_obj)
     return db_obj

@@ -101,11 +101,13 @@ def create_mock_data() -> None:
                 start_date=date.today(),
                 end_date=date.today() + timedelta(days=365),
                 premium_breakdown={
-                    "basic_premium": 100000.0,
-                    "training_levy": 200.0,
-                    "phcf_levy": 100.0,
-                    "stamp_duty": 40.0,
-                    "gross_premium": 100340.0,
+                    "basic": 100000.0,
+                    "levies": {
+                        "trainingLevy": 200.0,
+                        "phcf": 100.0,
+                        "stampDuty": 40.0,
+                    },
+                    "total": 100340.0,
                 },
                 benefits_snapshot=item.benefits,
                 risk_item_snapshot={
