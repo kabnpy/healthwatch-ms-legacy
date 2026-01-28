@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { ClientDocuments } from "@/components/Clients/ClientDocuments"
+import { DocumentManager } from "@/components/Common/DocumentManager"
 
 export const Route = createFileRoute("/_layout/clients/$clientId/documents")({
   component: ClientDocumentsTab,
@@ -9,7 +9,11 @@ function ClientDocumentsTab() {
   const { clientId } = Route.useParams()
   return (
     <div className="pt-4">
-      <ClientDocuments clientId={clientId} />
+      <DocumentManager
+        ownerId={clientId}
+        ownerType="client"
+        title="KYC & Legal Documents"
+      />
     </div>
   )
 }

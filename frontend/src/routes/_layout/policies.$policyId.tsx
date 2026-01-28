@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router"
 import { Suspense, useCallback, useMemo, useState } from "react"
 import { PoliciesService } from "@/client"
 import { DataTable } from "@/components/Common/DataTable"
+import { DocumentManager } from "@/components/Common/DocumentManager"
 import { DocumentViewerModal } from "@/components/Common/DocumentViewerModal"
 import ErrorComponent from "@/components/Common/ErrorComponent"
 import { SummaryCard } from "@/components/Common/SummaryCard"
@@ -231,18 +232,11 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
 
         {/* TAB 4: DOCUMENTS */}
         <TabsContent value="documents" className="pt-6">
-          <div className="flex flex-col items-center justify-center text-center py-20 border-2 border-dashed rounded-lg bg-muted/5">
-            <h3 className="text-lg font-semibold">Policy Documents</h3>
-            <p className="text-muted-foreground mb-4">
-              Upload and manage files related to this policy.
-            </p>
-            <button
-              type="button"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md text-sm font-medium"
-            >
-              Upload Document
-            </button>
-          </div>
+          <DocumentManager
+            ownerId={policy.client_id}
+            ownerType="policy"
+            title="Policy Support Documents"
+          />
         </TabsContent>
       </Tabs>
 
