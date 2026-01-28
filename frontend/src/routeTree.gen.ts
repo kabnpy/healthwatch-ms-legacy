@@ -23,6 +23,7 @@ import { Route as PrintRiskNotesIdRouteImport } from './routes/print/risk-notes.
 import { Route as LayoutPoliciesPolicyIdRouteImport } from './routes/_layout/policies.$policyId'
 import { Route as LayoutClientsClientIdRouteImport } from './routes/_layout/clients.$clientId'
 import { Route as LayoutClientsClientIdIndexRouteImport } from './routes/_layout/clients.$clientId.index'
+import { Route as LayoutClientsClientIdSettingsRouteImport } from './routes/_layout/clients.$clientId.settings'
 import { Route as LayoutClientsClientIdPoliciesRouteImport } from './routes/_layout/clients.$clientId.policies'
 import { Route as LayoutClientsClientIdInvoicesRouteImport } from './routes/_layout/clients.$clientId.invoices'
 import { Route as LayoutClientsClientIdDocumentsRouteImport } from './routes/_layout/clients.$clientId.documents'
@@ -97,6 +98,12 @@ const LayoutClientsClientIdIndexRoute =
     path: '/',
     getParentRoute: () => LayoutClientsClientIdRoute,
   } as any)
+const LayoutClientsClientIdSettingsRoute =
+  LayoutClientsClientIdSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => LayoutClientsClientIdRoute,
+  } as any)
 const LayoutClientsClientIdPoliciesRoute =
   LayoutClientsClientIdPoliciesRouteImport.update({
     id: '/policies',
@@ -132,6 +139,7 @@ export interface FileRoutesByFullPath {
   '/clients/$clientId/documents': typeof LayoutClientsClientIdDocumentsRoute
   '/clients/$clientId/invoices': typeof LayoutClientsClientIdInvoicesRoute
   '/clients/$clientId/policies': typeof LayoutClientsClientIdPoliciesRoute
+  '/clients/$clientId/settings': typeof LayoutClientsClientIdSettingsRoute
   '/clients/$clientId/': typeof LayoutClientsClientIdIndexRoute
 }
 export interface FileRoutesByTo {
@@ -149,6 +157,7 @@ export interface FileRoutesByTo {
   '/clients/$clientId/documents': typeof LayoutClientsClientIdDocumentsRoute
   '/clients/$clientId/invoices': typeof LayoutClientsClientIdInvoicesRoute
   '/clients/$clientId/policies': typeof LayoutClientsClientIdPoliciesRoute
+  '/clients/$clientId/settings': typeof LayoutClientsClientIdSettingsRoute
   '/clients/$clientId': typeof LayoutClientsClientIdIndexRoute
 }
 export interface FileRoutesById {
@@ -169,6 +178,7 @@ export interface FileRoutesById {
   '/_layout/clients/$clientId/documents': typeof LayoutClientsClientIdDocumentsRoute
   '/_layout/clients/$clientId/invoices': typeof LayoutClientsClientIdInvoicesRoute
   '/_layout/clients/$clientId/policies': typeof LayoutClientsClientIdPoliciesRoute
+  '/_layout/clients/$clientId/settings': typeof LayoutClientsClientIdSettingsRoute
   '/_layout/clients/$clientId/': typeof LayoutClientsClientIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -189,6 +199,7 @@ export interface FileRouteTypes {
     | '/clients/$clientId/documents'
     | '/clients/$clientId/invoices'
     | '/clients/$clientId/policies'
+    | '/clients/$clientId/settings'
     | '/clients/$clientId/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -206,6 +217,7 @@ export interface FileRouteTypes {
     | '/clients/$clientId/documents'
     | '/clients/$clientId/invoices'
     | '/clients/$clientId/policies'
+    | '/clients/$clientId/settings'
     | '/clients/$clientId'
   id:
     | '__root__'
@@ -225,6 +237,7 @@ export interface FileRouteTypes {
     | '/_layout/clients/$clientId/documents'
     | '/_layout/clients/$clientId/invoices'
     | '/_layout/clients/$clientId/policies'
+    | '/_layout/clients/$clientId/settings'
     | '/_layout/clients/$clientId/'
   fileRoutesById: FileRoutesById
 }
@@ -337,6 +350,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutClientsClientIdIndexRouteImport
       parentRoute: typeof LayoutClientsClientIdRoute
     }
+    '/_layout/clients/$clientId/settings': {
+      id: '/_layout/clients/$clientId/settings'
+      path: '/settings'
+      fullPath: '/clients/$clientId/settings'
+      preLoaderRoute: typeof LayoutClientsClientIdSettingsRouteImport
+      parentRoute: typeof LayoutClientsClientIdRoute
+    }
     '/_layout/clients/$clientId/policies': {
       id: '/_layout/clients/$clientId/policies'
       path: '/policies'
@@ -365,6 +385,7 @@ interface LayoutClientsClientIdRouteChildren {
   LayoutClientsClientIdDocumentsRoute: typeof LayoutClientsClientIdDocumentsRoute
   LayoutClientsClientIdInvoicesRoute: typeof LayoutClientsClientIdInvoicesRoute
   LayoutClientsClientIdPoliciesRoute: typeof LayoutClientsClientIdPoliciesRoute
+  LayoutClientsClientIdSettingsRoute: typeof LayoutClientsClientIdSettingsRoute
   LayoutClientsClientIdIndexRoute: typeof LayoutClientsClientIdIndexRoute
 }
 
@@ -372,6 +393,7 @@ const LayoutClientsClientIdRouteChildren: LayoutClientsClientIdRouteChildren = {
   LayoutClientsClientIdDocumentsRoute: LayoutClientsClientIdDocumentsRoute,
   LayoutClientsClientIdInvoicesRoute: LayoutClientsClientIdInvoicesRoute,
   LayoutClientsClientIdPoliciesRoute: LayoutClientsClientIdPoliciesRoute,
+  LayoutClientsClientIdSettingsRoute: LayoutClientsClientIdSettingsRoute,
   LayoutClientsClientIdIndexRoute: LayoutClientsClientIdIndexRoute,
 }
 

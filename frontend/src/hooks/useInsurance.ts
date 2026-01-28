@@ -36,6 +36,28 @@ export const useCreateClient = () => {
   })
 }
 
+export const useUpdateClient = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) =>
+      ClientsService.updateClient({ id, requestBody: data }),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ["clients"] })
+      queryClient.invalidateQueries({ queryKey: ["clients", id] })
+    },
+  })
+}
+
+export const useDeleteClient = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => ClientsService.deleteClient({ id }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["clients"] })
+    },
+  })
+}
+
 // 2. POLICIES
 export const usePolicies = (clientId?: string, skip = 0, limit = 100) => {
   return useQuery({
