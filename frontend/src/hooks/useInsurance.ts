@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   type ClientCreate,
   ClientsService,
+  FinancialsService,
   PoliciesService,
   type PolicyCreate,
   ProductsService,
@@ -183,5 +184,20 @@ export const useCreateCorrespondence = () => {
     onSuccess: (_, { clientId }) => {
       queryClient.invalidateQueries({ queryKey: ["correspondences", clientId] })
     },
+  })
+}
+
+// 8. FINANCIALS (Invoices & Receipts)
+export const useInvoices = (clientId?: string, skip = 0, limit = 100) => {
+  return useQuery({
+    queryKey: ["invoices", { clientId, skip, limit }],
+    queryFn: () => FinancialsService.readInvoices({ clientId, skip, limit }),
+  })
+}
+
+export const useReceipts = (clientId?: string, skip = 0, limit = 100) => {
+  return useQuery({
+    queryKey: ["receipts", { clientId, skip, limit }],
+    queryFn: () => FinancialsService.readReceipts({ clientId, skip, limit }),
   })
 }

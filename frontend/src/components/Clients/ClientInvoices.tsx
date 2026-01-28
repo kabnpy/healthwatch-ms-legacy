@@ -1,24 +1,17 @@
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { Suspense, useMemo, useState } from "react"
-import { PoliciesService, RiskNotesService } from "@/client"
+import { FinancialsService } from "@/client"
 import { DataTable } from "@/components/Common/DataTable"
 import { DocumentViewerModal } from "@/components/Common/DocumentViewerModal"
 import { UniversalDocumentViewer } from "@/components/Documents/UniversalDocumentViewer"
+import { getColumns as getInvoiceColumns } from "@/components/Invoices/columns"
 import PendingItems from "@/components/Pending/PendingItems"
-import { getColumns as getRiskNoteColumns } from "@/components/RiskNotes/columns"
 
-function getPoliciesQueryOptions(clientId: string) {
+function getInvoicesQueryOptions(clientId: string) {
   return {
     queryFn: () =>
-      PoliciesService.readPolicies({ clientId, skip: 0, limit: 100 }),
-    queryKey: ["policies", { clientId }],
-  }
-}
-
-function getClientRiskNotesQueryOptions() {
-  return {
-    queryFn: () => RiskNotesService.readRiskNotes({ skip: 0, limit: 1000 }),
-    queryKey: ["risk-notes"],
+      FinancialsService.readInvoices({ clientId, skip: 0, limit: 100 }),
+    queryKey: ["invoices", { clientId }],
   }
 }
 
@@ -27,24 +20,16 @@ interface ClientInvoicesProps {
 }
 
 export function ClientInvoices({ clientId }: ClientInvoicesProps) {
-  const { data: policies } = useSuspenseQuery(getPoliciesQueryOptions(clientId))
-  const { data: allRiskNotes } = useSuspenseQuery(
-    getClientRiskNotesQueryOptions(),
-  )
+  const { data: invoices } = useSuspenseQuery(getInvoicesQueryOptions(clientId))
 
   const [viewerOpen, setViewerOpen] = useState(false)
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(
     null,
   )
 
-  const policyIds = new Set(policies.data.map((p) => p.id))
-  const clientInvoices = allRiskNotes.data.filter((rn) =>
-    policyIds.has(rn.policy_id),
-  )
-
   const invoiceColumns = useMemo(
     () =>
-      getRiskNoteColumns((invoice) => {
+      getInvoiceColumns((invoice) => {
         setSelectedInvoiceId(invoice.id)
         setViewerOpen(true)
       }),
@@ -59,7 +44,7 @@ export function ClientInvoices({ clientId }: ClientInvoicesProps) {
         </h2>
       </div>
 
-      {clientInvoices.length === 0 ? (
+      {!invoices?.data || invoices.data.length === 0 ? (
         <div className="flex flex-col items-center justify-center text-center py-12 border rounded-lg bg-muted/5">
           <h3 className="text-lg font-semibold">No invoices issued</h3>
           <p className="text-muted-foreground">
@@ -67,14 +52,18 @@ export function ClientInvoices({ clientId }: ClientInvoicesProps) {
           </p>
         </div>
       ) : (
-        <DataTable columns={invoiceColumns} data={clientInvoices} />
+        <DataTable
+          columns={invoiceColumns}
+          data={invoices.data}
+          searchPlaceholder="Search invoices..."
+        />
       )}
 
       {selectedInvoiceId && (
         <DocumentViewerModal
           isOpen={viewerOpen}
           onClose={() => setViewerOpen(false)}
-          title={`Invoice: ${selectedInvoiceId}`}
+          title={`Invoice Details`}
         >
           <Suspense fallback={<PendingItems />}>
             <UniversalDocumentViewer id={selectedInvoiceId} type="invoice" />

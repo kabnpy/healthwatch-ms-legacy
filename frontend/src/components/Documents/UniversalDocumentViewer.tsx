@@ -1,12 +1,30 @@
 import { useSuspenseQuery } from "@tanstack/react-query"
-import { ClientsService, PoliciesService, RiskNotesService } from "@/client"
-import { DebitNoteTemplate } from "./templates/DebitNoteTemplate"
+import type {
+  ClientPublic,
+  InvoicePublic,
+  PolicyPublic,
+  RiskNotePublic,
+} from "@/client"
+import {
+  ClientsService,
+  FinancialsService,
+  PoliciesService,
+  RiskNotesService,
+} from "@/client"
+import { InvoiceTemplate } from "./templates/InvoiceTemplate"
 import { RiskNoteTemplate } from "./templates/RiskNoteTemplate"
 
 function getRiskNoteQueryOptions(id: string) {
   return {
     queryFn: () => RiskNotesService.readRiskNote({ id }),
     queryKey: ["risk-notes", id],
+  }
+}
+
+function getInvoiceQueryOptions(id: string) {
+  return {
+    queryFn: () => FinancialsService.readInvoice({ id }),
+    queryKey: ["invoices", id],
   }
 }
 
@@ -33,36 +51,50 @@ interface UniversalDocumentViewerProps {
   type: DocumentType
 }
 
-/**
- * Universal Document Viewer
- * A generic container that fetches required data and renders the appropriate template.
- * Displays only the document requested (no internal toggles).
- */
 export function UniversalDocumentViewer({
   id,
   type,
 }: UniversalDocumentViewerProps) {
-  const { data: riskNote } = useSuspenseQuery(getRiskNoteQueryOptions(id))
-  const { data: policy } = useSuspenseQuery(
-    getPolicyQueryOptions(riskNote.policy_id),
-  )
-  const { data: client } = useSuspenseQuery(
-    getClientQueryOptions(policy.client_id),
-  )
+  const isInvoice = type === "invoice"
+
+  // 1. Fetch main document
+  const { data: riskNote } = useSuspenseQuery({
+    ...getRiskNoteQueryOptions(id),
+    enabled: !isInvoice && type !== "receipt",
+  } as any) as { data: RiskNotePublic }
+
+  const { data: invoice } = useSuspenseQuery({
+    ...getInvoiceQueryOptions(id),
+    enabled: isInvoice,
+  } as any) as { data: InvoicePublic }
+
+  // 2. Fetch dependencies
+  const { data: policy } = useSuspenseQuery({
+    ...getPolicyQueryOptions(riskNote?.policy_id),
+    enabled: !!riskNote?.policy_id,
+  } as any) as { data: PolicyPublic }
+
+  const clientId = isInvoice ? invoice?.client_id : policy?.client_id
+
+  const { data: client } = useSuspenseQuery({
+    ...getClientQueryOptions(clientId),
+    enabled: !!clientId,
+  } as any) as { data: ClientPublic }
 
   return (
     <div className="w-full h-full animate-in fade-in zoom-in-95 duration-300">
-      {type === "risknote" && (
+      {type === "risknote" && riskNote && client && policy && (
         <RiskNoteTemplate riskNote={riskNote} client={client} policy={policy} />
       )}
-      {type === "invoice" && (
-        <DebitNoteTemplate
-          riskNote={riskNote}
+
+      {isInvoice && invoice && client && (
+        <InvoiceTemplate
+          invoice={invoice}
           client={client}
-          policy={policy}
+          lineItems={(invoice as any).line_items || []}
         />
       )}
-      {/* Receipt template coming in Phase 3 */}
+
       {type === "receipt" && (
         <div className="p-8 text-center text-muted-foreground italic border rounded-lg">
           Receipt View Placeholder - Coming Soon

@@ -131,6 +131,34 @@ export type InsurerUpdate = {
     phone?: (string | null);
 };
 
+export type InvoiceCreate = {
+    invoice_number: string;
+    client_id: string;
+    date_issued?: string;
+    due_date?: (string | null);
+    status?: string;
+    total_amount?: number;
+    balance_due?: number;
+    notes?: (string | null);
+};
+
+export type InvoicePublic = {
+    invoice_number: string;
+    client_id: string;
+    date_issued?: string;
+    due_date?: (string | null);
+    status?: string;
+    total_amount?: number;
+    balance_due?: number;
+    notes?: (string | null);
+    id: string;
+};
+
+export type InvoicesPublic = {
+    data: Array<InvoicePublic>;
+    count: number;
+};
+
 export type ItemCreate = {
     title: string;
     description?: (string | null);
@@ -160,48 +188,6 @@ export type Message = {
 export type NewPassword = {
     token: string;
     new_password: string;
-};
-
-export type PaymentAllocationCreate = {
-    payment_id: string;
-    risk_note_id: string;
-    amount_allocated: number;
-};
-
-export type PaymentAllocationPublic = {
-    payment_id: string;
-    risk_note_id: string;
-    amount_allocated: number;
-};
-
-export type PaymentCreate = {
-    receipt_number: string;
-    date_received: string;
-    amount: number;
-    mode: string;
-    reference: string;
-};
-
-export type PaymentPublic = {
-    receipt_number: string;
-    date_received: string;
-    amount: number;
-    mode: string;
-    reference: string;
-    id: string;
-};
-
-export type PaymentsPublic = {
-    data: Array<PaymentPublic>;
-    count: number;
-};
-
-export type PaymentUpdate = {
-    receipt_number?: (string | null);
-    date_received?: (string | null);
-    amount?: (number | null);
-    mode?: (string | null);
-    reference?: (string | null);
 };
 
 export type PoliciesPublic = {
@@ -275,6 +261,38 @@ export type ProductUpdate = {
 } | null);
     default_clauses?: (Array<(string)> | null);
     default_commission_rate?: (number | null);
+};
+
+export type ReceiptAllocationCreate = {
+    receipt_id: string;
+    invoice_id: string;
+    amount_allocated: number;
+};
+
+export type ReceiptCreate = {
+    receipt_number: string;
+    client_id: string;
+    date_received: string;
+    amount: number;
+    mode: string;
+    reference: string;
+    notes?: (string | null);
+};
+
+export type ReceiptPublic = {
+    receipt_number: string;
+    client_id: string;
+    date_received: string;
+    amount: number;
+    mode: string;
+    reference: string;
+    notes?: (string | null);
+    id: string;
+};
+
+export type ReceiptsPublic = {
+    data: Array<ReceiptPublic>;
+    count: number;
 };
 
 export type RiskItemCreate = {
@@ -505,6 +523,53 @@ export type ClientsCreateClientCorrespondenceData = {
 
 export type ClientsCreateClientCorrespondenceResponse = (CorrespondencePublic);
 
+export type FinancialsReadInvoicesData = {
+    clientId?: (string | null);
+    limit?: number;
+    skip?: number;
+};
+
+export type FinancialsReadInvoicesResponse = (InvoicesPublic);
+
+export type FinancialsCreateNewInvoiceData = {
+    requestBody: InvoiceCreate;
+};
+
+export type FinancialsCreateNewInvoiceResponse = (InvoicePublic);
+
+export type FinancialsReadInvoiceData = {
+    id: string;
+};
+
+export type FinancialsReadInvoiceResponse = (InvoicePublic);
+
+export type FinancialsReadReceiptsData = {
+    clientId?: (string | null);
+    limit?: number;
+    skip?: number;
+};
+
+export type FinancialsReadReceiptsResponse = (ReceiptsPublic);
+
+export type FinancialsCreateNewReceiptData = {
+    requestBody: ReceiptCreate;
+};
+
+export type FinancialsCreateNewReceiptResponse = (ReceiptPublic);
+
+export type FinancialsReadReceiptByIdData = {
+    id: string;
+};
+
+export type FinancialsReadReceiptByIdResponse = (ReceiptPublic);
+
+export type FinancialsAllocateReceiptData = {
+    id: string;
+    requestBody: ReceiptAllocationCreate;
+};
+
+export type FinancialsAllocateReceiptResponse = (Message);
+
 export type InsurersReadInsurersData = {
     limit?: number;
     skip?: number;
@@ -594,45 +659,6 @@ export type LoginRecoverPasswordHtmlContentData = {
 };
 
 export type LoginRecoverPasswordHtmlContentResponse = (string);
-
-export type PaymentsReadPaymentsData = {
-    limit?: number;
-    skip?: number;
-};
-
-export type PaymentsReadPaymentsResponse = (PaymentsPublic);
-
-export type PaymentsCreatePaymentData = {
-    requestBody: PaymentCreate;
-};
-
-export type PaymentsCreatePaymentResponse = (PaymentPublic);
-
-export type PaymentsReadPaymentData = {
-    id: string;
-};
-
-export type PaymentsReadPaymentResponse = (PaymentPublic);
-
-export type PaymentsUpdatePaymentData = {
-    id: string;
-    requestBody: PaymentUpdate;
-};
-
-export type PaymentsUpdatePaymentResponse = (PaymentPublic);
-
-export type PaymentsDeletePaymentData = {
-    id: string;
-};
-
-export type PaymentsDeletePaymentResponse = (Message);
-
-export type PaymentsCreatePaymentAllocationData = {
-    id: string;
-    requestBody: PaymentAllocationCreate;
-};
-
-export type PaymentsCreatePaymentAllocationResponse = (PaymentAllocationPublic);
 
 export type PoliciesReadPoliciesData = {
     clientId?: (string | null);

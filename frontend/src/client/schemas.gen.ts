@@ -730,6 +730,150 @@ export const InsurersPublicSchema = {
     title: 'InsurersPublic'
 } as const;
 
+export const InvoiceCreateSchema = {
+    properties: {
+        invoice_number: {
+            type: 'string',
+            title: 'Invoice Number'
+        },
+        client_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Client Id'
+        },
+        date_issued: {
+            type: 'string',
+            format: 'date',
+            title: 'Date Issued'
+        },
+        due_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Due Date'
+        },
+        status: {
+            type: 'string',
+            title: 'Status',
+            default: 'Unpaid'
+        },
+        total_amount: {
+            type: 'number',
+            title: 'Total Amount',
+            default: 0
+        },
+        balance_due: {
+            type: 'number',
+            title: 'Balance Due',
+            default: 0
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        }
+    },
+    type: 'object',
+    required: ['invoice_number', 'client_id'],
+    title: 'InvoiceCreate'
+} as const;
+
+export const InvoicePublicSchema = {
+    properties: {
+        invoice_number: {
+            type: 'string',
+            title: 'Invoice Number'
+        },
+        client_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Client Id'
+        },
+        date_issued: {
+            type: 'string',
+            format: 'date',
+            title: 'Date Issued'
+        },
+        due_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Due Date'
+        },
+        status: {
+            type: 'string',
+            title: 'Status',
+            default: 'Unpaid'
+        },
+        total_amount: {
+            type: 'number',
+            title: 'Total Amount',
+            default: 0
+        },
+        balance_due: {
+            type: 'number',
+            title: 'Balance Due',
+            default: 0
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        }
+    },
+    type: 'object',
+    required: ['invoice_number', 'client_id', 'id'],
+    title: 'InvoicePublic'
+} as const;
+
+export const InvoicesPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/InvoicePublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'InvoicesPublic'
+} as const;
+
 export const ItemCreateSchema = {
     properties: {
         title: {
@@ -871,195 +1015,6 @@ export const NewPasswordSchema = {
     type: 'object',
     required: ['token', 'new_password'],
     title: 'NewPassword'
-} as const;
-
-export const PaymentAllocationCreateSchema = {
-    properties: {
-        payment_id: {
-            type: 'string',
-            format: 'uuid',
-            title: 'Payment Id'
-        },
-        risk_note_id: {
-            type: 'string',
-            format: 'uuid',
-            title: 'Risk Note Id'
-        },
-        amount_allocated: {
-            type: 'number',
-            title: 'Amount Allocated'
-        }
-    },
-    type: 'object',
-    required: ['payment_id', 'risk_note_id', 'amount_allocated'],
-    title: 'PaymentAllocationCreate'
-} as const;
-
-export const PaymentAllocationPublicSchema = {
-    properties: {
-        payment_id: {
-            type: 'string',
-            format: 'uuid',
-            title: 'Payment Id'
-        },
-        risk_note_id: {
-            type: 'string',
-            format: 'uuid',
-            title: 'Risk Note Id'
-        },
-        amount_allocated: {
-            type: 'number',
-            title: 'Amount Allocated'
-        }
-    },
-    type: 'object',
-    required: ['payment_id', 'risk_note_id', 'amount_allocated'],
-    title: 'PaymentAllocationPublic'
-} as const;
-
-export const PaymentCreateSchema = {
-    properties: {
-        receipt_number: {
-            type: 'string',
-            title: 'Receipt Number'
-        },
-        date_received: {
-            type: 'string',
-            format: 'date',
-            title: 'Date Received'
-        },
-        amount: {
-            type: 'number',
-            title: 'Amount'
-        },
-        mode: {
-            type: 'string',
-            title: 'Mode'
-        },
-        reference: {
-            type: 'string',
-            title: 'Reference'
-        }
-    },
-    type: 'object',
-    required: ['receipt_number', 'date_received', 'amount', 'mode', 'reference'],
-    title: 'PaymentCreate'
-} as const;
-
-export const PaymentPublicSchema = {
-    properties: {
-        receipt_number: {
-            type: 'string',
-            title: 'Receipt Number'
-        },
-        date_received: {
-            type: 'string',
-            format: 'date',
-            title: 'Date Received'
-        },
-        amount: {
-            type: 'number',
-            title: 'Amount'
-        },
-        mode: {
-            type: 'string',
-            title: 'Mode'
-        },
-        reference: {
-            type: 'string',
-            title: 'Reference'
-        },
-        id: {
-            type: 'string',
-            format: 'uuid',
-            title: 'Id'
-        }
-    },
-    type: 'object',
-    required: ['receipt_number', 'date_received', 'amount', 'mode', 'reference', 'id'],
-    title: 'PaymentPublic'
-} as const;
-
-export const PaymentUpdateSchema = {
-    properties: {
-        receipt_number: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Receipt Number'
-        },
-        date_received: {
-            anyOf: [
-                {
-                    type: 'string',
-                    format: 'date'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Date Received'
-        },
-        amount: {
-            anyOf: [
-                {
-                    type: 'number'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Amount'
-        },
-        mode: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Mode'
-        },
-        reference: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Reference'
-        }
-    },
-    type: 'object',
-    title: 'PaymentUpdate'
-} as const;
-
-export const PaymentsPublicSchema = {
-    properties: {
-        data: {
-            items: {
-                '$ref': '#/components/schemas/PaymentPublic'
-            },
-            type: 'array',
-            title: 'Data'
-        },
-        count: {
-            type: 'integer',
-            title: 'Count'
-        }
-    },
-    type: 'object',
-    required: ['data', 'count'],
-    title: 'PaymentsPublic'
 } as const;
 
 export const PoliciesPublicSchema = {
@@ -1408,6 +1363,142 @@ export const ProductsPublicSchema = {
     type: 'object',
     required: ['data', 'count'],
     title: 'ProductsPublic'
+} as const;
+
+export const ReceiptAllocationCreateSchema = {
+    properties: {
+        receipt_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Receipt Id'
+        },
+        invoice_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Invoice Id'
+        },
+        amount_allocated: {
+            type: 'number',
+            title: 'Amount Allocated'
+        }
+    },
+    type: 'object',
+    required: ['receipt_id', 'invoice_id', 'amount_allocated'],
+    title: 'ReceiptAllocationCreate'
+} as const;
+
+export const ReceiptCreateSchema = {
+    properties: {
+        receipt_number: {
+            type: 'string',
+            title: 'Receipt Number'
+        },
+        client_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Client Id'
+        },
+        date_received: {
+            type: 'string',
+            format: 'date',
+            title: 'Date Received'
+        },
+        amount: {
+            type: 'number',
+            title: 'Amount'
+        },
+        mode: {
+            type: 'string',
+            title: 'Mode'
+        },
+        reference: {
+            type: 'string',
+            title: 'Reference'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        }
+    },
+    type: 'object',
+    required: ['receipt_number', 'client_id', 'date_received', 'amount', 'mode', 'reference'],
+    title: 'ReceiptCreate'
+} as const;
+
+export const ReceiptPublicSchema = {
+    properties: {
+        receipt_number: {
+            type: 'string',
+            title: 'Receipt Number'
+        },
+        client_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Client Id'
+        },
+        date_received: {
+            type: 'string',
+            format: 'date',
+            title: 'Date Received'
+        },
+        amount: {
+            type: 'number',
+            title: 'Amount'
+        },
+        mode: {
+            type: 'string',
+            title: 'Mode'
+        },
+        reference: {
+            type: 'string',
+            title: 'Reference'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        }
+    },
+    type: 'object',
+    required: ['receipt_number', 'client_id', 'date_received', 'amount', 'mode', 'reference', 'id'],
+    title: 'ReceiptPublic'
+} as const;
+
+export const ReceiptsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/ReceiptPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'ReceiptsPublic'
 } as const;
 
 export const RiskItemCreateSchema = {

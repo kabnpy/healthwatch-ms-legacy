@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ClaimsReadClaimsData, ClaimsReadClaimsResponse, ClaimsCreateClaimData, ClaimsCreateClaimResponse, ClaimsReadClaimData, ClaimsReadClaimResponse, ClaimsUpdateClaimData, ClaimsUpdateClaimResponse, ClaimsDeleteClaimData, ClaimsDeleteClaimResponse, ClientsReadClientsData, ClientsReadClientsResponse, ClientsCreateClientData, ClientsCreateClientResponse, ClientsReadClientData, ClientsReadClientResponse, ClientsUpdateClientData, ClientsUpdateClientResponse, ClientsDeleteClientData, ClientsDeleteClientResponse, ClientsReadClientCorrespondencesData, ClientsReadClientCorrespondencesResponse, ClientsCreateClientCorrespondenceData, ClientsCreateClientCorrespondenceResponse, InsurersReadInsurersData, InsurersReadInsurersResponse, InsurersCreateInsurerData, InsurersCreateInsurerResponse, InsurersReadInsurerData, InsurersReadInsurerResponse, InsurersUpdateInsurerData, InsurersUpdateInsurerResponse, InsurersDeleteInsurerData, InsurersDeleteInsurerResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PaymentsReadPaymentsData, PaymentsReadPaymentsResponse, PaymentsCreatePaymentData, PaymentsCreatePaymentResponse, PaymentsReadPaymentData, PaymentsReadPaymentResponse, PaymentsUpdatePaymentData, PaymentsUpdatePaymentResponse, PaymentsDeletePaymentData, PaymentsDeletePaymentResponse, PaymentsCreatePaymentAllocationData, PaymentsCreatePaymentAllocationResponse, PoliciesReadPoliciesData, PoliciesReadPoliciesResponse, PoliciesCreatePolicyData, PoliciesCreatePolicyResponse, PoliciesReadPolicyData, PoliciesReadPolicyResponse, PoliciesUpdatePolicyData, PoliciesUpdatePolicyResponse, PoliciesDeletePolicyData, PoliciesDeletePolicyResponse, PoliciesReadPolicyRiskNotesData, PoliciesReadPolicyRiskNotesResponse, PoliciesReadPolicyRiskItemsData, PoliciesReadPolicyRiskItemsResponse, PoliciesCreatePolicyRiskItemData, PoliciesCreatePolicyRiskItemResponse, PrivateCreateUserData, PrivateCreateUserResponse, ProductsReadProductsData, ProductsReadProductsResponse, ProductsCreateProductData, ProductsCreateProductResponse, ProductsReadProductData, ProductsReadProductResponse, ProductsUpdateProductData, ProductsUpdateProductResponse, ProductsDeleteProductData, ProductsDeleteProductResponse, RiskNotesReadRiskNotesData, RiskNotesReadRiskNotesResponse, RiskNotesCreateRiskNoteData, RiskNotesCreateRiskNoteResponse, RiskNotesReadRiskNoteData, RiskNotesReadRiskNoteResponse, RiskNotesUpdateRiskNoteData, RiskNotesUpdateRiskNoteResponse, RiskNotesDeleteRiskNoteData, RiskNotesDeleteRiskNoteResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { ClaimsReadClaimsData, ClaimsReadClaimsResponse, ClaimsCreateClaimData, ClaimsCreateClaimResponse, ClaimsReadClaimData, ClaimsReadClaimResponse, ClaimsUpdateClaimData, ClaimsUpdateClaimResponse, ClaimsDeleteClaimData, ClaimsDeleteClaimResponse, ClientsReadClientsData, ClientsReadClientsResponse, ClientsCreateClientData, ClientsCreateClientResponse, ClientsReadClientData, ClientsReadClientResponse, ClientsUpdateClientData, ClientsUpdateClientResponse, ClientsDeleteClientData, ClientsDeleteClientResponse, ClientsReadClientCorrespondencesData, ClientsReadClientCorrespondencesResponse, ClientsCreateClientCorrespondenceData, ClientsCreateClientCorrespondenceResponse, FinancialsReadInvoicesData, FinancialsReadInvoicesResponse, FinancialsCreateNewInvoiceData, FinancialsCreateNewInvoiceResponse, FinancialsReadInvoiceData, FinancialsReadInvoiceResponse, FinancialsReadReceiptsData, FinancialsReadReceiptsResponse, FinancialsCreateNewReceiptData, FinancialsCreateNewReceiptResponse, FinancialsReadReceiptByIdData, FinancialsReadReceiptByIdResponse, FinancialsAllocateReceiptData, FinancialsAllocateReceiptResponse, InsurersReadInsurersData, InsurersReadInsurersResponse, InsurersCreateInsurerData, InsurersCreateInsurerResponse, InsurersReadInsurerData, InsurersReadInsurerResponse, InsurersUpdateInsurerData, InsurersUpdateInsurerResponse, InsurersDeleteInsurerData, InsurersDeleteInsurerResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PoliciesReadPoliciesData, PoliciesReadPoliciesResponse, PoliciesCreatePolicyData, PoliciesCreatePolicyResponse, PoliciesReadPolicyData, PoliciesReadPolicyResponse, PoliciesUpdatePolicyData, PoliciesUpdatePolicyResponse, PoliciesDeletePolicyData, PoliciesDeletePolicyResponse, PoliciesReadPolicyRiskNotesData, PoliciesReadPolicyRiskNotesResponse, PoliciesReadPolicyRiskItemsData, PoliciesReadPolicyRiskItemsResponse, PoliciesCreatePolicyRiskItemData, PoliciesCreatePolicyRiskItemResponse, PrivateCreateUserData, PrivateCreateUserResponse, ProductsReadProductsData, ProductsReadProductsResponse, ProductsCreateProductData, ProductsCreateProductResponse, ProductsReadProductData, ProductsReadProductResponse, ProductsUpdateProductData, ProductsUpdateProductResponse, ProductsDeleteProductData, ProductsDeleteProductResponse, RiskNotesReadRiskNotesData, RiskNotesReadRiskNotesResponse, RiskNotesCreateRiskNoteData, RiskNotesCreateRiskNoteResponse, RiskNotesReadRiskNoteData, RiskNotesReadRiskNoteResponse, RiskNotesUpdateRiskNoteData, RiskNotesUpdateRiskNoteResponse, RiskNotesDeleteRiskNoteData, RiskNotesDeleteRiskNoteResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
 
 export class ClaimsService {
     /**
@@ -262,6 +262,164 @@ export class ClientsService {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/clients/{id}/correspondences',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class FinancialsService {
+    /**
+     * Read Invoices
+     * Retrieve invoices.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @param data.clientId
+     * @returns InvoicesPublic Successful Response
+     * @throws ApiError
+     */
+    public static readInvoices(data: FinancialsReadInvoicesData = {}): CancelablePromise<FinancialsReadInvoicesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/financials/invoices/',
+            query: {
+                skip: data.skip,
+                limit: data.limit,
+                client_id: data.clientId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create New Invoice
+     * Create new invoice.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns InvoicePublic Successful Response
+     * @throws ApiError
+     */
+    public static createNewInvoice(data: FinancialsCreateNewInvoiceData): CancelablePromise<FinancialsCreateNewInvoiceResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/financials/invoices/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Invoice
+     * Get invoice by ID.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns InvoicePublic Successful Response
+     * @throws ApiError
+     */
+    public static readInvoice(data: FinancialsReadInvoiceData): CancelablePromise<FinancialsReadInvoiceResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/financials/invoices/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Receipts
+     * Retrieve receipts.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @param data.clientId
+     * @returns ReceiptsPublic Successful Response
+     * @throws ApiError
+     */
+    public static readReceipts(data: FinancialsReadReceiptsData = {}): CancelablePromise<FinancialsReadReceiptsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/financials/receipts/',
+            query: {
+                skip: data.skip,
+                limit: data.limit,
+                client_id: data.clientId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create New Receipt
+     * Create new receipt.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns ReceiptPublic Successful Response
+     * @throws ApiError
+     */
+    public static createNewReceipt(data: FinancialsCreateNewReceiptData): CancelablePromise<FinancialsCreateNewReceiptResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/financials/receipts/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Receipt By Id
+     * Get receipt by ID.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns ReceiptPublic Successful Response
+     * @throws ApiError
+     */
+    public static readReceiptById(data: FinancialsReadReceiptByIdData): CancelablePromise<FinancialsReadReceiptByIdResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/financials/receipts/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Allocate Receipt
+     * Allocate a receipt to an invoice.
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static allocateReceipt(data: FinancialsAllocateReceiptData): CancelablePromise<FinancialsAllocateReceiptResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/financials/receipts/{id}/allocations',
             path: {
                 id: data.id
             },
@@ -586,141 +744,6 @@ export class LoginService {
             path: {
                 email: data.email
             },
-            errors: {
-                422: 'Validation Error'
-            }
-        });
-    }
-}
-
-export class PaymentsService {
-    /**
-     * Read Payments
-     * Retrieve payments.
-     * @param data The data for the request.
-     * @param data.skip
-     * @param data.limit
-     * @returns PaymentsPublic Successful Response
-     * @throws ApiError
-     */
-    public static readPayments(data: PaymentsReadPaymentsData = {}): CancelablePromise<PaymentsReadPaymentsResponse> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/v1/payments/',
-            query: {
-                skip: data.skip,
-                limit: data.limit
-            },
-            errors: {
-                422: 'Validation Error'
-            }
-        });
-    }
-    
-    /**
-     * Create Payment
-     * Create new payment (Receipt).
-     * @param data The data for the request.
-     * @param data.requestBody
-     * @returns PaymentPublic Successful Response
-     * @throws ApiError
-     */
-    public static createPayment(data: PaymentsCreatePaymentData): CancelablePromise<PaymentsCreatePaymentResponse> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/v1/payments/',
-            body: data.requestBody,
-            mediaType: 'application/json',
-            errors: {
-                422: 'Validation Error'
-            }
-        });
-    }
-    
-    /**
-     * Read Payment
-     * Get payment by ID.
-     * @param data The data for the request.
-     * @param data.id
-     * @returns PaymentPublic Successful Response
-     * @throws ApiError
-     */
-    public static readPayment(data: PaymentsReadPaymentData): CancelablePromise<PaymentsReadPaymentResponse> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/v1/payments/{id}',
-            path: {
-                id: data.id
-            },
-            errors: {
-                422: 'Validation Error'
-            }
-        });
-    }
-    
-    /**
-     * Update Payment
-     * Update a payment.
-     * @param data The data for the request.
-     * @param data.id
-     * @param data.requestBody
-     * @returns PaymentPublic Successful Response
-     * @throws ApiError
-     */
-    public static updatePayment(data: PaymentsUpdatePaymentData): CancelablePromise<PaymentsUpdatePaymentResponse> {
-        return __request(OpenAPI, {
-            method: 'PUT',
-            url: '/api/v1/payments/{id}',
-            path: {
-                id: data.id
-            },
-            body: data.requestBody,
-            mediaType: 'application/json',
-            errors: {
-                422: 'Validation Error'
-            }
-        });
-    }
-    
-    /**
-     * Delete Payment
-     * Delete a payment.
-     * @param data The data for the request.
-     * @param data.id
-     * @returns Message Successful Response
-     * @throws ApiError
-     */
-    public static deletePayment(data: PaymentsDeletePaymentData): CancelablePromise<PaymentsDeletePaymentResponse> {
-        return __request(OpenAPI, {
-            method: 'DELETE',
-            url: '/api/v1/payments/{id}',
-            path: {
-                id: data.id
-            },
-            errors: {
-                422: 'Validation Error'
-            }
-        });
-    }
-    
-    /**
-     * Create Payment Allocation
-     * Allocate payment to a risk note.
-     * @param data The data for the request.
-     * @param data.id
-     * @param data.requestBody
-     * @returns PaymentAllocationPublic Successful Response
-     * @throws ApiError
-     */
-    public static createPaymentAllocation(data: PaymentsCreatePaymentAllocationData): CancelablePromise<PaymentsCreatePaymentAllocationResponse> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/v1/payments/{id}/allocations',
-            path: {
-                id: data.id
-            },
-            body: data.requestBody,
-            mediaType: 'application/json',
             errors: {
                 422: 'Validation Error'
             }
