@@ -6,9 +6,13 @@ interface DebitNoteTemplateProps {
   policy: any
 }
 
-export const DebitNoteTemplate = ({ riskNote, client, policy }: DebitNoteTemplateProps) => {
+export const DebitNoteTemplate = ({
+  riskNote,
+  client,
+  policy,
+}: DebitNoteTemplateProps) => {
   const breakdown = (riskNote.premium_breakdown as any) || {}
-  
+
   return (
     <BaseDocument
       title="Debit Note"
@@ -27,7 +31,8 @@ export const DebitNoteTemplate = ({ riskNote, client, policy }: DebitNoteTemplat
             {client.postal_address || "No address provided"}
           </p>
           <p className="text-sm mt-2 font-mono">
-            <span className="font-semibold font-serif">KRA PIN:</span> {client.kra_pin}
+            <span className="font-semibold font-serif">KRA PIN:</span>{" "}
+            {client.kra_pin}
           </p>
         </div>
         <div className="text-right">
@@ -35,10 +40,16 @@ export const DebitNoteTemplate = ({ riskNote, client, policy }: DebitNoteTemplat
             Policy Information:
           </h2>
           <p className="font-bold text-gray-800">{policy.policy_number}</p>
-          <p className="text-sm font-semibold text-primary/80 uppercase tracking-wider">{riskNote.transaction_type}</p>
+          <p className="text-sm font-semibold text-primary/80 uppercase tracking-wider">
+            {riskNote.transaction_type}
+          </p>
           <div className="mt-4 text-xs">
-            <p className="uppercase text-gray-400 font-bold">Insurance Period</p>
-            <p className="font-semibold text-gray-700">{riskNote.start_date} to {riskNote.end_date}</p>
+            <p className="uppercase text-gray-400 font-bold">
+              Insurance Period
+            </p>
+            <p className="font-semibold text-gray-700">
+              {riskNote.start_date} to {riskNote.end_date}
+            </p>
           </div>
         </div>
       </div>
@@ -85,7 +96,9 @@ export const DebitNoteTemplate = ({ riskNote, client, policy }: DebitNoteTemplat
               </td>
             </tr>
             <tr>
-              <td className="py-2 pl-2 text-gray-500">Policy Holders Compensation Fund (0.25%)</td>
+              <td className="py-2 pl-2 text-gray-500">
+                Policy Holders Compensation Fund (0.25%)
+              </td>
               <td className="py-2 pr-2 text-right font-mono text-gray-500">
                 {breakdown?.levies?.phcf?.toLocaleString(undefined, {
                   minimumFractionDigits: 2,
@@ -125,8 +138,12 @@ export const DebitNoteTemplate = ({ riskNote, client, policy }: DebitNoteTemplat
               Option 1: MPESA Paybill
             </p>
             <div className="pl-4 border-l border-blue-200">
-              <p>Business Number: <strong>555000</strong></p>
-              <p>Account Number: <strong>{riskNote.risk_note_number}</strong></p>
+              <p>
+                Business Number: <strong>555000</strong>
+              </p>
+              <p>
+                Account Number: <strong>{riskNote.risk_note_number}</strong>
+              </p>
             </div>
           </div>
           <div className="space-y-2">
@@ -135,7 +152,9 @@ export const DebitNoteTemplate = ({ riskNote, client, policy }: DebitNoteTemplat
               Option 2: Bank Transfer / Cheque
             </p>
             <div className="pl-4 border-l border-blue-200">
-              <p>Payable to: <strong>HealthWatch Insurance Agency</strong></p>
+              <p>
+                Payable to: <strong>HealthWatch Insurance Agency</strong>
+              </p>
               <p>Bank: Standard Chartered Bank, Koinange St.</p>
             </div>
           </div>

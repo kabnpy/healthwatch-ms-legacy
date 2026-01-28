@@ -54,9 +54,11 @@ export function ClientInvoices({ clientId }: ClientInvoicesProps) {
   return (
     <div className="space-y-4 pt-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold tracking-tight text-primary">Financial Statement / Invoices</h2>
+        <h2 className="text-xl font-bold tracking-tight text-primary">
+          Financial Statement / Invoices
+        </h2>
       </div>
-      
+
       {clientInvoices.length === 0 ? (
         <div className="flex flex-col items-center justify-center text-center py-12 border rounded-lg bg-muted/5">
           <h3 className="text-lg font-semibold">No invoices issued</h3>

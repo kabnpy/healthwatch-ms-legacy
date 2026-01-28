@@ -48,12 +48,14 @@ interface FormData {
 
 interface RiskNoteFormProps {
   policyId: string
+  initialTransactionType?: string
   onSuccess?: () => void
   onCancel?: () => void
 }
 
 export const RiskNoteForm = ({
   policyId,
+  initialTransactionType = "New Business",
   onSuccess,
   onCancel,
 }: RiskNoteFormProps) => {
@@ -65,7 +67,7 @@ export const RiskNoteForm = ({
     defaultValues: {
       policy_id: policyId,
       risk_note_number: `RN-${Math.floor(Math.random() * 100000)}`,
-      transaction_type: "New Business",
+      transaction_type: initialTransactionType,
       start_date: new Date().toISOString().split("T")[0],
       end_date: new Date(new Date().setFullYear(new Date().getFullYear() + 1))
         .toISOString()

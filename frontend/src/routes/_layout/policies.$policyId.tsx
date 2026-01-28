@@ -5,6 +5,7 @@ import { DataTable } from "@/components/Common/DataTable"
 import { DocumentViewerModal } from "@/components/Common/DocumentViewerModal"
 import ErrorComponent from "@/components/Common/ErrorComponent"
 import { RiskNoteDocument } from "@/components/Documents/RiskNoteDocument"
+import { RiskNoteForm } from "@/components/Insurance/RiskNoteForm"
 import PendingItems from "@/components/Pending/PendingItems"
 import { AssetCard } from "@/components/Policies/Dashboard/AssetCard"
 import { CoverageCard } from "@/components/Policies/Dashboard/CoverageCard"
@@ -12,6 +13,13 @@ import { CoverageCard } from "@/components/Policies/Dashboard/CoverageCard"
 import { PolicyHeader } from "@/components/Policies/Dashboard/PolicyHeader"
 import { QuickActions } from "@/components/Policies/Dashboard/QuickActions"
 import { getColumns as getRiskNoteColumns } from "@/components/RiskNotes/columns"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useClient, usePolicyDashboard } from "@/hooks/useInsurance"
 import { queryClient } from "@/queryClient"
@@ -28,6 +36,20 @@ export const Route = createFileRoute("/_layout/policies/$policyId")({
     }),
 })
 
+// --- Main Page Component ---
+
+function PolicyDashboard() {
+  const { policyId } = Route.useParams()
+
+  return (
+    <Suspense fallback={<PendingItems />}>
+      <PolicyDashboardContent policyId={policyId} />
+    </Suspense>
+  )
+}
+
+// --- Component Content (Suspended) ---
+
 function PolicyDashboardContent({ policyId }: { policyId: string }) {
   const { policy, latestRiskNote, activeItem, riskNotes, isLoading } =
     usePolicyDashboard(policyId)
@@ -42,6 +64,10 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
   )
   const [viewMode, setViewMode] = useState<"invoice" | "certificate">("invoice")
 
+  // State for Risk Note Form
+  const [riskNoteFormOpen, setRiskNoteFormOpen] = useState(false)
+  const [transactionType, setTransactionType] = useState("Endorsement")
+
   // Handlers
   const handleViewRiskNote = useCallback(
     (id: string, mode: "invoice" | "certificate" = "invoice") => {
@@ -53,11 +79,13 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
   )
 
   const handleRenew = () => {
-    alert("Renewal Wizard coming soon!")
+    setTransactionType("Renewal")
+    setRiskNoteFormOpen(true)
   }
 
   const handleEndorse = () => {
-    alert("Endorsement Wizard coming soon!")
+    setTransactionType("Endorsement")
+    setRiskNoteFormOpen(true)
   }
 
   // Memoize columns for History Tab
@@ -128,7 +156,9 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
         {/* TAB 2: HISTORY (Risk Notes) */}
         <TabsContent value="history" className="pt-6">
           <div className="border rounded-lg p-4 bg-card">
-            <h3 className="text-lg font-semibold mb-4 text-primary">Transaction History (Risk Notes)</h3>
+            <h3 className="text-lg font-semibold mb-4 text-primary">
+              Transaction History (Risk Notes)
+            </h3>
             <DataTable columns={historyColumns} data={riskNotes} />
           </div>
         </TabsContent>
@@ -136,10 +166,14 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
         {/* TAB 3: CERTIFICATES */}
         <TabsContent value="certificates" className="pt-6">
           <div className="border rounded-lg p-4 bg-card">
-            <h3 className="text-lg font-semibold mb-4 text-primary">Generated Certificates</h3>
-            <DataTable 
-              columns={getRiskNoteColumns((rn) => handleViewRiskNote(rn.id, "certificate"))} 
-              data={riskNotes} 
+            <h3 className="text-lg font-semibold mb-4 text-primary">
+              Generated Certificates
+            </h3>
+            <DataTable
+              columns={getRiskNoteColumns((rn) =>
+                handleViewRiskNote(rn.id, "certificate"),
+              )}
+              data={riskNotes}
             />
           </div>
         </TabsContent>
@@ -177,16 +211,28 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
           </Suspense>
         </DocumentViewerModal>
       )}
+
+      {/* Risk Note Form Dialog (Renewals/Endorsements) */}
+      <Dialog open={riskNoteFormOpen} onOpenChange={setRiskNoteFormOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>
+              {transactionType} for Policy {policy.policy_number}
+            </DialogTitle>
+            <DialogDescription>
+              Create a new financial transaction for this policy.
+            </DialogDescription>
+          </DialogHeader>
+          <RiskNoteForm
+            policyId={policyId}
+            initialTransactionType={transactionType}
+            onSuccess={() => setRiskNoteFormOpen(false)}
+            onCancel={() => setRiskNoteFormOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
 
-function PolicyDashboard() {
-  const { policyId } = Route.useParams()
-
-  return (
-    <Suspense fallback={<PendingItems />}>
-      <PolicyDashboardContent policyId={policyId} />
-    </Suspense>
-  )
-}
+export default PolicyDashboard

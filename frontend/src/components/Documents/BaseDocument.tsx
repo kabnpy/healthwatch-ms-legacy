@@ -1,4 +1,4 @@
-import React from "react"
+import type React from "react"
 
 interface BaseDocumentProps {
   title: string
@@ -28,32 +28,30 @@ export const BaseDocument = ({
           {subtitle && <p className="text-sm font-bold mt-2">{subtitle}</p>}
           <p className="text-sm font-bold mt-1">HealthWatch Insurance Agency</p>
           <p className="text-xs">P.O. Box 12345-00100, Nairobi, Kenya</p>
-          <p className="text-xs">Tel: +254 700 000 000 | Email: info@healthwatch.co.ke</p>
+          <p className="text-xs">
+            Tel: +254 700 000 000 | Email: info@healthwatch.co.ke
+          </p>
         </div>
         <div className="text-right">
-          <p className="font-mono text-xl font-bold">
-            {documentNumber}
-          </p>
-          <p className="text-sm mt-1">
-            Date: {date}
-          </p>
+          <p className="font-mono text-xl font-bold">{documentNumber}</p>
+          <p className="text-sm mt-1">Date: {date}</p>
         </div>
       </div>
 
       {/* Main Content Area */}
-      <div className="min-h-[600px]">
-        {children}
-      </div>
+      <div className="min-h-[600px]">{children}</div>
 
       {/* Universal Footer */}
       <div className="mt-12 pt-8 border-t text-center text-[10px] text-gray-400">
-        <div className="mb-4">
-          {footerExtra}
-        </div>
+        <div className="mb-4">{footerExtra}</div>
         <p>
-          This is a computer-generated document and is valid without a physical signature.
+          This is a computer-generated document and is valid without a physical
+          signature.
         </p>
-        <p>HealthWatch Management System • Generated on {new Date().toLocaleString()}</p>
+        <p>
+          HealthWatch Management System • Generated on{" "}
+          {new Date().toLocaleString()}
+        </p>
       </div>
     </div>
   )

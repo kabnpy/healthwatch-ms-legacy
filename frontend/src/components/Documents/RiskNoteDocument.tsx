@@ -1,8 +1,8 @@
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { ClientsService, PoliciesService, RiskNotesService } from "@/client"
 import { Button } from "@/components/ui/button"
-import { DebitNoteTemplate } from "./templates/DebitNoteTemplate"
 import { CertificateTemplate } from "./templates/CertificateTemplate"
+import { DebitNoteTemplate } from "./templates/DebitNoteTemplate"
 
 function getRiskNoteQueryOptions(id: string) {
   return {
@@ -77,9 +77,17 @@ export function RiskNoteDocument({
       {/* Render the selected template */}
       <div className="animate-in fade-in zoom-in-95 duration-300">
         {isInvoice ? (
-          <DebitNoteTemplate riskNote={riskNote} client={client} policy={policy} />
+          <DebitNoteTemplate
+            riskNote={riskNote}
+            client={client}
+            policy={policy}
+          />
         ) : (
-          <CertificateTemplate riskNote={riskNote} client={client} policy={policy} />
+          <CertificateTemplate
+            riskNote={riskNote}
+            client={client}
+            policy={policy}
+          />
         )}
       </div>
     </div>

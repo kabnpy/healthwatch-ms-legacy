@@ -6,9 +6,13 @@ interface CertificateTemplateProps {
   policy: any
 }
 
-export const CertificateTemplate = ({ riskNote, client, policy }: CertificateTemplateProps) => {
+export const CertificateTemplate = ({
+  riskNote,
+  client,
+  policy,
+}: CertificateTemplateProps) => {
   const breakdown = (riskNote.premium_breakdown as any) || {}
-  
+
   return (
     <BaseDocument
       title="Certificate of Insurance"
@@ -24,8 +28,8 @@ export const CertificateTemplate = ({ riskNote, client, policy }: CertificateTem
       <div className="bg-gray-100 p-6 border border-gray-300 mb-8 text-center rounded">
         <p className="text-sm italic font-serif leading-relaxed">
           "This is to certify that the insured named below is covered in
-          accordance with the terms and conditions of the Master Policy, subject to
-          the payment of the premium stated in the corresponding Debit Note."
+          accordance with the terms and conditions of the Master Policy, subject
+          to the payment of the premium stated in the corresponding Debit Note."
         </p>
       </div>
 
@@ -35,7 +39,9 @@ export const CertificateTemplate = ({ riskNote, client, policy }: CertificateTem
             The Insured:
           </h2>
           <p className="font-bold text-lg">{client.name}</p>
-          <p className="text-sm text-gray-700">{client.postal_address || "N/A"}</p>
+          <p className="text-sm text-gray-700">
+            {client.postal_address || "N/A"}
+          </p>
         </div>
         <div className="text-right">
           <h2 className="text-xs font-bold uppercase border-b border-gray-300 mb-2 text-gray-500">
@@ -44,8 +50,12 @@ export const CertificateTemplate = ({ riskNote, client, policy }: CertificateTem
           <p className="font-bold">{policy.policy_number}</p>
           <div className="mt-4 text-xs">
             <p className="uppercase text-gray-400 font-bold">Validity Period</p>
-            <p className="font-semibold text-gray-700">From: {riskNote.start_date}</p>
-            <p className="font-semibold text-gray-700">To: {riskNote.end_date}</p>
+            <p className="font-semibold text-gray-700">
+              From: {riskNote.start_date}
+            </p>
+            <p className="font-semibold text-gray-700">
+              To: {riskNote.end_date}
+            </p>
           </div>
         </div>
       </div>
@@ -67,7 +77,9 @@ export const CertificateTemplate = ({ riskNote, client, policy }: CertificateTem
             </tr>
             <tr>
               <td className="py-2 px-2">Authorized Passenger Liability</td>
-              <td className="py-2 px-2 text-right">KES 200,000.00 Per Person</td>
+              <td className="py-2 px-2 text-right">
+                KES 200,000.00 Per Person
+              </td>
             </tr>
             <tr>
               <td className="py-2 px-2">Third Party Property Damage</td>
@@ -105,16 +117,20 @@ export const CertificateTemplate = ({ riskNote, client, policy }: CertificateTem
       <div className="mt-12 flex justify-between items-end">
         <div className="text-center">
           <div className="w-48 h-1 bg-gray-200 mb-2" />
-          <p className="text-[10px] uppercase text-gray-400">Insured Signature</p>
+          <p className="text-[10px] uppercase text-gray-400">
+            Insured Signature
+          </p>
         </div>
         <div className="text-center">
           <div className="mb-2">
-             {/* Placeholder for stamp/seal */}
-             <div className="w-20 h-20 border-2 border-blue-800 border-dashed rounded-full flex items-center justify-center text-blue-800 text-[8px] font-bold uppercase rotate-12 opacity-40 mx-auto">
-               Official Seal
-             </div>
+            {/* Placeholder for stamp/seal */}
+            <div className="w-20 h-20 border-2 border-blue-800 border-dashed rounded-full flex items-center justify-center text-blue-800 text-[8px] font-bold uppercase rotate-12 opacity-40 mx-auto">
+              Official Seal
+            </div>
           </div>
-          <p className="text-[10px] uppercase text-gray-400">Authorized Signatory</p>
+          <p className="text-[10px] uppercase text-gray-400">
+            Authorized Signatory
+          </p>
         </div>
       </div>
     </BaseDocument>

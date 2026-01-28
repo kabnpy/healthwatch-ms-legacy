@@ -7,7 +7,5 @@ export const Route = createFileRoute("/_layout/clients/$clientId/invoices")({
 
 function ClientInvoicesTab() {
   const { clientId } = Route.useParams()
-  return (
-    <ClientInvoices clientId={clientId} />
-  )
+  return <ClientInvoices clientId={clientId} />
 }
