@@ -1,18 +1,10 @@
 import { useSuspenseQuery } from "@tanstack/react-query"
-import type {
-  ClientPublic,
-  InvoicePublic,
-  PolicyPublic,
-  RiskNotePublic,
-} from "@/client"
-import {
-  ClientsService,
-  FinancialsService,
-  PoliciesService,
-  RiskNotesService,
-} from "@/client"
-import { InvoiceTemplate } from "./templates/InvoiceTemplate"
+import { ClientsService, FinancialsService, PoliciesService, RiskNotesService } from "@/client"
+import type { RiskNotePublic, InvoicePublic, ClientPublic, PolicyPublic } from "@/client"
 import { RiskNoteTemplate } from "./templates/RiskNoteTemplate"
+import { InvoiceTemplate } from "./templates/InvoiceTemplate"
+
+// --- Query Options ---
 
 function getRiskNoteQueryOptions(id: string) {
   return {
@@ -32,7 +24,6 @@ function getPolicyQueryOptions(policyId: string) {
   return {
     queryFn: () => PoliciesService.readPolicy({ id: policyId }),
     queryKey: ["policies", policyId],
-    enabled: !!policyId,
   }
 }
 
@@ -40,9 +31,33 @@ function getClientQueryOptions(clientId: string) {
   return {
     queryFn: () => ClientsService.readClient({ id: clientId }),
     queryKey: ["clients", clientId],
-    enabled: !!clientId,
   }
 }
+
+// --- Loader Components ---
+
+function RiskNoteLoader({ id }: { id: string }) {
+  const { data: riskNote } = useSuspenseQuery(getRiskNoteQueryOptions(id)) as { data: RiskNotePublic }
+  const { data: policy } = useSuspenseQuery(getPolicyQueryOptions(riskNote.policy_id)) as { data: PolicyPublic }
+  const { data: client } = useSuspenseQuery(getClientQueryOptions(policy.client_id)) as { data: ClientPublic }
+
+  return <RiskNoteTemplate riskNote={riskNote} client={client} policy={policy} />
+}
+
+function InvoiceLoader({ id }: { id: string }) {
+  const { data: invoice } = useSuspenseQuery(getInvoiceQueryOptions(id)) as { data: InvoicePublic }
+  const { data: client } = useSuspenseQuery(getClientQueryOptions(invoice.client_id)) as { data: ClientPublic }
+
+  return (
+    <InvoiceTemplate 
+      invoice={invoice} 
+      client={client} 
+      lineItems={(invoice as any).line_items || []} 
+    />
+  )
+}
+
+// --- Main Component ---
 
 type DocumentType = "risknote" | "invoice" | "receipt"
 
@@ -55,45 +70,11 @@ export function UniversalDocumentViewer({
   id,
   type,
 }: UniversalDocumentViewerProps) {
-  const isInvoice = type === "invoice"
-
-  // 1. Fetch main document
-  const { data: riskNote } = useSuspenseQuery({
-    ...getRiskNoteQueryOptions(id),
-    enabled: !isInvoice && type !== "receipt",
-  } as any) as { data: RiskNotePublic }
-
-  const { data: invoice } = useSuspenseQuery({
-    ...getInvoiceQueryOptions(id),
-    enabled: isInvoice,
-  } as any) as { data: InvoicePublic }
-
-  // 2. Fetch dependencies
-  const { data: policy } = useSuspenseQuery({
-    ...getPolicyQueryOptions(riskNote?.policy_id),
-    enabled: !!riskNote?.policy_id,
-  } as any) as { data: PolicyPublic }
-
-  const clientId = isInvoice ? invoice?.client_id : policy?.client_id
-
-  const { data: client } = useSuspenseQuery({
-    ...getClientQueryOptions(clientId),
-    enabled: !!clientId,
-  } as any) as { data: ClientPublic }
-
   return (
     <div className="w-full h-full animate-in fade-in zoom-in-95 duration-300">
-      {type === "risknote" && riskNote && client && policy && (
-        <RiskNoteTemplate riskNote={riskNote} client={client} policy={policy} />
-      )}
-
-      {isInvoice && invoice && client && (
-        <InvoiceTemplate
-          invoice={invoice}
-          client={client}
-          lineItems={(invoice as any).line_items || []}
-        />
-      )}
+      {type === "risknote" && <RiskNoteLoader id={id} />}
+      
+      {type === "invoice" && <InvoiceLoader id={id} />}
 
       {type === "receipt" && (
         <div className="p-8 text-center text-muted-foreground italic border rounded-lg">
