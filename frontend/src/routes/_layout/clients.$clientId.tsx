@@ -46,58 +46,26 @@ function ClientHubContent({ clientId }: { clientId: string }) {
   const location = useLocation()
 
   // Determine active tab based on path
-  const activeTab = location.pathname.split("/").pop() || "policies"
+  const activeTab = location.pathname.split("/").pop() || "overview"
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">{client.name}</h1>
-        <p className="text-muted-foreground">
-          Client Hub - manage details and policies
-        </p>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">KRA PIN</CardTitle>
-            <User className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{client.kra_pin}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Email</CardTitle>
-            <User className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-sm truncate">{client.email || "N/A"}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Phone</CardTitle>
-            <User className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{client.phone}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Type</CardTitle>
-            <User className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{client.client_type}</div>
-          </CardContent>
-        </Card>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">{client.name}</h1>
+          <p className="text-sm text-muted-foreground uppercase tracking-wider font-semibold">
+            {client.client_type} &bull; Client Hub
+          </p>
+        </div>
       </div>
 
       <Tabs value={activeTab} className="w-full">
         <TabsList>
+          <TabsTrigger value="overview" asChild>
+            <Link to="/clients/$clientId/overview" params={{ clientId }}>
+              Overview
+            </Link>
+          </TabsTrigger>
           <TabsTrigger value="policies" asChild>
             <Link to="/clients/$clientId/policies" params={{ clientId }}>
               Policies
@@ -113,8 +81,15 @@ function ClientHubContent({ clientId }: { clientId: string }) {
               Documents
             </Link>
           </TabsTrigger>
+          <TabsTrigger value="settings" asChild>
+            <Link to="/clients/$clientId/settings" params={{ clientId }}>
+              Settings
+            </Link>
+          </TabsTrigger>
         </TabsList>
-        <Outlet />
+        <div className="mt-4">
+          <Outlet />
+        </div>
       </Tabs>
     </div>
   )

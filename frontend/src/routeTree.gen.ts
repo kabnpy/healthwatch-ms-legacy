@@ -25,6 +25,7 @@ import { Route as LayoutClientsClientIdRouteImport } from './routes/_layout/clie
 import { Route as LayoutClientsClientIdIndexRouteImport } from './routes/_layout/clients.$clientId.index'
 import { Route as LayoutClientsClientIdSettingsRouteImport } from './routes/_layout/clients.$clientId.settings'
 import { Route as LayoutClientsClientIdPoliciesRouteImport } from './routes/_layout/clients.$clientId.policies'
+import { Route as LayoutClientsClientIdOverviewRouteImport } from './routes/_layout/clients.$clientId.overview'
 import { Route as LayoutClientsClientIdInvoicesRouteImport } from './routes/_layout/clients.$clientId.invoices'
 import { Route as LayoutClientsClientIdDocumentsRouteImport } from './routes/_layout/clients.$clientId.documents'
 
@@ -110,6 +111,12 @@ const LayoutClientsClientIdPoliciesRoute =
     path: '/policies',
     getParentRoute: () => LayoutClientsClientIdRoute,
   } as any)
+const LayoutClientsClientIdOverviewRoute =
+  LayoutClientsClientIdOverviewRouteImport.update({
+    id: '/overview',
+    path: '/overview',
+    getParentRoute: () => LayoutClientsClientIdRoute,
+  } as any)
 const LayoutClientsClientIdInvoicesRoute =
   LayoutClientsClientIdInvoicesRouteImport.update({
     id: '/invoices',
@@ -138,6 +145,7 @@ export interface FileRoutesByFullPath {
   '/clients/': typeof LayoutClientsIndexRoute
   '/clients/$clientId/documents': typeof LayoutClientsClientIdDocumentsRoute
   '/clients/$clientId/invoices': typeof LayoutClientsClientIdInvoicesRoute
+  '/clients/$clientId/overview': typeof LayoutClientsClientIdOverviewRoute
   '/clients/$clientId/policies': typeof LayoutClientsClientIdPoliciesRoute
   '/clients/$clientId/settings': typeof LayoutClientsClientIdSettingsRoute
   '/clients/$clientId/': typeof LayoutClientsClientIdIndexRoute
@@ -156,6 +164,7 @@ export interface FileRoutesByTo {
   '/clients': typeof LayoutClientsIndexRoute
   '/clients/$clientId/documents': typeof LayoutClientsClientIdDocumentsRoute
   '/clients/$clientId/invoices': typeof LayoutClientsClientIdInvoicesRoute
+  '/clients/$clientId/overview': typeof LayoutClientsClientIdOverviewRoute
   '/clients/$clientId/policies': typeof LayoutClientsClientIdPoliciesRoute
   '/clients/$clientId/settings': typeof LayoutClientsClientIdSettingsRoute
   '/clients/$clientId': typeof LayoutClientsClientIdIndexRoute
@@ -177,6 +186,7 @@ export interface FileRoutesById {
   '/_layout/clients/': typeof LayoutClientsIndexRoute
   '/_layout/clients/$clientId/documents': typeof LayoutClientsClientIdDocumentsRoute
   '/_layout/clients/$clientId/invoices': typeof LayoutClientsClientIdInvoicesRoute
+  '/_layout/clients/$clientId/overview': typeof LayoutClientsClientIdOverviewRoute
   '/_layout/clients/$clientId/policies': typeof LayoutClientsClientIdPoliciesRoute
   '/_layout/clients/$clientId/settings': typeof LayoutClientsClientIdSettingsRoute
   '/_layout/clients/$clientId/': typeof LayoutClientsClientIdIndexRoute
@@ -198,6 +208,7 @@ export interface FileRouteTypes {
     | '/clients/'
     | '/clients/$clientId/documents'
     | '/clients/$clientId/invoices'
+    | '/clients/$clientId/overview'
     | '/clients/$clientId/policies'
     | '/clients/$clientId/settings'
     | '/clients/$clientId/'
@@ -216,6 +227,7 @@ export interface FileRouteTypes {
     | '/clients'
     | '/clients/$clientId/documents'
     | '/clients/$clientId/invoices'
+    | '/clients/$clientId/overview'
     | '/clients/$clientId/policies'
     | '/clients/$clientId/settings'
     | '/clients/$clientId'
@@ -236,6 +248,7 @@ export interface FileRouteTypes {
     | '/_layout/clients/'
     | '/_layout/clients/$clientId/documents'
     | '/_layout/clients/$clientId/invoices'
+    | '/_layout/clients/$clientId/overview'
     | '/_layout/clients/$clientId/policies'
     | '/_layout/clients/$clientId/settings'
     | '/_layout/clients/$clientId/'
@@ -364,6 +377,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutClientsClientIdPoliciesRouteImport
       parentRoute: typeof LayoutClientsClientIdRoute
     }
+    '/_layout/clients/$clientId/overview': {
+      id: '/_layout/clients/$clientId/overview'
+      path: '/overview'
+      fullPath: '/clients/$clientId/overview'
+      preLoaderRoute: typeof LayoutClientsClientIdOverviewRouteImport
+      parentRoute: typeof LayoutClientsClientIdRoute
+    }
     '/_layout/clients/$clientId/invoices': {
       id: '/_layout/clients/$clientId/invoices'
       path: '/invoices'
@@ -384,6 +404,7 @@ declare module '@tanstack/react-router' {
 interface LayoutClientsClientIdRouteChildren {
   LayoutClientsClientIdDocumentsRoute: typeof LayoutClientsClientIdDocumentsRoute
   LayoutClientsClientIdInvoicesRoute: typeof LayoutClientsClientIdInvoicesRoute
+  LayoutClientsClientIdOverviewRoute: typeof LayoutClientsClientIdOverviewRoute
   LayoutClientsClientIdPoliciesRoute: typeof LayoutClientsClientIdPoliciesRoute
   LayoutClientsClientIdSettingsRoute: typeof LayoutClientsClientIdSettingsRoute
   LayoutClientsClientIdIndexRoute: typeof LayoutClientsClientIdIndexRoute
@@ -392,6 +413,7 @@ interface LayoutClientsClientIdRouteChildren {
 const LayoutClientsClientIdRouteChildren: LayoutClientsClientIdRouteChildren = {
   LayoutClientsClientIdDocumentsRoute: LayoutClientsClientIdDocumentsRoute,
   LayoutClientsClientIdInvoicesRoute: LayoutClientsClientIdInvoicesRoute,
+  LayoutClientsClientIdOverviewRoute: LayoutClientsClientIdOverviewRoute,
   LayoutClientsClientIdPoliciesRoute: LayoutClientsClientIdPoliciesRoute,
   LayoutClientsClientIdSettingsRoute: LayoutClientsClientIdSettingsRoute,
   LayoutClientsClientIdIndexRoute: LayoutClientsClientIdIndexRoute,
