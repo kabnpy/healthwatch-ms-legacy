@@ -7,12 +7,15 @@ import ErrorComponent from "@/components/Common/ErrorComponent"
 import { RiskNoteDocument } from "@/components/Documents/RiskNoteDocument"
 import { RiskNoteForm } from "@/components/Insurance/RiskNoteForm"
 import PendingItems from "@/components/Pending/PendingItems"
+import { SummaryCard } from "@/components/Common/SummaryCard"
 import { AssetCard } from "@/components/Policies/Dashboard/AssetCard"
 import { CoverageCard } from "@/components/Policies/Dashboard/CoverageCard"
 
 import { PolicyHeader } from "@/components/Policies/Dashboard/PolicyHeader"
-import { QuickActions } from "@/components/Policies/Dashboard/QuickActions"
 import { getColumns as getRiskNoteColumns } from "@/components/RiskNotes/columns"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Dialog,
   DialogContent,
@@ -108,6 +111,8 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
         clientId={client.id}
         policyNumber={policy.policy_number}
         status={policy.status || "Unknown"}
+        onRenew={handleRenew}
+        onEndorse={handleEndorse}
       />
 
       <Tabs defaultValue="overview" className="w-full">
@@ -120,6 +125,29 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
 
         {/* TAB 1: OVERVIEW */}
         <TabsContent value="overview" className="pt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <SummaryCard
+              title="Insured Value"
+              value={`KES ${((latestRiskNote?.premium_breakdown as any)?.basic / 0.04 || 0).toLocaleString()}`}
+              description="Current Sum Insured"
+            />
+            <SummaryCard
+              title="Total Premium"
+              value={`KES ${(latestRiskNote?.premium_breakdown as any)?.total?.toLocaleString() || "0.00"}`}
+              description="Including Levies & Taxes"
+            />
+            <SummaryCard
+              title="Period"
+              value={`${latestRiskNote?.start_date || "N/A"}`}
+              description={`To ${latestRiskNote?.end_date || "N/A"}`}
+            />
+            <SummaryCard
+              title="Product"
+              value={policy.product_id?.substring(0, 13)}
+              description="Policy Type"
+            />
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Column (2/3) */}
             <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -134,21 +162,32 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
               </div>
             </div>
 
-            {/* Right Column (1/3) */}
-            <div>
-              <QuickActions
-                onRenew={handleRenew}
-                onEndorse={handleEndorse}
-                onPrintCertificate={() =>
-                  latestRiskNote &&
-                  handleViewRiskNote(latestRiskNote.id, "certificate")
-                }
-                onPrintDebitNote={() =>
-                  latestRiskNote &&
-                  handleViewRiskNote(latestRiskNote.id, "invoice")
-                }
-                disabled={!latestRiskNote}
-              />
+            {/* Right Column (1/3) - Quick View Documents */}
+            <div className="space-y-6">
+              <Card className="bg-muted/20">
+                <CardHeader>
+                  <CardTitle className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
+                    Financial Status
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Status</span>
+                    <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-200">Paid</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Balance</span>
+                    <span className="font-mono font-bold">KES 0.00</span>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start gap-2 text-primary"
+                    onClick={() => latestRiskNote && handleViewRiskNote(latestRiskNote.id, "invoice")}
+                  >
+                    View Latest Debit Note
+                  </Button>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </TabsContent>
