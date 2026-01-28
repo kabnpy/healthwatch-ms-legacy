@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
+    from .financial import Invoice, Receipt
     from .policy import Policy
 
 # ==========================================
@@ -47,6 +48,8 @@ class Client(ClientBase, table=True):
 
     policies: list["Policy"] = Relationship(back_populates="client")
     correspondence: list["Correspondence"] = Relationship(back_populates="client")
+    invoices: list["Invoice"] = Relationship(back_populates="client")
+    receipts: list["Receipt"] = Relationship(back_populates="client")
 
 
 class ClientsPublic(SQLModel):

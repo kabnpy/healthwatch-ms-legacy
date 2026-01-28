@@ -8,7 +8,7 @@ from sqlmodel import Field, Relationship, SQLModel
 if TYPE_CHECKING:
     from .catalog import Product
     from .client import Client
-    from .payment import PaymentAllocation
+    from .financial import InvoiceLineItem, ReceiptAllocation
 
 # ==========================================
 # Policy Models
@@ -149,7 +149,8 @@ class RiskNote(RiskNoteBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
 
     policy: "Policy" = Relationship(back_populates="risk_notes")
-    allocations: list["PaymentAllocation"] = Relationship(back_populates="risk_note")
+    invoice_line_items: list["InvoiceLineItem"] = Relationship(back_populates="risk_note")
+    allocations: list["ReceiptAllocation"] = Relationship(back_populates="risk_note")
     documents: list["PolicyDocument"] = Relationship(back_populates="risk_note")
 
 

@@ -3,10 +3,10 @@ from fastapi import APIRouter
 from app.api.routes import (
     claims,
     clients,
+    financials,
     insurers,
     items,
     login,
-    payments,
     policies,
     private,
     products,
@@ -26,7 +26,7 @@ api_router.include_router(insurers.router, prefix="/insurers", tags=["insurers"]
 api_router.include_router(products.router, prefix="/products", tags=["products"])
 api_router.include_router(policies.router, prefix="/policies", tags=["policies"])
 api_router.include_router(risk_notes.router, prefix="/risk-notes", tags=["risk-notes"])
-api_router.include_router(payments.router, prefix="/payments", tags=["payments"])
+api_router.include_router(financials.router, prefix="/financials", tags=["financials"])
 api_router.include_router(claims.router, prefix="/claims", tags=["claims"])
 
 
