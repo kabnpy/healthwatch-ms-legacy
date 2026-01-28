@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router"
 import React from "react"
+import { CommandMenu } from "@/components/Common/CommandMenu"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -37,7 +38,9 @@ export const Header = () => {
           </BreadcrumbList>
         </Breadcrumb>
       </div>
-      <div className="flex-1" />
+      <div className="flex-1 flex justify-center px-4">
+        <CommandMenu />
+      </div>
     </header>
   )
 }
