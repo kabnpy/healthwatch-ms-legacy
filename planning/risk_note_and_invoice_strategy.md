@@ -36,9 +36,10 @@ We need to align the models with the actual business flow:
 - [x] Ensure the viewer is "one-way": it displays what it is told to display, no toggles.
 
 ### Phase 2: Backend Financial Alignment
-- [ ] Review and refactor `backend/app/models/insurance/payment.py`.
-- [ ] Introduce `Invoice` model.
-- [ ] Update `RiskNote` creation logic to trigger Invoice generation/update.
+- [x] Review and refactor `backend/app/models/insurance/payment.py` to `financial.py`.
+- [x] Introduce `Invoice` and `Receipt` models.
+- [x] Update `RiskNote` creation logic to trigger automatic Invoice generation/update.
+- [x] Sync frontend client and update hooks/components.
 
 ### Phase 3: Financials View
 - [ ] Create a dedicated "Payments & Invoicing" view.
