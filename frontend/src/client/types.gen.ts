@@ -9,8 +9,126 @@ export type Body_login_login_access_token = {
     client_secret?: (string | null);
 };
 
+export type ClaimCreate = {
+    claim_number: string;
+    policy_id: string;
+    risk_item_id?: (string | null);
+    date_of_loss: string;
+    description: string;
+    status?: string;
+    reserve_amount?: number;
+};
+
+export type ClaimPublic = {
+    claim_number: string;
+    policy_id: string;
+    risk_item_id?: (string | null);
+    date_of_loss: string;
+    description: string;
+    status?: string;
+    reserve_amount?: number;
+    id: string;
+};
+
+export type ClaimsPublic = {
+    data: Array<ClaimPublic>;
+    count: number;
+};
+
+export type ClaimUpdate = {
+    claim_number?: (string | null);
+    policy_id?: (string | null);
+    risk_item_id?: (string | null);
+    date_of_loss?: (string | null);
+    description?: (string | null);
+    status?: (string | null);
+    reserve_amount?: (number | null);
+};
+
+export type ClientCreate = {
+    client_type?: string;
+    name: string;
+    kra_pin: string;
+    email?: (string | null);
+    phone: string;
+    postal_address?: (string | null);
+    contact_person?: (string | null);
+};
+
+export type ClientPublic = {
+    client_type?: string;
+    name: string;
+    kra_pin: string;
+    email?: (string | null);
+    phone: string;
+    postal_address?: (string | null);
+    contact_person?: (string | null);
+    id: string;
+};
+
+export type ClientsPublic = {
+    data: Array<ClientPublic>;
+    count: number;
+};
+
+export type ClientUpdate = {
+    client_type?: (string | null);
+    name?: (string | null);
+    kra_pin?: (string | null);
+    email?: (string | null);
+    phone?: (string | null);
+    postal_address?: (string | null);
+    contact_person?: (string | null);
+};
+
+export type CorrespondenceCreate = {
+    client_id: string;
+    subject: string;
+    summary?: (string | null);
+    file_path: string;
+    date_logged?: string;
+};
+
+export type CorrespondencePublic = {
+    client_id: string;
+    subject: string;
+    summary?: (string | null);
+    file_path: string;
+    date_logged?: string;
+    id: string;
+};
+
+export type CorrespondencesPublic = {
+    data: Array<CorrespondencePublic>;
+    count: number;
+};
+
 export type HTTPValidationError = {
     detail?: Array<ValidationError>;
+};
+
+export type InsurerCreate = {
+    name: string;
+    email?: (string | null);
+    phone?: (string | null);
+};
+
+export type InsurerPublic = {
+    name: string;
+    email?: (string | null);
+    phone?: (string | null);
+    id: string;
+};
+
+export type InsurersPublic = {
+    data: Array<InsurerPublic>;
+    count: number;
+};
+
+export type InsurerUpdate = {
+    name?: (string | null);
+    email?: (string | null);
+    phone?: (string | null);
 };
 
 export type ItemCreate = {
@@ -44,11 +162,213 @@ export type NewPassword = {
     new_password: string;
 };
 
+export type PaymentAllocationCreate = {
+    payment_id: string;
+    risk_note_id: string;
+    amount_allocated: number;
+};
+
+export type PaymentAllocationPublic = {
+    payment_id: string;
+    risk_note_id: string;
+    amount_allocated: number;
+};
+
+export type PaymentCreate = {
+    receipt_number: string;
+    date_received: string;
+    amount: number;
+    mode: string;
+    reference: string;
+};
+
+export type PaymentPublic = {
+    receipt_number: string;
+    date_received: string;
+    amount: number;
+    mode: string;
+    reference: string;
+    id: string;
+};
+
+export type PaymentsPublic = {
+    data: Array<PaymentPublic>;
+    count: number;
+};
+
+export type PaymentUpdate = {
+    receipt_number?: (string | null);
+    date_received?: (string | null);
+    amount?: (number | null);
+    mode?: (string | null);
+    reference?: (string | null);
+};
+
+export type PoliciesPublic = {
+    data: Array<PolicyPublic>;
+    count: number;
+};
+
+export type PolicyCreate = {
+    policy_number: string;
+    client_id: string;
+    product_id?: (string | null);
+    status?: string;
+};
+
+export type PolicyPublic = {
+    policy_number: string;
+    client_id: string;
+    product_id?: (string | null);
+    status?: string;
+    id: string;
+};
+
+export type PolicyUpdate = {
+    policy_number?: (string | null);
+    client_id?: (string | null);
+    product_id?: (string | null);
+    status?: (string | null);
+};
+
 export type PrivateUserCreate = {
     email: string;
     password: string;
     full_name: string;
     is_verified?: boolean;
+};
+
+export type ProductCreate = {
+    insurer_id: string;
+    name: string;
+    class_of_insurance: string;
+    default_benefits?: {
+        [key: string]: unknown;
+    };
+    default_clauses?: Array<(string)>;
+    default_commission_rate?: number;
+};
+
+export type ProductPublic = {
+    insurer_id: string;
+    name: string;
+    class_of_insurance: string;
+    default_benefits?: {
+        [key: string]: unknown;
+    };
+    default_clauses?: Array<(string)>;
+    default_commission_rate?: number;
+    id: string;
+};
+
+export type ProductsPublic = {
+    data: Array<ProductPublic>;
+    count: number;
+};
+
+export type ProductUpdate = {
+    insurer_id?: (string | null);
+    name?: (string | null);
+    class_of_insurance?: (string | null);
+    default_benefits?: ({
+    [key: string]: unknown;
+} | null);
+    default_clauses?: (Array<(string)> | null);
+    default_commission_rate?: (number | null);
+};
+
+export type RiskItemCreate = {
+    policy_id: string;
+    identifier: string;
+    description: string;
+    sum_insured: number;
+    details?: {
+        [key: string]: unknown;
+    };
+    benefits?: {
+        [key: string]: unknown;
+    };
+};
+
+export type RiskItemPublic = {
+    policy_id: string;
+    identifier: string;
+    description: string;
+    sum_insured: number;
+    details?: {
+        [key: string]: unknown;
+    };
+    benefits?: {
+        [key: string]: unknown;
+    };
+    id: string;
+};
+
+export type RiskItemsPublic = {
+    data: Array<RiskItemPublic>;
+    count: number;
+};
+
+export type RiskNoteCreate = {
+    risk_note_number: string;
+    policy_id: string;
+    transaction_type: string;
+    start_date: string;
+    end_date: string;
+    premium_breakdown?: {
+        [key: string]: unknown;
+    };
+    benefits_snapshot?: {
+        [key: string]: unknown;
+    };
+    risk_item_snapshot?: {
+        [key: string]: unknown;
+    };
+    commission_amount: number;
+    special_clauses?: Array<(string)>;
+};
+
+export type RiskNotePublic = {
+    risk_note_number: string;
+    policy_id: string;
+    transaction_type: string;
+    start_date: string;
+    end_date: string;
+    premium_breakdown?: {
+        [key: string]: unknown;
+    };
+    benefits_snapshot?: {
+        [key: string]: unknown;
+    };
+    risk_item_snapshot?: {
+        [key: string]: unknown;
+    };
+    commission_amount: number;
+    special_clauses?: Array<(string)>;
+    id: string;
+};
+
+export type RiskNotesPublic = {
+    data: Array<RiskNotePublic>;
+    count: number;
+};
+
+export type RiskNoteUpdate = {
+    risk_note_number?: (string | null);
+    transaction_type?: (string | null);
+    start_date?: (string | null);
+    end_date?: (string | null);
+    premium_breakdown?: ({
+    [key: string]: unknown;
+} | null);
+    benefits_snapshot?: ({
+    [key: string]: unknown;
+} | null);
+    risk_item_snapshot?: ({
+    [key: string]: unknown;
+} | null);
+    commission_amount?: (number | null);
+    special_clauses?: (Array<(string)> | null);
 };
 
 export type Token = {
@@ -106,6 +426,116 @@ export type ValidationError = {
     msg: string;
     type: string;
 };
+
+export type ClaimsReadClaimsData = {
+    limit?: number;
+    policyId?: (string | null);
+    skip?: number;
+};
+
+export type ClaimsReadClaimsResponse = (ClaimsPublic);
+
+export type ClaimsCreateClaimData = {
+    requestBody: ClaimCreate;
+};
+
+export type ClaimsCreateClaimResponse = (ClaimPublic);
+
+export type ClaimsReadClaimData = {
+    id: string;
+};
+
+export type ClaimsReadClaimResponse = (ClaimPublic);
+
+export type ClaimsUpdateClaimData = {
+    id: string;
+    requestBody: ClaimUpdate;
+};
+
+export type ClaimsUpdateClaimResponse = (ClaimPublic);
+
+export type ClaimsDeleteClaimData = {
+    id: string;
+};
+
+export type ClaimsDeleteClaimResponse = (Message);
+
+export type ClientsReadClientsData = {
+    limit?: number;
+    skip?: number;
+};
+
+export type ClientsReadClientsResponse = (ClientsPublic);
+
+export type ClientsCreateClientData = {
+    requestBody: ClientCreate;
+};
+
+export type ClientsCreateClientResponse = (ClientPublic);
+
+export type ClientsReadClientData = {
+    id: string;
+};
+
+export type ClientsReadClientResponse = (ClientPublic);
+
+export type ClientsUpdateClientData = {
+    id: string;
+    requestBody: ClientUpdate;
+};
+
+export type ClientsUpdateClientResponse = (ClientPublic);
+
+export type ClientsDeleteClientData = {
+    id: string;
+};
+
+export type ClientsDeleteClientResponse = (Message);
+
+export type ClientsReadClientCorrespondencesData = {
+    id: string;
+};
+
+export type ClientsReadClientCorrespondencesResponse = (CorrespondencesPublic);
+
+export type ClientsCreateClientCorrespondenceData = {
+    id: string;
+    requestBody: CorrespondenceCreate;
+};
+
+export type ClientsCreateClientCorrespondenceResponse = (CorrespondencePublic);
+
+export type InsurersReadInsurersData = {
+    limit?: number;
+    skip?: number;
+};
+
+export type InsurersReadInsurersResponse = (InsurersPublic);
+
+export type InsurersCreateInsurerData = {
+    requestBody: InsurerCreate;
+};
+
+export type InsurersCreateInsurerResponse = (InsurerPublic);
+
+export type InsurersReadInsurerData = {
+    id: string;
+};
+
+export type InsurersReadInsurerResponse = (InsurerPublic);
+
+export type InsurersUpdateInsurerData = {
+    id: string;
+    requestBody: InsurerUpdate;
+};
+
+export type InsurersUpdateInsurerResponse = (InsurerPublic);
+
+export type InsurersDeleteInsurerData = {
+    id: string;
+};
+
+export type InsurersDeleteInsurerResponse = (Message);
 
 export type ItemsReadItemsData = {
     limit?: number;
@@ -165,11 +595,168 @@ export type LoginRecoverPasswordHtmlContentData = {
 
 export type LoginRecoverPasswordHtmlContentResponse = (string);
 
+export type PaymentsReadPaymentsData = {
+    limit?: number;
+    skip?: number;
+};
+
+export type PaymentsReadPaymentsResponse = (PaymentsPublic);
+
+export type PaymentsCreatePaymentData = {
+    requestBody: PaymentCreate;
+};
+
+export type PaymentsCreatePaymentResponse = (PaymentPublic);
+
+export type PaymentsReadPaymentData = {
+    id: string;
+};
+
+export type PaymentsReadPaymentResponse = (PaymentPublic);
+
+export type PaymentsUpdatePaymentData = {
+    id: string;
+    requestBody: PaymentUpdate;
+};
+
+export type PaymentsUpdatePaymentResponse = (PaymentPublic);
+
+export type PaymentsDeletePaymentData = {
+    id: string;
+};
+
+export type PaymentsDeletePaymentResponse = (Message);
+
+export type PaymentsCreatePaymentAllocationData = {
+    id: string;
+    requestBody: PaymentAllocationCreate;
+};
+
+export type PaymentsCreatePaymentAllocationResponse = (PaymentAllocationPublic);
+
+export type PoliciesReadPoliciesData = {
+    clientId?: (string | null);
+    limit?: number;
+    skip?: number;
+};
+
+export type PoliciesReadPoliciesResponse = (PoliciesPublic);
+
+export type PoliciesCreatePolicyData = {
+    requestBody: PolicyCreate;
+};
+
+export type PoliciesCreatePolicyResponse = (PolicyPublic);
+
+export type PoliciesReadPolicyData = {
+    id: string;
+};
+
+export type PoliciesReadPolicyResponse = (PolicyPublic);
+
+export type PoliciesUpdatePolicyData = {
+    id: string;
+    requestBody: PolicyUpdate;
+};
+
+export type PoliciesUpdatePolicyResponse = (PolicyPublic);
+
+export type PoliciesDeletePolicyData = {
+    id: string;
+};
+
+export type PoliciesDeletePolicyResponse = (Message);
+
+export type PoliciesReadPolicyRiskNotesData = {
+    id: string;
+};
+
+export type PoliciesReadPolicyRiskNotesResponse = (RiskNotesPublic);
+
+export type PoliciesReadPolicyRiskItemsData = {
+    id: string;
+};
+
+export type PoliciesReadPolicyRiskItemsResponse = (RiskItemsPublic);
+
+export type PoliciesCreatePolicyRiskItemData = {
+    id: string;
+    requestBody: RiskItemCreate;
+};
+
+export type PoliciesCreatePolicyRiskItemResponse = (RiskItemPublic);
+
 export type PrivateCreateUserData = {
     requestBody: PrivateUserCreate;
 };
 
 export type PrivateCreateUserResponse = (UserPublic);
+
+export type ProductsReadProductsData = {
+    insurerId?: (string | null);
+    limit?: number;
+    skip?: number;
+};
+
+export type ProductsReadProductsResponse = (ProductsPublic);
+
+export type ProductsCreateProductData = {
+    requestBody: ProductCreate;
+};
+
+export type ProductsCreateProductResponse = (ProductPublic);
+
+export type ProductsReadProductData = {
+    id: string;
+};
+
+export type ProductsReadProductResponse = (ProductPublic);
+
+export type ProductsUpdateProductData = {
+    id: string;
+    requestBody: ProductUpdate;
+};
+
+export type ProductsUpdateProductResponse = (ProductPublic);
+
+export type ProductsDeleteProductData = {
+    id: string;
+};
+
+export type ProductsDeleteProductResponse = (Message);
+
+export type RiskNotesReadRiskNotesData = {
+    limit?: number;
+    policyId?: (string | null);
+    skip?: number;
+};
+
+export type RiskNotesReadRiskNotesResponse = (RiskNotesPublic);
+
+export type RiskNotesCreateRiskNoteData = {
+    requestBody: RiskNoteCreate;
+};
+
+export type RiskNotesCreateRiskNoteResponse = (RiskNotePublic);
+
+export type RiskNotesReadRiskNoteData = {
+    id: string;
+};
+
+export type RiskNotesReadRiskNoteResponse = (RiskNotePublic);
+
+export type RiskNotesUpdateRiskNoteData = {
+    id: string;
+    requestBody: RiskNoteUpdate;
+};
+
+export type RiskNotesUpdateRiskNoteResponse = (RiskNotePublic);
+
+export type RiskNotesDeleteRiskNoteData = {
+    id: string;
+};
+
+export type RiskNotesDeleteRiskNoteResponse = (Message);
 
 export type UsersReadUsersData = {
     limit?: number;
