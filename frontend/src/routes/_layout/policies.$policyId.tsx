@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { Suspense, useCallback, useMemo, useState } from "react"
+import { Suspense, useCallback, useState } from "react"
 import { PoliciesService } from "@/client"
 import { DataTable } from "@/components/Common/DataTable"
 import { DocumentManager } from "@/components/Common/DocumentManager"
@@ -66,7 +66,9 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
   const [selectedRiskNoteId, setSelectedRiskNoteId] = useState<string | null>(
     null,
   )
-  const [viewMode, setViewMode] = useState<"invoice" | "certificate">("invoice")
+  const [viewMode, setViewMode] = useState<
+    "invoice" | "certificate" | "risknote"
+  >("invoice")
 
   // State for Risk Note Form
   const [riskNoteFormOpen, setRiskNoteFormOpen] = useState(false)
@@ -74,7 +76,7 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
 
   // Handlers
   const handleViewRiskNote = useCallback(
-    (id: string, mode: "invoice" | "certificate" = "invoice") => {
+    (id: string, mode: "invoice" | "certificate" | "risknote" = "invoice") => {
       setSelectedRiskNoteId(id)
       setViewMode(mode)
       setViewerOpen(true)
@@ -91,15 +93,6 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
     setTransactionType("Endorsement")
     setRiskNoteFormOpen(true)
   }
-
-  // Memoize columns for History Tab
-  const historyColumns = useMemo(
-    () =>
-      getRiskNoteColumns((riskNote) => {
-        handleViewRiskNote(riskNote.id)
-      }),
-    [handleViewRiskNote],
-  )
 
   if (isLoading || !policy || !client) {
     return <PendingItems />
@@ -206,12 +199,19 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
         </TabsContent>
 
         {/* TAB 2: HISTORY (Risk Notes) */}
+
         <TabsContent value="history" className="pt-6">
           <div className="border rounded-lg p-4 bg-card">
             <h3 className="text-lg font-semibold mb-4 text-primary">
               Transaction History (Risk Notes)
             </h3>
-            <DataTable columns={historyColumns} data={riskNotes} />
+
+            <DataTable
+              columns={getRiskNoteColumns((rn) =>
+                handleViewRiskNote(rn.id, "risknote"),
+              )}
+              data={riskNotes}
+            />
           </div>
         </TabsContent>
 

@@ -3,6 +3,7 @@ import { ClientsService, PoliciesService, RiskNotesService } from "@/client"
 import { Button } from "@/components/ui/button"
 import { CertificateTemplate } from "./templates/CertificateTemplate"
 import { DebitNoteTemplate } from "./templates/DebitNoteTemplate"
+import { RiskNoteTemplate } from "./templates/RiskNoteTemplate"
 
 function getRiskNoteQueryOptions(id: string) {
   return {
@@ -29,8 +30,8 @@ function getClientQueryOptions(clientId: string) {
 
 interface RiskNoteDocumentProps {
   id: string
-  mode: "invoice" | "certificate"
-  onModeChange: (mode: "invoice" | "certificate") => void
+  mode: "invoice" | "certificate" | "risknote"
+  onModeChange: (mode: "invoice" | "certificate" | "risknote") => void
 }
 
 /**
@@ -50,23 +51,28 @@ export function RiskNoteDocument({
     getClientQueryOptions(policy.client_id),
   )
 
-  const isInvoice = mode === "invoice"
-
   return (
     <div className="relative group">
       {/* Document Toggle Controls (Overlay) */}
       <div className="absolute top-4 right-4 print:hidden flex flex-col gap-2 z-50">
         <div className="flex bg-white/90 backdrop-blur-sm rounded-lg shadow-xl overflow-hidden border p-1 scale-90 origin-top-right transition-all hover:scale-100">
           <Button
-            variant={isInvoice ? "secondary" : "ghost"}
-            className="rounded-none h-8 text-xs font-bold"
+            variant={mode === "risknote" ? "secondary" : "ghost"}
+            className="rounded-none h-8 text-[10px] font-bold"
+            onClick={() => onModeChange("risknote")}
+          >
+            RISK NOTE
+          </Button>
+          <Button
+            variant={mode === "invoice" ? "secondary" : "ghost"}
+            className="rounded-none h-8 text-[10px] font-bold"
             onClick={() => onModeChange("invoice")}
           >
             DEBIT NOTE
           </Button>
           <Button
-            variant={!isInvoice ? "secondary" : "ghost"}
-            className="rounded-none h-8 text-xs font-bold"
+            variant={mode === "certificate" ? "secondary" : "ghost"}
+            className="rounded-none h-8 text-[10px] font-bold"
             onClick={() => onModeChange("certificate")}
           >
             CERTIFICATE
@@ -76,13 +82,21 @@ export function RiskNoteDocument({
 
       {/* Render the selected template */}
       <div className="animate-in fade-in zoom-in-95 duration-300">
-        {isInvoice ? (
+        {mode === "risknote" && (
+          <RiskNoteTemplate
+            riskNote={riskNote}
+            client={client}
+            policy={policy}
+          />
+        )}
+        {mode === "invoice" && (
           <DebitNoteTemplate
             riskNote={riskNote}
             client={client}
             policy={policy}
           />
-        ) : (
+        )}
+        {mode === "certificate" && (
           <CertificateTemplate
             riskNote={riskNote}
             client={client}

@@ -12,6 +12,7 @@ export const CertificateTemplate = ({
   policy,
 }: CertificateTemplateProps) => {
   const breakdown = (riskNote.premium_breakdown as any) || {}
+  const riskItem = (riskNote.risk_item_snapshot as any) || {}
 
   return (
     <BaseDocument
@@ -57,6 +58,34 @@ export const CertificateTemplate = ({
               To: {riskNote.end_date}
             </p>
           </div>
+        </div>
+      </div>
+
+      {/* NEW: Asset Grid */}
+      <div className="mb-8 bg-gray-50 p-4 border rounded">
+        <h2 className="text-[10px] font-bold uppercase text-gray-500 mb-3 tracking-widest border-b pb-1">
+          Insured Asset Details
+        </h2>
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <p className="text-[9px] uppercase text-gray-400 font-bold">
+              Identifier (Reg No)
+            </p>
+            <p className="text-sm font-mono font-bold">
+              {riskItem.identifier || "N/A"}
+            </p>
+          </div>
+          {riskItem.details &&
+            Object.entries(riskItem.details)
+              .slice(0, 2)
+              .map(([key, val]: [string, any]) => (
+                <div key={key}>
+                  <p className="text-[9px] uppercase text-gray-400 font-bold">
+                    {key}
+                  </p>
+                  <p className="text-sm font-semibold">{val}</p>
+                </div>
+              ))}
         </div>
       </div>
 
