@@ -3,7 +3,7 @@ import { Suspense, useMemo, useState } from "react"
 import { PoliciesService, RiskNotesService } from "@/client"
 import { DataTable } from "@/components/Common/DataTable"
 import { DocumentViewerModal } from "@/components/Common/DocumentViewerModal"
-import { RiskNoteDocument } from "@/components/Documents/RiskNoteDocument"
+import { UniversalDocumentViewer } from "@/components/Documents/UniversalDocumentViewer"
 import PendingItems from "@/components/Pending/PendingItems"
 import { getColumns as getRiskNoteColumns } from "@/components/RiskNotes/columns"
 
@@ -77,11 +77,7 @@ export function ClientInvoices({ clientId }: ClientInvoicesProps) {
           title={`Invoice: ${selectedInvoiceId}`}
         >
           <Suspense fallback={<PendingItems />}>
-            <RiskNoteDocument
-              id={selectedInvoiceId}
-              mode="invoice"
-              onModeChange={() => {}} // In this view, we keep it on invoice mode
-            />
+            <UniversalDocumentViewer id={selectedInvoiceId} type="invoice" />
           </Suspense>
         </DocumentViewerModal>
       )}

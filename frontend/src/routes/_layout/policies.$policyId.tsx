@@ -6,7 +6,7 @@ import { DocumentManager } from "@/components/Common/DocumentManager"
 import { DocumentViewerModal } from "@/components/Common/DocumentViewerModal"
 import ErrorComponent from "@/components/Common/ErrorComponent"
 import { SummaryCard } from "@/components/Common/SummaryCard"
-import { RiskNoteDocument } from "@/components/Documents/RiskNoteDocument"
+import { UniversalDocumentViewer } from "@/components/Documents/UniversalDocumentViewer"
 import { RiskNoteForm } from "@/components/Insurance/RiskNoteForm"
 import PendingItems from "@/components/Pending/PendingItems"
 import { AssetCard } from "@/components/Policies/Dashboard/AssetCard"
@@ -66,9 +66,7 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
   const [selectedRiskNoteId, setSelectedRiskNoteId] = useState<string | null>(
     null,
   )
-  const [viewMode, setViewMode] = useState<
-    "invoice" | "certificate" | "risknote"
-  >("invoice")
+  const [viewType, setViewType] = useState<"risknote" | "invoice">("risknote")
 
   // State for Risk Note Form
   const [riskNoteFormOpen, setRiskNoteFormOpen] = useState(false)
@@ -76,9 +74,9 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
 
   // Handlers
   const handleViewRiskNote = useCallback(
-    (id: string, mode: "invoice" | "certificate" | "risknote" = "invoice") => {
+    (id: string, type: "risknote" | "invoice" = "risknote") => {
       setSelectedRiskNoteId(id)
-      setViewMode(mode)
+      setViewType(type)
       setViewerOpen(true)
     },
     [],
@@ -113,7 +111,6 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="history">Risk Notes</TabsTrigger>
-          <TabsTrigger value="certificates">Certificates</TabsTrigger>
           <TabsTrigger value="documents">Documents</TabsTrigger>
         </TabsList>
 
@@ -215,21 +212,6 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
           </div>
         </TabsContent>
 
-        {/* TAB 3: CERTIFICATES */}
-        <TabsContent value="certificates" className="pt-6">
-          <div className="border rounded-lg p-4 bg-card">
-            <h3 className="text-lg font-semibold mb-4 text-primary">
-              Generated Certificates
-            </h3>
-            <DataTable
-              columns={getRiskNoteColumns((rn) =>
-                handleViewRiskNote(rn.id, "certificate"),
-              )}
-              data={riskNotes}
-            />
-          </div>
-        </TabsContent>
-
         {/* TAB 4: DOCUMENTS */}
         <TabsContent value="documents" className="pt-6">
           <DocumentManager
@@ -245,14 +227,10 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
         <DocumentViewerModal
           isOpen={viewerOpen}
           onClose={() => setViewerOpen(false)}
-          title={`Risk Note Viewer`}
+          title={`Document: ${selectedRiskNoteId}`}
         >
           <Suspense fallback={<PendingItems />}>
-            <RiskNoteDocument
-              id={selectedRiskNoteId}
-              mode={viewMode}
-              onModeChange={setViewMode}
-            />
+            <UniversalDocumentViewer id={selectedRiskNoteId} type={viewType} />
           </Suspense>
         </DocumentViewerModal>
       )}
