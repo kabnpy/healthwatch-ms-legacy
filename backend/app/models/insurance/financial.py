@@ -129,6 +129,7 @@ class ReceiptsPublic(SQLModel):
 class ReceiptAllocationBase(SQLModel):
     receipt_id: uuid.UUID = Field(foreign_key="receipt.id")
     invoice_id: uuid.UUID = Field(foreign_key="invoice.id")
+    risk_note_id: uuid.UUID | None = Field(default=None, foreign_key="risknote.id")
     amount_allocated: float
 
 
@@ -141,6 +142,7 @@ class ReceiptAllocation(ReceiptAllocationBase, table=True):
 
     receipt: "Receipt" = Relationship(back_populates="allocations")
     invoice: "Invoice" = Relationship(back_populates="allocations")
+    risk_note: "RiskNote" = Relationship(back_populates="allocations")
 
 
 class ReceiptAllocationsPublic(SQLModel):
