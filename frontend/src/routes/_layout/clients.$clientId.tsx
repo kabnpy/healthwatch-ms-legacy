@@ -1,20 +1,18 @@
 import { useSuspenseQuery } from "@tanstack/react-query"
-import { createFileRoute } from "@tanstack/react-router"
-import { Plus, User, Users } from "lucide-react"
-import { Suspense, useMemo, useState } from "react"
-import { ClientsService, PoliciesService, RiskNotesService } from "@/client"
-import { ClientDocuments } from "@/components/Clients/ClientDocuments"
-import { DataTable } from "@/components/Common/DataTable"
-import { DocumentViewerModal } from "@/components/Common/DocumentViewerModal"
+import {
+  createFileRoute,
+  Link,
+  Outlet,
+  useLocation,
+} from "@tanstack/react-router"
+import { User } from "lucide-react"
+import { Suspense } from "react"
+import { ClientsService } from "@/client"
 import ErrorComponent from "@/components/Common/ErrorComponent"
-import { RiskNoteDocument } from "@/components/Documents/RiskNoteDocument"
-import { NewBusinessWizard } from "@/components/Insurance/Wizard/NewBusinessWizard"
 import PendingItems from "@/components/Pending/PendingItems"
-import { columns as policyColumns } from "@/components/Policies/columns"
-import { getColumns as getRiskNoteColumns } from "@/components/RiskNotes/columns"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { queryClient } from "@/queryClient"
 
 // --- Query Options ---
 
@@ -25,26 +23,13 @@ function getClientQueryOptions(clientId: string) {
   }
 }
 
-function getPoliciesQueryOptions(clientId: string) {
-  return {
-    queryFn: () =>
-      PoliciesService.readPolicies({ clientId, skip: 0, limit: 100 }),
-    queryKey: ["policies", { clientId }],
-  }
-}
-
-function getClientRiskNotesQueryOptions() {
-  return {
-    queryFn: () => RiskNotesService.readRiskNotes({ skip: 0, limit: 1000 }),
-    queryKey: ["risk-notes"],
-  }
-}
-
 // --- Route Definition ---
 
 export const Route = createFileRoute("/_layout/clients/$clientId")({
-  component: ClientHub,
+  component: ClientHubLayout,
   errorComponent: ErrorComponent,
+  loader: ({ params }) =>
+    queryClient.ensureQueryData(getClientQueryOptions(params.clientId)),
   head: ({ params }) => ({
     meta: [
       {
@@ -58,37 +43,10 @@ export const Route = createFileRoute("/_layout/clients/$clientId")({
 
 function ClientHubContent({ clientId }: { clientId: string }) {
   const { data: client } = useSuspenseQuery(getClientQueryOptions(clientId))
-  const { data: policies } = useSuspenseQuery(getPoliciesQueryOptions(clientId))
-  const { data: allRiskNotes } = useSuspenseQuery(
-    getClientRiskNotesQueryOptions(),
-  )
+  const location = useLocation()
 
-  // State for Document Viewer
-  const [viewerOpen, setViewerOpen] = useState(false)
-  const [selectedRiskNoteId, setSelectedRiskNoteId] = useState<string | null>(
-    null,
-  )
-  const [viewMode, setViewMode] = useState<"invoice" | "certificate">("invoice")
-
-  // State for Wizard
-  const [wizardOpen, setWizardOpen] = useState(false)
-
-  // Filtering risk notes for this client
-  const policyIds = new Set(policies.data.map((p) => p.id))
-  const clientRiskNotes = allRiskNotes.data.filter((rn) =>
-    policyIds.has(rn.policy_id),
-  )
-
-  // Memoize columns to pass the view handler
-  const riskNoteColumns = useMemo(
-    () =>
-      getRiskNoteColumns((riskNote) => {
-        setSelectedRiskNoteId(riskNote.id)
-        setViewMode("invoice")
-        setViewerOpen(true)
-      }),
-    [],
-  )
+  // Determine active tab based on path
+  const activeTab = location.pathname.split("/").pop() || "policies"
 
   return (
     <div className="flex flex-col gap-6">
@@ -138,86 +96,33 @@ function ClientHubContent({ clientId }: { clientId: string }) {
         </Card>
       </div>
 
-      <Tabs defaultValue="policies" className="w-full">
+      <Tabs value={activeTab} className="w-full">
         <TabsList>
-          <TabsTrigger value="policies">Policies</TabsTrigger>
-          <TabsTrigger value="risk-notes">Risk Notes</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
+          <TabsTrigger value="policies" asChild>
+            <Link to="/clients/$clientId/policies" params={{ clientId }}>
+              Policies
+            </Link>
+          </TabsTrigger>
+          <TabsTrigger value="risk-notes" asChild>
+            <Link to="/clients/$clientId/risk-notes" params={{ clientId }}>
+              Risk Notes
+            </Link>
+          </TabsTrigger>
+          <TabsTrigger value="documents" asChild>
+            <Link to="/clients/$clientId/documents" params={{ clientId }}>
+              Documents
+            </Link>
+          </TabsTrigger>
         </TabsList>
-        <TabsContent value="policies" className="space-y-4 pt-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold tracking-tight">Policies</h2>
-            <Button onClick={() => setWizardOpen(true)} className="gap-2">
-              <Plus className="size-4" />
-              New Business Wizard
-            </Button>
-          </div>
-          {policies.data.length === 0 ? (
-            <div className="flex flex-col items-center justify-center text-center py-12 border rounded-lg bg-muted/5">
-              <div className="rounded-full bg-muted p-4 mb-4">
-                <Users className="h-8 w-8 text-muted-foreground" />
-              </div>
-              <h3 className="text-lg font-semibold">No policies found</h3>
-              <p className="text-muted-foreground">
-                Create a new policy using the wizard
-              </p>
-            </div>
-          ) : (
-            <DataTable columns={policyColumns} data={policies.data} />
-          )}
-        </TabsContent>
-        <TabsContent value="risk-notes" className="space-y-4 pt-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold tracking-tight">
-              Recent Risk Notes
-            </h2>
-          </div>
-          {clientRiskNotes.length === 0 ? (
-            <div className="flex flex-col items-center justify-center text-center py-12 border rounded-lg bg-muted/5">
-              <h3 className="text-lg font-semibold">No risk notes yet</h3>
-              <p className="text-muted-foreground">
-                Financial transactions will appear here once policies are active
-              </p>
-            </div>
-          ) : (
-            <DataTable columns={riskNoteColumns} data={clientRiskNotes} />
-          )}
-        </TabsContent>
-        <TabsContent value="documents" className="pt-4">
-          <ClientDocuments clientId={clientId} />
-        </TabsContent>
+        <Outlet />
       </Tabs>
-
-      {/* Wizard Modal */}
-      <NewBusinessWizard
-        clientId={clientId}
-        isOpen={wizardOpen}
-        onClose={() => setWizardOpen(false)}
-      />
-
-      {/* Document Viewer Modal */}
-      {selectedRiskNoteId && (
-        <DocumentViewerModal
-          isOpen={viewerOpen}
-          onClose={() => setViewerOpen(false)}
-          title={`Risk Note: ${selectedRiskNoteId}`}
-        >
-          <Suspense fallback={<PendingItems />}>
-            <RiskNoteDocument
-              id={selectedRiskNoteId}
-              mode={viewMode}
-              onModeChange={setViewMode}
-            />
-          </Suspense>
-        </DocumentViewerModal>
-      )}
     </div>
   )
 }
 
 // --- Main Page Component ---
 
-function ClientHub() {
+function ClientHubLayout() {
   const { clientId } = Route.useParams()
 
   return (
