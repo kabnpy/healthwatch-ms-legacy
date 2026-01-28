@@ -8,7 +8,8 @@ from app.models import (
     Product, ProductCreate,
     Policy, PolicyCreate,
     RiskNote, RiskNoteCreate,
-    Payment, PaymentCreate,
+    Receipt, ReceiptCreate,
+    Invoice, InvoiceCreate,
     Claim, ClaimCreate
 )
 from tests.utils.utils import random_email, random_lower_string
@@ -48,16 +49,35 @@ def create_random_policy(db: Session, client_id: uuid.UUID | None = None, produc
     )
     return crud.create_policy(session=db, policy_in=policy_in)
 
-def create_random_payment(db: Session) -> Payment:
+def create_random_receipt(db: Session, client_id: uuid.UUID | None = None) -> Receipt:
+    if not client_id:
+        client = create_random_client(db)
+        client_id = client.id
     receipt_number = random_lower_string()
-    payment_in = PaymentCreate(
+    receipt_in = ReceiptCreate(
         receipt_number=receipt_number,
+        client_id=client_id,
         date_received=date.today(),
         amount=1000.0,
         mode="Cash",
         reference=random_lower_string()
     )
-    return crud.create_payment(session=db, payment_in=payment_in)
+    return crud.create_receipt(session=db, receipt_in=receipt_in)
+
+def create_random_invoice(db: Session, client_id: uuid.UUID | None = None) -> Invoice:
+    if not client_id:
+        client = create_random_client(db)
+        client_id = client.id
+    invoice_number = f"INV-{uuid.uuid4().hex[:8].upper()}"
+    invoice_in = InvoiceCreate(
+        invoice_number=invoice_number,
+        client_id=client_id,
+        date_issued=date.today(),
+        total_amount=5000.0,
+        balance_due=5000.0,
+        status="Unpaid"
+    )
+    return crud.create_invoice(session=db, invoice_in=invoice_in)
 
 def create_random_claim(db: Session, policy_id: uuid.UUID | None = None) -> Claim:
     if not policy_id:

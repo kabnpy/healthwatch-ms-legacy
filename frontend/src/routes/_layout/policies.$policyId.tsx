@@ -257,5 +257,3 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
     </div>
   )
 }
-
-export default PolicyDashboard

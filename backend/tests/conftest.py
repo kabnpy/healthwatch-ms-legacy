@@ -14,8 +14,10 @@ from app.models import (
     Product,
     Client,
     Correspondence,
-    Payment,
-    PaymentAllocation,
+    Invoice,
+    InvoiceLineItem,
+    Receipt,
+    ReceiptAllocation,
     Policy,
     RiskItem,
     RiskNote,
@@ -37,7 +39,13 @@ def db() -> Generator[Session, None, None]:
         session.execute(statement)
         statement = delete(Claim)
         session.execute(statement)
-        statement = delete(PaymentAllocation)
+        statement = delete(ReceiptAllocation)
+        session.execute(statement)
+        statement = delete(InvoiceLineItem)
+        session.execute(statement)
+        statement = delete(Receipt)
+        session.execute(statement)
+        statement = delete(Invoice)
         session.execute(statement)
         statement = delete(RiskItem)
         session.execute(statement)
@@ -48,8 +56,6 @@ def db() -> Generator[Session, None, None]:
         statement = delete(Product)
         session.execute(statement)
         statement = delete(Correspondence)
-        session.execute(statement)
-        statement = delete(Payment)
         session.execute(statement)
         statement = delete(Client)
         session.execute(statement)

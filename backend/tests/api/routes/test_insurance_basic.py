@@ -7,7 +7,7 @@ from tests.utils.insurance import (
     create_random_insurer,
     create_random_product,
     create_random_policy,
-    create_random_payment,
+    
     create_random_claim
 )
 from tests.utils.client import create_random_client
@@ -65,26 +65,6 @@ def test_create_policy(
     content = response.json()
     assert content["policy_number"] == data["policy_number"]
     assert content["client_id"] == str(db_client.id)
-
-def test_create_payment(
-    client: TestClient, superuser_token_headers: dict[str, str]
-) -> None:
-    data = {
-        "receipt_number": random_lower_string(),
-        "date_received": "2024-01-01",
-        "amount": 500.50,
-        "mode": "M-Pesa",
-        "reference": "REF123"
-    }
-    response = client.post(
-        f"{settings.API_V1_STR}/payments/",
-        headers=superuser_token_headers,
-        json=data,
-    )
-    assert response.status_code == 200
-    content = response.json()
-    assert content["receipt_number"] == data["receipt_number"]
-    assert content["amount"] == 500.50
 
 def test_create_claim(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
