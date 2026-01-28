@@ -103,9 +103,9 @@ function ClientHubContent({ clientId }: { clientId: string }) {
               Policies
             </Link>
           </TabsTrigger>
-          <TabsTrigger value="risk-notes" asChild>
-            <Link to="/clients/$clientId/risk-notes" params={{ clientId }}>
-              Risk Notes
+          <TabsTrigger value="invoices" asChild>
+            <Link to="/clients/$clientId/invoices" params={{ clientId }}>
+              Invoices
             </Link>
           </TabsTrigger>
           <TabsTrigger value="documents" asChild>

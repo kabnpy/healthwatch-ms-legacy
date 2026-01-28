@@ -85,7 +85,8 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
       <Tabs defaultValue="overview" className="w-full">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="history">History</TabsTrigger>
+          <TabsTrigger value="history">Risk Notes</TabsTrigger>
+          <TabsTrigger value="certificates">Certificates</TabsTrigger>
           <TabsTrigger value="documents">Documents</TabsTrigger>
         </TabsList>
 
@@ -124,15 +125,26 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
           </div>
         </TabsContent>
 
-        {/* TAB 2: HISTORY */}
+        {/* TAB 2: HISTORY (Risk Notes) */}
         <TabsContent value="history" className="pt-6">
           <div className="border rounded-lg p-4 bg-card">
-            <h3 className="text-lg font-semibold mb-4">Transaction History</h3>
+            <h3 className="text-lg font-semibold mb-4 text-primary">Transaction History (Risk Notes)</h3>
             <DataTable columns={historyColumns} data={riskNotes} />
           </div>
         </TabsContent>
 
-        {/* TAB 3: DOCUMENTS */}
+        {/* TAB 3: CERTIFICATES */}
+        <TabsContent value="certificates" className="pt-6">
+          <div className="border rounded-lg p-4 bg-card">
+            <h3 className="text-lg font-semibold mb-4 text-primary">Generated Certificates</h3>
+            <DataTable 
+              columns={getRiskNoteColumns((rn) => handleViewRiskNote(rn.id, "certificate"))} 
+              data={riskNotes} 
+            />
+          </div>
+        </TabsContent>
+
+        {/* TAB 4: DOCUMENTS */}
         <TabsContent value="documents" className="pt-6">
           <div className="flex flex-col items-center justify-center text-center py-20 border-2 border-dashed rounded-lg bg-muted/5">
             <h3 className="text-lg font-semibold">Policy Documents</h3>

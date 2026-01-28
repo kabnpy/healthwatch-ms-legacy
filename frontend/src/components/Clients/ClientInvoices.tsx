@@ -1,5 +1,4 @@
 import { useSuspenseQuery } from "@tanstack/react-query"
-import { createFileRoute } from "@tanstack/react-router"
 import { Suspense, useMemo, useState } from "react"
 import { PoliciesService, RiskNotesService } from "@/client"
 import { DataTable } from "@/components/Common/DataTable"
@@ -23,33 +22,30 @@ function getClientRiskNotesQueryOptions() {
   }
 }
 
-export const Route = createFileRoute("/_layout/clients/$clientId/risk-notes")({
-  component: ClientRiskNotes,
-})
+interface ClientInvoicesProps {
+  clientId: string
+}
 
-function ClientRiskNotes() {
-  const { clientId } = Route.useParams()
+export function ClientInvoices({ clientId }: ClientInvoicesProps) {
   const { data: policies } = useSuspenseQuery(getPoliciesQueryOptions(clientId))
   const { data: allRiskNotes } = useSuspenseQuery(
     getClientRiskNotesQueryOptions(),
   )
 
   const [viewerOpen, setViewerOpen] = useState(false)
-  const [selectedRiskNoteId, setSelectedRiskNoteId] = useState<string | null>(
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(
     null,
   )
-  const [viewMode, setViewMode] = useState<"invoice" | "certificate">("invoice")
 
   const policyIds = new Set(policies.data.map((p) => p.id))
-  const clientRiskNotes = allRiskNotes.data.filter((rn) =>
+  const clientInvoices = allRiskNotes.data.filter((rn) =>
     policyIds.has(rn.policy_id),
   )
 
-  const riskNoteColumns = useMemo(
+  const invoiceColumns = useMemo(
     () =>
-      getRiskNoteColumns((riskNote) => {
-        setSelectedRiskNoteId(riskNote.id)
-        setViewMode("invoice")
+      getRiskNoteColumns((invoice) => {
+        setSelectedInvoiceId(invoice.id)
         setViewerOpen(true)
       }),
     [],
@@ -58,30 +54,31 @@ function ClientRiskNotes() {
   return (
     <div className="space-y-4 pt-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold tracking-tight">Recent Risk Notes</h2>
+        <h2 className="text-xl font-bold tracking-tight text-primary">Financial Statement / Invoices</h2>
       </div>
-      {clientRiskNotes.length === 0 ? (
+      
+      {clientInvoices.length === 0 ? (
         <div className="flex flex-col items-center justify-center text-center py-12 border rounded-lg bg-muted/5">
-          <h3 className="text-lg font-semibold">No risk notes yet</h3>
+          <h3 className="text-lg font-semibold">No invoices issued</h3>
           <p className="text-muted-foreground">
-            Financial transactions will appear here once policies are active
+            Invoices will appear here once policies are issued or renewed.
           </p>
         </div>
       ) : (
-        <DataTable columns={riskNoteColumns} data={clientRiskNotes} />
+        <DataTable columns={invoiceColumns} data={clientInvoices} />
       )}
 
-      {selectedRiskNoteId && (
+      {selectedInvoiceId && (
         <DocumentViewerModal
           isOpen={viewerOpen}
           onClose={() => setViewerOpen(false)}
-          title={`Risk Note: ${selectedRiskNoteId}`}
+          title={`Invoice: ${selectedInvoiceId}`}
         >
           <Suspense fallback={<PendingItems />}>
             <RiskNoteDocument
-              id={selectedRiskNoteId}
-              mode={viewMode}
-              onModeChange={setViewMode}
+              id={selectedInvoiceId}
+              mode="invoice"
+              onModeChange={() => {}} // In this view, we keep it on invoice mode
             />
           </Suspense>
         </DocumentViewerModal>

@@ -23,8 +23,8 @@ import { Route as PrintRiskNotesIdRouteImport } from './routes/print/risk-notes.
 import { Route as LayoutPoliciesPolicyIdRouteImport } from './routes/_layout/policies.$policyId'
 import { Route as LayoutClientsClientIdRouteImport } from './routes/_layout/clients.$clientId'
 import { Route as LayoutClientsClientIdIndexRouteImport } from './routes/_layout/clients.$clientId.index'
-import { Route as LayoutClientsClientIdRiskNotesRouteImport } from './routes/_layout/clients.$clientId.risk-notes'
 import { Route as LayoutClientsClientIdPoliciesRouteImport } from './routes/_layout/clients.$clientId.policies'
+import { Route as LayoutClientsClientIdInvoicesRouteImport } from './routes/_layout/clients.$clientId.invoices'
 import { Route as LayoutClientsClientIdDocumentsRouteImport } from './routes/_layout/clients.$clientId.documents'
 
 const SignupRoute = SignupRouteImport.update({
@@ -97,16 +97,16 @@ const LayoutClientsClientIdIndexRoute =
     path: '/',
     getParentRoute: () => LayoutClientsClientIdRoute,
   } as any)
-const LayoutClientsClientIdRiskNotesRoute =
-  LayoutClientsClientIdRiskNotesRouteImport.update({
-    id: '/risk-notes',
-    path: '/risk-notes',
-    getParentRoute: () => LayoutClientsClientIdRoute,
-  } as any)
 const LayoutClientsClientIdPoliciesRoute =
   LayoutClientsClientIdPoliciesRouteImport.update({
     id: '/policies',
     path: '/policies',
+    getParentRoute: () => LayoutClientsClientIdRoute,
+  } as any)
+const LayoutClientsClientIdInvoicesRoute =
+  LayoutClientsClientIdInvoicesRouteImport.update({
+    id: '/invoices',
+    path: '/invoices',
     getParentRoute: () => LayoutClientsClientIdRoute,
   } as any)
 const LayoutClientsClientIdDocumentsRoute =
@@ -130,8 +130,8 @@ export interface FileRoutesByFullPath {
   '/print/risk-notes/$id': typeof PrintRiskNotesIdRoute
   '/clients/': typeof LayoutClientsIndexRoute
   '/clients/$clientId/documents': typeof LayoutClientsClientIdDocumentsRoute
+  '/clients/$clientId/invoices': typeof LayoutClientsClientIdInvoicesRoute
   '/clients/$clientId/policies': typeof LayoutClientsClientIdPoliciesRoute
-  '/clients/$clientId/risk-notes': typeof LayoutClientsClientIdRiskNotesRoute
   '/clients/$clientId/': typeof LayoutClientsClientIdIndexRoute
 }
 export interface FileRoutesByTo {
@@ -147,8 +147,8 @@ export interface FileRoutesByTo {
   '/print/risk-notes/$id': typeof PrintRiskNotesIdRoute
   '/clients': typeof LayoutClientsIndexRoute
   '/clients/$clientId/documents': typeof LayoutClientsClientIdDocumentsRoute
+  '/clients/$clientId/invoices': typeof LayoutClientsClientIdInvoicesRoute
   '/clients/$clientId/policies': typeof LayoutClientsClientIdPoliciesRoute
-  '/clients/$clientId/risk-notes': typeof LayoutClientsClientIdRiskNotesRoute
   '/clients/$clientId': typeof LayoutClientsClientIdIndexRoute
 }
 export interface FileRoutesById {
@@ -167,8 +167,8 @@ export interface FileRoutesById {
   '/print/risk-notes/$id': typeof PrintRiskNotesIdRoute
   '/_layout/clients/': typeof LayoutClientsIndexRoute
   '/_layout/clients/$clientId/documents': typeof LayoutClientsClientIdDocumentsRoute
+  '/_layout/clients/$clientId/invoices': typeof LayoutClientsClientIdInvoicesRoute
   '/_layout/clients/$clientId/policies': typeof LayoutClientsClientIdPoliciesRoute
-  '/_layout/clients/$clientId/risk-notes': typeof LayoutClientsClientIdRiskNotesRoute
   '/_layout/clients/$clientId/': typeof LayoutClientsClientIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -187,8 +187,8 @@ export interface FileRouteTypes {
     | '/print/risk-notes/$id'
     | '/clients/'
     | '/clients/$clientId/documents'
+    | '/clients/$clientId/invoices'
     | '/clients/$clientId/policies'
-    | '/clients/$clientId/risk-notes'
     | '/clients/$clientId/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -204,8 +204,8 @@ export interface FileRouteTypes {
     | '/print/risk-notes/$id'
     | '/clients'
     | '/clients/$clientId/documents'
+    | '/clients/$clientId/invoices'
     | '/clients/$clientId/policies'
-    | '/clients/$clientId/risk-notes'
     | '/clients/$clientId'
   id:
     | '__root__'
@@ -223,8 +223,8 @@ export interface FileRouteTypes {
     | '/print/risk-notes/$id'
     | '/_layout/clients/'
     | '/_layout/clients/$clientId/documents'
+    | '/_layout/clients/$clientId/invoices'
     | '/_layout/clients/$clientId/policies'
-    | '/_layout/clients/$clientId/risk-notes'
     | '/_layout/clients/$clientId/'
   fileRoutesById: FileRoutesById
 }
@@ -337,18 +337,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutClientsClientIdIndexRouteImport
       parentRoute: typeof LayoutClientsClientIdRoute
     }
-    '/_layout/clients/$clientId/risk-notes': {
-      id: '/_layout/clients/$clientId/risk-notes'
-      path: '/risk-notes'
-      fullPath: '/clients/$clientId/risk-notes'
-      preLoaderRoute: typeof LayoutClientsClientIdRiskNotesRouteImport
-      parentRoute: typeof LayoutClientsClientIdRoute
-    }
     '/_layout/clients/$clientId/policies': {
       id: '/_layout/clients/$clientId/policies'
       path: '/policies'
       fullPath: '/clients/$clientId/policies'
       preLoaderRoute: typeof LayoutClientsClientIdPoliciesRouteImport
+      parentRoute: typeof LayoutClientsClientIdRoute
+    }
+    '/_layout/clients/$clientId/invoices': {
+      id: '/_layout/clients/$clientId/invoices'
+      path: '/invoices'
+      fullPath: '/clients/$clientId/invoices'
+      preLoaderRoute: typeof LayoutClientsClientIdInvoicesRouteImport
       parentRoute: typeof LayoutClientsClientIdRoute
     }
     '/_layout/clients/$clientId/documents': {
@@ -363,15 +363,15 @@ declare module '@tanstack/react-router' {
 
 interface LayoutClientsClientIdRouteChildren {
   LayoutClientsClientIdDocumentsRoute: typeof LayoutClientsClientIdDocumentsRoute
+  LayoutClientsClientIdInvoicesRoute: typeof LayoutClientsClientIdInvoicesRoute
   LayoutClientsClientIdPoliciesRoute: typeof LayoutClientsClientIdPoliciesRoute
-  LayoutClientsClientIdRiskNotesRoute: typeof LayoutClientsClientIdRiskNotesRoute
   LayoutClientsClientIdIndexRoute: typeof LayoutClientsClientIdIndexRoute
 }
 
 const LayoutClientsClientIdRouteChildren: LayoutClientsClientIdRouteChildren = {
   LayoutClientsClientIdDocumentsRoute: LayoutClientsClientIdDocumentsRoute,
+  LayoutClientsClientIdInvoicesRoute: LayoutClientsClientIdInvoicesRoute,
   LayoutClientsClientIdPoliciesRoute: LayoutClientsClientIdPoliciesRoute,
-  LayoutClientsClientIdRiskNotesRoute: LayoutClientsClientIdRiskNotesRoute,
   LayoutClientsClientIdIndexRoute: LayoutClientsClientIdIndexRoute,
 }
 
