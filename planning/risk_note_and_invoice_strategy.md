@@ -1,58 +1,48 @@
-# Risk Note & Invoice System Refinement Strategy
+# Document & Payment System Strategy (Refined)
 
-## 1. Core Architecture: Decoupling Risk Notes from Invoices
+## 1. Core Philosophy: Unified Viewing, Decoupled Logic
+- **Generic Document Viewer:** Every document (Risk Note, Invoice, Receipt) must use the same viewer interface. The viewer should not know about "modes" like switching between a Risk Note and an Invoice.
+- **Strict Decoupling:** Risk Notes (underwriting) and Invoices (financials) are separate entities. A Risk Note describes a transaction; an Invoice requests payment for one or more transactions.
+- **Record Accuracy:** Certificates are removed from the system as they are not part of the official records.
 
-### The Problem
-Currently, every `RiskNote` is treated as an "Invoice" (Debit Note). In reality:
-- **Risk Note:** A document summarizing a specific transaction (New Business, Renewal, Endorsement) and its coverage. It is an internal/underwriting document.
-- **Invoice (Debit Note):** A billing request. A single invoice might bundle multiple Risk Notes (e.g., a fleet of 5 vehicles renewed together).
+## 2. Document Definitions
+- **Risk Note:** A summary of an underwriting action (New Business, Renewal, Endorsement). Lives under **Policies**.
+- **Invoice (Debit Note):** A request for payment. Lives under **Clients**. It aggregates pending balances from Risk Notes.
+- **Receipt:** A record of a payment made by a client. lives under **Financials**.
 
-### The Solution: Introduce an `Invoice` Entity
-We will decouple these by adding an `Invoice` model that acts as a collection of `RiskNotes`.
+## 3. Component Architecture
+### `UniversalDocumentViewer.tsx` (formerly `RiskNoteDocument.tsx`)
+- A stateless container that takes a `documentType` and `data`.
+- Uses a registry to render the correct template.
+- **Templates:**
+    - `RiskNoteTemplate.tsx`
+    - `InvoiceTemplate.tsx`
+    - `ReceiptTemplate.tsx`
 
-- **Invoice Model:**
-    - `id`, `invoice_number`, `client_id`, `status` (Unpaid, Partial, Paid).
-    - `line_items`: A relationship to one or more `RiskNotes`.
-    - `total_amount`: Aggregated total of all linked Risk Notes.
+## 4. Backend Model Rework
+We need to align the models with the actual business flow:
+1. **Flow:** Policy Renewed -> `RiskNote` created -> `Invoice` created/updated with the pending amount.
+2. **Current `Payment` Model:** Currently acts like a Receipt.
+3. **Proposed Change:**
+    - Rename/Refactor existing `Payment` to `Receipt`.
+    - Introduce `Invoice` model to track "Money Owed".
+    - `Invoice` contains line items linking to `RiskNote` IDs.
 
-## 2. Refined Document Templates
+## 5. Implementation Roadmap
 
-### Risk Note Template Refinement
-Based on `Risk Note - sample.docx`, we will update `RiskNoteTemplate.tsx` to include:
-- **Intermediary Details:** Clearly showing the agency branding vs the insurer.
-- **Detailed Asset Tables:** E.g., for Motor, showing Chassis No, Engine No, Make/Model in a structured grid.
-- **Scope of Cover:** A more professional "Schedule of Benefits" section.
+### Phase 1: Viewer Refactoring & Cleanup
+- [x] Rename `RiskNoteDocument.tsx` to `UniversalDocumentViewer.tsx`.
+- [x] Remove `CertificateTemplate.tsx` and all references to "Certificate" mode.
+- [x] Ensure the viewer is "one-way": it displays what it is told to display, no toggles.
 
-### Invoice (Debit Note) Template
-- Focus on the **Financial Summary**.
-- Group by Policy Number if multiple policies are included.
-- Explicit "Balance Due" and "Payment History" sections.
+### Phase 2: Backend Financial Alignment
+- [ ] Review and refactor `backend/app/models/insurance/payment.py`.
+- [ ] Introduce `Invoice` model.
+- [ ] Update `RiskNote` creation logic to trigger Invoice generation/update.
 
-## 3. New Module: Payments & Invoicing (`/finance`)
+### Phase 3: Financials View
+- [ ] Create a dedicated "Payments & Invoicing" view.
+- [ ] Support archival of physical documents (Cheques, Bank Slips) via `DocumentManager`.
 
-### Financial Hub (Client Level)
-Add a "Payments & Invoicing" view under the Client Hub.
-- **Content:**
-    - **Open Invoices:** Unpaid or partially paid bills.
-    - **Payment History:** Receipts and allocations.
-    - **Archival:** Links to uploaded images/PDFs of Cheques and Receipts.
-
-## 4. Implementation Roadmap
-
-### Phase 1: Risk Note Polish (UI)
-- [x] Refactor `templates/RiskNoteTemplate.tsx` (Internal/Transaction View) to match professional standards.
-- [x] Update `templates/Certificate.tsx` to handle more granular asset data (Chassis, Engine).
-
-### Phase 2: Invoice Logic (Backend & Frontend)
-- [ ] Implement `Invoice` model in the backend.
-- [ ] Create a "Generation Engine" utility that can take N Risk Notes and produce 1 Invoice.
-
-### Phase 3: Financial Management View
-- [ ] Implement the `Financials` view in the frontend.
-- [ ] Add `PaymentAllocation` UI to allow partial payments against specific invoices.
-- [ ] Integrate `DocumentManager` for archival of Cheques/Receipts.
-
-## 5. Workflow Refinement
-1. **Underwriting:** Create/Renew Policy -> Generate **Risk Note**.
-2. **Billing:** Select one or more Risk Notes -> Generate **Invoice (Debit Note)**.
-3. **Cashiering:** Receive Payment -> Create **Receipt** -> Allocate to **Invoice**.
+## 6. Progress Tracking
+- **[2026-01-28]:** Strategy refined. Removing Certificates and refactoring to Universal Viewer.
