@@ -1,8 +1,17 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import { Eye } from "lucide-react"
+import { Copy, Eye, FileDown, Mail, MoreHorizontal } from "lucide-react"
+import { toast } from "sonner"
 
 import type { RiskNotePublic } from "@/client"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export const getColumns = (
   onView: (riskNote: RiskNotePublic) => void,
@@ -11,7 +20,13 @@ export const getColumns = (
     accessorKey: "risk_note_number",
     header: "Risk Note #",
     cell: ({ row }) => (
-      <span className="font-mono">{row.original.risk_note_number}</span>
+      <button
+        type="button"
+        onClick={() => onView(row.original)}
+        className="font-mono font-medium text-primary hover:underline"
+      >
+        {row.original.risk_note_number}
+      </button>
     ),
   },
   {
@@ -39,13 +54,44 @@ export const getColumns = (
   {
     id: "actions",
     header: () => <span className="sr-only">Actions</span>,
-    cell: ({ row }) => (
-      <div className="flex justify-end">
-        <Button size="sm" variant="ghost" onClick={() => onView(row.original)}>
-          <Eye className="size-4 mr-2" />
-          View
-        </Button>
-      </div>
-    ),
+    cell: ({ row }) => {
+      const riskNote = row.original
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem
+              onClick={() => {
+                navigator.clipboard.writeText(riskNote.id)
+                toast.success("ID copied to clipboard")
+              }}
+            >
+              <Copy className="mr-2 h-4 w-4" />
+              Copy ID
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => onView(riskNote)}>
+              <Eye className="mr-2 h-4 w-4" />
+              View Document
+            </DropdownMenuItem>
+            <DropdownMenuItem disabled>
+              <FileDown className="mr-2 h-4 w-4" />
+              Download PDF
+            </DropdownMenuItem>
+            <DropdownMenuItem disabled>
+              <Mail className="mr-2 h-4 w-4" />
+              Email to Client
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )
+    },
   },
 ]

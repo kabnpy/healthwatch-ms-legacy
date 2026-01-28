@@ -5,12 +5,10 @@ import {
   Outlet,
   useLocation,
 } from "@tanstack/react-router"
-import { User } from "lucide-react"
 import { Suspense } from "react"
 import { ClientsService } from "@/client"
 import ErrorComponent from "@/components/Common/ErrorComponent"
 import PendingItems from "@/components/Pending/PendingItems"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { queryClient } from "@/queryClient"
 

@@ -24,9 +24,15 @@ export function PolicyHeader({
     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-1 text-sm text-muted-foreground">
-          <Link to="/clients" className="hover:text-primary transition-colors">Clients</Link>
+          <Link to="/clients" className="hover:text-primary transition-colors">
+            Clients
+          </Link>
           <ChevronRight className="size-4" />
-          <Link to="/clients/$clientId/overview" params={{ clientId }} className="hover:text-primary transition-colors">
+          <Link
+            to="/clients/$clientId/overview"
+            params={{ clientId }}
+            className="hover:text-primary transition-colors"
+          >
             {clientName}
           </Link>
           <ChevronRight className="size-4" />
@@ -34,7 +40,10 @@ export function PolicyHeader({
         </div>
         <div className="flex items-center gap-4">
           <h1 className="text-3xl font-bold tracking-tight">{policyNumber}</h1>
-          <Badge variant={status === "Active" ? "default" : "secondary"} className="h-fit">
+          <Badge
+            variant={status === "Active" ? "default" : "secondary"}
+            className="h-fit"
+          >
             {status}
           </Badge>
         </div>

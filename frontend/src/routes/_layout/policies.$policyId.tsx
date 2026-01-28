@@ -4,10 +4,10 @@ import { PoliciesService } from "@/client"
 import { DataTable } from "@/components/Common/DataTable"
 import { DocumentViewerModal } from "@/components/Common/DocumentViewerModal"
 import ErrorComponent from "@/components/Common/ErrorComponent"
+import { SummaryCard } from "@/components/Common/SummaryCard"
 import { RiskNoteDocument } from "@/components/Documents/RiskNoteDocument"
 import { RiskNoteForm } from "@/components/Insurance/RiskNoteForm"
 import PendingItems from "@/components/Pending/PendingItems"
-import { SummaryCard } from "@/components/Common/SummaryCard"
 import { AssetCard } from "@/components/Policies/Dashboard/AssetCard"
 import { CoverageCard } from "@/components/Policies/Dashboard/CoverageCard"
 
@@ -172,17 +172,29 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Status</span>
-                    <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-200">Paid</Badge>
+                    <span className="text-sm text-muted-foreground">
+                      Status
+                    </span>
+                    <Badge
+                      variant="outline"
+                      className="bg-green-500/10 text-green-600 border-green-200"
+                    >
+                      Paid
+                    </Badge>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Balance</span>
+                    <span className="text-sm text-muted-foreground">
+                      Balance
+                    </span>
                     <span className="font-mono font-bold">KES 0.00</span>
                   </div>
-                  <Button 
-                    variant="ghost" 
+                  <Button
+                    variant="ghost"
                     className="w-full justify-start gap-2 text-primary"
-                    onClick={() => latestRiskNote && handleViewRiskNote(latestRiskNote.id, "invoice")}
+                    onClick={() =>
+                      latestRiskNote &&
+                      handleViewRiskNote(latestRiskNote.id, "invoice")
+                    }
                   >
                     View Latest Debit Note
                   </Button>
