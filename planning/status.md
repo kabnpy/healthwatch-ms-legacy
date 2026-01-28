@@ -31,8 +31,12 @@
 - **UI Standardization & Client Management**
     - **Table Patterns:** Standardized Client and Policy tables with clickable identifiers and "Three-dot" action menus.
     - **Client Hub Upgrades:** Added **Settings** tab for full profile editing and a dedicated **Financials/Invoices** tab.
-    - **Danger Zone:** Implemented secure client deletion with confirmation dialogs.
-    - **Policy Context:** Moved financial actions (Renew/Endorse) from the global table to the specific Policy Dashboard.
+- **Financial System Architectural Overhaul**
+    - **Decoupling:** Separated Risk Notes (Underwriting) from Invoices (Billing).
+    - **New Models:** Implemented `Invoice`, `InvoiceLineItem`, `Receipt`, and `ReceiptAllocation`.
+    - **Automation:** Risk Note creation now automatically triggers/updates client invoices.
+    - **Validation:** Added comprehensive API tests for the new financial workflows (`test_financials.py`).
+    - **Polish:** Implemented `UniversalDocumentViewer` for a consistent viewing experience across all document types.
 - **Code Quality & Maintenance**
     - **Linting & Formatting:** Cleaned up all linting and formatting issues in both Backend (Ruff, MyPy) and Frontend (Biome).
     - **Bug Fixes:** Resolved `prestart` container exit due to schema mismatch (`physical_address` -> `postal_address`).
