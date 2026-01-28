@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { Suspense, useCallback, useMemo, useState } from "react"
+import { PoliciesService } from "@/client"
 import { DataTable } from "@/components/Common/DataTable"
 import { DocumentViewerModal } from "@/components/Common/DocumentViewerModal"
 import ErrorComponent from "@/components/Common/ErrorComponent"
@@ -13,12 +14,18 @@ import { QuickActions } from "@/components/Policies/Dashboard/QuickActions"
 import { getColumns as getRiskNoteColumns } from "@/components/RiskNotes/columns"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useClient, usePolicyDashboard } from "@/hooks/useInsurance"
+import { queryClient } from "@/queryClient"
 
 // --- Route Definition ---
 
 export const Route = createFileRoute("/_layout/policies/$policyId")({
   component: PolicyDashboard,
   errorComponent: ErrorComponent,
+  loader: ({ params }) =>
+    queryClient.ensureQueryData({
+      queryKey: ["policy", params.policyId],
+      queryFn: () => PoliciesService.readPolicy({ id: params.policyId }),
+    }),
 })
 
 function PolicyDashboardContent({ policyId }: { policyId: string }) {
