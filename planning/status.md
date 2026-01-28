@@ -28,6 +28,11 @@
     - **Breadcrumbs:** Implemented a dynamic breadcrumb system in the main header using Shadcn UI and a custom `useBreadcrumbs` hook.
     - **Nested Routing:** Refactored the Client Hub from state-based tabs to true nested routes (`/clients/$clientId/policies`, etc.) for better deep-linking and breadcrumb accuracy.
     - **Architecture:** Extracted a reusable `Header` component for the main layout.
+- **UI Standardization & Client Management**
+    - **Table Patterns:** Standardized Client and Policy tables with clickable identifiers and "Three-dot" action menus.
+    - **Client Hub Upgrades:** Added **Settings** tab for full profile editing and a dedicated **Financials/Invoices** tab.
+    - **Danger Zone:** Implemented secure client deletion with confirmation dialogs.
+    - **Policy Context:** Moved financial actions (Renew/Endorse) from the global table to the specific Policy Dashboard.
 - **Code Quality & Maintenance**
     - **Linting & Formatting:** Cleaned up all linting and formatting issues in both Backend (Ruff, MyPy) and Frontend (Biome).
     - **Bug Fixes:** Resolved `prestart` container exit due to schema mismatch (`physical_address` -> `postal_address`).
