@@ -24,6 +24,10 @@
 - **MVP Phase 3: Generalized Wizard & Client Documents**
     - **Universal Wizard:** Upgraded `NewBusinessWizard` to handle any insurance class. Added Product Selection and dynamic asset fields (Motor vs. General).
     - **Client Documents:** Implemented the "Documents" tab in the Client Hub, allowing upload and viewing of client-level files (KRA PIN, IDs).
+- **Navigation & UX Refinement**
+    - **Breadcrumbs:** Implemented a dynamic breadcrumb system in the main header using Shadcn UI and a custom `useBreadcrumbs` hook.
+    - **Nested Routing:** Refactored the Client Hub from state-based tabs to true nested routes (`/clients/$clientId/policies`, etc.) for better deep-linking and breadcrumb accuracy.
+    - **Architecture:** Extracted a reusable `Header` component for the main layout.
 - **Code Quality & Maintenance**
     - **Linting & Formatting:** Cleaned up all linting and formatting issues in both Backend (Ruff, MyPy) and Frontend (Biome).
     - **Bug Fixes:** Resolved `prestart` container exit due to schema mismatch (`physical_address` -> `postal_address`).
