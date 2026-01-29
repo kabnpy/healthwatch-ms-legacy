@@ -17,15 +17,15 @@ export const getColumns = (
   onView: (riskNote: RiskNotePublic) => void,
 ): ColumnDef<RiskNotePublic>[] => [
   {
-    accessorKey: "risk_note_number",
-    header: "Risk Note #",
+    accessorKey: "invoice_number",
+    header: "Ref / Invoice #",
     cell: ({ row }) => (
       <button
         type="button"
         onClick={() => onView(row.original)}
         className="font-mono font-medium text-primary hover:underline"
       >
-        {row.original.risk_note_number}
+        {row.original.invoice_number || "Draft"}
       </button>
     ),
   },
@@ -38,16 +38,20 @@ export const getColumns = (
     header: "Start Date",
   },
   {
-    accessorKey: "gross_premium",
-    header: "Gross Premium",
+    accessorKey: "total_amount",
+    header: "Total Amount",
     cell: ({ row }) => {
-      const breakdown = row.original.premium_breakdown as any
       return (
-        <span className="font-bold">
-          {breakdown?.total?.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-          }) || "0.00"}
-        </span>
+        <div className="flex flex-col">
+          <span className="font-bold">
+            KES {row.original.total_amount.toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+            })}
+          </span>
+          <span className="text-[10px] uppercase text-muted-foreground">
+            {row.original.payment_status}
+          </span>
+        </div>
       )
     },
   },

@@ -83,6 +83,11 @@ export const ClaimCreateSchema = {
             format: 'date',
             title: 'Date Of Loss'
         },
+        date_reported: {
+            type: 'string',
+            format: 'date',
+            title: 'Date Reported'
+        },
         description: {
             type: 'string',
             title: 'Description'
@@ -90,7 +95,7 @@ export const ClaimCreateSchema = {
         status: {
             type: 'string',
             title: 'Status',
-            default: 'Open'
+            default: 'Reported'
         },
         reserve_amount: {
             type: 'number',
@@ -131,6 +136,11 @@ export const ClaimPublicSchema = {
             format: 'date',
             title: 'Date Of Loss'
         },
+        date_reported: {
+            type: 'string',
+            format: 'date',
+            title: 'Date Reported'
+        },
         description: {
             type: 'string',
             title: 'Description'
@@ -138,7 +148,7 @@ export const ClaimPublicSchema = {
         status: {
             type: 'string',
             title: 'Status',
-            default: 'Open'
+            default: 'Reported'
         },
         reserve_amount: {
             type: 'number',
@@ -204,6 +214,18 @@ export const ClaimUpdateSchema = {
                 }
             ],
             title: 'Date Of Loss'
+        },
+        date_reported: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Date Reported'
         },
         description: {
             anyOf: [
@@ -303,16 +325,13 @@ export const ClientCreateSchema = {
             ],
             title: 'Postal Address'
         },
-        contact_person: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Contact Person'
+        contacts: {
+            items: {
+                additionalProperties: true,
+                type: 'object'
+            },
+            type: 'array',
+            title: 'Contacts'
         }
     },
     type: 'object',
@@ -361,16 +380,13 @@ export const ClientPublicSchema = {
             ],
             title: 'Postal Address'
         },
-        contact_person: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Contact Person'
+        contacts: {
+            items: {
+                additionalProperties: true,
+                type: 'object'
+            },
+            type: 'array',
+            title: 'Contacts'
         },
         id: {
             type: 'string',
@@ -451,16 +467,20 @@ export const ClientUpdateSchema = {
             ],
             title: 'Postal Address'
         },
-        contact_person: {
+        contacts: {
             anyOf: [
                 {
-                    type: 'string'
+                    items: {
+                        additionalProperties: true,
+                        type: 'object'
+                    },
+                    type: 'array'
                 },
                 {
                     type: 'null'
                 }
             ],
-            title: 'Contact Person'
+            title: 'Contacts'
         }
     },
     type: 'object',
@@ -848,6 +868,14 @@ export const InvoicePublicSchema = {
             type: 'string',
             format: 'uuid',
             title: 'Id'
+        },
+        allocations: {
+            items: {
+                '$ref': '#/components/schemas/ReceiptAllocationBase'
+            },
+            type: 'array',
+            title: 'Allocations',
+            default: []
         }
     },
     type: 'object',
@@ -1063,6 +1091,11 @@ export const PolicyCreateSchema = {
             type: 'string',
             title: 'Status',
             default: 'Active'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
         }
     },
     type: 'object',
@@ -1097,6 +1130,11 @@ export const PolicyPublicSchema = {
             type: 'string',
             title: 'Status',
             default: 'Active'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
         },
         id: {
             type: 'string',
@@ -1185,6 +1223,12 @@ export const PolicyUpdateSchema = {
     title: 'PolicyUpdate'
 } as const;
 
+export const PricingStrategySchema = {
+    type: 'string',
+    enum: ['Percentage', 'FixedTiered', 'Manual'],
+    title: 'PricingStrategy'
+} as const;
+
 export const PrivateUserCreateSchema = {
     properties: {
         email: {
@@ -1225,6 +1269,23 @@ export const ProductCreateSchema = {
             type: 'string',
             title: 'Class Of Insurance'
         },
+        pricing_strategy: {
+            '$ref': '#/components/schemas/PricingStrategy',
+            default: 'Percentage'
+        },
+        pricing_rules: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Pricing Rules'
+        },
+        form_schema: {
+            items: {
+                additionalProperties: true,
+                type: 'object'
+            },
+            type: 'array',
+            title: 'Form Schema'
+        },
         default_benefits: {
             additionalProperties: true,
             type: 'object',
@@ -1262,6 +1323,23 @@ export const ProductPublicSchema = {
         class_of_insurance: {
             type: 'string',
             title: 'Class Of Insurance'
+        },
+        pricing_strategy: {
+            '$ref': '#/components/schemas/PricingStrategy',
+            default: 'Percentage'
+        },
+        pricing_rules: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Pricing Rules'
+        },
+        form_schema: {
+            items: {
+                additionalProperties: true,
+                type: 'object'
+            },
+            type: 'array',
+            title: 'Form Schema'
         },
         default_benefits: {
             additionalProperties: true,
@@ -1326,6 +1404,43 @@ export const ProductUpdateSchema = {
                 }
             ],
             title: 'Class Of Insurance'
+        },
+        pricing_strategy: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/PricingStrategy'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        pricing_rules: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Pricing Rules'
+        },
+        form_schema: {
+            anyOf: [
+                {
+                    items: {
+                        additionalProperties: true,
+                        type: 'object'
+                    },
+                    type: 'array'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Form Schema'
         },
         default_benefits: {
             anyOf: [
@@ -1476,6 +1591,11 @@ export const ReceiptCreateSchema = {
             type: 'number',
             title: 'Amount'
         },
+        unallocated_amount: {
+            type: 'number',
+            title: 'Unallocated Amount',
+            default: 0
+        },
         mode: {
             type: 'string',
             title: 'Mode'
@@ -1494,6 +1614,23 @@ export const ReceiptCreateSchema = {
                 }
             ],
             title: 'Notes'
+        },
+        status: {
+            type: 'string',
+            title: 'Status',
+            default: 'Active'
+        },
+        created_by_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Created By Id'
         }
     },
     type: 'object',
@@ -1521,6 +1658,11 @@ export const ReceiptPublicSchema = {
             type: 'number',
             title: 'Amount'
         },
+        unallocated_amount: {
+            type: 'number',
+            title: 'Unallocated Amount',
+            default: 0
+        },
         mode: {
             type: 'string',
             title: 'Mode'
@@ -1540,6 +1682,23 @@ export const ReceiptPublicSchema = {
             ],
             title: 'Notes'
         },
+        status: {
+            type: 'string',
+            title: 'Status',
+            default: 'Active'
+        },
+        created_by_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Created By Id'
+        },
         id: {
             type: 'string',
             format: 'uuid',
@@ -1552,15 +1711,10 @@ export const ReceiptPublicSchema = {
             type: 'array',
             title: 'Allocations',
             default: []
-        },
-        unallocated_amount: {
-            type: 'number',
-            title: 'Unallocated Amount',
-            readOnly: true
         }
     },
     type: 'object',
-    required: ['receipt_number', 'client_id', 'date_received', 'amount', 'mode', 'reference', 'id', 'unallocated_amount'],
+    required: ['receipt_number', 'client_id', 'date_received', 'amount', 'mode', 'reference', 'id'],
     title: 'ReceiptPublic'
 } as const;
 
@@ -1590,31 +1744,61 @@ export const RiskItemCreateSchema = {
             format: 'uuid',
             title: 'Policy Id'
         },
-        identifier: {
+        version_number: {
+            type: 'integer',
+            title: 'Version Number',
+            default: 1
+        },
+        valid_from: {
             type: 'string',
-            title: 'Identifier'
+            format: 'date',
+            title: 'Valid From'
+        },
+        valid_to: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Valid To'
+        },
+        is_active: {
+            type: 'boolean',
+            title: 'Is Active',
+            default: true
         },
         description: {
             type: 'string',
             title: 'Description'
         },
-        sum_insured: {
+        cover_description: {
+            type: 'string',
+            title: 'Cover Description'
+        },
+        total_premium: {
             type: 'number',
-            title: 'Sum Insured'
+            title: 'Total Premium',
+            default: 0
         },
-        details: {
+        premium_breakdown: {
+            additionalProperties: {
+                type: 'number'
+            },
+            type: 'object',
+            title: 'Premium Breakdown'
+        },
+        risk_details: {
             additionalProperties: true,
             type: 'object',
-            title: 'Details'
-        },
-        benefits: {
-            additionalProperties: true,
-            type: 'object',
-            title: 'Benefits'
+            title: 'Risk Details'
         }
     },
     type: 'object',
-    required: ['policy_id', 'identifier', 'description', 'sum_insured'],
+    required: ['policy_id', 'description', 'cover_description'],
     title: 'RiskItemCreate'
 } as const;
 
@@ -1625,27 +1809,57 @@ export const RiskItemPublicSchema = {
             format: 'uuid',
             title: 'Policy Id'
         },
-        identifier: {
+        version_number: {
+            type: 'integer',
+            title: 'Version Number',
+            default: 1
+        },
+        valid_from: {
             type: 'string',
-            title: 'Identifier'
+            format: 'date',
+            title: 'Valid From'
+        },
+        valid_to: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Valid To'
+        },
+        is_active: {
+            type: 'boolean',
+            title: 'Is Active',
+            default: true
         },
         description: {
             type: 'string',
             title: 'Description'
         },
-        sum_insured: {
+        cover_description: {
+            type: 'string',
+            title: 'Cover Description'
+        },
+        total_premium: {
             type: 'number',
-            title: 'Sum Insured'
+            title: 'Total Premium',
+            default: 0
         },
-        details: {
+        premium_breakdown: {
+            additionalProperties: {
+                type: 'number'
+            },
+            type: 'object',
+            title: 'Premium Breakdown'
+        },
+        risk_details: {
             additionalProperties: true,
             type: 'object',
-            title: 'Details'
-        },
-        benefits: {
-            additionalProperties: true,
-            type: 'object',
-            title: 'Benefits'
+            title: 'Risk Details'
         },
         id: {
             type: 'string',
@@ -1654,7 +1868,7 @@ export const RiskItemPublicSchema = {
         }
     },
     type: 'object',
-    required: ['policy_id', 'identifier', 'description', 'sum_insured', 'id'],
+    required: ['policy_id', 'description', 'cover_description', 'id'],
     title: 'RiskItemPublic'
 } as const;
 
@@ -1679,10 +1893,6 @@ export const RiskItemsPublicSchema = {
 
 export const RiskNoteCreateSchema = {
     properties: {
-        risk_note_number: {
-            type: 'string',
-            title: 'Risk Note Number'
-        },
         policy_id: {
             type: 'string',
             format: 'uuid',
@@ -1691,6 +1901,46 @@ export const RiskNoteCreateSchema = {
         transaction_type: {
             type: 'string',
             title: 'Transaction Type'
+        },
+        previous_risk_note_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Previous Risk Note Id'
+        },
+        invoice_number: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Invoice Number'
+        },
+        created_by_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Created By Id'
+        },
+        payment_status: {
+            type: 'string',
+            title: 'Payment Status',
+            default: 'Unpaid'
         },
         start_date: {
             type: 'string',
@@ -1702,24 +1952,29 @@ export const RiskNoteCreateSchema = {
             format: 'date',
             title: 'End Date'
         },
-        premium_breakdown: {
-            additionalProperties: true,
-            type: 'object',
-            title: 'Premium Breakdown'
+        net_premium: {
+            type: 'number',
+            title: 'Net Premium'
         },
-        benefits_snapshot: {
-            additionalProperties: true,
+        taxes: {
+            additionalProperties: {
+                type: 'number'
+            },
             type: 'object',
-            title: 'Benefits Snapshot'
-        },
-        risk_item_snapshot: {
-            additionalProperties: true,
-            type: 'object',
-            title: 'Risk Item Snapshot'
+            title: 'Taxes'
         },
         commission_amount: {
             type: 'number',
             title: 'Commission Amount'
+        },
+        total_amount: {
+            type: 'number',
+            title: 'Total Amount'
+        },
+        items_snapshot: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Items Snapshot'
         },
         special_clauses: {
             items: {
@@ -1730,16 +1985,12 @@ export const RiskNoteCreateSchema = {
         }
     },
     type: 'object',
-    required: ['risk_note_number', 'policy_id', 'transaction_type', 'start_date', 'end_date', 'commission_amount'],
+    required: ['policy_id', 'transaction_type', 'start_date', 'end_date', 'net_premium', 'commission_amount', 'total_amount'],
     title: 'RiskNoteCreate'
 } as const;
 
 export const RiskNotePublicSchema = {
     properties: {
-        risk_note_number: {
-            type: 'string',
-            title: 'Risk Note Number'
-        },
         policy_id: {
             type: 'string',
             format: 'uuid',
@@ -1748,6 +1999,46 @@ export const RiskNotePublicSchema = {
         transaction_type: {
             type: 'string',
             title: 'Transaction Type'
+        },
+        previous_risk_note_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Previous Risk Note Id'
+        },
+        invoice_number: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Invoice Number'
+        },
+        created_by_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Created By Id'
+        },
+        payment_status: {
+            type: 'string',
+            title: 'Payment Status',
+            default: 'Unpaid'
         },
         start_date: {
             type: 'string',
@@ -1759,24 +2050,29 @@ export const RiskNotePublicSchema = {
             format: 'date',
             title: 'End Date'
         },
-        premium_breakdown: {
-            additionalProperties: true,
-            type: 'object',
-            title: 'Premium Breakdown'
+        net_premium: {
+            type: 'number',
+            title: 'Net Premium'
         },
-        benefits_snapshot: {
-            additionalProperties: true,
+        taxes: {
+            additionalProperties: {
+                type: 'number'
+            },
             type: 'object',
-            title: 'Benefits Snapshot'
-        },
-        risk_item_snapshot: {
-            additionalProperties: true,
-            type: 'object',
-            title: 'Risk Item Snapshot'
+            title: 'Taxes'
         },
         commission_amount: {
             type: 'number',
             title: 'Commission Amount'
+        },
+        total_amount: {
+            type: 'number',
+            title: 'Total Amount'
+        },
+        items_snapshot: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Items Snapshot'
         },
         special_clauses: {
             items: {
@@ -1792,23 +2088,12 @@ export const RiskNotePublicSchema = {
         }
     },
     type: 'object',
-    required: ['risk_note_number', 'policy_id', 'transaction_type', 'start_date', 'end_date', 'commission_amount', 'id'],
+    required: ['policy_id', 'transaction_type', 'start_date', 'end_date', 'net_premium', 'commission_amount', 'total_amount', 'id'],
     title: 'RiskNotePublic'
 } as const;
 
 export const RiskNoteUpdateSchema = {
     properties: {
-        risk_note_number: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Risk Note Number'
-        },
         transaction_type: {
             anyOf: [
                 {
@@ -1819,6 +2104,40 @@ export const RiskNoteUpdateSchema = {
                 }
             ],
             title: 'Transaction Type'
+        },
+        previous_risk_note_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Previous Risk Note Id'
+        },
+        invoice_number: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Invoice Number'
+        },
+        payment_status: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Payment Status'
         },
         start_date: {
             anyOf: [
@@ -1844,41 +2163,30 @@ export const RiskNoteUpdateSchema = {
             ],
             title: 'End Date'
         },
-        premium_breakdown: {
+        net_premium: {
             anyOf: [
                 {
-                    additionalProperties: true,
-                    type: 'object'
+                    type: 'number'
                 },
                 {
                     type: 'null'
                 }
             ],
-            title: 'Premium Breakdown'
+            title: 'Net Premium'
         },
-        benefits_snapshot: {
+        taxes: {
             anyOf: [
                 {
-                    additionalProperties: true,
+                    additionalProperties: {
+                        type: 'number'
+                    },
                     type: 'object'
                 },
                 {
                     type: 'null'
                 }
             ],
-            title: 'Benefits Snapshot'
-        },
-        risk_item_snapshot: {
-            anyOf: [
-                {
-                    additionalProperties: true,
-                    type: 'object'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Risk Item Snapshot'
+            title: 'Taxes'
         },
         commission_amount: {
             anyOf: [
@@ -1890,6 +2198,29 @@ export const RiskNoteUpdateSchema = {
                 }
             ],
             title: 'Commission Amount'
+        },
+        total_amount: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Total Amount'
+        },
+        items_snapshot: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Items Snapshot'
         },
         special_clauses: {
             anyOf: [
@@ -1996,6 +2327,10 @@ export const UserCreateSchema = {
             ],
             title: 'Full Name'
         },
+        role: {
+            '$ref': '#/components/schemas/UserRole',
+            default: 'Viewer'
+        },
         password: {
             type: 'string',
             maxLength: 128,
@@ -2037,6 +2372,10 @@ export const UserPublicSchema = {
                 }
             ],
             title: 'Full Name'
+        },
+        role: {
+            '$ref': '#/components/schemas/UserRole',
+            default: 'Viewer'
         },
         id: {
             type: 'string',
@@ -2081,6 +2420,12 @@ export const UserRegisterSchema = {
     title: 'UserRegister'
 } as const;
 
+export const UserRoleSchema = {
+    type: 'string',
+    enum: ['Admin', 'Underwriter', 'Cashier', 'Viewer'],
+    title: 'UserRole'
+} as const;
+
 export const UserUpdateSchema = {
     properties: {
         email: {
@@ -2117,6 +2462,10 @@ export const UserUpdateSchema = {
                 }
             ],
             title: 'Full Name'
+        },
+        role: {
+            '$ref': '#/components/schemas/UserRole',
+            default: 'Viewer'
         },
         password: {
             anyOf: [

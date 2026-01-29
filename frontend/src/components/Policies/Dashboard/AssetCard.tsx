@@ -19,7 +19,7 @@ export function AssetCard({ item }: AssetCardProps) {
   }
 
   // Assuming details is a generic dict
-  const details = (item.details as Record<string, any>) || {}
+  const details = (item.risk_details as Record<string, any>) || {}
 
   return (
     <Card className="h-full shadow-sm">
@@ -32,15 +32,15 @@ export function AssetCard({ item }: AssetCardProps) {
       <CardContent>
         <div className="flex flex-col gap-4">
           <div>
-            <div className="text-xl font-bold truncate">{item.identifier}</div>
-            <p className="text-sm text-muted-foreground">{item.description}</p>
+            <div className="text-xl font-bold truncate">{item.description}</div>
+            <p className="text-sm text-muted-foreground">{item.cover_description}</p>
           </div>
 
           <div className="space-y-2 text-sm">
             <div className="flex justify-between border-b pb-1">
-              <span className="text-muted-foreground">Sum Insured</span>
+              <span className="text-muted-foreground">Insured Value</span>
               <span className="font-mono font-semibold">
-                KES {item.sum_insured.toLocaleString()}
+                KES {(details.sum_insured || 0).toLocaleString()}
               </span>
             </div>
             {Object.entries(details)

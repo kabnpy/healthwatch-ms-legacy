@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
 import {
   FinancialsService,
   type ReceiptCreate,
@@ -45,6 +46,18 @@ export const useCreateReceipt = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["receipts"] })
       queryClient.invalidateQueries({ queryKey: ["invoices"] })
+    },
+  })
+}
+
+export const useVoidReceipt = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => FinancialsService.deleteReceipt({ id }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["receipts"] })
+      queryClient.invalidateQueries({ queryKey: ["invoices"] })
+      toast.success("Receipt voided and balances reversed")
     },
   })
 }

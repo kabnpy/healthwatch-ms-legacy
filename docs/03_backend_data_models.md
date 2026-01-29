@@ -1,127 +1,130 @@
 # Backend Data Models (Refined Architecture)
 
 > **STATUS:** FINAL
-> **CONTEXT:** Supports "Time Travel" (History), Cashiering, and Polymorphic File Storage.
+> **CONTEXT:** Supports "Temporal Versioning" (History), Snapshots, and Financial Integrity.
 
 ---
 
 ## 1. CORE ENTITIES (Identity)
 
 ### `User`
-*The staff members accessing the system.*
-- `id`: UUID (Primary Key).
+- `id`: UUID.
 - `email`: String (Unique).
 - `full_name`: String.
 - `role`: Enum (`Admin`, `Underwriter`, `Cashier`, `Viewer`).
 - `is_active`: Boolean.
 
 ### `Client`
-*The customer.*
 - `id`: UUID.
-- `name`: String (Individual or Corporate Name).
-- `kra_pin`: String (Tax ID - Critical for Invoicing).
+- `name`: String.
+- `kra_pin`: String.
 - `email`: String.
 - `phone`: String.
-- `physical_address`: Text.
+- `postal_address`: Text.
+- **`contacts`**: JSON (Multi-contact system for Corporate clients).
 
 ---
 
-## 2. POLICY ENGINE (The Transaction Log)
+## 2. PRODUCT & POLICY ENGINE
 
-### `Policy`
-*The container for coverage. It represents the "Folder".*
+### `Product` (The Template)
+- `id`: UUID.
+- `name`: String (e.g., "Gold Comprehensive").
+- `class_of_insurance`: String (e.g., "Motor Private").
+- `pricing_strategy`: Enum (`Percentage`, `FixedTiered`, `Manual`).
+- `pricing_rules`: JSON.
+- `form_schema`: JSON (Defines fields for the Wizard).
+
+### `Policy` (The Folder)
 - `id`: UUID.
 - `client_id`: FK -> Client.
-- `product_id`: FK -> Product (e.g., "Motor Private").
-- `policy_number`: String (Unique, e.g., "P/001/2026").
+- `product_id`: FK -> Product.
+- `policy_number`: String (Unique).
 - `status`: Enum (`Active`, `Lapsed`, `Cancelled`).
 - `created_at`: Timestamp.
 
-### `RiskItem` (The Asset)
-*Implements **Temporal Versioning**. We never update in place; we expire and create new.*
+### `RiskItem` (The Asset - Temporal)
+*Multiple versions can exist for one asset over time.*
 - `id`: UUID.
 - `policy_id`: FK -> Policy.
-- **`version_number`**: Int (Increments: 1, 2, 3...).
-- **`valid_from`**: Date (Start of this specific version).
-- **`valid_to`**: Date (Nullable. None = Currently Active).
-- `is_active`: Boolean (Helper field for queries).
-- `identifier`: String (e.g., Vehicle Reg No).
-- `description`: String (e.g., "Toyota Harrier").
-- `sum_insured`: Decimal.
-- `details`: JSON (Flexible bucket for "Chassis No", "Engine No", "Color").
+- `version_number`: Int.
+- `valid_from`: Date.
+- `valid_to`: Date (Nullable).
+- `is_active`: Boolean.
+- `description`: String.
+- `cover_description`: String.
+- `total_premium`: Decimal.
+- `premium_breakdown`: JSON.
+- `risk_details`: JSON (Product-specific data).
 
-### `RiskNote` (The Transaction & Invoice)
-*Dual purpose: Legal Certificate + Financial Debit Note.*
+### `RiskNote` (The Transaction Snapshot)
+*A frozen state of the policy for a specific event (Renewal, Endorsement).*
 - `id`: UUID.
 - `policy_id`: FK -> Policy.
-- **`transaction_type`**: Enum (`New Business`, `Renewal`, `Endorsement`, `Cancellation`).
-- **`previous_risk_note_id`**: FK -> RiskNote (Self-referential history chain).
-- `risk_note_number`: String (Internal Ref).
-- **`invoice_number`**: String (Official Tax Invoice #).
-- **`created_by_id`**: FK -> User (For "Prepared By" audit trail).
-- `start_date`: Date (Cover start).
-- `end_date`: Date (Cover end).
-- `basic_premium`: Decimal.
-- `taxes_and_levies`: JSON (Breakdown of Stamp Duty, Training Levy, etc.).
-- `gross_premium`: Decimal (Total Payable).
-- `payment_status`: Enum (`Unpaid`, `Partial`, `Paid`).
-
----
-
-## 3. FINANCIALS (Cashiering)
-
-### `Payment` (Money In)
-*Represents a raw inflow of funds (Check, M-Pesa, etc).*
-- `id`: UUID.
-- `date`: Date.
-- `amount`: Decimal (Total received).
-- **`unallocated_amount`**: Decimal (Ideally equals `amount` initially. Drops to 0 as it is used).
-- `payment_mode`: Enum (`Cheque`, `MPESA`, `BankTransfer`, `Cash`).
-- `reference`: String (Transaction Code).
+- `transaction_type`: Enum (`New Business`, `Renewal`, `Endorsement`, `Cancellation`).
+- `previous_risk_note_id`: FK -> RiskNote.
 - `created_by_id`: FK -> User.
-
-### `PaymentAllocation` (The Link)
-*Mapping money from a Payment to a specific Debt (Risk Note).*
-- `id`: UUID.
-- `payment_id`: FK -> Payment.
-- `risk_note_id`: FK -> RiskNote.
-- `amount_allocated`: Decimal.
-- `created_at`: Timestamp.
+- `start_date`: Date.
+- `end_date`: Date.
+- `items_snapshot`: JSON (Frozen state of all RiskItems in this transaction).
+- `net_premium`: Decimal.
+- `taxes`: JSON.
+- `total_amount`: Decimal (The amount to be invoiced).
 
 ---
 
-## 4. CLAIMS (Triage)
+## 3. FINANCIALS (Ledge)
+
+### `Invoice` (The Debt)
+- `id`: UUID.
+- `invoice_number`: String.
+- `client_id`: FK -> Client.
+- `date_issued`: Date.
+- `status`: Enum (`Unpaid`, `Partial`, `Paid`).
+- `total_amount`: Decimal.
+- `balance_due`: Decimal.
+
+### `Receipt` (The Money In)
+- `id`: UUID.
+- `receipt_number`: String.
+- `client_id`: FK -> Client.
+- `date_received`: Date.
+- `amount`: Decimal.
+- `unallocated_amount`: Decimal.
+- `mode`: Enum (`MPESA`, `BankTransfer`, `Cash`, `Cheque`).
+- `reference`: String.
+- `status`: Enum (`Active`, `Voided`).
+
+### `ReceiptAllocation` (The Link)
+- `id`: UUID.
+- `receipt_id`: FK -> Receipt.
+- `invoice_id`: FK -> Invoice.
+- `risk_note_id`: FK -> RiskNote (Optional).
+- `amount_allocated`: Decimal.
+
+---
+
+## 4. CLAIMS & DOCUMENTS
 
 ### `Claim`
-*The header for a loss incident.*
 - `id`: UUID.
 - `policy_id`: FK -> Policy.
-- **`risk_item_id`**: FK -> RiskItem (Links to the specific version of the car at time of loss).
+- `risk_item_id`: FK -> RiskItem (Specific version).
 - `claim_number`: String.
 - `date_of_loss`: Date.
 - `date_reported`: Date.
-- `status`: Enum (`Reported`, `Under Investigation`, `Approved`, `Declined`, `Paid`).
-- `reserve_amount`: Decimal (Estimated liability).
-
-### `ClaimEvent`
-*The timeline of actions taken on a claim.*
-- `id`: UUID.
-- `claim_id`: FK -> Claim.
-- `event_type`: Enum (`Notification`, `Assessment`, `Correspondence`, `Payment`).
-- `description`: Text.
-- `created_by_id`: FK -> User.
-- `created_at`: Timestamp.
-
----
-
-## 5. DOCUMENTS (The Vault)
+- `status`: Enum (`Reported`, `Investigating`, `Approved`, `Declined`, `Paid`).
 
 ### `Document` (Polymorphic)
-*A single table for all file attachments across the system.*
+*A single table for all file attachments across the system. This is where external files (e.g., Bank Slips, M-Pesa screenshots, Insurer-issued receipts) are stored and linked to internal records.*
+
 - `id`: UUID.
-- **`entity_type`**: Enum (`Client`, `Policy`, `Claim`, `User`).
-- **`entity_id`**: UUID (The ID of the Client/Policy/Claim).
-- `document_type`: Enum (`Logbook`, `ID`, `Valuation`, `PoliceAbstract`, `Receipt`).
+- **`entity_type`**: Enum (`Client`, `Policy`, `Claim`, `RiskNote`, `Receipt`).
+- **`entity_id`**: UUID (e.g., link to a specific internal Receipt record).
+- `document_type`: String (e.g., "Logbook", "ID", "Proof of Payment", "Insurer Receipt").
 - `file_path`: String (Local path or S3 Key).
-- `mime_type`: String.
 - `uploaded_at`: Timestamp.
+
+**Relationship Note:**
+- An internal **Receipt** record represents the financial transaction in the ledger.
+- An external **Proof of Payment** is a **Document** linked to that Receipt.

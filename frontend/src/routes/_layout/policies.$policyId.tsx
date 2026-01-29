@@ -119,13 +119,13 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
         <TabsContent value="overview" className="pt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <SummaryCard
-              title="Insured Value"
-              value={`KES ${((latestRiskNote?.premium_breakdown as any)?.basic / 0.04 || 0).toLocaleString()}`}
-              description="Current Sum Insured"
+              title="Net Premium"
+              value={`KES ${latestRiskNote?.net_premium?.toLocaleString() || "0.00"}`}
+              description="Before taxes & levies"
             />
             <SummaryCard
-              title="Total Premium"
-              value={`KES ${(latestRiskNote?.premium_breakdown as any)?.total?.toLocaleString() || "0.00"}`}
+              title="Total Payable"
+              value={`KES ${latestRiskNote?.total_amount?.toLocaleString() || "0.00"}`}
               description="Including Levies & Taxes"
             />
             <SummaryCard

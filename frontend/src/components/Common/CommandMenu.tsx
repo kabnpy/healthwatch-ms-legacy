@@ -1,5 +1,14 @@
 import { useNavigate } from "@tanstack/react-router"
-import { FileText, Search, Settings, Shield, User, Users } from "lucide-react"
+import { 
+  FileText, 
+  Search, 
+  Settings, 
+  Shield, 
+  User, 
+  Users, 
+  Receipt as ReceiptIcon,
+  CreditCard 
+} from "lucide-react"
 import * as React from "react"
 
 import {
@@ -13,6 +22,7 @@ import {
   CommandShortcut,
 } from "@/components/ui/command"
 import { useClients, usePolicies } from "@/hooks/useInsurance"
+import { useInvoices, useReceipts } from "@/hooks/useFinancials"
 
 export function CommandMenu() {
   const [open, setOpen] = React.useState(false)
@@ -20,6 +30,8 @@ export function CommandMenu() {
 
   const { data: clientsData } = useClients(0, 50)
   const { data: policiesData } = usePolicies(undefined, 0, 50)
+  const { data: invoicesData } = useInvoices(undefined, 0, 50)
+  const { data: receiptsData } = useReceipts(undefined, 0, 50)
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -98,6 +110,52 @@ export function CommandMenu() {
                 <Shield className="mr-2 h-4 w-4" />
                 <span>{policy.policy_number}</span>
                 <CommandShortcut>{policy.status}</CommandShortcut>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+
+          <CommandSeparator />
+
+          <CommandGroup heading="Invoices">
+            {invoicesData?.data.map((invoice) => (
+              <CommandItem
+                key={invoice.id}
+                value={invoice.invoice_number}
+                onSelect={() => {
+                  runCommand(() =>
+                    navigate({
+                      to: "/clients/$clientId/invoices",
+                      params: { clientId: invoice.client_id },
+                    }),
+                  )
+                }}
+              >
+                <ReceiptIcon className="mr-2 h-4 w-4" />
+                <span>{invoice.invoice_number}</span>
+                <CommandShortcut>KES {(invoice.total_amount || 0).toLocaleString()}</CommandShortcut>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+
+          <CommandSeparator />
+
+          <CommandGroup heading="Receipts">
+            {receiptsData?.data.map((receipt) => (
+              <CommandItem
+                key={receipt.id}
+                value={receipt.receipt_number}
+                onSelect={() => {
+                  runCommand(() =>
+                    navigate({
+                      to: "/clients/$clientId/invoices",
+                      params: { clientId: receipt.client_id },
+                    }),
+                  )
+                }}
+              >
+                <CreditCard className="mr-2 h-4 w-4" />
+                <span>{receipt.receipt_number}</span>
+                <CommandShortcut>{receipt.mode}</CommandShortcut>
               </CommandItem>
             ))}
           </CommandGroup>

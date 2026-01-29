@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
+import { useForm, useFieldArray } from "react-hook-form"
 import { z } from "zod"
 import type { ClientCreate, ClientPublic, ClientUpdate } from "@/client"
 import { Button } from "@/components/ui/button"
@@ -20,6 +20,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Plus, Trash2 } from "lucide-react"
+import { Separator } from "@/components/ui/separator"
+
+const contactSchema = z.object({
+  name: z.string().min(1, "Contact name is required"),
+  role: z.string().optional(),
+  phone: z.string().optional(),
+  email: z.string().email("Invalid email").or(z.literal("")).optional(),
+})
 
 const formSchema = z.object({
   client_type: z.enum(["Individual", "Corporate"]),
@@ -28,7 +37,7 @@ const formSchema = z.object({
   email: z.string().email("Invalid email").or(z.literal("")),
   phone: z.string().min(10, "Phone number is required"),
   postal_address: z.string().optional(),
-  contact_person: z.string().optional(),
+  contacts: z.array(contactSchema).default([]),
 })
 
 type FormData = z.infer<typeof formSchema>
@@ -57,8 +66,13 @@ export const ClientForm = ({
       email: initialData?.email || "",
       phone: initialData?.phone || "",
       postal_address: initialData?.postal_address || "",
-      contact_person: initialData?.contact_person || "",
+      contacts: (initialData?.contacts as any) || [],
     },
+  })
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "contacts"
   })
 
   const handleFormSubmit = (data: FormData) => {
@@ -66,7 +80,6 @@ export const ClientForm = ({
       ...data,
       email: data.email === "" ? null : data.email,
       postal_address: data.postal_address || null,
-      contact_person: data.contact_person || null,
     }
     onSubmit(formattedData as any)
   }
@@ -178,21 +191,97 @@ export const ClientForm = ({
           )}
         />
 
-        {form.watch("client_type") === "Corporate" && (
-          <FormField
-            control={form.control}
-            name="contact_person"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Contact Person</FormLabel>
-                <FormControl>
-                  <Input placeholder="Name of contact person" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
+        <div className="space-y-4 pt-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+              Client Contacts
+            </h3>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={() => append({ name: "", role: "", phone: "", email: "" })}
+            >
+              <Plus className="size-4" />
+              Add Contact
+            </Button>
+          </div>
+          <Separator />
+          
+          {fields.map((field, index) => (
+            <div key={field.id} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg bg-muted/10 relative group">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-destructive"
+                onClick={() => remove(index)}
+              >
+                <Trash2 className="size-4" />
+              </Button>
+
+              <FormField
+                control={form.control}
+                name={`contacts.${index}.name`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Contact Name</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name={`contacts.${index}.role`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Role (e.g. Accountant)</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name={`contacts.${index}.phone`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phone</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name={`contacts.${index}.email`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          ))}
+
+          {fields.length === 0 && (
+            <p className="text-center text-xs text-muted-foreground italic py-4">
+              No additional contacts added.
+            </p>
+          )}
+        </div>
 
         <div className="flex justify-end gap-4 pt-4">
           {onCancel && (

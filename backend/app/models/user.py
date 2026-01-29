@@ -8,12 +8,23 @@ if TYPE_CHECKING:
     from .item import Item
 
 
+from enum import Enum
+
+
+class UserRole(str, Enum):
+    ADMIN = "Admin"
+    UNDERWRITER = "Underwriter"
+    CASHIER = "Cashier"
+    VIEWER = "Viewer"
+
+
 # Shared properties
 class UserBase(SQLModel):
     email: EmailStr = Field(unique=True, index=True, max_length=255)
     is_active: bool = True
     is_superuser: bool = False
     full_name: str | None = Field(default=None, max_length=255)
+    role: UserRole = Field(default=UserRole.VIEWER)
 
 
 # Properties to receive via API on creation

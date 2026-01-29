@@ -1,20 +1,23 @@
 import uuid
 from collections.abc import Sequence
-
 from datetime import date
-from sqlmodel import Session, select
+from typing import Any, cast
+
 from sqlalchemy.orm import selectinload
+from sqlmodel import Session, select
 
 from app.models.insurance.financial import Invoice, InvoiceLineItem
 from app.models.insurance.policy import (
     Claim,
     ClaimCreate,
+    ClaimEvent,
+    ClaimEventCreate,
     ClaimUpdate,
+    Document,
+    DocumentCreate,
+    DocumentUpdate,
     Policy,
     PolicyCreate,
-    PolicyDocument,
-    PolicyDocumentCreate,
-    PolicyDocumentUpdate,
     PolicyUpdate,
     RiskItem,
     RiskItemCreate,
@@ -37,7 +40,10 @@ def get_policy(session: Session, *, id: uuid.UUID) -> Policy | None:
     statement = (
         select(Policy)
         .where(Policy.id == id)
-        .options(selectinload(Policy.product), selectinload(Policy.items))
+        .options(
+            selectinload(cast(Any, Policy.product)),
+            selectinload(cast(Any, Policy.items)),
+        )
     )
     return session.exec(statement).first()
 
@@ -55,7 +61,10 @@ def get_policies_by_client_id(
     statement = (
         select(Policy)
         .where(Policy.client_id == client_id)
-        .options(selectinload(Policy.product), selectinload(Policy.items))
+        .options(
+            selectinload(cast(Any, Policy.product)),
+            selectinload(cast(Any, Policy.items)),
+        )
     )
     return session.exec(statement).all()
 
@@ -82,8 +91,10 @@ def create_risk_item(*, session: Session, risk_item_in: RiskItemCreate) -> RiskI
 def get_risk_item_by_identifier(
     session: Session, *, identifier: str
 ) -> RiskItem | None:
-    statement = select(RiskItem).where(RiskItem.identifier == identifier)
-    return session.exec(statement).first()
+    # In temporal items, identifier might be in risk_details
+    # For now, we search by description or similar if needed,
+    # but the old identifier column is gone.
+    return None
 
 
 def update_risk_item(
@@ -105,19 +116,15 @@ def create_risk_note(*, session: Session, risk_note_in: RiskNoteCreate) -> RiskN
     session.refresh(db_obj)
 
     # 2. Handle Invoicing Logic
-    # Get the policy to find the client
     policy = session.get(Policy, db_obj.policy_id)
     if not policy:
         return db_obj
 
-    # Calculate amount from breakdown
-    premium_breakdown = db_obj.premium_breakdown or {}
-    amount = premium_breakdown.get("total", 0.0)
+    amount = db_obj.total_amount
 
     # Check for an existing Unpaid invoice for this client
     statement = select(Invoice).where(
-        Invoice.client_id == policy.client_id,
-        Invoice.status == "Unpaid"
+        Invoice.client_id == policy.client_id, Invoice.status == "Unpaid"
     )
     invoice = session.exec(statement).first()
 
@@ -129,7 +136,7 @@ def create_risk_note(*, session: Session, risk_note_in: RiskNoteCreate) -> RiskN
             date_issued=date.today(),
             total_amount=0.0,
             balance_due=0.0,
-            status="Unpaid"
+            status="Unpaid",
         )
         session.add(invoice)
         session.commit()
@@ -140,7 +147,7 @@ def create_risk_note(*, session: Session, risk_note_in: RiskNoteCreate) -> RiskN
         invoice_id=invoice.id,
         risk_note_id=db_obj.id,
         amount=amount,
-        description=f"{db_obj.transaction_type} - {policy.policy_number}"
+        description=f"{db_obj.transaction_type} - {policy.policy_number}",
     )
     session.add(line_item)
 
@@ -148,7 +155,11 @@ def create_risk_note(*, session: Session, risk_note_in: RiskNoteCreate) -> RiskN
     invoice.total_amount += amount
     invoice.balance_due += amount
     session.add(invoice)
-    
+
+    # Update RiskNote with Invoice Number
+    db_obj.invoice_number = invoice.invoice_number
+    session.add(db_obj)
+
     session.commit()
     session.refresh(db_obj)
     return db_obj
@@ -182,30 +193,6 @@ def update_claim(*, session: Session, db_claim: Claim, claim_in: ClaimUpdate) ->
     return db_claim
 
 
-def create_policy_document(
-    *, session: Session, policy_document_in: PolicyDocumentCreate
-) -> PolicyDocument:
-    db_obj = PolicyDocument.model_validate(policy_document_in)
-    session.add(db_obj)
-    session.commit()
-    session.refresh(db_obj)
-    return db_obj
-
-
-def update_policy_document(
-    *,
-    session: Session,
-    db_policy_document: PolicyDocument,
-    policy_document_in: PolicyDocumentUpdate,
-) -> PolicyDocument:
-    policy_document_data = policy_document_in.model_dump(exclude_unset=True)
-    db_policy_document.sqlmodel_update(policy_document_data)
-    session.add(db_policy_document)
-    session.commit()
-    session.refresh(db_policy_document)
-    return db_policy_document
-
-
 def get_policies(
     session: Session,
     *,
@@ -214,7 +201,7 @@ def get_policies(
     client_id: uuid.UUID | None = None,
 ) -> list[Policy]:
     statement = select(Policy).options(
-        selectinload(Policy.product), selectinload(Policy.items)
+        selectinload(cast(Any, Policy.product)), selectinload(cast(Any, Policy.items))
     )
     if client_id:
         statement = statement.where(Policy.client_id == client_id)
@@ -334,42 +321,72 @@ def delete_risk_note(session: Session, *, db_risk_note: RiskNote) -> None:
     session.commit()
 
 
-def get_policy_documents(
+def create_claim_event(
+    *, session: Session, claim_event_in: ClaimEventCreate
+) -> ClaimEvent:
+    db_obj = ClaimEvent.model_validate(claim_event_in)
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
+
+
+def create_document(*, session: Session, document_in: DocumentCreate) -> Document:
+    db_obj = Document.model_validate(document_in)
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
+
+
+def update_document(
+    *,
+    session: Session,
+    db_document: Document,
+    document_in: DocumentUpdate,
+) -> Document:
+    document_data = document_in.model_dump(exclude_unset=True)
+    db_document.sqlmodel_update(document_data)
+    session.add(db_document)
+    session.commit()
+    session.refresh(db_document)
+    return db_document
+
+
+def get_documents(
     session: Session,
     *,
     skip: int = 0,
     limit: int = 100,
-    policy_id: uuid.UUID | None = None,
-    claim_id: uuid.UUID | None = None,
-) -> list[PolicyDocument]:
-    statement = select(PolicyDocument)
-    if policy_id:
-        statement = statement.where(PolicyDocument.policy_id == policy_id)
-    if claim_id:
-        statement = statement.where(PolicyDocument.claim_id == claim_id)
+    entity_id: uuid.UUID | None = None,
+    entity_type: str | None = None,
+) -> list[Document]:
+    statement = select(Document)
+    if entity_id:
+        statement = statement.where(Document.entity_id == entity_id)
+    if entity_type:
+        statement = statement.where(Document.entity_type == entity_type)
     statement = statement.offset(skip).limit(limit)
     return list(session.exec(statement).all())
 
 
-def count_policy_documents(
+def count_documents(
     session: Session,
     *,
-    policy_id: uuid.UUID | None = None,
-    claim_id: uuid.UUID | None = None,
+    entity_id: uuid.UUID | None = None,
+    entity_type: str | None = None,
 ) -> int:
     from sqlmodel import func
 
-    statement = select(PolicyDocument)
-    if policy_id:
-        statement = statement.where(PolicyDocument.policy_id == policy_id)
-    if claim_id:
-        statement = statement.where(PolicyDocument.claim_id == claim_id)
+    statement = select(Document)
+    if entity_id:
+        statement = statement.where(Document.entity_id == entity_id)
+    if entity_type:
+        statement = statement.where(Document.entity_type == entity_type)
     count_statement = select(func.count()).select_from(statement.subquery())
     return session.exec(count_statement).one()
 
 
-def delete_policy_document(
-    session: Session, *, db_policy_document: PolicyDocument
-) -> None:
-    session.delete(db_policy_document)
+def delete_document(session: Session, *, db_document: Document) -> None:
+    session.delete(db_document)
     session.commit()

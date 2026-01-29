@@ -13,6 +13,7 @@ from app.models.insurance.client import (
 
 
 def create_client(*, session: Session, client_in: ClientCreate) -> Client:
+    # SQLModel should handle the sa_type=JSON mapping automatically via model_validate
     db_obj = Client.model_validate(client_in)
     session.add(db_obj)
     session.commit()

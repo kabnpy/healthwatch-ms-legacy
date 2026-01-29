@@ -3,11 +3,10 @@ from datetime import date
 from typing import TYPE_CHECKING
 
 from sqlmodel import Field, Relationship, SQLModel
-from pydantic import computed_field
 
 if TYPE_CHECKING:
-    from .policy import RiskNote
     from .client import Client
+    from .policy import RiskNote
 
 # ==========================================
 # Invoice Models (Pending Payment)
@@ -38,21 +37,12 @@ class InvoiceUpdate(SQLModel):
     notes: str | None = None
 
 
-class InvoicePublic(InvoiceBase):
-    id: uuid.UUID
-
-
 class Invoice(InvoiceBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
 
     client: "Client" = Relationship(back_populates="invoices")
     line_items: list["InvoiceLineItem"] = Relationship(back_populates="invoice")
     allocations: list["ReceiptAllocation"] = Relationship(back_populates="invoice")
-
-
-class InvoicesPublic(SQLModel):
-    data: list[InvoicePublic]
-    count: int
 
 
 # ==========================================
@@ -88,9 +78,12 @@ class ReceiptBase(SQLModel):
     client_id: uuid.UUID = Field(foreign_key="client.id")
     date_received: date
     amount: float
+    unallocated_amount: float = Field(default=0.0)
     mode: str  # Cash, Cheque, MPESA, Bank Transfer
     reference: str  # Transaction ID, Cheque No
     notes: str | None = None
+    status: str = "Active"  # Active, Voided
+    created_by_id: uuid.UUID | None = Field(default=None, foreign_key="user.id")
 
 
 class ReceiptCreate(ReceiptBase):
@@ -101,9 +94,11 @@ class ReceiptUpdate(SQLModel):
     receipt_number: str | None = None
     date_received: date | None = None
     amount: float | None = None
+    unallocated_amount: float | None = None
     mode: str | None = None
     reference: str | None = None
     notes: str | None = None
+    status: str | None = None
 
 
 # ==========================================
@@ -139,15 +134,20 @@ class ReceiptAllocationsPublic(SQLModel):
 # Public Schemas (Late Binding)
 # ==========================================
 
-class ReceiptPublic(ReceiptBase):
+
+class InvoicePublic(InvoiceBase):
     id: uuid.UUID
     allocations: list[ReceiptAllocationBase] = []
 
-    @computed_field
-    @property
-    def unallocated_amount(self) -> float:
-        allocated = sum(a.amount_allocated for a in self.allocations)
-        return self.amount - allocated
+
+class InvoicesPublic(SQLModel):
+    data: list[InvoicePublic]
+    count: int
+
+
+class ReceiptPublic(ReceiptBase):
+    id: uuid.UUID
+    allocations: list[ReceiptAllocationBase] = []
 
 
 class Receipt(ReceiptBase, table=True):

@@ -16,6 +16,7 @@ import {
 
 export const getColumns = (
   onView: (invoice: InvoicePublic) => void,
+  onViewHistory?: (invoice: InvoicePublic) => void,
 ): ColumnDef<InvoicePublic>[] => [
   {
     accessorKey: "invoice_number",
@@ -116,6 +117,12 @@ export const getColumns = (
               <Eye className="mr-2 h-4 w-4" />
               View Invoice
             </DropdownMenuItem>
+            {onViewHistory && (
+              <DropdownMenuItem onClick={() => onViewHistory(invoice)}>
+                <ReceiptText className="mr-2 h-4 w-4" />
+                View Payment History
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       )

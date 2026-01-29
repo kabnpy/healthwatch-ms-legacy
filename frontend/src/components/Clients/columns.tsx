@@ -49,9 +49,12 @@ export const columns: ColumnDef<ClientPublic>[] = [
     },
   },
   {
-    accessorKey: "contact_person",
-    header: "Contact Person",
-    cell: ({ row }) => row.original.contact_person || "-",
+    accessorKey: "contacts",
+    header: "Primary Contact",
+    cell: ({ row }) => {
+      const contacts = row.original.contacts as any[]
+      return contacts?.[0]?.name || "-"
+    },
   },
   {
     accessorKey: "kra_pin",

@@ -20,8 +20,6 @@ export function CoverageCard({ riskNote, onViewBreakdown }: CoverageCardProps) {
     )
   }
 
-  const breakdown = (riskNote.premium_breakdown as any) || {}
-
   return (
     <Card className="h-full border-l-4 border-l-green-600 shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -35,11 +33,13 @@ export function CoverageCard({ riskNote, onViewBreakdown }: CoverageCardProps) {
           <div>
             <div className="text-2xl font-bold">
               KES{" "}
-              {breakdown?.total?.toLocaleString(undefined, {
+              {riskNote.total_amount.toLocaleString(undefined, {
                 minimumFractionDigits: 2,
-              }) || "0.00"}
+              })}
             </div>
-            <p className="text-xs text-muted-foreground">Total Premium</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-tighter">
+              {riskNote.payment_status} • Total Amount
+            </p>
           </div>
 
           <div className="grid grid-cols-2 gap-2 text-sm">

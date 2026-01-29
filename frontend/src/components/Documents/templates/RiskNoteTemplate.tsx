@@ -11,14 +11,14 @@ export const RiskNoteTemplate = ({
   client,
   policy,
 }: RiskNoteTemplateProps) => {
-  const breakdown = (riskNote.premium_breakdown as any) || {}
-  const riskItem = (riskNote.risk_item_snapshot as any) || {}
+  const items = (riskNote.items_snapshot?.items as any[]) || []
+  const riskItem = items[0] || {}
 
   return (
     <BaseDocument
       title="Risk Note"
       subtitle="Underwriting Transaction Summary"
-      documentNumber={riskNote.risk_note_number}
+      documentNumber={riskNote.invoice_number || "Draft"}
       date={new Date(riskNote.start_date).toLocaleDateString()}
     >
       {/* Transaction Metadata */}
@@ -107,9 +107,7 @@ export const RiskNoteTemplate = ({
                   {riskItem.identifier || "N/A"}
                 </td>
                 <td className="py-3 px-3 text-right font-bold">
-                  {breakdown.basic
-                    ? (breakdown.basic / 0.04).toLocaleString()
-                    : "0.00"}
+                  KES {riskItem.details?.sum_insured?.toLocaleString() || "0.00"}
                 </td>
               </tr>
             </tbody>
@@ -158,31 +156,20 @@ export const RiskNoteTemplate = ({
         <div className="grid grid-cols-2 gap-x-12 text-xs">
           <div className="space-y-1">
             <div className="flex justify-between">
-              <span>Basic Premium</span>
+              <span>Net Premium</span>
               <span className="font-mono">
-                {breakdown.basic?.toLocaleString()}
+                KES {riskNote.net_premium?.toLocaleString()}
               </span>
             </div>
-            {breakdown.extensions?.map((ext: any) => (
-              <div
-                key={ext.name}
-                className="flex justify-between text-blue-700"
-              >
-                <span>+ {ext.name}</span>
-                <span className="font-mono">
-                  {ext.amount?.toLocaleString()}
-                </span>
-              </div>
-            ))}
           </div>
           <div className="space-y-1 border-l pl-6 font-bold text-sm flex flex-col justify-center">
             <div className="flex justify-between border-b pb-1">
-              <span>Gross Premium</span>
-              <span>KES {breakdown.total?.toLocaleString()}</span>
+              <span>Total Payable</span>
+              <span>KES {riskNote.total_amount?.toLocaleString()}</span>
             </div>
             <div className="flex justify-between pt-1 text-[10px] text-gray-500 font-normal italic">
-              <span>Estimated Commission (12.5%)</span>
-              <span>{riskNote.commission_amount?.toLocaleString()}</span>
+              <span>Estimated Commission</span>
+              <span>KES {riskNote.commission_amount?.toLocaleString()}</span>
             </div>
           </div>
         </div>

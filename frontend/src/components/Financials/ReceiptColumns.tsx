@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import { Copy, MoreHorizontal, ReceiptText } from "lucide-react"
+import { Copy, Eye, MoreHorizontal, ReceiptText } from "lucide-react"
 import { toast } from "sonner"
 
 import type { ReceiptPublic } from "@/client"
@@ -9,19 +9,32 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { StatusIndicator } from "../Common/StatusIndicator"
 
 export const getReceiptColumns = (
   onAllocate: (receipt: ReceiptPublic) => void,
+  onViewHistory: (receipt: ReceiptPublic) => void,
+  onVoid: (receipt: ReceiptPublic) => void,
+  onView: (receipt: ReceiptPublic) => void,
 ): ColumnDef<ReceiptPublic>[] => [
   {
     accessorKey: "receipt_number",
     header: "Receipt #",
     cell: ({ row }) => (
-      <span className="font-mono font-medium">{row.original.receipt_number}</span>
+      <button
+        type="button"
+        onClick={() => onView(row.original)}
+        className="flex flex-col gap-1 text-left hover:underline text-primary"
+      >
+        <span className="font-mono font-medium">{row.original.receipt_number}</span>
+        <StatusIndicator isActive={row.original.status === "Active"} label={row.original.status} />
+      </button>
     ),
   },
+
   {
     accessorKey: "date_received",
     header: "Date",
@@ -75,12 +88,30 @@ export const getReceiptColumns = (
               <Copy className="mr-2 h-4 w-4" />
               Copy ID
             </DropdownMenuItem>
-            <DropdownMenuItem 
+                        <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => onView(receipt)}>
+              <Eye className="mr-2 h-4 w-4" />
+              View Receipt
+            </DropdownMenuItem>
+            <DropdownMenuItem
               onClick={() => onAllocate(receipt)}
               disabled={(receipt as any).unallocated_amount <= 0}
             >
               <ReceiptText className="mr-2 h-4 w-4" />
               Allocate to Invoice
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onViewHistory(receipt)}>
+              <MoreHorizontal className="mr-2 h-4 w-4" />
+              View Allocation History
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem 
+              onClick={() => onVoid(receipt)}
+              disabled={receipt.status === "Voided"}
+              className="text-destructive focus:text-destructive"
+            >
+              <ReceiptText className="mr-2 h-4 w-4" />
+              Void Receipt
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

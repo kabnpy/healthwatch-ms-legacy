@@ -51,9 +51,8 @@ function RiskNotePrintContent({ id }: { id: string }) {
     getClientQueryOptions(policy.client_id),
   )
 
-  // Type-safe access to the JSON fields
-  // In a real app, use Zod to validate these at runtime
-  const breakdown = (riskNote.premium_breakdown as any) || {}
+  const items = (riskNote.items_snapshot?.items as any[]) || []
+  const riskItem = items[0] || {}
 
   const isInvoice = mode === "invoice" || !mode
 
@@ -72,7 +71,7 @@ function RiskNotePrintContent({ id }: { id: string }) {
         </div>
         <div className="text-right">
           <p className="font-mono text-xl font-bold">
-            {riskNote.risk_note_number}
+            {riskNote.invoice_number || "Draft"}
           </p>
           <p className="text-sm mt-1">
             Date: {new Date().toLocaleDateString()}
@@ -133,10 +132,7 @@ function RiskNotePrintContent({ id }: { id: string }) {
               <tr className="border-b">
                 <td className="py-2 font-bold">Sum Insured</td>
                 <td className="py-2 text-right font-mono font-bold">
-                  KES{" "}
-                  {breakdown?.basic
-                    ? (breakdown.basic / 0.04).toLocaleString()
-                    : "Refer to Schedule"}
+                  KES {riskItem.details?.sum_insured?.toLocaleString() || "Refer to Schedule"}
                 </td>
               </tr>
               {/* Placeholder for real benefits snapshot */}
@@ -186,61 +182,33 @@ function RiskNotePrintContent({ id }: { id: string }) {
             </thead>
             <tbody className="divide-y">
               <tr>
-                <td className="py-2 pl-2">Basic Premium</td>
+                <td className="py-2 pl-2">Net Premium</td>
                 <td className="py-2 pr-2 text-right font-mono">
-                  {breakdown?.basic?.toLocaleString(undefined, {
+                  {riskNote.net_premium.toLocaleString(undefined, {
                     minimumFractionDigits: 2,
-                  }) || "0.00"}
+                  })}
                 </td>
               </tr>
 
-              {/* Extensions */}
-              {breakdown?.extensions?.map((ext: any, i: number) => (
+              {/* Taxes/Levies */}
+              {riskNote.taxes && Object.entries(riskNote.taxes).map(([key, val]: [string, any], i: number) => (
                 <tr key={i}>
-                  <td className="py-2 pl-2">{ext.name}</td>
-                  <td className="py-2 pr-2 text-right font-mono">
-                    {ext.amount?.toLocaleString(undefined, {
+                  <td className="py-2 pl-2 text-gray-600 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</td>
+                  <td className="py-2 pr-2 text-right font-mono text-gray-600">
+                    {val.toLocaleString(undefined, {
                       minimumFractionDigits: 2,
                     })}
                   </td>
                 </tr>
               ))}
 
-              {/* Levies */}
-              <tr>
-                <td className="py-2 pl-2 text-gray-600">
-                  Training Levy (0.2%)
-                </td>
-                <td className="py-2 pr-2 text-right font-mono text-gray-600">
-                  {breakdown?.levies?.trainingLevy?.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                  }) || "0.00"}
-                </td>
-              </tr>
-              <tr>
-                <td className="py-2 pl-2 text-gray-600">PHCF (0.25%)</td>
-                <td className="py-2 pr-2 text-right font-mono text-gray-600">
-                  {breakdown?.levies?.phcf?.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                  }) || "0.00"}
-                </td>
-              </tr>
-              <tr>
-                <td className="py-2 pl-2 text-gray-600">Stamp Duty</td>
-                <td className="py-2 pr-2 text-right font-mono text-gray-600">
-                  {breakdown?.levies?.stampDuty?.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                  }) || "0.00"}
-                </td>
-              </tr>
-
               {/* TOTAL */}
               <tr className="bg-gray-100 font-bold text-lg">
                 <td className="py-3 pl-2">TOTAL PREMIUM PAYABLE</td>
                 <td className="py-3 pr-2 text-right font-mono">
-                  {breakdown?.total?.toLocaleString(undefined, {
+                  {riskNote.total_amount.toLocaleString(undefined, {
                     minimumFractionDigits: 2,
-                  }) || "0.00"}
+                  })}
                 </td>
               </tr>
             </tbody>
@@ -250,7 +218,7 @@ function RiskNotePrintContent({ id }: { id: string }) {
             <p className="font-bold text-black mb-1">Payment Instructions:</p>
             <p>
               Please pay via MPESA Paybill: <strong>555000</strong>, Account:{" "}
-              <strong>{riskNote.risk_note_number}</strong>
+              <strong>{riskNote.invoice_number || "Draft"}</strong>
             </p>
             <p>
               Cheques payable to: <strong>HealthWatch Insurance Agency</strong>

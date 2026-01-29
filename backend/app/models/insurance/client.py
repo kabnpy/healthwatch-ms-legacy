@@ -1,12 +1,14 @@
 import uuid
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
     from .financial import Invoice, Receipt
     from .policy import Policy
+
+from sqlalchemy import JSON
 
 # ==========================================
 # Client Models
@@ -21,8 +23,9 @@ class ClientBase(SQLModel):
     phone: str
     postal_address: str | None = None
 
-    # Corporate specific
-    contact_person: str | None = None
+    # Multi-contact system (especially for Corporate)
+    # Structure: [{"name": "...", "role": "...", "phone": "...", "email": "..."}]
+    contacts: list[dict[str, Any]] = Field(default_factory=list, sa_type=JSON)
 
 
 class ClientCreate(ClientBase):
@@ -36,7 +39,7 @@ class ClientUpdate(SQLModel):
     email: str | None = None
     phone: str | None = None
     postal_address: str | None = None
-    contact_person: str | None = None
+    contacts: list[dict[str, Any]] | None = None
 
 
 class ClientPublic(ClientBase):

@@ -83,11 +83,17 @@ export function NewBusinessWizard({
         policyId: policy.id,
         data: {
           policy_id: policy.id,
-          identifier: state.asset?.identifier || "",
           description: state.asset?.description || "",
-          sum_insured: state.financials?.sumInsured || 0,
-          details: state.asset?.details || {},
-          benefits: {},
+          cover_description: "Comprehensive", // Default
+          total_premium: 0, // Calculated later
+          premium_breakdown: {},
+          risk_details: {
+            ...state.asset?.details,
+            identifier: state.asset?.identifier,
+            sum_insured: state.financials?.sumInsured || 0,
+          },
+          version_number: 1,
+          is_active: true,
         },
       })
 
@@ -103,7 +109,6 @@ export function NewBusinessWizard({
 
       await createRiskNote.mutateAsync({
         policy_id: policy.id,
-        risk_note_number: `RN/${Math.floor(Math.random() * 1000000)}`,
         transaction_type: "New Business",
         start_date: state.financials?.startDate || "",
         end_date: new Date(
@@ -113,10 +118,13 @@ export function NewBusinessWizard({
         )
           .toISOString()
           .split("T")[0],
-        premium_breakdown: calc.breakdown,
-        benefits_snapshot: {},
-        risk_item_snapshot: state.asset as any,
+        net_premium: calc.breakdown.basic + calc.breakdown.extensions.reduce((acc, curr) => acc + curr.amount, 0),
+        taxes: calc.breakdown.levies as any,
         commission_amount: calc.breakdown.basic * 0.125,
+        total_amount: calc.breakdown.total,
+        items_snapshot: {
+          items: [state.asset]
+        },
         special_clauses: [],
       })
 

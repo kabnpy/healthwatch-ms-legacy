@@ -14,6 +14,7 @@ export type ClaimCreate = {
     policy_id: string;
     risk_item_id?: (string | null);
     date_of_loss: string;
+    date_reported?: string;
     description: string;
     status?: string;
     reserve_amount?: number;
@@ -24,6 +25,7 @@ export type ClaimPublic = {
     policy_id: string;
     risk_item_id?: (string | null);
     date_of_loss: string;
+    date_reported?: string;
     description: string;
     status?: string;
     reserve_amount?: number;
@@ -40,6 +42,7 @@ export type ClaimUpdate = {
     policy_id?: (string | null);
     risk_item_id?: (string | null);
     date_of_loss?: (string | null);
+    date_reported?: (string | null);
     description?: (string | null);
     status?: (string | null);
     reserve_amount?: (number | null);
@@ -52,7 +55,9 @@ export type ClientCreate = {
     email?: (string | null);
     phone: string;
     postal_address?: (string | null);
-    contact_person?: (string | null);
+    contacts?: Array<{
+        [key: string]: unknown;
+    }>;
 };
 
 export type ClientPublic = {
@@ -62,7 +67,9 @@ export type ClientPublic = {
     email?: (string | null);
     phone: string;
     postal_address?: (string | null);
-    contact_person?: (string | null);
+    contacts?: Array<{
+        [key: string]: unknown;
+    }>;
     id: string;
 };
 
@@ -78,7 +85,9 @@ export type ClientUpdate = {
     email?: (string | null);
     phone?: (string | null);
     postal_address?: (string | null);
-    contact_person?: (string | null);
+    contacts?: (Array<{
+    [key: string]: unknown;
+}> | null);
 };
 
 export type CorrespondenceCreate = {
@@ -152,6 +161,7 @@ export type InvoicePublic = {
     balance_due?: number;
     notes?: (string | null);
     id: string;
+    allocations?: Array<ReceiptAllocationBase>;
 };
 
 export type InvoicesPublic = {
@@ -200,6 +210,7 @@ export type PolicyCreate = {
     client_id: string;
     product_id?: (string | null);
     status?: string;
+    created_at?: string;
 };
 
 export type PolicyPublic = {
@@ -207,6 +218,7 @@ export type PolicyPublic = {
     client_id: string;
     product_id?: (string | null);
     status?: string;
+    created_at?: string;
     id: string;
     product?: (ProductPublic | null);
     items?: Array<RiskItemPublic>;
@@ -220,6 +232,8 @@ export type PolicyUpdate = {
     status?: (string | null);
 };
 
+export type PricingStrategy = 'Percentage' | 'FixedTiered' | 'Manual';
+
 export type PrivateUserCreate = {
     email: string;
     password: string;
@@ -231,6 +245,13 @@ export type ProductCreate = {
     insurer_id: string;
     name: string;
     class_of_insurance: string;
+    pricing_strategy?: PricingStrategy;
+    pricing_rules?: {
+        [key: string]: unknown;
+    };
+    form_schema?: Array<{
+        [key: string]: unknown;
+    }>;
     default_benefits?: {
         [key: string]: unknown;
     };
@@ -242,6 +263,13 @@ export type ProductPublic = {
     insurer_id: string;
     name: string;
     class_of_insurance: string;
+    pricing_strategy?: PricingStrategy;
+    pricing_rules?: {
+        [key: string]: unknown;
+    };
+    form_schema?: Array<{
+        [key: string]: unknown;
+    }>;
     default_benefits?: {
         [key: string]: unknown;
     };
@@ -259,6 +287,13 @@ export type ProductUpdate = {
     insurer_id?: (string | null);
     name?: (string | null);
     class_of_insurance?: (string | null);
+    pricing_strategy?: (PricingStrategy | null);
+    pricing_rules?: ({
+    [key: string]: unknown;
+} | null);
+    form_schema?: (Array<{
+    [key: string]: unknown;
+}> | null);
     default_benefits?: ({
     [key: string]: unknown;
 } | null);
@@ -285,9 +320,12 @@ export type ReceiptCreate = {
     client_id: string;
     date_received: string;
     amount: number;
+    unallocated_amount?: number;
     mode: string;
     reference: string;
     notes?: (string | null);
+    status?: string;
+    created_by_id?: (string | null);
 };
 
 export type ReceiptPublic = {
@@ -295,12 +333,14 @@ export type ReceiptPublic = {
     client_id: string;
     date_received: string;
     amount: number;
+    unallocated_amount?: number;
     mode: string;
     reference: string;
     notes?: (string | null);
+    status?: string;
+    created_by_id?: (string | null);
     id: string;
     allocations?: Array<ReceiptAllocationBase>;
-    readonly unallocated_amount: number;
 };
 
 export type ReceiptsPublic = {
@@ -310,26 +350,34 @@ export type ReceiptsPublic = {
 
 export type RiskItemCreate = {
     policy_id: string;
-    identifier: string;
+    version_number?: number;
+    valid_from?: string;
+    valid_to?: (string | null);
+    is_active?: boolean;
     description: string;
-    sum_insured: number;
-    details?: {
-        [key: string]: unknown;
+    cover_description: string;
+    total_premium?: number;
+    premium_breakdown?: {
+        [key: string]: (number);
     };
-    benefits?: {
+    risk_details?: {
         [key: string]: unknown;
     };
 };
 
 export type RiskItemPublic = {
     policy_id: string;
-    identifier: string;
+    version_number?: number;
+    valid_from?: string;
+    valid_to?: (string | null);
+    is_active?: boolean;
     description: string;
-    sum_insured: number;
-    details?: {
-        [key: string]: unknown;
+    cover_description: string;
+    total_premium?: number;
+    premium_breakdown?: {
+        [key: string]: (number);
     };
-    benefits?: {
+    risk_details?: {
         [key: string]: unknown;
     };
     id: string;
@@ -341,40 +389,44 @@ export type RiskItemsPublic = {
 };
 
 export type RiskNoteCreate = {
-    risk_note_number: string;
     policy_id: string;
     transaction_type: string;
+    previous_risk_note_id?: (string | null);
+    invoice_number?: (string | null);
+    created_by_id?: (string | null);
+    payment_status?: string;
     start_date: string;
     end_date: string;
-    premium_breakdown?: {
-        [key: string]: unknown;
-    };
-    benefits_snapshot?: {
-        [key: string]: unknown;
-    };
-    risk_item_snapshot?: {
-        [key: string]: unknown;
+    net_premium: number;
+    taxes?: {
+        [key: string]: (number);
     };
     commission_amount: number;
+    total_amount: number;
+    items_snapshot?: {
+        [key: string]: unknown;
+    };
     special_clauses?: Array<(string)>;
 };
 
 export type RiskNotePublic = {
-    risk_note_number: string;
     policy_id: string;
     transaction_type: string;
+    previous_risk_note_id?: (string | null);
+    invoice_number?: (string | null);
+    created_by_id?: (string | null);
+    payment_status?: string;
     start_date: string;
     end_date: string;
-    premium_breakdown?: {
-        [key: string]: unknown;
-    };
-    benefits_snapshot?: {
-        [key: string]: unknown;
-    };
-    risk_item_snapshot?: {
-        [key: string]: unknown;
+    net_premium: number;
+    taxes?: {
+        [key: string]: (number);
     };
     commission_amount: number;
+    total_amount: number;
+    items_snapshot?: {
+        [key: string]: unknown;
+    };
     special_clauses?: Array<(string)>;
     id: string;
 };
@@ -385,20 +437,21 @@ export type RiskNotesPublic = {
 };
 
 export type RiskNoteUpdate = {
-    risk_note_number?: (string | null);
     transaction_type?: (string | null);
+    previous_risk_note_id?: (string | null);
+    invoice_number?: (string | null);
+    payment_status?: (string | null);
     start_date?: (string | null);
     end_date?: (string | null);
-    premium_breakdown?: ({
-    [key: string]: unknown;
-} | null);
-    benefits_snapshot?: ({
-    [key: string]: unknown;
-} | null);
-    risk_item_snapshot?: ({
-    [key: string]: unknown;
+    net_premium?: (number | null);
+    taxes?: ({
+    [key: string]: (number);
 } | null);
     commission_amount?: (number | null);
+    total_amount?: (number | null);
+    items_snapshot?: ({
+    [key: string]: unknown;
+} | null);
     special_clauses?: (Array<(string)> | null);
 };
 
@@ -417,6 +470,7 @@ export type UserCreate = {
     is_active?: boolean;
     is_superuser?: boolean;
     full_name?: (string | null);
+    role?: UserRole;
     password: string;
 };
 
@@ -425,6 +479,7 @@ export type UserPublic = {
     is_active?: boolean;
     is_superuser?: boolean;
     full_name?: (string | null);
+    role?: UserRole;
     id: string;
 };
 
@@ -433,6 +488,8 @@ export type UserRegister = {
     password: string;
     full_name?: (string | null);
 };
+
+export type UserRole = 'Admin' | 'Underwriter' | 'Cashier' | 'Viewer';
 
 export type UsersPublic = {
     data: Array<UserPublic>;
@@ -444,6 +501,7 @@ export type UserUpdate = {
     is_active?: boolean;
     is_superuser?: boolean;
     full_name?: (string | null);
+    role?: UserRole;
     password?: (string | null);
 };
 
@@ -575,6 +633,12 @@ export type FinancialsReadReceiptByIdData = {
 };
 
 export type FinancialsReadReceiptByIdResponse = (ReceiptPublic);
+
+export type FinancialsDeleteReceiptData = {
+    id: string;
+};
+
+export type FinancialsDeleteReceiptResponse = (ReceiptPublic);
 
 export type FinancialsAllocateReceiptData = {
     id: string;

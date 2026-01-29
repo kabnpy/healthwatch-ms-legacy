@@ -22,7 +22,6 @@ import { handleError } from "@/utils"
 
 const formSchema = z.object({
   policy_id: z.string().uuid(),
-  risk_note_number: z.string().min(1, "Required"),
   transaction_type: z.string(),
   start_date: z.string(),
   end_date: z.string(),
@@ -35,7 +34,6 @@ const formSchema = z.object({
 
 interface FormData {
   policy_id: string
-  risk_note_number: string
   transaction_type: string
   start_date: string
   end_date: string
@@ -66,7 +64,6 @@ export const RiskNoteForm = ({
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
       policy_id: policyId,
-      risk_note_number: `RN-${Math.floor(Math.random() * 100000)}`,
       transaction_type: initialTransactionType,
       start_date: new Date().toISOString().split("T")[0],
       end_date: new Date(new Date().setFullYear(new Date().getFullYear() + 1))
@@ -97,20 +94,17 @@ export const RiskNoteForm = ({
   const { breakdown } = calculation
 
   const onSubmit: SubmitHandler<FormData> = (data) => {
-    // 1. Prepare the JSON blobs
-    const premiumBreakdown = calculation.breakdown
-
-    // 2. Prepare the payload
+    // 1. Prepare the payload
     const riskNoteData: RiskNoteCreate = {
       policy_id: data.policy_id,
-      risk_note_number: data.risk_note_number,
       transaction_type: data.transaction_type,
       start_date: data.start_date,
       end_date: data.end_date,
+      net_premium: breakdown.basic + breakdown.extensions.reduce((acc, curr) => acc + curr.amount, 0),
+      taxes: breakdown.levies as any,
       commission_amount: breakdown.basic * (data.commission_rate / 100),
-      premium_breakdown: premiumBreakdown,
-      benefits_snapshot: {}, // Placeholder for now
-      risk_item_snapshot: {}, // Placeholder for now
+      total_amount: breakdown.total,
+      items_snapshot: {}, // Will be handled in wizard or dashboard
       special_clauses: [],
     }
 
@@ -128,20 +122,7 @@ export const RiskNoteForm = ({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="risk_note_number"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Risk Note #</FormLabel>
-                <FormControl>
-                  <Input {...field} readOnly />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <div className="grid grid-cols-1 gap-4">
           <FormField
             control={form.control}
             name="sum_insured"
