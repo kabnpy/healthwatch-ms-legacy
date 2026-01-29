@@ -3,6 +3,7 @@ from collections.abc import Sequence
 
 from datetime import date
 from sqlmodel import Session, select
+from sqlalchemy.orm import selectinload
 
 from app.models.insurance.financial import Invoice, InvoiceLineItem
 from app.models.insurance.policy import (
@@ -32,6 +33,15 @@ def create_policy(*, session: Session, policy_in: PolicyCreate) -> Policy:
     return db_obj
 
 
+def get_policy(session: Session, *, id: uuid.UUID) -> Policy | None:
+    statement = (
+        select(Policy)
+        .where(Policy.id == id)
+        .options(selectinload(Policy.product), selectinload(Policy.items))
+    )
+    return session.exec(statement).first()
+
+
 def get_policy_by_policy_number(
     session: Session, *, policy_number: str
 ) -> Policy | None:
@@ -42,7 +52,11 @@ def get_policy_by_policy_number(
 def get_policies_by_client_id(
     session: Session, *, client_id: uuid.UUID
 ) -> Sequence[Policy]:
-    statement = select(Policy).where(Policy.client_id == client_id)
+    statement = (
+        select(Policy)
+        .where(Policy.client_id == client_id)
+        .options(selectinload(Policy.product), selectinload(Policy.items))
+    )
     return session.exec(statement).all()
 
 
@@ -199,7 +213,9 @@ def get_policies(
     limit: int = 100,
     client_id: uuid.UUID | None = None,
 ) -> list[Policy]:
-    statement = select(Policy)
+    statement = select(Policy).options(
+        selectinload(Policy.product), selectinload(Policy.items)
+    )
     if client_id:
         statement = statement.where(Policy.client_id == client_id)
     statement = statement.offset(skip).limit(limit)

@@ -7,6 +7,7 @@ from app.api.deps import CurrentUser, SessionDep
 from app.crud.insurance.policy import (
     count_policies,
     get_policies,
+    get_policy,
     get_policy_by_policy_number,
 )
 from app.crud.insurance.policy import (
@@ -57,7 +58,7 @@ def read_policy(session: SessionDep, _current_user: CurrentUser, id: uuid.UUID) 
     """
     Get policy by ID.
     """
-    policy = session.get(Policy, id)
+    policy = get_policy(session=session, id=id)
     if not policy:
         raise HTTPException(status_code=404, detail="Policy not found")
     return policy

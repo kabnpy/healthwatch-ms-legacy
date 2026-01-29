@@ -1,12 +1,13 @@
 import { Link } from "@tanstack/react-router"
 import { ChevronRight, PlusCircle, RefreshCw } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { StatusIndicator } from "../../Common/StatusIndicator"
 
 interface PolicyHeaderProps {
   clientName: string
   clientId: string
   policyNumber: string
+  displayName?: string
   status: string
   onRenew: () => void
   onEndorse: () => void
@@ -16,6 +17,7 @@ export function PolicyHeader({
   clientName,
   clientId,
   policyNumber,
+  displayName,
   status,
   onRenew,
   onEndorse,
@@ -36,17 +38,24 @@ export function PolicyHeader({
             {clientName}
           </Link>
           <ChevronRight className="size-4" />
-          <span className="font-semibold text-foreground">{policyNumber}</span>
+          <span className="font-semibold text-foreground">
+            {displayName || policyNumber}
+          </span>
         </div>
         <div className="flex items-center gap-4">
-          <h1 className="text-3xl font-bold tracking-tight">{policyNumber}</h1>
-          <Badge
-            variant={status === "Active" ? "default" : "secondary"}
-            className="h-fit"
-          >
-            {status}
-          </Badge>
+          <h1 className="text-3xl font-bold tracking-tight">
+            {displayName || policyNumber}
+          </h1>
+          <StatusIndicator
+            isActive={status === "Active"}
+            label={status}
+          />
         </div>
+        {displayName && (
+          <span className="text-sm text-muted-foreground font-mono">
+            {policyNumber}
+          </span>
+        )}
       </div>
 
       <div className="flex items-center gap-2">

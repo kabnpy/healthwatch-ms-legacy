@@ -102,6 +102,7 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
         clientName={client.name}
         clientId={client.id}
         policyNumber={policy.policy_number}
+        displayName={policy.display_name}
         status={policy.status || "Unknown"}
         onRenew={handleRenew}
         onEndorse={handleEndorse}
@@ -134,8 +135,8 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
             />
             <SummaryCard
               title="Product"
-              value={policy.product_id?.substring(0, 13)}
-              description="Policy Type"
+              value={policy.product?.name || "N/A"}
+              description={policy.product?.class_of_insurance || "Policy Type"}
             />
           </div>
 

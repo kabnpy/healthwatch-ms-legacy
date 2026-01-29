@@ -10,6 +10,9 @@ if TYPE_CHECKING:
     from .client import Client
     from .financial import InvoiceLineItem, ReceiptAllocation
 
+from pydantic import computed_field
+from .catalog import ProductPublic
+
 # ==========================================
 # Policy Models
 # ==========================================
@@ -35,6 +38,22 @@ class PolicyUpdate(SQLModel):
 
 class PolicyPublic(PolicyBase):
     id: uuid.UUID
+    product: Optional[ProductPublic] = None
+    items: list["RiskItemPublic"] = []
+
+    @computed_field
+    @property
+    def display_name(self) -> str:
+        if self.product:
+            # Pattern 1: "Motor Private - KDF 334K"
+            if (
+                self.product.class_of_insurance == "Motor Private"
+                or "Motor" in self.product.class_of_insurance
+            ) and self.items:
+                return f"{self.product.class_of_insurance} - {self.items[0].identifier}"
+            # Pattern 2: "MAXPAC - Personal Accident"
+            return f"{self.product.name} - {self.product.class_of_insurance}"
+        return self.policy_number
 
 
 class Policy(PolicyBase, table=True):
