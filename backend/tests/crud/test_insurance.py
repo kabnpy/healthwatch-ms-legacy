@@ -7,8 +7,8 @@ from app.models import (
     ClientCreate,
     PolicyCreate,
     RiskNoteCreate,
-    PaymentCreate,
-    PaymentAllocationCreate,
+    ReceiptCreate,
+    ReceiptAllocationCreate,
 )
 from tests.utils.utils import random_lower_string, random_email
 import uuid
@@ -88,8 +88,7 @@ def test_create_risk_note(db: Session) -> None:
         transaction_type="New Business",
         start_date=date(2024, 1, 1),
         end_date=date(2024, 12, 31),
-        basic_premium=1000.0,
-        gross_premium=1100.0,
+        premium_breakdown={"basic": 1000.0, "total": 1100.0},
         commission_amount=100.0,
     )
     risk_note = crud.create_risk_note(session=db, risk_note_in=risk_note_in)
@@ -97,20 +96,29 @@ def test_create_risk_note(db: Session) -> None:
     assert risk_note.policy_id == policy.id
 
 
-def test_create_payment(db: Session) -> None:
-    payment_in = PaymentCreate(
+def test_create_receipt(db: Session) -> None:
+    client_in = ClientCreate(
+        name=random_lower_string(),
+        kra_pin=random_lower_string(),
+        email=random_email(),
+        phone=random_lower_string(),
+    )
+    client = crud.create_client(session=db, client_in=client_in)
+
+    receipt_in = ReceiptCreate(
         receipt_number=random_lower_string(),
+        client_id=client.id,
         date_received=date(2024, 1, 15),
         amount=1100.0,
         mode="Cash",
         reference=random_lower_string(),
     )
-    payment = crud.create_payment(session=db, payment_in=payment_in)
-    assert payment.receipt_number == payment_in.receipt_number
-    assert payment.amount == payment_in.amount
+    receipt = crud.create_receipt(session=db, receipt_in=receipt_in)
+    assert receipt.receipt_number == receipt_in.receipt_number
+    assert receipt.amount == receipt_in.amount
 
 
-def test_create_payment_allocation(db: Session) -> None:
+def test_create_receipt_allocation(db: Session) -> None:
     client_in = ClientCreate(
         name=random_lower_string(),
         kra_pin=random_lower_string(),
@@ -131,26 +139,34 @@ def test_create_payment_allocation(db: Session) -> None:
         transaction_type="New Business",
         start_date=date(2024, 1, 1),
         end_date=date(2024, 12, 31),
-        basic_premium=1000.0,
-        gross_premium=1100.0,
+        premium_breakdown={"basic": 1000.0, "total": 1100.0},
         commission_amount=100.0,
     )
     risk_note = crud.create_risk_note(session=db, risk_note_in=risk_note_in)
     
-    payment_in = PaymentCreate(
+    receipt_in = ReceiptCreate(
         receipt_number=random_lower_string(),
+        client_id=client.id,
         date_received=date(2024, 1, 15),
         amount=1100.0,
         mode="Cash",
         reference=random_lower_string(),
     )
-    payment = crud.create_payment(session=db, payment_in=payment_in)
+    receipt = crud.create_receipt(session=db, receipt_in=receipt_in)
     
-    payment_allocation_in = PaymentAllocationCreate(
-        payment_id=payment.id,
+    # We need an invoice for the allocation
+    # The risk_note creation already creates an invoice in crud.create_risk_note
+    from app.models.insurance.financial import Invoice
+    from sqlmodel import select
+    invoice = db.exec(select(Invoice).where(Invoice.client_id == client.id)).first()
+    assert invoice is not None
+
+    allocation_in = ReceiptAllocationCreate(
+        receipt_id=receipt.id,
+        invoice_id=invoice.id,
         risk_note_id=risk_note.id,
         amount_allocated=1100.0,
     )
-    payment_allocation = crud.create_payment_allocation(session=db, payment_allocation_in=payment_allocation_in)
-    assert payment_allocation.payment_id == payment.id
-    assert payment_allocation.risk_note_id == risk_note.id
+    allocation = crud.create_receipt_allocation(session=db, allocation_in=allocation_in)
+    assert allocation.receipt_id == receipt.id
+    assert allocation.risk_note_id == risk_note.id

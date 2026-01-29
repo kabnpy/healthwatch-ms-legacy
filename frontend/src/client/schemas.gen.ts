@@ -1102,10 +1102,33 @@ export const PolicyPublicSchema = {
             type: 'string',
             format: 'uuid',
             title: 'Id'
+        },
+        product: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/ProductPublic'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        items: {
+            items: {
+                '$ref': '#/components/schemas/RiskItemPublic'
+            },
+            type: 'array',
+            title: 'Items',
+            default: []
+        },
+        display_name: {
+            type: 'string',
+            title: 'Display Name',
+            readOnly: true
         }
     },
     type: 'object',
-    required: ['policy_number', 'client_id', 'id'],
+    required: ['policy_number', 'client_id', 'id', 'display_name'],
     title: 'PolicyPublic'
 } as const;
 
@@ -1376,6 +1399,18 @@ export const ReceiptAllocationCreateSchema = {
             type: 'string',
             format: 'uuid',
             title: 'Invoice Id'
+        },
+        risk_note_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Risk Note Id'
         },
         amount_allocated: {
             type: 'number',

@@ -208,6 +208,9 @@ export type PolicyPublic = {
     product_id?: (string | null);
     status?: string;
     id: string;
+    product?: (ProductPublic | null);
+    items?: Array<RiskItemPublic>;
+    readonly display_name: string;
 };
 
 export type PolicyUpdate = {
@@ -266,6 +269,7 @@ export type ProductUpdate = {
 export type ReceiptAllocationCreate = {
     receipt_id: string;
     invoice_id: string;
+    risk_note_id?: (string | null);
     amount_allocated: number;
 };
 
