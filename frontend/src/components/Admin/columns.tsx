@@ -3,6 +3,7 @@ import type { ColumnDef } from "@tanstack/react-table"
 import type { UserPublic } from "@/client"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import { StatusIndicator } from "../Common/StatusIndicator"
 import { UserActionsMenu } from "./UserActionsMenu"
 
 export type UserTableData = UserPublic & {
@@ -51,17 +52,7 @@ export const columns: ColumnDef<UserTableData>[] = [
     accessorKey: "is_active",
     header: "Status",
     cell: ({ row }) => (
-      <div className="flex items-center gap-2">
-        <span
-          className={cn(
-            "size-2 rounded-full",
-            row.original.is_active ? "bg-green-500" : "bg-gray-400",
-          )}
-        />
-        <span className={row.original.is_active ? "" : "text-muted-foreground"}>
-          {row.original.is_active ? "Active" : "Inactive"}
-        </span>
-      </div>
+      <StatusIndicator isActive={row.original.is_active} />
     ),
   },
   {

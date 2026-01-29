@@ -10,6 +10,7 @@ import {
 import { toast } from "sonner"
 
 import type { ClientPublic } from "@/client"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -36,6 +37,23 @@ export const columns: ColumnDef<ClientPublic>[] = [
     ),
   },
   {
+    accessorKey: "client_type",
+    header: "Type",
+    cell: ({ row }) => {
+      const type = row.original.client_type
+      return (
+        <Badge variant={type === "Corporate" ? "default" : "secondary"}>
+          {type}
+        </Badge>
+      )
+    },
+  },
+  {
+    accessorKey: "contact_person",
+    header: "Contact Person",
+    cell: ({ row }) => row.original.contact_person || "-",
+  },
+  {
     accessorKey: "kra_pin",
     header: "KRA PIN",
     cell: ({ row }) => (
@@ -53,10 +71,6 @@ export const columns: ColumnDef<ClientPublic>[] = [
   {
     accessorKey: "phone",
     header: "Phone",
-  },
-  {
-    accessorKey: "client_type",
-    header: "Type",
   },
   {
     id: "actions",

@@ -10,7 +10,6 @@ import {
 import { toast } from "sonner"
 
 import type { PolicyPublic } from "@/client"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -20,18 +19,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { StatusIndicator } from "../Common/StatusIndicator"
 
 export const columns: ColumnDef<PolicyPublic>[] = [
   {
-    accessorKey: "policy_number",
-    header: "Policy Number",
+    accessorKey: "display_name",
+    header: "Policy",
     cell: ({ row }) => (
       <Link
         to="/policies/$policyId"
         params={{ policyId: row.original.id }}
         className="font-medium hover:underline text-primary flex items-center gap-2"
       >
-        {row.original.policy_number}
+        {row.original.display_name}
         <ExternalLink className="size-3 opacity-50" />
       </Link>
     ),
@@ -39,14 +39,12 @@ export const columns: ColumnDef<PolicyPublic>[] = [
   {
     accessorKey: "status",
     header: "Status",
-    cell: ({ row }) => {
-      const status = row.original.status
-      return (
-        <Badge variant={status === "Active" ? "default" : "secondary"}>
-          {status}
-        </Badge>
-      )
-    },
+    cell: ({ row }) => (
+      <StatusIndicator
+        isActive={row.original.status === "Active"}
+        label={row.original.status}
+      />
+    ),
   },
   {
     id: "actions",
