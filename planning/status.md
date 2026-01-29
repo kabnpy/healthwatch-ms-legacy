@@ -6,6 +6,10 @@
     - Implemented `Invoice`, `InvoiceLineItem`, `Receipt`, and `ReceiptAllocation` models.
     - Added automatic invoicing logic to the Risk Note creation flow.
     - Verified with new API tests in `test_financials.py`.
+- **Client Financial Hub (Subview)**
+    - Enhanced Client Hub with a complete "Financial Statement" view.
+    - Integrated payment logging (Receipts) and allocation logic directly into client management.
+    - Standardized financial summaries (Total Invoiced, Paid, Outstanding).
 - **UI Refinement & Standardization**
     - **Human-Readable Policy Titles**: Implemented `display_name` (e.g., "Motor Private - KDF 334K") across the backend and frontend.
     - **Standardized Status Indicators**: Created a reusable `StatusIndicator` component following the Admin page style (colored dot + text).

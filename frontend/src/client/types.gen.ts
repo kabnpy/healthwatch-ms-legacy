@@ -266,6 +266,13 @@ export type ProductUpdate = {
     default_commission_rate?: (number | null);
 };
 
+export type ReceiptAllocationBase = {
+    receipt_id: string;
+    invoice_id: string;
+    risk_note_id?: (string | null);
+    amount_allocated: number;
+};
+
 export type ReceiptAllocationCreate = {
     receipt_id: string;
     invoice_id: string;
@@ -292,6 +299,8 @@ export type ReceiptPublic = {
     reference: string;
     notes?: (string | null);
     id: string;
+    allocations?: Array<ReceiptAllocationBase>;
+    readonly unallocated_amount: number;
 };
 
 export type ReceiptsPublic = {

@@ -52,7 +52,7 @@ export const columns: ColumnDef<UserTableData>[] = [
     accessorKey: "is_active",
     header: "Status",
     cell: ({ row }) => (
-      <StatusIndicator isActive={row.original.is_active} />
+      <StatusIndicator isActive={!!row.original.is_active} />
     ),
   },
   {

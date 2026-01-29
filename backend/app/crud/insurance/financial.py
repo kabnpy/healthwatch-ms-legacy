@@ -1,5 +1,6 @@
 import uuid
 from sqlmodel import Session, select
+from sqlalchemy.orm import selectinload
 from app.models.insurance.financial import (
     Invoice,
     InvoiceCreate,
@@ -51,10 +52,11 @@ def create_receipt(*, session: Session, receipt_in: ReceiptCreate) -> Receipt:
     return db_obj
 
 def get_receipt(session: Session, *, id: uuid.UUID) -> Receipt | None:
-    return session.get(Receipt, id)
+    statement = select(Receipt).where(Receipt.id == id).options(selectinload(Receipt.allocations))
+    return session.exec(statement).first()
 
 def get_receipts(session: Session, *, skip: int = 0, limit: int = 100, client_id: uuid.UUID | None = None) -> list[Receipt]:
-    statement = select(Receipt)
+    statement = select(Receipt).options(selectinload(Receipt.allocations))
     if client_id:
         statement = statement.where(Receipt.client_id == client_id)
     statement = statement.offset(skip).limit(limit)

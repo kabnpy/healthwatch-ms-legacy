@@ -1,31 +1,44 @@
-import { useSuspenseQuery } from "@tanstack/react-query"
 import { Suspense, useMemo, useState } from "react"
-import { FinancialsService } from "@/client"
 import { DataTable } from "@/components/Common/DataTable"
 import { DocumentViewerModal } from "@/components/Common/DocumentViewerModal"
 import { UniversalDocumentViewer } from "@/components/Documents/UniversalDocumentViewer"
 import { getColumns as getInvoiceColumns } from "@/components/Invoices/columns"
+import { getReceiptColumns } from "@/components/Financials/ReceiptColumns"
 import PendingItems from "@/components/Pending/PendingItems"
-
-function getInvoicesQueryOptions(clientId: string) {
-  return {
-    queryFn: () =>
-      FinancialsService.readInvoices({ clientId, skip: 0, limit: 100 }),
-    queryKey: ["invoices", { clientId }],
-  }
-}
+import { useFinancialSummary } from "@/hooks/useFinancials"
+import { SummaryCard } from "@/components/Common/SummaryCard"
+import { Wallet, Receipt as ReceiptIcon, CreditCard, Plus } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { AddReceiptForm } from "@/components/Financials/AddReceiptForm"
+import { AllocationDialog } from "@/components/Financials/AllocationDialog"
+import type { ReceiptPublic } from "@/client"
 
 interface ClientInvoicesProps {
   clientId: string
 }
 
 export function ClientInvoices({ clientId }: ClientInvoicesProps) {
-  const { data: invoices } = useSuspenseQuery(getInvoicesQueryOptions(clientId))
+  const { invoices, receipts, summary, isLoading } = useFinancialSummary(clientId)
 
   const [viewerOpen, setViewerOpen] = useState(false)
-  const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(
-    null,
-  )
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null)
+  
+  const [isAddReceiptOpen, setIsAddReceiptOpen] = useState(false)
+  const [selectedReceipt, setSelectedReceipt] = useState<ReceiptPublic | null>(null)
+  const [isAllocationOpen, setIsAllocationOpen] = useState(false)
+
+  const handleAllocate = (receipt: ReceiptPublic) => {
+    setSelectedReceipt(receipt)
+    setIsAllocationOpen(true)
+  }
 
   const invoiceColumns = useMemo(
     () =>
@@ -36,26 +49,88 @@ export function ClientInvoices({ clientId }: ClientInvoicesProps) {
     [],
   )
 
+  const receiptColumns = useMemo(() => getReceiptColumns(handleAllocate), [])
+
+  if (isLoading) return <PendingItems />
+
   return (
-    <div className="space-y-4 pt-4">
+    <div className="space-y-6 pt-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold tracking-tight text-primary">
-          Financial Statement / Invoices
+        <h2 className="text-2xl font-bold tracking-tight text-primary">
+          Financial Statement
         </h2>
+        <Button className="gap-2" onClick={() => setIsAddReceiptOpen(true)}>
+          <Plus className="size-4" />
+          Log Payment
+        </Button>
       </div>
 
-      {!invoices?.data || invoices.data.length === 0 ? (
-        <div className="flex flex-col items-center justify-center text-center py-12 border rounded-lg bg-muted/5">
-          <h3 className="text-lg font-semibold">No invoices issued</h3>
-          <p className="text-muted-foreground">
-            Invoices will appear here once policies are issued or renewed.
-          </p>
-        </div>
-      ) : (
-        <DataTable
-          columns={invoiceColumns}
-          data={invoices.data}
-          searchPlaceholder="Search invoices..."
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <SummaryCard
+          title="Total Invoiced"
+          value={`KES ${summary.totalInvoiced.toLocaleString()}`}
+          description="Billed for all policies"
+          icon={ReceiptIcon}
+        />
+        <SummaryCard
+          title="Total Paid"
+          value={`KES ${summary.totalPaid.toLocaleString()}`}
+          description="Verified receipts"
+          icon={Wallet}
+        />
+        <SummaryCard
+          title="Outstanding Balance"
+          value={`KES ${summary.totalDue.toLocaleString()}`}
+          description="Current due amount"
+          icon={CreditCard}
+        />
+      </div>
+
+      <Tabs defaultValue="invoices" className="w-full">
+        <TabsList>
+          <TabsTrigger value="invoices">Invoices</TabsTrigger>
+          <TabsTrigger value="receipts">Receipts / Payments</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="invoices" className="pt-4">
+          <DataTable
+            columns={invoiceColumns}
+            data={invoices}
+            searchPlaceholder="Search invoices..."
+          />
+        </TabsContent>
+
+        <TabsContent value="receipts" className="pt-4">
+          <DataTable
+            columns={receiptColumns}
+            data={receipts}
+            searchPlaceholder="Search receipts..."
+          />
+        </TabsContent>
+      </Tabs>
+
+      {/* MODALS */}
+      <Dialog open={isAddReceiptOpen} onOpenChange={setIsAddReceiptOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Log Payment for Client</DialogTitle>
+            <DialogDescription>
+              Record a new receipt in the system.
+            </DialogDescription>
+          </DialogHeader>
+          <AddReceiptForm 
+            initialClientId={clientId}
+            onSuccess={() => setIsAddReceiptOpen(false)} 
+            onCancel={() => setIsAddReceiptOpen(false)} 
+          />
+        </DialogContent>
+      </Dialog>
+
+      {selectedReceipt && (
+        <AllocationDialog
+          receipt={selectedReceipt}
+          isOpen={isAllocationOpen}
+          onClose={() => setIsAllocationOpen(false)}
         />
       )}
 

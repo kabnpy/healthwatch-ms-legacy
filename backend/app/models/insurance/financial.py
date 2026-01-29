@@ -3,6 +3,7 @@ from datetime import date
 from typing import TYPE_CHECKING
 
 from sqlmodel import Field, Relationship, SQLModel
+from pydantic import computed_field
 
 if TYPE_CHECKING:
     from .policy import RiskNote
@@ -105,22 +106,6 @@ class ReceiptUpdate(SQLModel):
     notes: str | None = None
 
 
-class ReceiptPublic(ReceiptBase):
-    id: uuid.UUID
-
-
-class Receipt(ReceiptBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-
-    client: "Client" = Relationship(back_populates="receipts")
-    allocations: list["ReceiptAllocation"] = Relationship(back_populates="receipt")
-
-
-class ReceiptsPublic(SQLModel):
-    data: list[ReceiptPublic]
-    count: int
-
-
 # ==========================================
 # Receipt Allocation Models
 # ==========================================
@@ -147,4 +132,31 @@ class ReceiptAllocation(ReceiptAllocationBase, table=True):
 
 class ReceiptAllocationsPublic(SQLModel):
     data: list[ReceiptAllocationBase]
+    count: int
+
+
+# ==========================================
+# Public Schemas (Late Binding)
+# ==========================================
+
+class ReceiptPublic(ReceiptBase):
+    id: uuid.UUID
+    allocations: list[ReceiptAllocationBase] = []
+
+    @computed_field
+    @property
+    def unallocated_amount(self) -> float:
+        allocated = sum(a.amount_allocated for a in self.allocations)
+        return self.amount - allocated
+
+
+class Receipt(ReceiptBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+
+    client: "Client" = Relationship(back_populates="receipts")
+    allocations: list["ReceiptAllocation"] = Relationship(back_populates="receipt")
+
+
+class ReceiptsPublic(SQLModel):
+    data: list[ReceiptPublic]
     count: int

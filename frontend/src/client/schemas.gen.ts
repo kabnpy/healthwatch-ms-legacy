@@ -1388,6 +1388,40 @@ export const ProductsPublicSchema = {
     title: 'ProductsPublic'
 } as const;
 
+export const ReceiptAllocationBaseSchema = {
+    properties: {
+        receipt_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Receipt Id'
+        },
+        invoice_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Invoice Id'
+        },
+        risk_note_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Risk Note Id'
+        },
+        amount_allocated: {
+            type: 'number',
+            title: 'Amount Allocated'
+        }
+    },
+    type: 'object',
+    required: ['receipt_id', 'invoice_id', 'amount_allocated'],
+    title: 'ReceiptAllocationBase'
+} as const;
+
 export const ReceiptAllocationCreateSchema = {
     properties: {
         receipt_id: {
@@ -1510,10 +1544,23 @@ export const ReceiptPublicSchema = {
             type: 'string',
             format: 'uuid',
             title: 'Id'
+        },
+        allocations: {
+            items: {
+                '$ref': '#/components/schemas/ReceiptAllocationBase'
+            },
+            type: 'array',
+            title: 'Allocations',
+            default: []
+        },
+        unallocated_amount: {
+            type: 'number',
+            title: 'Unallocated Amount',
+            readOnly: true
         }
     },
     type: 'object',
-    required: ['receipt_number', 'client_id', 'date_received', 'amount', 'mode', 'reference', 'id'],
+    required: ['receipt_number', 'client_id', 'date_received', 'amount', 'mode', 'reference', 'id', 'unallocated_amount'],
     title: 'ReceiptPublic'
 } as const;
 
