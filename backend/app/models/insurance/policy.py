@@ -86,7 +86,7 @@ class RiskItemBase(SQLModel):
     description: str
     cover_description: str
     total_premium: float = Field(default=0.0)
-    premium_breakdown: dict[str, float] = Field(default_factory=dict, sa_type=JSON)
+    premium_breakdown: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
     risk_details: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
 
 
@@ -102,7 +102,7 @@ class RiskItemUpdate(SQLModel):
     description: str | None = None
     cover_description: str | None = None
     total_premium: float | None = None
-    premium_breakdown: dict[str, float] | None = None
+    premium_breakdown: dict[str, Any] | None = None
     risk_details: dict[str, Any] | None = None
 
 
@@ -142,7 +142,7 @@ class RiskNoteBase(SQLModel):
 
     # Invoice Totals (Aggregated from all items)
     net_premium: float
-    taxes: dict[str, float] = Field(default_factory=dict, sa_type=JSON)
+    taxes: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
     commission_amount: float
     total_amount: float
 
@@ -167,7 +167,7 @@ class RiskNoteUpdate(SQLModel):
     start_date: date | None = None
     end_date: date | None = None
     net_premium: float | None = None
-    taxes: dict[str, float] | None = None
+    taxes: dict[str, Any] | None = None
     commission_amount: float | None = None
     total_amount: float | None = None
     items_snapshot: dict[str, Any] | None = None

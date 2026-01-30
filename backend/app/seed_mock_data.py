@@ -14,123 +14,158 @@ logger = logging.getLogger(__name__)
 def create_mock_data() -> None:
     with Session(engine) as session:
         # 1. SETUP THE CATALOG
-        insurer = session.exec(
-            select(Insurer).where(Insurer.name == "Jubilee Insurance")
+        old_mutual = session.exec(
+            select(Insurer).where(Insurer.name == "Old Mutual General Insurance Kenya Ltd.")
         ).first()
-        if not insurer:
-            insurer = Insurer(name="Jubilee Insurance", email="claims@jubilee.com")
-            session.add(insurer)
+        if not old_mutual:
+            old_mutual = Insurer(name="Old Mutual General Insurance Kenya Ltd.", email="info@oldmutual.co.ke")
+            session.add(old_mutual)
             session.commit()
-            session.refresh(insurer)
+            session.refresh(old_mutual)
 
-        product = session.exec(
-            select(Product).where(Product.name == "Motor Private - Gold")
-        ).first()
-        if not product:
-            product = Product(
-                insurer_id=insurer.id,
-                name="Motor Private - Gold",
-                class_of_insurance="Motor Private",
-                pricing_strategy=PricingStrategy.PERCENTAGE,
-                pricing_rules={"rate": 4.5, "min_premium": 5000},
+        # PRODUCT: PERSONAL ACCIDENT
+        pa_product = session.exec(select(Product).where(Product.name == "Maxpac Personal Accident")).first()
+        if not pa_product:
+            pa_product = Product(
+                insurer_id=old_mutual.id,
+                name="Maxpac Personal Accident",
+                class_of_insurance="Personal Accident",
                 form_schema=[
-                    {
-                        "key": "registration_no",
-                        "label": "Registration No",
-                        "type": "text",
-                    },
-                    {"key": "chassis_no", "label": "Chassis No", "type": "text"},
-                    {"key": "make", "label": "Make", "type": "text"},
-                    {"key": "model", "label": "Model", "type": "text"},
-                    {"key": "sum_insured", "label": "Sum Insured", "type": "number"},
+                    {"key": "occupation", "label": "Occupation", "type": "text"},
+                    {"key": "acc_death", "label": "Accidental Death", "type": "number", "category": "BENEFITS"},
+                    {"key": "perm_total_disability", "label": "Permanent Total Disablement", "type": "number", "category": "BENEFITS"},
+                    {"key": "hosp_cash", "label": "Hospital Cash", "type": "number", "category": "BENEFITS"},
+                    {"key": "acc_med_expenses", "label": "Accidental Medical Expenses", "type": "number", "category": "BENEFITS"},
+                    {"key": "last_expense", "label": "Last Expense", "type": "number", "category": "BENEFITS"},
                 ],
                 default_benefits={
-                    "towing": 50000,
-                    "windscreen": 50000,
-                    "excess": "2.5% of Value",
+                    "acc_death": 500000,
+                    "perm_total_disability": 500000,
+                    "hosp_cash": 1000,
+                    "acc_med_expenses": 70000,
+                    "last_expense": 50000,
                 },
-                default_commission_rate=12.5,
+                default_clauses=["24hour cover", "Worldwide limits", "Age limits 16-65 years"],
             )
-            session.add(product)
-            session.commit()
-            session.refresh(product)
+            session.add(pa_product)
 
-        # 2. CREATE CLIENT
+        # PRODUCT: MOTOR PRIVATE
+        motor_product = session.exec(select(Product).where(Product.name == "Motor Private - Comprehensive")).first()
+        if not motor_product:
+            motor_product = Product(
+                insurer_id=old_mutual.id,
+                name="Motor Private - Comprehensive",
+                class_of_insurance="Motor Private",
+                form_schema=[
+                    {"key": "reg_no", "label": "Reg. No", "type": "text", "category": "VEHICLE DETAILS"},
+                    {"key": "make", "label": "Make", "type": "text", "category": "VEHICLE DETAILS"},
+                    {"key": "year", "label": "Year", "type": "number", "category": "VEHICLE DETAILS"},
+                    {"key": "value", "label": "Value Kshs.", "type": "number", "category": "VEHICLE DETAILS"},
+                    {"key": "tp_persons", "label": "Third Party Persons", "type": "number", "category": "BENEFITS & LIMITS"},
+                    {"key": "tp_property", "label": "Third Party Property", "type": "number", "category": "BENEFITS & LIMITS"},
+                    {"key": "towing", "label": "Towing & Recovery", "type": "number", "category": "BENEFITS & LIMITS"},
+                    {"key": "own_damage_excess", "label": "Own Damage and Partial", "type": "text", "category": "EXCESS"},
+                    {"key": "theft_excess", "label": "Theft losses", "type": "text", "category": "EXCESS"},
+                ],
+                default_benefits={
+                    "tp_persons": 10000000,
+                    "tp_property": 30000000,
+                    "towing": 100000,
+                },
+                default_clauses=["Including Special Perils", "No blame no excess"],
+            )
+            session.add(motor_product)
+
+        # PRODUCT: DOMESTIC PACKAGE
+        domestic_product = session.exec(select(Product).where(Product.name == "Domestic Package - HomeShield")).first()
+        if not domestic_product:
+            domestic_product = Product(
+                insurer_id=old_mutual.id,
+                name="Domestic Package - HomeShield",
+                class_of_insurance="Domestic Package",
+                form_schema=[
+                    {"key": "location", "label": "Location", "type": "text", "category": "LOCATION"},
+                    {"key": "construction", "label": "Construction", "type": "text", "category": "LOCATION"},
+                    {"key": "value", "label": "Value Kshs.", "type": "number", "category": "LOCATION"},
+                    {"key": "contents", "label": "Section B: (Contents)", "type": "number", "category": "INTEREST & SUM INSURED"},
+                    {"key": "all_risks", "label": "Section C: (All Risks)", "type": "number", "category": "INTEREST & SUM INSURED"},
+                    {"key": "owners_liability", "label": "Owners Liability", "type": "number", "category": "LIABILITIES"},
+                    {"key": "occupiers_liability", "label": "Occupiers Liability", "type": "number", "category": "LIABILITIES"},
+                ],
+                default_benefits={
+                    "owners_liability": 1000000,
+                    "occupiers_liability": 1000000,
+                },
+                default_clauses=["Automatic reinstatement of loss", "Fire brigade"],
+            )
+            session.add(domestic_product)
+
+        session.commit()
+        logger.info("✅ Catalog Seeded with Old Mutual Products")
+
+        # 2. CREATE CLIENT (Agnes Njoki Mwangi)
         client = session.exec(
-            select(Client).where(Client.kra_pin == "A001234567Z")
+            select(Client).where(Client.kra_pin == "A001158997L")
         ).first()
         if not client:
             client = Client(
-                name="John Doe",
-                kra_pin="A001234567Z",
-                phone="0712345678",
-                postal_address="P.O. Box 1234, Westlands, Nairobi",
-                email="john@example.com",
-                contacts=[
-                    {
-                        "name": "Jane Doe",
-                        "role": "Spouse",
-                        "phone": "0722000000",
-                        "email": "jane@example.com",
-                    }
-                ],
+                name="Agnes Njoki Mwangi",
+                kra_pin="A001158997L",
+                phone="0733980566",
+                postal_address="P.O. Box 11908 - 00100",
+                city="Nairobi",
+                email="agnes@example.com",
             )
             session.add(client)
             session.commit()
             session.refresh(client)
 
-        # 3. CREATE POLICY
+        # 3. CREATE MOTOR POLICY
         policy = session.exec(
-            select(Policy).where(Policy.policy_number == "P/001/2026")
+            select(Policy).where(Policy.policy_number == "010/070/1/012473/2017")
         ).first()
         if not policy:
             policy = Policy(
-                policy_number="P/001/2026",
+                policy_number="010/070/1/012473/2017",
                 client_id=client.id,
-                product_id=product.id,
+                product_id=motor_product.id,
                 status="Active",
             )
             session.add(policy)
             session.commit()
             session.refresh(policy)
 
-        # 4. CREATE RISK ITEM (The Car)
-        # Check if any risk item exists for this policy since identifier is gone
+        # 4. CREATE MOTOR RISK ITEM
         item = session.exec(
             select(RiskItem).where(RiskItem.policy_id == policy.id)
         ).first()
         if not item:
             item = RiskItem(
                 policy_id=policy.id,
-                version_number=1,
-                valid_from=date.today(),
-                is_active=True,
-                description="KCA 123B - Toyota Harrier",
+                description="KCM 780L - Toyota Landcruiser Prado",
                 cover_description="Comprehensive",
-                total_premium=100340.0,
+                total_premium=153438.0,
                 premium_breakdown={
-                    "basic": 100000.0,
-                    "levies": {
-                        "trainingLevy": 200.0,
-                        "phcf": 100.0,
-                        "stampDuty": 40.0,
-                    },
-                    "total": 100340.0,
+                    "basic": 152750.0,
+                    "levies": {"trainingLevy": 306.0, "phcf": 382.0},
                 },
                 risk_details={
-                    "make": "Toyota",
-                    "model": "Harrier",
-                    "chassis_no": "JMZ...",
-                    "registration_no": "KCA 123B",
-                    "sum_insured": 2500000.0,
+                    "reg_no": "KCM 780L",
+                    "make": "Toyota Landcruiser Prado",
+                    "year": 2016,
+                    "value": 4700000.0,
+                    "tp_persons": 10000000,
+                    "tp_property": 30000000,
+                    "towing": 100000,
+                    "own_damage_excess": "2.5% of value min 15k",
+                    "theft_excess": "10% of vehicle value",
                 },
             )
             session.add(item)
             session.commit()
             session.refresh(item)
 
-        # 5. CREATE RISK NOTE (The Financials)
-        # Check if any risk note exists for this policy
+        # 5. CREATE MOTOR RISK NOTE
         rn = session.exec(
             select(RiskNote).where(RiskNote.policy_id == policy.id)
         ).first()
@@ -138,17 +173,13 @@ def create_mock_data() -> None:
             rn = RiskNote(
                 policy_id=policy.id,
                 transaction_type="New Business",
-                start_date=date.today(),
-                end_date=date.today() + timedelta(days=365),
-                net_premium=100000.0,
-                taxes={
-                    "trainingLevy": 200.0,
-                    "phcf": 100.0,
-                    "stampDuty": 40.0,
-                },
-                commission_amount=12500.0,
-                total_amount=100340.0,
-                payment_status="Unpaid",
+                invoice_number="HW-MOT-001",
+                start_date=date(2025, 8, 2),
+                end_date=date(2026, 8, 1),
+                net_premium=152750.0,
+                taxes={"trainingLevy": 306.0, "phcf": 382.0},
+                commission_amount=15275.0,
+                total_amount=153438.0,
                 items_snapshot={
                     "items": [
                         {
@@ -159,13 +190,12 @@ def create_mock_data() -> None:
                         }
                     ]
                 },
-                special_clauses=[
-                    "Including Political Violence",
-                    "Windscreen up to 50k",
-                ],
+                special_clauses=["Including Special Perils", "No blame no excess"],
             )
             session.add(rn)
             session.commit()
+
+        logger.info("✅ Mock Data Seeded Successfully")
 
         logger.info("✅ Mock Data Seeded Successfully")
 
