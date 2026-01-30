@@ -130,6 +130,7 @@ class RiskItemsPublic(SQLModel):
 class RiskNoteBase(SQLModel):
     policy_id: uuid.UUID = Field(foreign_key="policy.id")
     transaction_type: str  # "New Business", "Renewal", "Endorsement", "Cancellation"
+    status: str = Field(default="Draft")  # "Draft", "Active", "Cancelled"
     previous_risk_note_id: uuid.UUID | None = Field(
         default=None, foreign_key="risknote.id"
     )
@@ -161,6 +162,7 @@ class RiskNoteCreate(RiskNoteBase):
 
 class RiskNoteUpdate(SQLModel):
     transaction_type: str | None = None
+    status: str | None = None
     previous_risk_note_id: uuid.UUID | None = None
     invoice_number: str | None = None
     payment_status: str | None = None

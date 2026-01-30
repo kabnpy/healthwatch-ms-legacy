@@ -33,6 +33,25 @@ def create_policy(*, session: Session, policy_in: PolicyCreate) -> Policy:
     session.add(db_obj)
     session.commit()
     session.refresh(db_obj)
+
+    # Automatically create the first Risk Note for the new policy
+    from datetime import date, timedelta
+    
+    first_risk_note_in = RiskNoteCreate(
+        policy_id=db_obj.id,
+        transaction_type="New Business",
+        status="Draft",
+        start_date=date.today(),
+        end_date=date.today() + timedelta(days=365),
+        net_premium=0.0,
+        taxes={},
+        commission_amount=0.0,
+        total_amount=0.0,
+        items_snapshot={},
+        special_clauses=[]
+    )
+    create_risk_note(session=session, risk_note_in=first_risk_note_in)
+    
     return db_obj
 
 

@@ -61,13 +61,9 @@ class ProductBase(SQLModel):
     name: str
     class_of_insurance: str  # "Motor Private", "Fire"
 
-    pricing_strategy: PricingStrategy = Field(default=PricingStrategy.PERCENTAGE)
-    pricing_rules: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
-    form_schema: list[dict[str, Any]] = Field(default_factory=list, sa_type=JSON)
+    product_details: list[dict[str, Any]] = Field(default_factory=list, sa_type=JSON)
 
     # Defaults to pre-fill the form
-    default_benefits: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
-    default_clauses: list[str] = Field(default_factory=list, sa_type=JSON)
     default_commission_rate: float = 10.0
 
 
@@ -79,11 +75,7 @@ class ProductUpdate(SQLModel):
     insurer_id: uuid.UUID | None = None
     name: str | None = None
     class_of_insurance: str | None = None
-    pricing_strategy: PricingStrategy | None = None
-    pricing_rules: dict[str, Any] | None = None
-    form_schema: list[dict[str, Any]] | None = None
-    default_benefits: dict[str, Any] | None = None
-    default_clauses: list[str] | None = None
+    product_details: list[dict[str, Any]] | None = None
     default_commission_rate: float | None = None
 
 

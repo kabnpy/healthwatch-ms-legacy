@@ -5,7 +5,6 @@ from sqlmodel import Session, select
 
 from app.core.db import engine
 from app.models import Client, Insurer, Policy, Product, RiskItem, RiskNote
-from app.models.insurance.catalog import PricingStrategy
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -30,22 +29,17 @@ def create_mock_data() -> None:
                 insurer_id=old_mutual.id,
                 name="Maxpac Personal Accident",
                 class_of_insurance="Personal Accident",
-                form_schema=[
-                    {"key": "occupation", "label": "Occupation", "type": "text"},
-                    {"key": "acc_death", "label": "Accidental Death", "type": "number", "category": "BENEFITS"},
-                    {"key": "perm_total_disability", "label": "Permanent Total Disablement", "type": "number", "category": "BENEFITS"},
-                    {"key": "hosp_cash", "label": "Hospital Cash", "type": "number", "category": "BENEFITS"},
-                    {"key": "acc_med_expenses", "label": "Accidental Medical Expenses", "type": "number", "category": "BENEFITS"},
-                    {"key": "last_expense", "label": "Last Expense", "type": "number", "category": "BENEFITS"},
+                product_details=[
+                    # Inputs
+                    {"key": "occupation", "label": "Occupation", "type": "text", "field_type": "input", "section": "OCCUPATION", "pricing_type": "none"},
+                    
+                    # Static Benefits (Precalculated/Flat)
+                    {"key": "acc_death", "label": "Accidental Death", "type": "static", "field_type": "static", "section": "BENEFITS", "value": "Kshs. 500,000/-", "pricing_type": "none"},
+                    {"key": "perm_total_disability", "label": "Permanent Total Disablement", "type": "static", "field_type": "static", "section": "BENEFITS", "value": "Kshs. 500,000/-", "pricing_type": "none"},
+                    
+                    # The Premium itself
+                    {"key": "base_premium", "label": "Standard PA Premium", "type": "number", "field_type": "static", "section": "FINANCIALS", "value": 1725.0, "pricing_type": "fixed", "pricing_value": 1725.0, "show_in_risknote": False},
                 ],
-                default_benefits={
-                    "acc_death": 500000,
-                    "perm_total_disability": 500000,
-                    "hosp_cash": 1000,
-                    "acc_med_expenses": 70000,
-                    "last_expense": 50000,
-                },
-                default_clauses=["24hour cover", "Worldwide limits", "Age limits 16-65 years"],
             )
             session.add(pa_product)
 
@@ -56,23 +50,16 @@ def create_mock_data() -> None:
                 insurer_id=old_mutual.id,
                 name="Motor Private - Comprehensive",
                 class_of_insurance="Motor Private",
-                form_schema=[
-                    {"key": "reg_no", "label": "Reg. No", "type": "text", "category": "VEHICLE DETAILS"},
-                    {"key": "make", "label": "Make", "type": "text", "category": "VEHICLE DETAILS"},
-                    {"key": "year", "label": "Year", "type": "number", "category": "VEHICLE DETAILS"},
-                    {"key": "value", "label": "Value Kshs.", "type": "number", "category": "VEHICLE DETAILS"},
-                    {"key": "tp_persons", "label": "Third Party Persons", "type": "number", "category": "BENEFITS & LIMITS"},
-                    {"key": "tp_property", "label": "Third Party Property", "type": "number", "category": "BENEFITS & LIMITS"},
-                    {"key": "towing", "label": "Towing & Recovery", "type": "number", "category": "BENEFITS & LIMITS"},
-                    {"key": "own_damage_excess", "label": "Own Damage and Partial", "type": "text", "category": "EXCESS"},
-                    {"key": "theft_excess", "label": "Theft losses", "type": "text", "category": "EXCESS"},
+                product_details=[
+                    # Inputs
+                    {"key": "reg_no", "label": "Reg. No", "type": "text", "field_type": "input", "section": "VEHICLE DETAILS", "pricing_type": "none"},
+                    {"key": "make", "label": "Make", "type": "text", "field_type": "input", "section": "VEHICLE DETAILS", "pricing_type": "none"},
+                    {"key": "year", "label": "Year", "type": "number", "field_type": "input", "section": "VEHICLE DETAILS", "pricing_type": "none"},
+                    {"key": "value", "label": "Value Kshs.", "type": "number", "field_type": "input", "section": "VEHICLE DETAILS", "pricing_type": "percentage", "pricing_value": 3.25},
+                    
+                    # Static Benefits
+                    {"key": "tp_persons", "label": "Third Party Persons", "type": "static", "field_type": "static", "section": "HIGH-END BENEFITS & LIMITS", "value": "Kshs. 10,000,000.00", "pricing_type": "none"},
                 ],
-                default_benefits={
-                    "tp_persons": 10000000,
-                    "tp_property": 30000000,
-                    "towing": 100000,
-                },
-                default_clauses=["Including Special Perils", "No blame no excess"],
             )
             session.add(motor_product)
 
@@ -83,25 +70,16 @@ def create_mock_data() -> None:
                 insurer_id=old_mutual.id,
                 name="Domestic Package - HomeShield",
                 class_of_insurance="Domestic Package",
-                form_schema=[
-                    {"key": "location", "label": "Location", "type": "text", "category": "LOCATION"},
-                    {"key": "construction", "label": "Construction", "type": "text", "category": "LOCATION"},
-                    {"key": "value", "label": "Value Kshs.", "type": "number", "category": "LOCATION"},
-                    {"key": "contents", "label": "Section B: (Contents)", "type": "number", "category": "INTEREST & SUM INSURED"},
-                    {"key": "all_risks", "label": "Section C: (All Risks)", "type": "number", "category": "INTEREST & SUM INSURED"},
-                    {"key": "owners_liability", "label": "Owners Liability", "type": "number", "category": "LIABILITIES"},
-                    {"key": "occupiers_liability", "label": "Occupiers Liability", "type": "number", "category": "LIABILITIES"},
+                product_details=[
+                    # Inputs
+                    {"key": "location", "label": "Location", "type": "text", "field_type": "input", "section": "LOCATION", "pricing_type": "none"},
+                    {"key": "value", "label": "Value Kshs.", "type": "number", "field_type": "input", "section": "LOCATION", "pricing_type": "percentage", "pricing_value": 1.5},
                 ],
-                default_benefits={
-                    "owners_liability": 1000000,
-                    "occupiers_liability": 1000000,
-                },
-                default_clauses=["Automatic reinstatement of loss", "Fire brigade"],
             )
             session.add(domestic_product)
 
         session.commit()
-        logger.info("✅ Catalog Seeded with Old Mutual Products")
+        logger.info("✅ Catalog Seeded with Unified product_details")
 
         # 2. CREATE CLIENT (Agnes Njoki Mwangi)
         client = session.exec(
@@ -154,11 +132,6 @@ def create_mock_data() -> None:
                     "make": "Toyota Landcruiser Prado",
                     "year": 2016,
                     "value": 4700000.0,
-                    "tp_persons": 10000000,
-                    "tp_property": 30000000,
-                    "towing": 100000,
-                    "own_damage_excess": "2.5% of value min 15k",
-                    "theft_excess": "10% of vehicle value",
                 },
             )
             session.add(item)
@@ -180,9 +153,11 @@ def create_mock_data() -> None:
                 taxes={"trainingLevy": 306.0, "phcf": 382.0},
                 commission_amount=15275.0,
                 total_amount=153438.0,
+                status="Active",
                 items_snapshot={
                     "items": [
                         {
+                            "name": motor_product.name,
                             "description": item.description,
                             "cover": item.cover_description,
                             "premium": item.total_premium,
@@ -190,12 +165,10 @@ def create_mock_data() -> None:
                         }
                     ]
                 },
-                special_clauses=["Including Special Perils", "No blame no excess"],
+                special_clauses=[],
             )
             session.add(rn)
             session.commit()
-
-        logger.info("✅ Mock Data Seeded Successfully")
 
         logger.info("✅ Mock Data Seeded Successfully")
 
