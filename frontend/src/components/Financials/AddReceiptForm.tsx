@@ -1,7 +1,7 @@
-import { useForm, type SubmitHandler } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { type SubmitHandler, useForm } from "react-hook-form"
+import { toast } from "sonner"
 import * as z from "zod"
-
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -19,9 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useClients } from "@/hooks/useInsurance"
 import { useCreateReceipt } from "@/hooks/useFinancials"
-import { toast } from "sonner"
+import { useClients } from "@/hooks/useInsurance"
 
 const formSchema = z.object({
   client_id: z.string().min(1, "Please select a client"),
@@ -41,7 +40,11 @@ interface AddReceiptFormProps {
   initialClientId?: string
 }
 
-export function AddReceiptForm({ onSuccess, onCancel, initialClientId }: AddReceiptFormProps) {
+export function AddReceiptForm({
+  onSuccess,
+  onCancel,
+  initialClientId,
+}: AddReceiptFormProps) {
   const { data: clientsData } = useClients(0, 1000)
   const createReceipt = useCreateReceipt()
 
@@ -63,7 +66,7 @@ export function AddReceiptForm({ onSuccess, onCancel, initialClientId }: AddRece
       await createReceipt.mutateAsync(values as any)
       toast.success("Receipt created successfully")
       onSuccess()
-    } catch (error) {
+    } catch (_error) {
       toast.error("Failed to create receipt")
     }
   }
@@ -78,7 +81,10 @@ export function AddReceiptForm({ onSuccess, onCancel, initialClientId }: AddRece
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Client</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a client" />
@@ -147,7 +153,10 @@ export function AddReceiptForm({ onSuccess, onCancel, initialClientId }: AddRece
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Payment Mode</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Mode" />

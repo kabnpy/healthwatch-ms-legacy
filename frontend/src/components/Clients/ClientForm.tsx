@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm, useFieldArray } from "react-hook-form"
+import { Plus, Trash2 } from "lucide-react"
+import { useFieldArray, useForm } from "react-hook-form"
 import { z } from "zod"
 import type { ClientCreate, ClientPublic, ClientUpdate } from "@/client"
 import { Button } from "@/components/ui/button"
@@ -20,7 +21,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Plus, Trash2 } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 
 const contactSchema = z.object({
@@ -72,7 +72,7 @@ export const ClientForm = ({
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name: "contacts"
+    name: "contacts",
   })
 
   const handleFormSubmit = (data: FormData) => {
@@ -201,16 +201,21 @@ export const ClientForm = ({
               variant="outline"
               size="sm"
               className="gap-2"
-              onClick={() => append({ name: "", role: "", phone: "", email: "" })}
+              onClick={() =>
+                append({ name: "", role: "", phone: "", email: "" })
+              }
             >
               <Plus className="size-4" />
               Add Contact
             </Button>
           </div>
           <Separator />
-          
+
           {fields.map((field, index) => (
-            <div key={field.id} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg bg-muted/10 relative group">
+            <div
+              key={field.id}
+              className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg bg-muted/10 relative group"
+            >
               <Button
                 type="button"
                 variant="ghost"

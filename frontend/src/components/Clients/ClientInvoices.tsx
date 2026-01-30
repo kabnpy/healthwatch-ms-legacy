@@ -1,15 +1,17 @@
+import { CreditCard, Plus, Receipt as ReceiptIcon, Wallet } from "lucide-react"
 import { Suspense, useMemo, useState } from "react"
+import type { InvoicePublic, ReceiptPublic } from "@/client"
 import { DataTable } from "@/components/Common/DataTable"
 import { DocumentViewerModal } from "@/components/Common/DocumentViewerModal"
-import { UniversalDocumentViewer } from "@/components/Documents/UniversalDocumentViewer"
-import { getColumns as getInvoiceColumns } from "@/components/Invoices/columns"
-import { getReceiptColumns } from "@/components/Financials/ReceiptColumns"
-import PendingItems from "@/components/Pending/PendingItems"
-import { useFinancialSummary, useVoidReceipt } from "@/hooks/useFinancials"
 import { SummaryCard } from "@/components/Common/SummaryCard"
-import { Wallet, Receipt as ReceiptIcon, CreditCard, Plus } from "lucide-react"
+import { UniversalDocumentViewer } from "@/components/Documents/UniversalDocumentViewer"
+import { AddReceiptForm } from "@/components/Financials/AddReceiptForm"
+import { AllocationDialog } from "@/components/Financials/AllocationDialog"
+import { AllocationHistory } from "@/components/Financials/AllocationHistory"
+import { getReceiptColumns } from "@/components/Financials/ReceiptColumns"
+import { getColumns as getInvoiceColumns } from "@/components/Invoices/columns"
+import PendingItems from "@/components/Pending/PendingItems"
 import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Dialog,
   DialogContent,
@@ -18,30 +20,34 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { AddReceiptForm } from "@/components/Financials/AddReceiptForm"
-import { AllocationDialog } from "@/components/Financials/AllocationDialog"
-import { AllocationHistory } from "@/components/Financials/AllocationHistory"
-import type { ReceiptPublic, InvoicePublic } from "@/client"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useFinancialSummary, useVoidReceipt } from "@/hooks/useFinancials"
 
 interface ClientInvoicesProps {
   clientId: string
 }
 
 export function ClientInvoices({ clientId }: ClientInvoicesProps) {
-  const { invoices, receipts, summary, isLoading } = useFinancialSummary(clientId)
+  const { invoices, receipts, summary, isLoading } =
+    useFinancialSummary(clientId)
   const voidMutation = useVoidReceipt()
 
   const [viewerOpen, setViewerOpen] = useState(false)
-  const [selectedDoc, setSelectedDoc] = useState<{ id: string, type: "invoice" | "receipt" } | null>(null)
-  
+  const [selectedDoc, setSelectedDoc] = useState<{
+    id: string
+    type: "invoice" | "receipt"
+  } | null>(null)
+
   const [isAddReceiptOpen, setIsAddReceiptOpen] = useState(false)
-  const [selectedReceipt, setSelectedReceipt] = useState<ReceiptPublic | null>(null)
+  const [selectedReceipt, setSelectedReceipt] = useState<ReceiptPublic | null>(
+    null,
+  )
   const [isAllocationOpen, setIsAllocationOpen] = useState(false)
   const [receiptToVoid, setReceiptToVoid] = useState<ReceiptPublic | null>(null)
 
-  const [historyTarget, setHistoryTarget] = useState<{ 
-    type: "invoice" | "receipt", 
-    item: InvoicePublic | ReceiptPublic 
+  const [historyTarget, setHistoryTarget] = useState<{
+    type: "invoice" | "receipt"
+    item: InvoicePublic | ReceiptPublic
   } | null>(null)
 
   const handleAllocate = (receipt: ReceiptPublic) => {
@@ -54,7 +60,7 @@ export function ClientInvoices({ clientId }: ClientInvoicesProps) {
     try {
       await voidMutation.mutateAsync(receiptToVoid.id)
       setReceiptToVoid(null)
-    } catch (error) {
+    } catch (_error) {
       // toast is already in mutation
     }
   }
@@ -66,22 +72,23 @@ export function ClientInvoices({ clientId }: ClientInvoicesProps) {
           setSelectedDoc({ id: invoice.id, type: "invoice" })
           setViewerOpen(true)
         },
-        (invoice) => setHistoryTarget({ type: "invoice", item: invoice })
+        (invoice) => setHistoryTarget({ type: "invoice", item: invoice }),
       ),
     [],
   )
 
   const receiptColumns = useMemo(
-    () => getReceiptColumns(
-      handleAllocate,
-      (receipt) => setHistoryTarget({ type: "receipt", item: receipt }),
-      (receipt) => setReceiptToVoid(receipt),
-      (receipt) => {
-        setSelectedDoc({ id: receipt.id, type: "receipt" })
-        setViewerOpen(true)
-      }
-    ), 
-    []
+    () =>
+      getReceiptColumns(
+        handleAllocate,
+        (receipt) => setHistoryTarget({ type: "receipt", item: receipt }),
+        (receipt) => setReceiptToVoid(receipt),
+        (receipt) => {
+          setSelectedDoc({ id: receipt.id, type: "receipt" })
+          setViewerOpen(true)
+        },
+      ),
+    [handleAllocate],
   )
 
   if (isLoading) return <PendingItems />
@@ -151,10 +158,10 @@ export function ClientInvoices({ clientId }: ClientInvoicesProps) {
               Record a new receipt in the system.
             </DialogDescription>
           </DialogHeader>
-          <AddReceiptForm 
+          <AddReceiptForm
             initialClientId={clientId}
-            onSuccess={() => setIsAddReceiptOpen(false)} 
-            onCancel={() => setIsAddReceiptOpen(false)} 
+            onSuccess={() => setIsAddReceiptOpen(false)}
+            onCancel={() => setIsAddReceiptOpen(false)}
           />
         </DialogContent>
       </Dialog>
@@ -177,32 +184,36 @@ export function ClientInvoices({ clientId }: ClientInvoicesProps) {
           title={`${selectedDoc.type === "invoice" ? "Invoice" : "Receipt"} Details`}
         >
           <Suspense fallback={<PendingItems />}>
-            <UniversalDocumentViewer id={selectedDoc.id} type={selectedDoc.type} />
+            <UniversalDocumentViewer
+              id={selectedDoc.id}
+              type={selectedDoc.type}
+            />
           </Suspense>
         </DocumentViewerModal>
       )}
 
       {/* HISTORY DIALOG */}
-      <Dialog 
-        open={!!historyTarget} 
+      <Dialog
+        open={!!historyTarget}
         onOpenChange={(open) => !open && setHistoryTarget(null)}
       >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {historyTarget?.type === "invoice" ? "Payment History" : "Allocation History"}
+              {historyTarget?.type === "invoice"
+                ? "Payment History"
+                : "Allocation History"}
             </DialogTitle>
             <DialogDescription>
-              {historyTarget?.type === "invoice" 
+              {historyTarget?.type === "invoice"
                 ? `Receipts applied to Invoice ${(historyTarget.item as InvoicePublic).invoice_number}`
-                : `Invoices paid by Receipt ${(historyTarget?.item as ReceiptPublic)?.receipt_number}`
-              }
+                : `Invoices paid by Receipt ${(historyTarget?.item as ReceiptPublic)?.receipt_number}`}
             </DialogDescription>
           </DialogHeader>
           {historyTarget && (
-            <AllocationHistory 
-              allocations={historyTarget.item.allocations || []} 
-              type={historyTarget.type} 
+            <AllocationHistory
+              allocations={historyTarget.item.allocations || []}
+              type={historyTarget.type}
             />
           )}
           <div className="flex justify-end pt-4">
@@ -214,13 +225,15 @@ export function ClientInvoices({ clientId }: ClientInvoicesProps) {
       </Dialog>
 
       {/* VOID CONFIRMATION */}
-      <Dialog 
-        open={!!receiptToVoid} 
+      <Dialog
+        open={!!receiptToVoid}
         onOpenChange={(open) => !open && setReceiptToVoid(null)}
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-destructive">Void Receipt {receiptToVoid?.receipt_number}</DialogTitle>
+            <DialogTitle className="text-destructive">
+              Void Receipt {receiptToVoid?.receipt_number}
+            </DialogTitle>
             <DialogDescription>
               Are you sure you want to void this payment? This will:
               <ul className="list-disc pl-6 pt-2 space-y-1">
@@ -228,15 +241,17 @@ export function ClientInvoices({ clientId }: ClientInvoicesProps) {
                 <li>Increase the balance due on all affected invoices</li>
                 <li>Mark this receipt as "Voided"</li>
               </ul>
-              <p className="pt-2 font-semibold">This action cannot be undone.</p>
+              <p className="pt-2 font-semibold">
+                This action cannot be undone.
+              </p>
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setReceiptToVoid(null)}>
               Cancel
             </Button>
-            <Button 
-              variant="destructive" 
+            <Button
+              variant="destructive"
               onClick={handleVoid}
               disabled={voidMutation.isPending}
             >

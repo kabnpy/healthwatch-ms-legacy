@@ -1,20 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router"
+import { Clock, CreditCard, FileDown, Mail } from "lucide-react"
 import { Suspense, useCallback, useState } from "react"
 import { PoliciesService } from "@/client"
 import { DataTable } from "@/components/Common/DataTable"
 import { DocumentManager } from "@/components/Common/DocumentManager"
 import { DocumentViewerModal } from "@/components/Common/DocumentViewerModal"
 import ErrorComponent from "@/components/Common/ErrorComponent"
-import { SummaryCard } from "@/components/Common/SummaryCard"
+import { RiskNoteTemplate } from "@/components/Documents/templates/RiskNoteTemplate"
 import { UniversalDocumentViewer } from "@/components/Documents/UniversalDocumentViewer"
 import { RiskNoteForm } from "@/components/Insurance/RiskNoteForm"
 import PendingItems from "@/components/Pending/PendingItems"
-import { AssetCard } from "@/components/Policies/Dashboard/AssetCard"
-import { CoverageCard } from "@/components/Policies/Dashboard/CoverageCard"
-
 import { PolicyHeader } from "@/components/Policies/Dashboard/PolicyHeader"
 import { getColumns as getRiskNoteColumns } from "@/components/RiskNotes/columns"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -25,6 +22,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useFinancialSummary } from "@/hooks/useFinancials"
 import { useClient, usePolicyDashboard } from "@/hooks/useInsurance"
 import { queryClient } from "@/queryClient"
 
@@ -60,6 +58,7 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
 
   // We need client name for breadcrumbs
   const { data: client } = useClient(policy?.client_id || "")
+  const { summary } = useFinancialSummary(policy?.client_id || "")
 
   // State for Document Viewer
   const [viewerOpen, setViewerOpen] = useState(false)
@@ -96,6 +95,13 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
     return <PendingItems />
   }
 
+  const daysToExpiry = latestRiskNote
+    ? Math.ceil(
+        (new Date(latestRiskNote.end_date).getTime() - Date.now()) /
+          (1000 * 60 * 60 * 24),
+      )
+    : 0
+
   return (
     <div className="flex flex-col gap-6">
       <PolicyHeader
@@ -111,87 +117,112 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
       <Tabs defaultValue="overview" className="w-full">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="history">Risk Notes</TabsTrigger>
+          <TabsTrigger value="history">History</TabsTrigger>
           <TabsTrigger value="documents">Documents</TabsTrigger>
         </TabsList>
 
-        {/* TAB 1: OVERVIEW */}
+        {/* TAB 1: OVERVIEW (The Digital File) */}
         <TabsContent value="overview" className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <SummaryCard
-              title="Net Premium"
-              value={`KES ${latestRiskNote?.net_premium?.toLocaleString() || "0.00"}`}
-              description="Before taxes & levies"
-            />
-            <SummaryCard
-              title="Total Payable"
-              value={`KES ${latestRiskNote?.total_amount?.toLocaleString() || "0.00"}`}
-              description="Including Levies & Taxes"
-            />
-            <SummaryCard
-              title="Period"
-              value={`${latestRiskNote?.start_date || "N/A"}`}
-              description={`To ${latestRiskNote?.end_date || "N/A"}`}
-            />
-            <SummaryCard
-              title="Product"
-              value={policy.product?.name || "N/A"}
-              description={policy.product?.class_of_insurance || "Policy Type"}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left Column (2/3) */}
-            <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="h-full">
-                <CoverageCard
-                  riskNote={latestRiskNote}
-                  onViewBreakdown={(rn) => handleViewRiskNote(rn.id, "invoice")}
-                />
-              </div>
-              <div className="h-full">
-                <AssetCard item={activeItem} />
-              </div>
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+            {/* Main Column: The Document */}
+            <div className="lg:col-span-3 space-y-6">
+              {latestRiskNote ? (
+                <div className="border rounded-lg shadow-xl overflow-hidden bg-white dark:bg-zinc-950">
+                  <div className="p-1 bg-muted/20 border-b text-[10px] uppercase tracking-widest text-center text-muted-foreground font-semibold">
+                    Current Master Risk Note
+                  </div>
+                  <RiskNoteTemplate
+                    riskNote={latestRiskNote}
+                    client={client}
+                    policy={policy}
+                  />
+                </div>
+              ) : (
+                <div className="p-12 text-center border-2 border-dashed rounded-lg bg-muted/10">
+                  <p className="text-muted-foreground italic">
+                    No transaction history found for this policy.
+                  </p>
+                </div>
+              )}
             </div>
 
-            {/* Right Column (1/3) - Quick View Documents */}
-            <div className="space-y-6">
-              <Card className="bg-muted/20">
-                <CardHeader>
-                  <CardTitle className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
-                    Financial Status
+            {/* Sidebar: Live Data & Quick Actions */}
+            <div className="lg:col-span-1 space-y-6">
+              {/* Live Expiry Sidebar Card */}
+              <Card className="border-l-4 border-l-blue-500 shadow-sm">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-xs font-bold uppercase text-muted-foreground flex items-center gap-2">
+                    <Clock className="size-3" />
+                    Status Tracker
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">
-                      Status
-                    </span>
-                    <Badge
-                      variant="outline"
-                      className="bg-green-500/10 text-green-600 border-green-200"
-                    >
-                      Paid
-                    </Badge>
+                  <div>
+                    <div className="text-2xl font-bold">{daysToExpiry}</div>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-tighter">
+                      Days until Expiry
+                    </p>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">
-                      Balance
-                    </span>
-                    <span className="font-mono font-bold">KES 0.00</span>
+                  <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className={`h-full ${daysToExpiry < 30 ? "bg-destructive" : "bg-blue-500"}`}
+                      style={{
+                        width: `${Math.min(100, (daysToExpiry / 365) * 100)}%`,
+                      }}
+                    />
                   </div>
+                </CardContent>
+              </Card>
+
+              {/* Financial Summary sidebar card */}
+              <Card className="border-l-4 border-l-green-500 shadow-sm">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-xs font-bold uppercase text-muted-foreground flex items-center gap-2">
+                    <CreditCard className="size-3" />
+                    Live Balance
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    KES {(summary?.totalDue || 0).toLocaleString()}
+                  </div>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-tighter">
+                    Outstanding for Client
+                  </p>
                   <Button
                     variant="ghost"
-                    className="w-full justify-start gap-2 text-primary"
+                    size="sm"
+                    className="w-full mt-4 text-xs h-8 border border-dashed"
                     onClick={() =>
-                      latestRiskNote &&
-                      handleViewRiskNote(latestRiskNote.id, "invoice")
+                      handleViewRiskNote(latestRiskNote?.id || "", "invoice")
                     }
+                    disabled={!latestRiskNote}
                   >
                     View Latest Debit Note
                   </Button>
                 </CardContent>
               </Card>
+
+              {/* Document Quick Actions */}
+              <div className="space-y-2">
+                <h4 className="text-[10px] font-bold uppercase text-muted-foreground px-1 tracking-widest">
+                  Print / Export
+                </h4>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start gap-3 h-10 shadow-sm group"
+                >
+                  <FileDown className="size-4 text-muted-foreground group-hover:text-primary" />
+                  <span className="text-xs">Download PDF</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start gap-3 h-10 shadow-sm group"
+                >
+                  <Mail className="size-4 text-muted-foreground group-hover:text-primary" />
+                  <span className="text-xs">Email to Client</span>
+                </Button>
+              </div>
             </div>
           </div>
         </TabsContent>

@@ -132,7 +132,9 @@ function RiskNotePrintContent({ id }: { id: string }) {
               <tr className="border-b">
                 <td className="py-2 font-bold">Sum Insured</td>
                 <td className="py-2 text-right font-mono font-bold">
-                  KES {riskItem.details?.sum_insured?.toLocaleString() || "Refer to Schedule"}
+                  KES{" "}
+                  {riskItem.details?.sum_insured?.toLocaleString() ||
+                    "Refer to Schedule"}
                 </td>
               </tr>
               {/* Placeholder for real benefits snapshot */}
@@ -191,16 +193,21 @@ function RiskNotePrintContent({ id }: { id: string }) {
               </tr>
 
               {/* Taxes/Levies */}
-              {riskNote.taxes && Object.entries(riskNote.taxes).map(([key, val]: [string, any], i: number) => (
-                <tr key={i}>
-                  <td className="py-2 pl-2 text-gray-600 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</td>
-                  <td className="py-2 pr-2 text-right font-mono text-gray-600">
-                    {val.toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                    })}
-                  </td>
-                </tr>
-              ))}
+              {riskNote.taxes &&
+                Object.entries(riskNote.taxes).map(
+                  ([key, val]: [string, any], i: number) => (
+                    <tr key={i}>
+                      <td className="py-2 pl-2 text-gray-600 capitalize">
+                        {key.replace(/([A-Z])/g, " $1").trim()}
+                      </td>
+                      <td className="py-2 pr-2 text-right font-mono text-gray-600">
+                        {val.toLocaleString(undefined, {
+                          minimumFractionDigits: 2,
+                        })}
+                      </td>
+                    </tr>
+                  ),
+                )}
 
               {/* TOTAL */}
               <tr className="bg-gray-100 font-bold text-lg">

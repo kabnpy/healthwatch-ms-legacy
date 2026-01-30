@@ -44,7 +44,8 @@ export const getColumns = (
       return (
         <div className="flex flex-col">
           <span className="font-bold">
-            KES {row.original.total_amount.toLocaleString(undefined, {
+            KES{" "}
+            {row.original.total_amount.toLocaleString(undefined, {
               minimumFractionDigits: 2,
             })}
           </span>

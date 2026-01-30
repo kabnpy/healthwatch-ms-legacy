@@ -1,6 +1,6 @@
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import { Hash, Mail, Phone, User, CreditCard } from "lucide-react"
+import { CreditCard, Hash, Mail, Phone, User } from "lucide-react"
 import { ClientsService } from "@/client"
 import { SummaryCard } from "@/components/Common/SummaryCard"
 import { useFinancialSummary } from "@/hooks/useFinancials"
@@ -34,7 +34,11 @@ function ClientOverview() {
           title="Outstanding Balance"
           value={`KES ${summary.totalDue.toLocaleString()}`}
           icon={CreditCard}
-          valueClassName={summary.totalDue > 0 ? "text-destructive font-bold" : "text-green-600"}
+          valueClassName={
+            summary.totalDue > 0
+              ? "text-destructive font-bold"
+              : "text-green-600"
+          }
         />
         <SummaryCard
           title="Phone Number"

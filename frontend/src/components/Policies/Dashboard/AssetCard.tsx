@@ -33,7 +33,9 @@ export function AssetCard({ item }: AssetCardProps) {
         <div className="flex flex-col gap-4">
           <div>
             <div className="text-xl font-bold truncate">{item.description}</div>
-            <p className="text-sm text-muted-foreground">{item.cover_description}</p>
+            <p className="text-sm text-muted-foreground">
+              {item.cover_description}
+            </p>
           </div>
 
           <div className="space-y-2 text-sm">

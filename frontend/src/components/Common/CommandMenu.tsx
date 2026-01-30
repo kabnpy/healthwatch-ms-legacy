@@ -1,13 +1,13 @@
 import { useNavigate } from "@tanstack/react-router"
-import { 
-  FileText, 
-  Search, 
-  Settings, 
-  Shield, 
-  User, 
-  Users, 
+import {
+  CreditCard,
+  FileText,
   Receipt as ReceiptIcon,
-  CreditCard 
+  Search,
+  Settings,
+  Shield,
+  User,
+  Users,
 } from "lucide-react"
 import * as React from "react"
 
@@ -21,8 +21,8 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command"
-import { useClients, usePolicies } from "@/hooks/useInsurance"
 import { useInvoices, useReceipts } from "@/hooks/useFinancials"
+import { useClients, usePolicies } from "@/hooks/useInsurance"
 
 export function CommandMenu() {
   const [open, setOpen] = React.useState(false)
@@ -132,7 +132,9 @@ export function CommandMenu() {
               >
                 <ReceiptIcon className="mr-2 h-4 w-4" />
                 <span>{invoice.invoice_number}</span>
-                <CommandShortcut>KES {(invoice.total_amount || 0).toLocaleString()}</CommandShortcut>
+                <CommandShortcut>
+                  KES {(invoice.total_amount || 0).toLocaleString()}
+                </CommandShortcut>
               </CommandItem>
             ))}
           </CommandGroup>

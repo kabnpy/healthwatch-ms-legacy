@@ -100,7 +100,9 @@ export const RiskNoteForm = ({
       transaction_type: data.transaction_type,
       start_date: data.start_date,
       end_date: data.end_date,
-      net_premium: breakdown.basic + breakdown.extensions.reduce((acc, curr) => acc + curr.amount, 0),
+      net_premium:
+        breakdown.basic +
+        breakdown.extensions.reduce((acc, curr) => acc + curr.amount, 0),
       taxes: breakdown.levies as any,
       commission_amount: breakdown.basic * (data.commission_rate / 100),
       total_amount: breakdown.total,

@@ -21,6 +21,22 @@ export function Logo({
   const { resolvedTheme } = useTheme()
   const isDark = resolvedTheme === "dark"
 
+  // For Documents/Print, we use a specialized branding style
+  if (variant === "full" && !asLink) {
+    return (
+      <div className={cn("flex items-center gap-2 font-sans", className)}>
+        <div className="flex flex-col leading-none">
+          <span className="text-xl font-black tracking-tighter uppercase">
+            HealthWatch
+          </span>
+          <span className="text-[8px] font-bold tracking-[0.3em] uppercase text-muted-foreground ml-0.5">
+            Insurance Agency
+          </span>
+        </div>
+      </div>
+    )
+  }
+
   const fullLogo = isDark ? logoLight : logo
   const iconLogo = isDark ? iconLight : icon
 

@@ -2,8 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import {
   FinancialsService,
-  type ReceiptCreate,
   type ReceiptAllocationCreate,
+  type ReceiptCreate,
 } from "../client"
 
 // 1. INVOICES
@@ -82,8 +82,14 @@ export const useFinancialSummary = (clientId?: string) => {
   const receiptsQuery = useReceipts(clientId)
 
   const invoices = invoicesQuery.data?.data || []
-  const totalInvoiced = invoices.reduce((sum, inv) => sum + (inv.total_amount || 0), 0)
-  const totalDue = invoices.reduce((sum, inv) => sum + (inv.balance_due || 0), 0)
+  const totalInvoiced = invoices.reduce(
+    (sum, inv) => sum + (inv.total_amount || 0),
+    0,
+  )
+  const totalDue = invoices.reduce(
+    (sum, inv) => sum + (inv.balance_due || 0),
+    0,
+  )
   const totalPaid = totalInvoiced - totalDue
 
   return {

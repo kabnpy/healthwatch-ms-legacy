@@ -1,6 +1,8 @@
+import type { ColumnDef } from "@tanstack/react-table"
 import { useState } from "react"
+import { toast } from "sonner"
 import type { InvoicePublic, ReceiptPublic } from "@/client"
-import { useInvoices, useAllocateReceipt } from "@/hooks/useFinancials"
+import { DataTable } from "@/components/Common/DataTable"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -10,9 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { toast } from "sonner"
-import { DataTable } from "@/components/Common/DataTable"
-import type { ColumnDef } from "@tanstack/react-table"
+import { useAllocateReceipt, useInvoices } from "@/hooks/useFinancials"
 
 interface AllocationDialogProps {
   receipt: ReceiptPublic
@@ -20,15 +20,22 @@ interface AllocationDialogProps {
   onClose: () => void
 }
 
-export function AllocationDialog({ receipt, isOpen, onClose }: AllocationDialogProps) {
+export function AllocationDialog({
+  receipt,
+  isOpen,
+  onClose,
+}: AllocationDialogProps) {
   const { data: invoicesData, isLoading } = useInvoices(receipt.client_id)
   const allocateMutation = useAllocateReceipt()
-  const [allocationAmounts, setAllocationAmounts] = useState<Record<string, number>>({})
+  const [allocationAmounts, setAllocationAmounts] = useState<
+    Record<string, number>
+  >({})
 
   const unallocated = (receipt as any).unallocated_amount ?? receipt.amount
 
   // Filter only unpaid or partial invoices
-  const pendingInvoices = invoicesData?.data.filter(inv => (inv.balance_due || 0) > 0) || []
+  const pendingInvoices =
+    invoicesData?.data.filter((inv) => (inv.balance_due || 0) > 0) || []
 
   const handleAllocate = async (invoiceId: string) => {
     const amount = allocationAmounts[invoiceId]
@@ -38,7 +45,9 @@ export function AllocationDialog({ receipt, isOpen, onClose }: AllocationDialogP
     }
 
     if (amount > unallocated) {
-      toast.error(`Cannot allocate more than available balance (KES ${unallocated.toLocaleString()})`)
+      toast.error(
+        `Cannot allocate more than available balance (KES ${unallocated.toLocaleString()})`,
+      )
       return
     }
 
@@ -49,11 +58,11 @@ export function AllocationDialog({ receipt, isOpen, onClose }: AllocationDialogP
           receipt_id: receipt.id,
           invoice_id: invoiceId,
           amount_allocated: amount,
-        }
+        },
       })
       toast.success("Amount allocated successfully")
-      setAllocationAmounts(prev => ({ ...prev, [invoiceId]: 0 }))
-    } catch (error) {
+      setAllocationAmounts((prev) => ({ ...prev, [invoiceId]: 0 }))
+    } catch (_error) {
       toast.error("Allocation failed")
     }
   }
@@ -83,22 +92,24 @@ export function AllocationDialog({ receipt, isOpen, onClose }: AllocationDialogP
             placeholder="Amount"
             value={allocationAmounts[row.original.id] || ""}
             max={Math.min(unallocated, row.original.balance_due || 0)}
-            onChange={(e) => setAllocationAmounts(prev => ({ 
-              ...prev, 
-              [row.original.id]: parseFloat(e.target.value) 
-            }))}
+            onChange={(e) =>
+              setAllocationAmounts((prev) => ({
+                ...prev,
+                [row.original.id]: parseFloat(e.target.value),
+              }))
+            }
           />
-          <Button 
-            size="sm" 
-            className="h-8" 
+          <Button
+            size="sm"
+            className="h-8"
             onClick={() => handleAllocate(row.original.id)}
             disabled={allocateMutation.isPending || unallocated <= 0}
           >
             Apply
           </Button>
         </div>
-      )
-    }
+      ),
+    },
   ]
 
   return (
@@ -107,8 +118,19 @@ export function AllocationDialog({ receipt, isOpen, onClose }: AllocationDialogP
         <DialogHeader>
           <DialogTitle>Allocate Receipt {receipt.receipt_number}</DialogTitle>
           <DialogDescription className="flex justify-between items-center pt-2">
-            <span>Receipt Total: <span className="font-bold text-foreground">KES {receipt.amount.toLocaleString()}</span></span>
-            <span className={unallocated > 0 ? "text-green-600 font-bold" : "text-muted-foreground"}>
+            <span>
+              Receipt Total:{" "}
+              <span className="font-bold text-foreground">
+                KES {receipt.amount.toLocaleString()}
+              </span>
+            </span>
+            <span
+              className={
+                unallocated > 0
+                  ? "text-green-600 font-bold"
+                  : "text-muted-foreground"
+              }
+            >
               Available: KES {unallocated.toLocaleString()}
             </span>
           </DialogDescription>

@@ -1,35 +1,31 @@
-# Project Status (Session End: 2026-01-28)
+# Project Status (Session End: 2026-01-29)
 
 ## Finished
-- **Financial System Overhaul (Merged)**
-    - Decoupled Underwriting (Risk Notes) from Billing (Invoices).
-    - Implemented `Invoice`, `InvoiceLineItem`, `Receipt`, and `ReceiptAllocation` models.
-    - Added automatic invoicing logic to the Risk Note creation flow.
-    - Verified with new API tests in `test_financials.py`.
-- **Client Financial Hub (Subview)**
-    - Enhanced Client Hub with a complete "Financial Statement" view.
-    - Integrated payment logging (Receipts) and allocation logic directly into client management.
-    - Standardized financial summaries (Total Invoiced, Paid, Outstanding).
-- **UI Refinement & Standardization**
-    - **Human-Readable Policy Titles**: Implemented `display_name` (e.g., "Motor Private - KDF 334K") across the backend and frontend.
-    - **Standardized Status Indicators**: Created a reusable `StatusIndicator` component following the Admin page style (colored dot + text).
-    - **Client Table Improvements**: Added "Contact Person" column and visual badges for Client Type (Individual/Corporate).
-- **Navigation & UX Refinement**
-    - Implemented dynamic Breadcrumbs and a global `CommandMenu` (Ctrl+K).
-    - Refactored Client Hub and Policy Dashboard into true nested routes.
-    - Standardized all data tables with real-time filtering and action menus.
-- **Unified Document System**
-    - Created `UniversalDocumentViewer` using a loader-based architecture.
-    - Standardized `RiskNoteTemplate` and `InvoiceTemplate` visuals.
-    - Cleaned up redundant Certificate views.
-- **System Stability**
-    - Fixed backend relationship mapping errors and 404 routing issues.
-    - Optimized frontend bundle via code-splitting improvements.
+- **UI & UX Refinement**
+    - **Document Viewer Scaling**: Implemented a "Fit-to-Width" scaling mechanism in `DocumentViewerModal` using `ResizeObserver`, ensuring A4 documents are readable on all screen sizes.
+    - **Expanded Modal Layouts**: Standardized complex modals (`AddClient`, `AddPolicy`, `AddRiskNote`) to `max-w-2xl` and the document viewer to `95vw` to eliminate the "cramped" feel.
+    - **BaseDocument Optimization**: Removed redundant overflow and layout constraints to support dynamic scaling and improved typography (Sans-serif).
+- **Minimal Invoice Design**
+    - Updated `Letterhead` to use the new centered address block and HealthWatch details.
+    - Refactored `BaseDocument` to support the centered Title/[Reference] header style.
+    - Completely redesigned `RiskNoteTemplate` and `InvoiceTemplate` to match the "Minimal Invoice" layout (Client Left, Dates Split, Grid Table, Financial Footer).
+- **Refined Architecture Implementation (Major Overhaul)**
+    - **Temporal Versioning**: Implemented history tracking for `RiskItems` using `version_number` and `valid_from` fields.
+    - **Transaction Snapshots**: `RiskNotes` now capture a frozen state of assets (`items_snapshot`) for financial and legal auditability.
+    - **Polymorphic Documents**: Unified document storage system supporting links to Clients, Policies, Claims, and Receipts (Proof of Payment).
+    - **Multi-Contact System**: Corporate clients can now have multiple contact persons stored in a flexible JSON structure.
+- **Financial System Integrity**
+    - **Reversals**: Implemented `void_receipt` logic that automatically restores invoice balances and statuses.
+    - **Audit Trail**: Created `AllocationHistory` to track exactly which payments settled which debts.
+- **UI Standardization**
+    - **Human-Readable Policies**: Switched from raw numbers to descriptive titles (e.g., "Motor Private - KCA 123B").
+    - **Standardized Indicators**: Universal `StatusIndicator` component applied across Admin, Clients, and Policies.
 
 ## Next Steps
 1. **Frontend Financials**: Implement the "Payments & Invoicing" dashboard to allow users to manually create Receipts and allocate them to Invoices.
 2. **File Uploads**: Transition the `DocumentManager` from simple URL strings to actual file uploads (using S3 or local storage).
 3. **Endorsement Wizard**: Add specific UI logic for the "Modify/Endorse" transaction type in the Policy Dashboard.
+4. **Receipt Standardization**: Consider moving `ReceiptTemplate` to use the new `BaseDocument` structure for consistency.
 
 ## Architectural Decisions
 - **Decoupled Financials**: Invoices now act as the primary billing entity, allowing N Risk Notes to be grouped into 1 Invoice.

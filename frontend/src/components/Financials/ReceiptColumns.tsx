@@ -29,8 +29,13 @@ export const getReceiptColumns = (
         onClick={() => onView(row.original)}
         className="flex flex-col gap-1 text-left hover:underline text-primary"
       >
-        <span className="font-mono font-medium">{row.original.receipt_number}</span>
-        <StatusIndicator isActive={row.original.status === "Active"} label={row.original.status} />
+        <span className="font-mono font-medium">
+          {row.original.receipt_number}
+        </span>
+        <StatusIndicator
+          isActive={row.original.status === "Active"}
+          label={row.original.status}
+        />
       </button>
     ),
   },
@@ -45,10 +50,14 @@ export const getReceiptColumns = (
     cell: ({ row }) => (
       <div className="flex flex-col">
         <span className="font-bold text-sm">
-          KES {row.original.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+          KES{" "}
+          {row.original.amount.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+          })}
         </span>
         <span className="text-[10px] text-muted-foreground uppercase tracking-tighter">
-          Unallocated: KES {(row.original as any).unallocated_amount?.toLocaleString()}
+          Unallocated: KES{" "}
+          {(row.original as any).unallocated_amount?.toLocaleString()}
         </span>
       </div>
     ),
@@ -61,7 +70,9 @@ export const getReceiptColumns = (
     accessorKey: "reference",
     header: "Reference",
     cell: ({ row }) => (
-      <span className="text-muted-foreground text-xs">{row.original.reference}</span>
+      <span className="text-muted-foreground text-xs">
+        {row.original.reference}
+      </span>
     ),
   },
   {
@@ -88,7 +99,7 @@ export const getReceiptColumns = (
               <Copy className="mr-2 h-4 w-4" />
               Copy ID
             </DropdownMenuItem>
-                        <DropdownMenuSeparator />
+            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => onView(receipt)}>
               <Eye className="mr-2 h-4 w-4" />
               View Receipt
@@ -105,7 +116,7 @@ export const getReceiptColumns = (
               View Allocation History
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem 
+            <DropdownMenuItem
               onClick={() => onVoid(receipt)}
               disabled={receipt.status === "Voided"}
               className="text-destructive focus:text-destructive"

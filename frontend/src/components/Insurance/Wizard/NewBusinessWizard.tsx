@@ -118,12 +118,14 @@ export function NewBusinessWizard({
         )
           .toISOString()
           .split("T")[0],
-        net_premium: calc.breakdown.basic + calc.breakdown.extensions.reduce((acc, curr) => acc + curr.amount, 0),
+        net_premium:
+          calc.breakdown.basic +
+          calc.breakdown.extensions.reduce((acc, curr) => acc + curr.amount, 0),
         taxes: calc.breakdown.levies as any,
         commission_amount: calc.breakdown.basic * 0.125,
         total_amount: calc.breakdown.total,
         items_snapshot: {
-          items: [state.asset]
+          items: [state.asset],
         },
         special_clauses: [],
       })
