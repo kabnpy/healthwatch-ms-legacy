@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useMemo } from "react"
+import { useMemo, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { Button } from "@/components/ui/button"
@@ -21,21 +21,6 @@ import {
 } from "@/components/ui/select"
 import { useProducts } from "@/hooks/useInsurance"
 
-const assetSchema = z.object({
-  product_id: z.string().min(1, "Product is required"),
-  asset: z.object({
-    identifier: z.string().min(1, "Identifier is required").toUpperCase(),
-    description: z.string().min(1, "Description is required"),
-    details: z
-      .object({
-        chassis: z.string().optional().default(""),
-        engine: z.string().optional().default(""),
-        note: z.string().optional().default(""),
-      })
-      .default({ chassis: "", engine: "", note: "" }),
-  }),
-})
-
 interface StepAssetProps {
   defaultValues: any
   onNext: (data: any) => void
@@ -45,20 +30,11 @@ export function StepAsset({ defaultValues, onNext }: StepAssetProps) {
   const { data: productsData } = useProducts()
 
   const form = useForm({
-    resolver: zodResolver(assetSchema),
     defaultValues: {
       product_id: defaultValues?.product_id || "",
       asset: {
-        identifier: defaultValues?.asset?.identifier || "",
-        description:
-          defaultValues?.asset?.description ||
-          defaultValues?.asset?.makeModel ||
-          "",
-        details: {
-          chassis: defaultValues?.asset?.details?.chassis || "",
-          engine: defaultValues?.asset?.details?.engine || "",
-          note: defaultValues?.asset?.details?.note || "",
-        },
+        description: defaultValues?.asset?.description || "",
+        details: defaultValues?.asset?.details || {},
       },
     },
   })
@@ -69,9 +45,27 @@ export function StepAsset({ defaultValues, onNext }: StepAssetProps) {
     return productsData?.data.find((p) => p.id === selectedProductId)
   }, [selectedProductId, productsData])
 
-  const isMotor = selectedProduct?.class_of_insurance
-    .toLowerCase()
-    .includes("motor")
+  const inputFields = useMemo(() => {
+    return (selectedProduct?.product_details || []).filter(
+      (f: any) => f.field_type === "input" || f.field_type === "optional"
+    )
+  }, [selectedProduct])
+
+  // Helper to generate a summary description based on the fields
+  useEffect(() => {
+    const details = form.getValues("asset.details")
+    if (selectedProduct && Object.keys(details).length > 0) {
+      // Create a sensible description from the first 2-3 input fields
+      const summaryParts = inputFields
+        .slice(0, 2)
+        .map(f => details[f.key])
+        .filter(v => !!v)
+      
+      if (summaryParts.length > 0) {
+        form.setValue("asset.description", summaryParts.join(" - "))
+      }
+    }
+  }, [form.watch("asset.details"), selectedProduct, inputFields])
 
   return (
     <Form {...form}>
@@ -101,107 +95,52 @@ export function StepAsset({ defaultValues, onNext }: StepAssetProps) {
           )}
         />
 
-        <div className="grid grid-cols-2 gap-4 border-t pt-6">
-          <FormField
-            control={form.control}
-            name="asset.identifier"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  {isMotor
-                    ? "Registration Number"
-                    : "Identifier (Serial/Plot No)"}
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder={isMotor ? "KCA 123B" : "Asset ID"}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="asset.description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  {isMotor ? "Make & Model" : "Asset Description"}
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder={
-                      isMotor ? "Toyota Harrier" : "Brief description"
-                    }
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        {selectedProduct && (
+          <div className="space-y-4 border-t pt-6">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+              {selectedProduct.class_of_insurance} Details
+            </h3>
+            
+            <div className="grid grid-cols-2 gap-4">
+              {inputFields.map((field: any) => (
+                <FormField
+                  key={field.key}
+                  control={form.control}
+                  name={`asset.details.${field.key}`}
+                  render={({ field: inputField }) => (
+                    <FormItem>
+                      <FormLabel>{field.label}</FormLabel>
+                      <FormControl>
+                        <Input
+                          type={field.type === "number" ? "number" : "text"}
+                          placeholder={field.description || `Enter ${field.label.toLowerCase()}`}
+                          {...inputField}
+                          value={inputField.value || ""}
+                          onChange={(e) => 
+                            inputField.onChange(field.type === "number" ? e.target.valueAsNumber : e.target.value)
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ))}
+            </div>
 
-        {isMotor && (
-          <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
-              name="asset.details.chassis"
+              name="asset.description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Chassis Number</FormLabel>
+                  <FormLabel>Summary Description</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="JMZ..."
-                      {...field}
-                      value={(field.value as string) || ""}
-                    />
+                    <Input placeholder="E.g. Toyota Harrier - KCA 123B" {...field} />
                   </FormControl>
+                  <FormDescription className="text-[10px]">
+                    This is how the asset will be displayed in lists.
+                  </FormDescription>
                   <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="asset.details.engine"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Engine Number</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="2AZ..."
-                      {...field}
-                      value={(field.value as string) || ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        )}
-
-        {!isMotor && selectedProductId && (
-          <div className="p-4 bg-muted/20 border rounded-md">
-            <p className="text-sm text-muted-foreground italic">
-              Additional details for {selectedProduct?.class_of_insurance} can
-              be added here.
-            </p>
-            <FormField
-              control={form.control}
-              name="asset.details.note"
-              render={({ field }) => (
-                <FormItem className="mt-2">
-                  <FormLabel>Additional Notes</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Specify location, serial numbers etc"
-                      {...field}
-                      value={(field.value as string) || ""}
-                    />
-                  </FormControl>
                 </FormItem>
               )}
             />
@@ -216,4 +155,8 @@ export function StepAsset({ defaultValues, onNext }: StepAssetProps) {
       </form>
     </Form>
   )
+}
+
+function FormDescription({ children, className }: { children: React.ReactNode, className?: string }) {
+  return <p className={`text-sm text-muted-foreground ${className}`}>{children}</p>
 }

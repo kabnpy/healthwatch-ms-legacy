@@ -4,7 +4,7 @@ import { Plus, Users } from "lucide-react"
 import { useState } from "react"
 import { PoliciesService } from "@/client"
 import { DataTable } from "@/components/Common/DataTable"
-import { NewBusinessWizard } from "@/components/Insurance/Wizard/NewBusinessWizard"
+import { NewPolicyWizard } from "@/components/Insurance/Wizard/NewPolicyWizard"
 import { columns as policyColumns } from "@/components/Policies/columns"
 import { Button } from "@/components/ui/button"
 
@@ -31,7 +31,7 @@ function ClientPolicies() {
         <h2 className="text-xl font-bold tracking-tight">Policies</h2>
         <Button onClick={() => setWizardOpen(true)} className="gap-2">
           <Plus className="size-4" />
-          New Business Wizard
+          New Policy
         </Button>
       </div>
       {policies.data.length === 0 ? (
@@ -48,7 +48,7 @@ function ClientPolicies() {
         <DataTable columns={policyColumns} data={policies.data} />
       )}
 
-      <NewBusinessWizard
+      <NewPolicyWizard
         clientId={clientId}
         isOpen={wizardOpen}
         onClose={() => setWizardOpen(false)}

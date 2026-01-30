@@ -16,21 +16,21 @@ import { StepAsset } from "./StepAsset"
 import { StepFinancials } from "./StepFinancials"
 import { StepReview } from "./StepReview"
 
-const steps = ["Asset Details", "Coverage & Financials", "Review"]
+const steps = ["Product & Asset", "Financials", "Review"]
 
-interface NewBusinessWizardProps {
+interface NewPolicyWizardProps {
   clientId: string
   isOpen: boolean
   onClose: () => void
   onSuccess?: () => void
 }
 
-export function NewBusinessWizard({
+export function NewPolicyWizard({
   clientId,
   isOpen,
   onClose,
   onSuccess,
-}: NewBusinessWizardProps) {
+}: NewPolicyWizardProps) {
   const [step, setStep] = useState(0)
   const { showSuccessToast, showErrorToast } = useCustomToast()
 
@@ -70,7 +70,7 @@ export function NewBusinessWizard({
 
   const handleIssuePolicy = async () => {
     try {
-      // 1. Create Policy
+      // 1. Create Policy (This also creates an initial blank Risk Note in backend)
       const policy = await createPolicy.mutateAsync({
         policy_number: `P/${Math.floor(Math.random() * 1000000)}`,
         client_id: clientId,
@@ -79,32 +79,30 @@ export function NewBusinessWizard({
       })
 
       // 2. Create Risk Item
-      await createRiskItem.mutateAsync({
+      const riskItem = await createRiskItem.mutateAsync({
         policyId: policy.id,
         data: {
           policy_id: policy.id,
-          description: state.asset?.description || "",
-          cover_description: "Comprehensive", // Default
-          total_premium: 0, // Calculated later
+          description: state.asset?.description || "Insurance Asset",
+          cover_description: "Standard",
+          total_premium: 0, 
           premium_breakdown: {},
-          risk_details: {
-            ...state.asset?.details,
-            identifier: state.asset?.identifier,
-            sum_insured: state.financials?.sumInsured || 0,
-          },
+          risk_details: state.asset?.details || {},
           version_number: 1,
           is_active: true,
         },
       })
 
-      // 3. Create Risk Note
+      // 3. Update the Risk Note (The backend created a draft, but we want to finalize it)
+      // For MVP simplicity, we create a SECOND finalized Risk Note and the first one remains as the "New Business" initiator
+      // Actually, it's better to just create a new Risk Note with full details.
+      
       const { calculatePremium } = await import("@/lib/calculator")
       const calc = calculatePremium({
         sumInsured: state.financials?.sumInsured || 0,
-        rate: state.financials?.rate || 4.5,
+        rate: state.financials?.rate || 0,
         hasPVT: state.extensions?.pvt || false,
         hasExcessProtector: state.extensions?.excessProtector || false,
-        hasPassengerLiability: state.extensions?.passengerLiability || false,
       })
 
       await createRiskNote.mutateAsync({
@@ -124,8 +122,16 @@ export function NewBusinessWizard({
         taxes: calc.breakdown.levies as any,
         commission_amount: calc.breakdown.basic * 0.125,
         total_amount: calc.breakdown.total,
+        status: "Active",
         items_snapshot: {
-          items: [state.asset],
+          items: [
+            {
+              name: policy.product?.name || "Asset",
+              description: riskItem.description,
+              details: state.asset?.details,
+              premium: calc.breakdown.total
+            }
+          ],
         },
         special_clauses: [],
       })
@@ -143,7 +149,7 @@ export function NewBusinessWizard({
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            New Business Wizard - Step {step + 1}: {steps[step]}
+            New Policy Wizard - {steps[step]}
           </DialogTitle>
         </DialogHeader>
 
@@ -173,6 +179,7 @@ export function NewBusinessWizard({
           )}
           {step === 1 && (
             <StepFinancials
+              productId={state.product_id || ""}
               defaultValues={{
                 financials: state.financials,
                 extensions: state.extensions,

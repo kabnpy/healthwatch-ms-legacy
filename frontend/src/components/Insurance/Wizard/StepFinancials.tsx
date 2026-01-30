@@ -1,5 +1,6 @@
-import { zodResolver } from "@hookform/resolvers/zod"
+import { useMemo } from "react"
 import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -13,6 +14,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { calculatePremium } from "@/lib/calculator"
+import { useProducts } from "@/hooks/useInsurance"
 
 const financialsSchema = z.object({
   financials: z.object({
@@ -32,13 +34,21 @@ interface StepFinancialsProps {
   defaultValues: any
   onNext: (data: any) => void
   onBack: () => void
+  productId: string
 }
 
 export function StepFinancials({
   defaultValues,
   onNext,
   onBack,
+  productId,
 }: StepFinancialsProps) {
+  const { data: productsData } = useProducts()
+  
+  const selectedProduct = useMemo(() => {
+    return productsData?.data.find((p) => p.id === productId)
+  }, [productId, productsData])
+
   const form = useForm({
     resolver: zodResolver(financialsSchema),
     defaultValues,
@@ -53,6 +63,9 @@ export function StepFinancials({
     hasPassengerLiability: watchedValues.extensions.passengerLiability,
   })
 
+  const isPA = selectedProduct?.class_of_insurance?.toLowerCase().includes("personal accident")
+  const isMotor = selectedProduct?.class_of_insurance?.toLowerCase().includes("motor")
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onNext)} className="space-y-6">
@@ -60,25 +73,27 @@ export function StepFinancials({
           {/* Inputs */}
           <div className="lg:col-span-2 space-y-6">
             <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="financials.sumInsured"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Sum Insured</FormLabel>
-                    <FormControl>
-                      <Input type="number" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {!isPA && (
+                <FormField
+                  control={form.control}
+                  name="financials.sumInsured"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Sum Insured</FormLabel>
+                      <FormControl>
+                        <Input type="number" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
               <FormField
                 control={form.control}
                 name="financials.rate"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Rate (%)</FormLabel>
+                    <FormLabel>{isPA ? "Premium (Flat Amount)" : "Rate (%)"}</FormLabel>
                     <FormControl>
                       <Input type="number" step="0.01" {...field} />
                     </FormControl>
@@ -117,83 +132,69 @@ export function StepFinancials({
               />
             </div>
 
-            <div className="space-y-4">
-              <h3 className="text-sm font-semibold uppercase text-muted-foreground">
-                Extensions
-              </h3>
-              <div className="grid grid-cols-1 gap-4 border rounded-md p-4 bg-muted/10">
-                <FormField
-                  control={form.control}
-                  name="extensions.pvt"
-                  render={({ field }) => (
-                    <FormItem className="flex items-center justify-between space-y-0 rounded-lg p-2 border">
-                      <FormLabel className="text-base cursor-pointer">
-                        Political Violence & Terrorism (0.25%)
-                      </FormLabel>
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="extensions.excessProtector"
-                  render={({ field }) => (
-                    <FormItem className="flex items-center justify-between space-y-0 rounded-lg p-2 border">
-                      <FormLabel className="text-base cursor-pointer">
-                        Excess Protector (0.25%)
-                      </FormLabel>
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="extensions.passengerLiability"
-                  render={({ field }) => (
-                    <FormItem className="flex items-center justify-between space-y-0 rounded-lg p-2 border">
-                      <FormLabel className="text-base cursor-pointer">
-                        Passenger Liability (Flat KES 500)
-                      </FormLabel>
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+            {isMotor && (
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold uppercase text-muted-foreground">
+                  Motor Extensions
+                </h3>
+                <div className="grid grid-cols-1 gap-4 border rounded-md p-4 bg-muted/10">
+                  <FormField
+                    control={form.control}
+                    name="extensions.pvt"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center justify-between space-y-0 rounded-lg p-2 border">
+                        <FormLabel className="text-base cursor-pointer">
+                          Political Violence & Terrorism (0.25%)
+                        </FormLabel>
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="extensions.excessProtector"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center justify-between space-y-0 rounded-lg p-2 border">
+                        <FormLabel className="text-base cursor-pointer">
+                          Excess Protector (0.25%)
+                        </FormLabel>
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Preview */}
           <div className="lg:col-span-1">
             <div className="sticky top-0 bg-muted/30 border rounded-lg p-6 space-y-4">
               <h3 className="font-bold text-center border-b pb-2">
-                PREMIUM BREAKDOWN
+                PREMIUM PREVIEW
               </h3>
 
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span>Basic Premium:</span>
+                <div className="flex justify-between font-bold">
+                  <span>{isPA ? "Base Premium:" : "Basic Premium:"}</span>
                   <span className="font-mono">
                     {calculation.breakdown.basic.toLocaleString(undefined, {
                       minimumFractionDigits: 2,
                     })}
                   </span>
                 </div>
-                {calculation.breakdown.extensions.map((ext) => (
+                
+                {isMotor && calculation.breakdown.extensions.map((ext) => (
                   <div
                     key={ext.name}
                     className="flex justify-between text-blue-600"
@@ -206,6 +207,7 @@ export function StepFinancials({
                     </span>
                   </div>
                 ))}
+
                 <div className="border-t pt-2 mt-2">
                   <div className="flex justify-between text-muted-foreground">
                     <span>Training Levy:</span>
@@ -220,15 +222,6 @@ export function StepFinancials({
                     <span>PHCF Levy:</span>
                     <span>
                       {calculation.breakdown.levies.phcf.toLocaleString(
-                        undefined,
-                        { minimumFractionDigits: 2 },
-                      )}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-muted-foreground">
-                    <span>Stamp Duty:</span>
-                    <span>
-                      {calculation.breakdown.levies.stampDuty.toLocaleString(
                         undefined,
                         { minimumFractionDigits: 2 },
                       )}

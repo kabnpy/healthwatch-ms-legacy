@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { LoadingButton } from "@/components/ui/loading-button"
 import { calculatePremium } from "@/lib/calculator"
 import type { WizardState } from "@/types/wizard"
+import { useProducts } from "@/hooks/useInsurance"
+import { useMemo } from "react"
 
 interface StepReviewProps {
   state: WizardState
@@ -17,6 +19,12 @@ export function StepReview({
   onBack,
   isSubmitting,
 }: StepReviewProps) {
+  const { data: productsData } = useProducts()
+  
+  const selectedProduct = useMemo(() => {
+    return productsData?.data.find((p) => p.id === state.product_id)
+  }, [state.product_id, productsData])
+
   const calculation = calculatePremium({
     sumInsured: state.financials.sumInsured,
     rate: state.financials.rate,
@@ -25,6 +33,8 @@ export function StepReview({
     hasPassengerLiability: state.extensions.passengerLiability,
   })
 
+  const isPA = selectedProduct?.class_of_insurance?.toLowerCase().includes("personal accident")
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -32,26 +42,26 @@ export function StepReview({
         <Card>
           <CardHeader>
             <CardTitle className="text-sm font-medium uppercase text-muted-foreground tracking-wider">
-              Asset Summary
+              Asset/Risk Details
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Identifier:</span>
-              <span className="font-bold">{state.asset.identifier}</span>
+              <span className="text-muted-foreground">Product:</span>
+              <span className="font-bold">{selectedProduct?.name}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Description:</span>
               <span className="font-medium">{state.asset.description}</span>
             </div>
-            {state.asset.details?.chassis && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Chassis:</span>
-                <span className="text-xs font-mono uppercase">
-                  {state.asset.details.chassis}
-                </span>
-              </div>
-            )}
+            <div className="border-t pt-2 mt-2 space-y-1">
+               {Object.entries(state.asset.details || {}).map(([key, value]) => (
+                 <div key={key} className="flex justify-between text-xs">
+                   <span className="text-muted-foreground capitalize">{key.replace(/_/g, ' ')}:</span>
+                   <span className="font-mono">{String(value)}</span>
+                 </div>
+               ))}
+            </div>
           </CardContent>
         </Card>
 
@@ -63,12 +73,14 @@ export function StepReview({
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Sum Insured:</span>
-              <span className="font-bold">
-                KES {state.financials.sumInsured.toLocaleString()}
-              </span>
-            </div>
+            {!isPA && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Sum Insured:</span>
+                <span className="font-bold">
+                  KES {state.financials.sumInsured.toLocaleString()}
+                </span>
+              </div>
+            )}
             <div className="flex justify-between">
               <span className="text-muted-foreground">Total Premium:</span>
               <span className="font-bold text-green-700">
@@ -78,17 +90,18 @@ export function StepReview({
                 })}
               </span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Start Date:</span>
-              <span className="font-medium">{state.financials.startDate}</span>
+            <div className="flex justify-between border-t pt-2">
+              <span className="text-muted-foreground">Period:</span>
+              <span className="font-medium">
+                {state.financials.startDate} (12 Months)
+              </span>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-md text-sm text-yellow-800">
-        Please verify all details before issuing the policy. This action will
-        generate an official tax invoice and a certificate of insurance.
+      <div className="bg-blue-50 border border-blue-200 p-4 rounded-md text-sm text-blue-800">
+        Review all details above. Issuing this policy will create the final Risk Note and initiate the debit note for the client.
       </div>
 
       <div className="flex justify-between pt-4 border-t">
@@ -103,9 +116,9 @@ export function StepReview({
         <LoadingButton
           onClick={onIssue}
           loading={isSubmitting}
-          className="bg-green-700 hover:bg-green-800"
+          className="bg-blue-700 hover:bg-blue-800"
         >
-          Issue Policy & Generate Documents
+          Confirm & Issue Policy
         </LoadingButton>
       </div>
     </div>
