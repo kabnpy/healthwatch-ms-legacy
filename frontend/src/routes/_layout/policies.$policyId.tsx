@@ -70,6 +70,7 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
   // State for Risk Note Form
   const [riskNoteFormOpen, setRiskNoteFormOpen] = useState(false)
   const [transactionType, setTransactionType] = useState("Endorsement")
+  const [editingRiskNoteId, setEditingRiskNoteId] = useState<string | undefined>()
 
   // Handlers
   const handleViewRiskNote = useCallback(
@@ -81,13 +82,23 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
     [],
   )
 
+  const handlePopulateDraft = () => {
+    if (latestRiskNote?.id) {
+      setTransactionType(latestRiskNote.transaction_type)
+      setEditingRiskNoteId(latestRiskNote.id)
+      setRiskNoteFormOpen(true)
+    }
+  }
+
   const handleRenew = () => {
     setTransactionType("Renewal")
+    setEditingRiskNoteId(undefined)
     setRiskNoteFormOpen(true)
   }
 
   const handleEndorse = () => {
     setTransactionType("Endorsement")
+    setEditingRiskNoteId(undefined)
     setRiskNoteFormOpen(true)
   }
 
@@ -126,6 +137,32 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
             {/* Main Column: The Document */}
             <div className="lg:col-span-3 space-y-6">
+              {latestRiskNote?.status === "Draft" && (
+                <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg flex items-center justify-between shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-blue-500 p-2 rounded-full">
+                      <FileDown className="size-4 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-blue-900">
+                        Draft Risk Note Detected
+                      </p>
+                      <p className="text-xs text-blue-700">
+                        This {latestRiskNote.transaction_type} has not been
+                        finalized yet.
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    className="bg-blue-600 hover:bg-blue-700 text-white gap-2"
+                    onClick={handlePopulateDraft}
+                  >
+                    Populate & Issue
+                  </Button>
+                </div>
+              )}
+
               {latestRiskNote ? (
                 <div className="border rounded-lg shadow-xl overflow-hidden bg-white dark:bg-zinc-950">
                   <div className="p-1 bg-muted/20 border-b text-[10px] uppercase tracking-widest text-center text-muted-foreground font-semibold">
@@ -280,7 +317,7 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
           </DialogHeader>
           <RiskNoteForm
             policyId={policyId}
-            initialTransactionType={transactionType}
+            riskNoteId={editingRiskNoteId}
             onSuccess={() => setRiskNoteFormOpen(false)}
             onCancel={() => setRiskNoteFormOpen(false)}
           />

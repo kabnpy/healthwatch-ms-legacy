@@ -40,6 +40,8 @@ export const Route = createFileRoute("/print/risk-notes/$id")({
   validateSearch: (search) => searchSchema.parse(search),
 })
 
+import { RiskNoteTemplate } from "@/components/Documents/templates/RiskNoteTemplate"
+
 function RiskNotePrintContent({ id }: { id: string }) {
   const { mode } = Route.useSearch()
   const navigate = Route.useNavigate()
@@ -55,6 +57,43 @@ function RiskNotePrintContent({ id }: { id: string }) {
   const riskItem = items[0] || {}
 
   const isInvoice = mode === "invoice" || !mode
+
+  if (isInvoice) {
+    return (
+      <div className="max-w-[800px] mx-auto bg-white shadow-lg print:shadow-none min-h-screen relative">
+        <RiskNoteTemplate riskNote={riskNote} client={client} policy={policy} />
+        
+        <div className="fixed bottom-8 right-8 print:hidden flex flex-col gap-2">
+          {/* Toggle Buttons */}
+          <div className="flex bg-white rounded-lg shadow-lg overflow-hidden border">
+            <Button
+              variant="secondary"
+              className="rounded-none"
+              onClick={() => navigate({ search: { mode: "invoice" } })}
+            >
+              Risk Note
+            </Button>
+            <Button
+              variant="ghost"
+              className="rounded-none"
+              onClick={() => navigate({ search: { mode: "certificate" } })}
+            >
+              Certificate
+            </Button>
+          </div>
+
+          <Button
+            onClick={() => window.print()}
+            size="lg"
+            className="shadow-xl rounded-full gap-2"
+          >
+            <Printer className="size-5" />
+            Print
+          </Button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="max-w-[800px] mx-auto p-8 bg-white text-black min-h-screen border shadow-sm print:shadow-none print:border-none print:p-0 font-serif">

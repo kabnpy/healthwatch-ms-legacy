@@ -1,10 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useEffect } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
 import { z } from "zod"
 
-import type { ApiError, RiskNoteCreate } from "@/client"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
 import {
   Form,
   FormControl,
@@ -15,145 +13,186 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { LoadingButton } from "@/components/ui/loading-button"
+import { Button } from "@/components/ui/button"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import useCustomToast from "@/hooks/useCustomToast"
-import { useCreateRiskNote } from "@/hooks/useInsurance"
-import { calculatePremium } from "@/lib/calculator"
+import {
+  usePolicy,
+  useRiskNote,
+  useUpdateRiskNote,
+} from "@/hooks/useInsurance"
 import { handleError } from "@/utils"
-
-const formSchema = z.object({
-  policy_id: z.string().uuid(),
-  transaction_type: z.string(),
-  start_date: z.string(),
-  end_date: z.string(),
-  sum_insured: z.coerce.number().min(0),
-  rate: z.coerce.number().min(0).default(4),
-  hasPVT: z.boolean().default(false),
-  hasExcessProtector: z.boolean().default(false),
-  commission_rate: z.coerce.number().min(0).default(12.5),
-})
-
-interface FormData {
-  policy_id: string
-  transaction_type: string
-  start_date: string
-  end_date: string
-  sum_insured: number
-  rate: number
-  hasPVT: boolean
-  hasExcessProtector: boolean
-  commission_rate: number
-}
+import type { ApiError } from "@/client"
 
 interface RiskNoteFormProps {
   policyId: string
-  initialTransactionType?: string
+  riskNoteId?: string // If provided, we are editing an existing (likely draft) risk note
   onSuccess?: () => void
   onCancel?: () => void
 }
 
 export const RiskNoteForm = ({
   policyId,
-  initialTransactionType = "New Business",
+  riskNoteId,
   onSuccess,
   onCancel,
 }: RiskNoteFormProps) => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
-  const createRiskNote = useCreateRiskNote()
+  const { data: policy, isLoading: isLoadingPolicy } = usePolicy(policyId)
+  const { data: existingRiskNote, isLoading: isLoadingRiskNote } = useRiskNote(riskNoteId || "")
+  const updateRiskNote = useUpdateRiskNote()
+
+  const formSchema = z.object({
+    transaction_type: z.string().min(1),
+    start_date: z.string().min(1),
+    end_date: z.string().min(1),
+    status: z.string().min(1),
+    net_premium: z.coerce.number().min(0),
+    commission_amount: z.coerce.number().min(0),
+    details: z.record(z.any()), // Dynamic fields from form_schema
+  })
+
+  type FormData = z.infer<typeof formSchema>
 
   const form = useForm<FormData>({
-    resolver: zodResolver(formSchema) as any,
+    resolver: zodResolver(formSchema),
     defaultValues: {
-      policy_id: policyId,
-      transaction_type: initialTransactionType,
+      transaction_type: "New Business",
       start_date: new Date().toISOString().split("T")[0],
       end_date: new Date(new Date().setFullYear(new Date().getFullYear() + 1))
         .toISOString()
         .split("T")[0],
-      sum_insured: 0,
-      rate: 4,
-      hasPVT: false,
-      hasExcessProtector: false,
-      commission_rate: 12.5,
+      status: "Draft",
+      net_premium: 0,
+      commission_amount: 0,
+      details: {},
     },
   })
 
-  // Watch fields for real-time calculation
-  const sumInsured = form.watch("sum_insured")
-  const rate = form.watch("rate")
-  const hasPVT = form.watch("hasPVT")
-  const hasExcessProtector = form.watch("hasExcessProtector")
-
-  // Calculate premium on the fly
-  const calculation = calculatePremium({
-    sumInsured,
-    rate,
-    hasPVT,
-    hasExcessProtector,
-  })
-
-  const { breakdown } = calculation
+  // Populate form when data is loaded
+  useEffect(() => {
+    if (existingRiskNote) {
+      const items = (existingRiskNote.items_snapshot?.items as any[]) || []
+      const riskItem = items[0] || {}
+      
+      form.reset({
+        transaction_type: existingRiskNote.transaction_type,
+        start_date: existingRiskNote.start_date,
+        end_date: existingRiskNote.end_date,
+        status: existingRiskNote.status,
+        net_premium: existingRiskNote.net_premium,
+        commission_amount: existingRiskNote.commission_amount,
+        details: riskItem.details || {},
+      })
+    }
+  }, [existingRiskNote, form])
 
   const onSubmit: SubmitHandler<FormData> = (data) => {
-    // 1. Prepare the payload
-    const riskNoteData: RiskNoteCreate = {
-      policy_id: data.policy_id,
-      transaction_type: data.transaction_type,
-      start_date: data.start_date,
-      end_date: data.end_date,
-      net_premium:
-        breakdown.basic +
-        breakdown.extensions.reduce((acc, curr) => acc + curr.amount, 0),
-      taxes: breakdown.levies as any,
-      commission_amount: breakdown.basic * (data.commission_rate / 100),
-      total_amount: breakdown.total,
-      items_snapshot: {}, // Will be handled in wizard or dashboard
-      special_clauses: [],
+    if (!riskNoteId) return
+
+    // Prepare items snapshot
+    const product = policy?.product
+    const items_snapshot = {
+      items: [
+        {
+          name: product?.name || "Insurance Item",
+          description: `${product?.class_of_insurance || "Insurance"} cover`,
+          details: data.details,
+          premium: data.net_premium,
+        },
+      ],
     }
 
-    createRiskNote.mutate(riskNoteData, {
-      onSuccess: () => {
-        showSuccessToast("Risk Note created successfully")
-        onSuccess?.()
-      },
-      onError: (err: Error) => {
-        handleError.call(showErrorToast, err as ApiError)
-      },
-    })
+    // Basic tax calculation for now (matching seeding logic)
+    const trainingLevy = data.net_premium * 0.002
+    const phcf = data.net_premium * 0.0025
+    const total_amount = data.net_premium + trainingLevy + phcf
+
+    const payload = {
+      ...data,
+      items_snapshot,
+      taxes: { trainingLevy, phcf },
+      total_amount,
+    }
+
+    updateRiskNote.mutate(
+      { id: riskNoteId, data: payload },
+      {
+        onSuccess: () => {
+          showSuccessToast("Risk Note updated successfully")
+          onSuccess?.()
+        },
+        onError: (err: Error) => {
+          handleError.call(showErrorToast, err as ApiError)
+        },
+      }
+    )
   }
+
+  if (isLoadingPolicy || (riskNoteId && isLoadingRiskNote)) {
+    return <div className="p-8 text-center">Loading form details...</div>
+  }
+
+  const productDetails = (policy?.product?.product_details as any[]) || []
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid grid-cols-1 gap-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <div className="grid grid-cols-2 gap-4 bg-muted/30 p-4 rounded-lg">
           <FormField
             control={form.control}
-            name="sum_insured"
+            name="transaction_type"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Sum Insured</FormLabel>
-                <FormControl>
-                  <Input type="number" {...field} />
-                </FormControl>
+                <FormLabel>Transaction Type</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="New Business">New Business</SelectItem>
+                    <SelectItem value="Renewal">Renewal</SelectItem>
+                    <SelectItem value="Endorsement">Endorsement</SelectItem>
+                    <SelectItem value="Cancellation">Cancellation</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="status"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Status</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="Draft">Draft (Preliminary)</SelectItem>
+                    <SelectItem value="Active">Active (Finalized)</SelectItem>
+                    <SelectItem value="Cancelled">Cancelled</SelectItem>
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
-          <FormField
-            control={form.control}
-            name="rate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Rate (%)</FormLabel>
-                <FormControl>
-                  <Input type="number" step="0.01" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="start_date"
@@ -182,103 +221,70 @@ export const RiskNoteForm = ({
           />
         </div>
 
-        {/* Extensions Toggles */}
-        <div className="flex gap-6 p-4 border rounded-md bg-muted/20">
-          <FormField
-            control={form.control}
-            name="hasPVT"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>Include PVT (0.25%)</FormLabel>
-                </div>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="hasExcessProtector"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>Include Excess Protector (0.25%)</FormLabel>
-                </div>
-              </FormItem>
-            )}
-          />
+        <div className="space-y-4">
+          <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground border-b pb-1">
+            Risk Details ({policy?.product?.class_of_insurance})
+          </h3>
+          <div className="grid grid-cols-2 gap-4">
+            {productDetails
+              .filter((f: any) => f.field_type === "input" || f.field_type === "optional")
+              .map((field: any) => (
+                <FormField
+                  key={field.key}
+                  control={form.control}
+                  name={`details.${field.key}`}
+                render={({ field: inputField }) => (
+                  <FormItem>
+                    <FormLabel>{field.label}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type={field.type === "number" ? "number" : "text"}
+                        {...inputField}
+                        value={inputField.value || ""}
+                        onChange={(e) => 
+                          inputField.onChange(field.type === "number" ? e.target.valueAsNumber : e.target.value)
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            ))}
+          </div>
         </div>
 
-        {/* Live Calculation Preview */}
-        <div className="bg-muted/50 p-4 rounded-lg space-y-2 border border-muted-foreground/20">
-          <div className="flex justify-between text-sm">
-            <span>Basic Premium ({rate}%):</span>
-            <span className="font-mono">
-              {breakdown.basic.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-              })}
-            </span>
-          </div>
-
-          {breakdown.extensions.map((ext) => (
-            <div
-              key={ext.name}
-              className="flex justify-between text-sm text-blue-600"
-            >
-              <span>+ {ext.name}:</span>
-              <span>
-                {ext.amount.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                })}
-              </span>
-            </div>
-          ))}
-
-          <div className="border-t my-2 border-dashed" />
-
-          <div className="flex justify-between text-sm text-muted-foreground">
-            <span>Training Levy (0.2%):</span>
-            <span>
-              {breakdown.levies.trainingLevy.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-              })}
-            </span>
-          </div>
-          <div className="flex justify-between text-sm text-muted-foreground">
-            <span>PHCF Levy (0.25%):</span>
-            <span>
-              {breakdown.levies.phcf.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-              })}
-            </span>
-          </div>
-          <div className="flex justify-between text-sm text-muted-foreground">
-            <span>Stamp Duty:</span>
-            <span>
-              {breakdown.levies.stampDuty.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-              })}
-            </span>
-          </div>
-
-          <div className="flex justify-between font-bold border-t border-black pt-2 mt-2 text-lg">
-            <span>TOTAL PAYABLE:</span>
-            <span>
-              {breakdown.total.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-              })}
-            </span>
+        <div className="space-y-4 pt-4 border-t">
+          <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground border-b pb-1">
+            Financials
+          </h3>
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="net_premium"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Net Premium (KSH)</FormLabel>
+                  <FormControl>
+                    <Input type="number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="commission_amount"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Commission (KSH)</FormLabel>
+                  <FormControl>
+                    <Input type="number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
         </div>
 
@@ -286,8 +292,12 @@ export const RiskNoteForm = ({
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancel
           </Button>
-          <LoadingButton type="submit" loading={createRiskNote.isPending}>
-            Generate Risk Note
+          <LoadingButton
+            type="submit"
+            loading={updateRiskNote.isPending}
+            disabled={!riskNoteId}
+          >
+            {form.watch("status") === "Active" ? "Finalize & Issue" : "Save Changes"}
           </LoadingButton>
         </div>
       </form>

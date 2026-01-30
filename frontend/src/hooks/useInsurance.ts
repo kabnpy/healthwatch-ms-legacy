@@ -94,6 +94,14 @@ export const useRiskNotes = (policyId?: string, skip = 0, limit = 100) => {
   })
 }
 
+export const useRiskNote = (id: string) => {
+  return useQuery({
+    queryKey: ["risk-notes", id],
+    queryFn: () => RiskNotesService.readRiskNote({ id }),
+    enabled: !!id,
+  })
+}
+
 export const useCreateRiskNote = () => {
   const queryClient = useQueryClient()
   return useMutation({
@@ -102,6 +110,18 @@ export const useCreateRiskNote = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["risk-notes"] })
       queryClient.invalidateQueries({ queryKey: ["policies"] })
+    },
+  })
+}
+
+export const useUpdateRiskNote = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) =>
+      RiskNotesService.updateRiskNote({ id, requestBody: data }),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ["risk-notes"] })
+      queryClient.invalidateQueries({ queryKey: ["risk-notes", id] })
     },
   })
 }
