@@ -1,6 +1,16 @@
 # Project Status (Session End: 2026-01-29)
 
 ## Finished
+- **Unified Product Schema & Dynamic Wizard**
+    - **Manifest-Driven Architecture**: Centralized all product-specific details (benefits, excess, clauses) into the `Product.form_schema`, removing redundant attributes.
+    - **Dynamic Wizard**: Refactored the "New Policy" wizard to dynamically render capture fields from the product schema, supporting product-agnostic data entry.
+    - **Conditional Logic**: Implemented class-specific UI logic (e.g., hiding Sum Insured for Personal Accident) in the creation workflow.
+    - **Agnostic Rendering**: Updated `RiskNoteTemplate` to aggregate both static and captured fields into a single professional layout.
+- **Risk Note Refinement (Composable & Dynamic)**
+    - **Dynamic Layouts**: Refactored `RiskNoteTemplate` to use a composable architecture (`RiskNoteRow`, `RiskNoteSection`) driven by `Product.form_schema`.
+    - **Automatic Issuance Workflow**: Updated backend CRUD to automatically generate a "New Business" Risk Note (Draft) upon policy creation.
+    - **Enriched Data Catalog**: Updated seeding with logical grouping (`section`) and visibility toggles (`show_in_risknote`) for all core products (Motor, PA, Domestic).
+    - **Draft Workflow**: Implemented a "Populate & Issue" flow in the Policy Dashboard to finalize draft risk notes using a dynamic form renderer.
 - **UI & UX Refinement**
     - **Document Viewer Scaling**: Implemented a "Fit-to-Width" scaling mechanism in `DocumentViewerModal` using `ResizeObserver`, ensuring A4 documents are readable on all screen sizes.
     - **Expanded Modal Layouts**: Standardized complex modals (`AddClient`, `AddPolicy`, `AddRiskNote`) to `max-w-2xl` and the document viewer to `95vw` to eliminate the "cramped" feel.
