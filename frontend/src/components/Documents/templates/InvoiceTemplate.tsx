@@ -13,140 +13,137 @@ export const InvoiceTemplate = ({
   lineItems,
 }: InvoiceTemplateProps) => {
   return (
-    <BaseDocument
-      title="Debit Note / Invoice"
-      subtitle="Request for Payment"
-      documentNumber={invoice.invoice_number}
-      date={
-        invoice.date_issued
-          ? new Date(invoice.date_issued).toLocaleDateString()
-          : "N/A"
-      }
-    >
-      {/* Insured Details */}
-      <div className="grid grid-cols-2 gap-12 mb-8">
-        <div>
-          <h2 className="text-xs font-bold uppercase border-b border-gray-300 mb-2 text-gray-500">
-            Bill To:
-          </h2>
-          <p className="font-bold text-lg">{client.name}</p>
-          <p className="text-sm whitespace-pre-line text-gray-700">
-            {client.postal_address || "No address provided"}
+    <BaseDocument title="INVOICE" documentNumber={invoice.invoice_number}>
+      <div className="font-sans text-slate-900">
+        {/* CLIENT DETAILS */}
+        <div className="mb-10 pl-8">
+          <p className="font-bold text-lg uppercase tracking-wide">
+            {client.name}
           </p>
-          <p className="text-sm mt-2 font-mono">
-            <span className="font-semibold font-serif">KRA PIN:</span>{" "}
-            {client.kra_pin}
+          <p className="whitespace-pre-line text-sm text-slate-700">
+            {client.postal_address || "P.O. Box - N/A"}
           </p>
+          <p className="text-sm text-slate-700">{client.city || "Nairobi"}</p>
+          <div className="mt-2 text-sm">
+            <span className="font-bold text-slate-500 mr-2">PIN:</span>
+            <span className="font-mono">{client.kra_pin}</span>
+          </div>
         </div>
-        <div className="text-right">
-          <h2 className="text-xs font-bold uppercase border-b border-gray-300 mb-2 text-gray-500">
-            Invoice Summary:
-          </h2>
-          <p className="text-sm font-semibold uppercase tracking-wider">
-            Status:{" "}
-            <span
-              className={
-                invoice.status === "Paid"
-                  ? "text-green-600"
-                  : "text-destructive"
-              }
-            >
-              {invoice.status}
-            </span>
-          </p>
-          <div className="mt-4 text-xs">
-            <p className="uppercase text-gray-400 font-bold">Due Date</p>
-            <p className="font-semibold text-gray-700">
-              {invoice.due_date || "Upon Receipt"}
+
+        {/* DATES */}
+        <div className="flex gap-32 mb-10 pl-8">
+          <div>
+            <p className="font-bold text-sm mb-1 uppercase tracking-wider text-slate-500">
+              Invoice Date
+            </p>
+            <p className="font-bold">
+              {invoice.date_issued
+                ? new Date(invoice.date_issued).toLocaleDateString("en-GB", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  })
+                : "N/A"}
+            </p>
+          </div>
+          <div>
+            <p className="font-bold text-sm mb-1 uppercase tracking-wider text-slate-500">
+              Due Date
+            </p>
+            <p className="font-bold">
+              {invoice.due_date
+                ? new Date(invoice.due_date).toLocaleDateString("en-GB", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  })
+                : "Upon Receipt"}
             </p>
           </div>
         </div>
-      </div>
 
-      {/* Line Items Table */}
-      <div className="mb-8">
-        <h2 className="text-sm font-bold uppercase border-b-2 border-black mb-4 pb-1">
-          Items for Payment
-        </h2>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b-2 border-black text-left bg-gray-50 uppercase text-[10px] tracking-widest">
-              <th className="py-3 pl-2">Description / Risk Note #</th>
-              <th className="py-3 pr-2 text-right">Amount (KES)</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y border-b">
-            {lineItems.map((item, i) => (
-              <tr key={item.id || i}>
-                <td className="py-4 pl-2">
-                  <p className="font-medium">{item.description}</p>
-                  <p className="text-[10px] text-muted-foreground font-mono">
-                    RN ID: {item.risk_note_id}
+        {/* TABLE HEADER */}
+        <div className="grid grid-cols-12 gap-4 border-b-2 border-black pb-2 mb-4 font-bold text-sm uppercase tracking-wider pl-4">
+          <div className="col-span-1 text-center">#</div>
+          <div className="col-span-8">Description / Reference</div>
+          <div className="col-span-3 text-right pr-4">Amount (KES)</div>
+        </div>
+
+        {/* TABLE ROWS */}
+        <div className="space-y-4 mb-8">
+          {lineItems.map((item, i) => (
+            <div
+              key={item.id || i}
+              className="grid grid-cols-12 gap-4 text-sm pl-4"
+            >
+              <div className="col-span-1 text-center font-bold">{i + 1}</div>
+              <div className="col-span-8">
+                <p className="font-bold text-base">{item.description}</p>
+                {item.risk_note_id && (
+                  <p className="text-xs text-slate-500 font-mono mt-1">
+                    Ref: {item.risk_note_id}
                   </p>
-                </td>
-                <td className="py-4 pr-2 text-right font-mono">
-                  {(item.amount || 0).toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                  })}
-                </td>
-              </tr>
-            ))}
-
-            {/* Subtotal / Total Logic */}
-            <tr className="bg-gray-50 font-bold">
-              <td className="py-3 pl-2 uppercase text-xs">
-                Total Invoiced Amount
-              </td>
-              <td className="py-3 pr-2 text-right font-mono">
-                KES{" "}
-                {(invoice.total_amount || 0).toLocaleString(undefined, {
+                )}
+              </div>
+              <div className="col-span-3 text-right font-mono text-base pr-4">
+                {(item.amount || 0).toLocaleString(undefined, {
                   minimumFractionDigits: 2,
                 })}
-              </td>
-            </tr>
-            <tr className="bg-gray-900 text-white font-bold text-lg">
-              <td className="py-4 pl-3 uppercase">Net Balance Due</td>
-              <td className="py-4 pr-3 text-right font-mono">
-                KES{" "}
-                {(invoice.balance_due || 0).toLocaleString(undefined, {
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* FINANCIAL BREAKDOWN */}
+        <div className="mt-8 flex justify-end pr-4">
+          <div className="w-1/2 max-w-sm space-y-2 text-sm">
+            <div className="flex justify-between border-t-2 border-black pt-2 mt-2 text-base">
+              <span className="font-bold uppercase tracking-wider">
+                Total Amount
+              </span>
+              <span className="font-bold font-mono">
+                {invoice.total_amount.toLocaleString(undefined, {
                   minimumFractionDigits: 2,
                 })}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      {/* Payment Footer */}
-      <div className="mt-12 p-6 bg-blue-50/30 border-2 border-blue-100 rounded-lg">
-        <h3 className="text-sm font-bold text-blue-900 mb-3 uppercase tracking-tighter">
-          Payment Settlement Instructions
-        </h3>
-        <div className="grid grid-cols-2 gap-8 text-xs text-blue-800">
-          <div className="space-y-2">
-            <p className="font-bold flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-blue-400" />
-              Option 1: MPESA Paybill
-            </p>
-            <div className="pl-4 border-l border-blue-200">
-              <p>
-                Business Number: <strong>555000</strong>
-              </p>
-              <p>
-                Account Number: <strong>{client.kra_pin}</strong>
-              </p>
+              </span>
+            </div>
+            <div className="flex justify-between text-base text-red-600">
+              <span className="font-bold uppercase tracking-wider">
+                Balance Due
+              </span>
+              <span className="font-bold font-mono">
+                {invoice.balance_due.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                })}
+              </span>
             </div>
           </div>
-          <div className="space-y-2">
-            <p className="font-bold flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-blue-400" />
-              Option 2: Bank Transfer / Cheque
-            </p>
-            <div className="pl-4 border-l border-blue-200">
+        </div>
+
+        {/* Payment Instructions */}
+        <div className="mt-12 pt-8 border-t text-xs pl-8 text-slate-600">
+          <p className="font-bold uppercase text-slate-500 mb-2">
+            Payment Instructions
+          </p>
+          <div className="grid grid-cols-2 gap-8">
+            <div>
+              <p className="font-bold text-black">Option 1: MPESA Paybill</p>
+              <p>Business No: 555000</p>
               <p>
-                Payable to: <strong>HealthWatch Insurance Agency</strong>
+                Account No:{" "}
+                <span className="font-mono font-bold text-black">
+                  {client.kra_pin}
+                </span>
               </p>
-              <p>Bank: Standard Chartered Bank, Koinange St.</p>
+            </div>
+            <div>
+              <p className="font-bold text-black">Option 2: Cheque / EFT</p>
+              <p>
+                Payable to:{" "}
+                <span className="font-bold text-black">
+                  HealthWatch Insurance Brokers Ltd
+                </span>
+              </p>
             </div>
           </div>
         </div>
