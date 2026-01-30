@@ -1,10 +1,8 @@
-import { zodResolver } from "@hookform/resolvers/zod"
-import { FileIcon, Plus } from "lucide-react"
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-import { DataTable } from "@/components/Common/DataTable"
-import { Button } from "@/components/ui/button"
+import { FileIcon, Plus, Trash2, Eye } from "lucide-react";
+import { useState, useMemo, Suspense } from "react";
+import { DataTable } from "@/components/Common/DataTable";
+import { Button } from "@/components/ui/button";
+import PendingItems from "@/components/Pending/PendingItems";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -20,75 +18,126 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { LoadingButton } from "@/components/ui/loading-button"
-import useCustomToast from "@/hooks/useCustomToast"
+} from "@/components/ui/form";
 import {
-  useCorrespondences,
-  useCreateCorrespondence,
-} from "@/hooks/useInsurance"
-import { getDocumentColumns } from "./DocumentColumns"
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { useDocuments, useUploadDocument, useDeleteDocument } from "@/hooks/useDocuments";
+import { FileUploadZone } from "./FileUploadZone";
+import { DocumentViewerModal } from "./DocumentViewerModal";
+import { DocumentViewer } from "@/components/Documents/DocumentViewer";
+import type { ColumnDef } from "@tanstack/react-table";
 
 interface DocumentManagerProps {
-  ownerId: string
-  ownerType: "client" | "policy"
-  title?: string
+  entityId: string;
+  entityType: "Client" | "Policy" | "Claim" | "Receipt";
+  title?: string;
 }
 
-const documentSchema = z.object({
-  subject: z.string().min(1, "Name is required"),
-  summary: z.string().optional(),
-  file_path: z.string().min(1, "URL or path is required"),
-})
+const DOCUMENT_PRESETS: Record<string, string[]> = {
+  Policy: ["Logbook", "Valuation Report", "Police Abstract", "Policy Schedule", "Cover Note"],
+  Client: ["KRA PIN Certificate", "National ID / Passport", "Certificate of Incorporation", "Utility Bill"],
+  Claim: ["Accident Photos", "Repair Estimate", "Claim Form", "Police Report"],
+  Receipt: ["Proof of Payment", "Bank Slip", "M-Pesa Screenshot"],
+};
 
-type DocumentFormData = z.infer<typeof documentSchema>
+const uploadSchema = z.object({
+  document_type: z.string().min(1, "Document type is required"),
+  file: z.instanceof(File, { message: "File is required" }),
+});
 
 export function DocumentManager({
-  ownerId,
-  ownerType,
+  entityId,
+  entityType,
   title = "Documents",
 }: DocumentManagerProps) {
-  const { data: correspondences, isLoading } = useCorrespondences(ownerId)
-  const [isUploadOpen, setIsOpen] = useState(false)
-  const { showSuccessToast, showErrorToast } = useCustomToast()
-  const createCorrespondence = useCreateCorrespondence()
+  const { data: documentsData, isLoading } = useDocuments(entityId, entityType);
+  const uploadMutation = useUploadDocument();
+  const deleteMutation = useDeleteDocument();
+  
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
 
-  const columns = getDocumentColumns()
-
-  const form = useForm<DocumentFormData>({
-    resolver: zodResolver(documentSchema),
+  const form = useForm<z.infer<typeof uploadSchema>>({
+    resolver: zodResolver(uploadSchema),
     defaultValues: {
-      subject: "",
-      summary: "",
-      file_path: "",
+      document_type: DOCUMENT_PRESETS[entityType]?.[0] || "",
     },
-  })
+  });
 
-  const onSubmit = (data: DocumentFormData) => {
-    // For now, we use the client correspondence endpoint regardless
-    // Future: Use specific policy endpoint if ownerType is policy
-    createCorrespondence.mutate(
-      {
-        clientId: ownerId,
-        data: {
-          ...data,
-          client_id: ownerId,
-          date_logged: new Date().toISOString(),
-        },
-      },
-      {
-        onSuccess: () => {
-          showSuccessToast("Document uploaded successfully")
-          form.reset()
-          setIsOpen(false)
-        },
-        onError: () => {
-          showErrorToast("Failed to upload document")
-        },
-      },
-    )
-  }
+  const onSubmit = async (values: z.infer<typeof uploadSchema>) => {
+    await uploadMutation.mutateAsync({
+      file: values.file,
+      entity_type: entityType,
+      entity_id: entityId,
+      document_type: values.document_type,
+    });
+    form.reset();
+    setIsUploadOpen(false);
+  };
+
+  const columns: ColumnDef<any>[] = useMemo(() => [
+    {
+      accessorKey: "document_type",
+      header: "Type",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2">
+          <FileIcon className="size-4 text-muted-foreground" />
+          <span className="font-medium">{row.original.document_type}</span>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "mime_type",
+      header: "Format",
+      cell: ({ row }) => (
+        <span className="text-xs text-muted-foreground uppercase">
+          {row.original.mime_type?.split("/")[1] || "File"}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "uploaded_at",
+      header: "Date",
+      cell: ({ row }) => (
+        <span className="text-sm">
+          {new Date(row.original.uploaded_at).toLocaleDateString()}
+        </span>
+      ),
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setSelectedDocId(row.original.id)}
+          >
+            <Eye className="size-4 mr-2" />
+            View
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-destructive hover:bg-destructive/10"
+            onClick={() => deleteMutation.mutate(row.original.id)}
+            disabled={deleteMutation.isPending}
+          >
+            <Trash2 className="size-4" />
+          </Button>
+        </div>
+      ),
+    },
+  ], [deleteMutation]);
 
   return (
     <div className="space-y-4">
@@ -96,7 +145,7 @@ export function DocumentManager({
         <h2 className="text-xl font-bold tracking-tight text-primary">
           {title}
         </h2>
-        <Dialog open={isUploadOpen} onOpenChange={setIsOpen}>
+        <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
           <DialogTrigger asChild>
             <Button size="sm" className="gap-2">
               <Plus className="size-4" />
@@ -105,75 +154,63 @@ export function DocumentManager({
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Upload Document</DialogTitle>
+              <DialogTitle>Upload {entityType} Document</DialogTitle>
               <DialogDescription>
-                Add a new file reference to this {ownerType}.
+                Select a file to attach to this {entityType}.
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4"
-              >
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                   control={form.control}
-                  name="subject"
+                  name="document_type"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Document Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g. Identity Card" {...field} />
-                      </FormControl>
+                      <FormLabel>Document Type</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {DOCUMENT_PRESETS[entityType]?.map((type) => (
+                            <SelectItem key={type} value={type}>
+                              {type}
+                            </SelectItem>
+                          ))}
+                          <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+                
                 <FormField
                   control={form.control}
-                  name="summary"
+                  name="file"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Notes</FormLabel>
+                      <FormLabel>File</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="Optional notes about this file"
-                          {...field}
+                        <FileUploadZone
+                          selectedFile={field.value}
+                          onFileSelect={(file) => field.onChange(file)}
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="file_path"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>File Path / URL</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="https://example.com/file.pdf"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+
                 <div className="flex justify-end gap-2 pt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsOpen(false)}
-                  >
+                  <Button variant="outline" type="button" onClick={() => setIsUploadOpen(false)}>
                     Cancel
                   </Button>
-                  <LoadingButton
-                    type="submit"
-                    loading={createCorrespondence.isPending}
-                  >
-                    Save Document
-                  </LoadingButton>
+                  <Button type="submit" disabled={uploadMutation.isPending}>
+                    {uploadMutation.isPending ? "Uploading..." : "Save Document"}
+                  </Button>
                 </div>
               </form>
             </Form>
@@ -181,27 +218,25 @@ export function DocumentManager({
         </Dialog>
       </div>
 
-      {isLoading ? (
-        <div className="py-10 text-center text-muted-foreground animate-pulse">
-          Fetching documents...
-        </div>
-      ) : !correspondences?.data || correspondences.data.length === 0 ? (
-        <div className="flex flex-col items-center justify-center text-center py-12 border-2 border-dashed rounded-lg bg-muted/5">
-          <div className="rounded-full bg-muted p-4 mb-4">
-            <FileIcon className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <h3 className="text-lg font-semibold">Empty Folder</h3>
-          <p className="text-muted-foreground max-w-xs mx-auto">
-            No files have been uploaded for this {ownerType} yet.
-          </p>
-        </div>
-      ) : (
-        <DataTable
-          columns={columns}
-          data={correspondences.data}
-          searchPlaceholder="Filter documents..."
-        />
+      <DataTable
+        columns={columns}
+        data={documentsData?.data || []}
+        searchPlaceholder="Filter documents..."
+        isLoading={isLoading}
+      />
+
+      {/* Lightbox Viewer */}
+      {selectedDocId && (
+        <DocumentViewerModal
+          isOpen={!!selectedDocId}
+          onClose={() => setSelectedDocId(null)}
+          title="View Document"
+        >
+          <Suspense fallback={<PendingItems />}>
+            <DocumentViewer id={selectedDocId} type="external" />
+          </Suspense>
+        </DocumentViewerModal>
       )}
     </div>
-  )
+  );
 }

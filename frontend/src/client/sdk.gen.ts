@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ClaimsReadClaimsData, ClaimsReadClaimsResponse, ClaimsCreateClaimData, ClaimsCreateClaimResponse, ClaimsReadClaimData, ClaimsReadClaimResponse, ClaimsUpdateClaimData, ClaimsUpdateClaimResponse, ClaimsDeleteClaimData, ClaimsDeleteClaimResponse, ClientsReadClientsData, ClientsReadClientsResponse, ClientsCreateClientData, ClientsCreateClientResponse, ClientsReadClientData, ClientsReadClientResponse, ClientsUpdateClientData, ClientsUpdateClientResponse, ClientsDeleteClientData, ClientsDeleteClientResponse, ClientsReadClientCorrespondencesData, ClientsReadClientCorrespondencesResponse, ClientsCreateClientCorrespondenceData, ClientsCreateClientCorrespondenceResponse, FinancialsReadInvoicesData, FinancialsReadInvoicesResponse, FinancialsCreateNewInvoiceData, FinancialsCreateNewInvoiceResponse, FinancialsReadInvoiceData, FinancialsReadInvoiceResponse, FinancialsReadReceiptsData, FinancialsReadReceiptsResponse, FinancialsCreateNewReceiptData, FinancialsCreateNewReceiptResponse, FinancialsReadReceiptByIdData, FinancialsReadReceiptByIdResponse, FinancialsDeleteReceiptData, FinancialsDeleteReceiptResponse, FinancialsAllocateReceiptData, FinancialsAllocateReceiptResponse, InsurersReadInsurersData, InsurersReadInsurersResponse, InsurersCreateInsurerData, InsurersCreateInsurerResponse, InsurersReadInsurerData, InsurersReadInsurerResponse, InsurersUpdateInsurerData, InsurersUpdateInsurerResponse, InsurersDeleteInsurerData, InsurersDeleteInsurerResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PoliciesReadPoliciesData, PoliciesReadPoliciesResponse, PoliciesCreatePolicyData, PoliciesCreatePolicyResponse, PoliciesReadPolicyData, PoliciesReadPolicyResponse, PoliciesUpdatePolicyData, PoliciesUpdatePolicyResponse, PoliciesDeletePolicyData, PoliciesDeletePolicyResponse, PoliciesReadPolicyRiskNotesData, PoliciesReadPolicyRiskNotesResponse, PoliciesReadPolicyRiskItemsData, PoliciesReadPolicyRiskItemsResponse, PoliciesCreatePolicyRiskItemData, PoliciesCreatePolicyRiskItemResponse, PrivateCreateUserData, PrivateCreateUserResponse, ProductsReadProductsData, ProductsReadProductsResponse, ProductsCreateProductData, ProductsCreateProductResponse, ProductsReadProductData, ProductsReadProductResponse, ProductsUpdateProductData, ProductsUpdateProductResponse, ProductsDeleteProductData, ProductsDeleteProductResponse, RiskNotesReadRiskNotesData, RiskNotesReadRiskNotesResponse, RiskNotesCreateRiskNoteData, RiskNotesCreateRiskNoteResponse, RiskNotesReadRiskNoteData, RiskNotesReadRiskNoteResponse, RiskNotesUpdateRiskNoteData, RiskNotesUpdateRiskNoteResponse, RiskNotesDeleteRiskNoteData, RiskNotesDeleteRiskNoteResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { ClaimsReadClaimsData, ClaimsReadClaimsResponse, ClaimsCreateClaimData, ClaimsCreateClaimResponse, ClaimsReadClaimData, ClaimsReadClaimResponse, ClaimsUpdateClaimData, ClaimsUpdateClaimResponse, ClaimsDeleteClaimData, ClaimsDeleteClaimResponse, ClientsReadClientsData, ClientsReadClientsResponse, ClientsCreateClientData, ClientsCreateClientResponse, ClientsReadClientData, ClientsReadClientResponse, ClientsUpdateClientData, ClientsUpdateClientResponse, ClientsDeleteClientData, ClientsDeleteClientResponse, ClientsReadClientCorrespondencesData, ClientsReadClientCorrespondencesResponse, ClientsCreateClientCorrespondenceData, ClientsCreateClientCorrespondenceResponse, DocumentsReadDocumentsData, DocumentsReadDocumentsResponse, DocumentsUploadDocumentData, DocumentsUploadDocumentResponse, DocumentsReadDocumentByIdData, DocumentsReadDocumentByIdResponse, DocumentsRemoveDocumentData, DocumentsRemoveDocumentResponse, DocumentsDownloadDocumentData, DocumentsDownloadDocumentResponse, FinancialsReadInvoicesData, FinancialsReadInvoicesResponse, FinancialsCreateNewInvoiceData, FinancialsCreateNewInvoiceResponse, FinancialsReadInvoiceData, FinancialsReadInvoiceResponse, FinancialsReadReceiptsData, FinancialsReadReceiptsResponse, FinancialsCreateNewReceiptData, FinancialsCreateNewReceiptResponse, FinancialsReadReceiptByIdData, FinancialsReadReceiptByIdResponse, FinancialsDeleteReceiptData, FinancialsDeleteReceiptResponse, FinancialsAllocateReceiptData, FinancialsAllocateReceiptResponse, InsurersReadInsurersData, InsurersReadInsurersResponse, InsurersCreateInsurerData, InsurersCreateInsurerResponse, InsurersReadInsurerData, InsurersReadInsurerResponse, InsurersUpdateInsurerData, InsurersUpdateInsurerResponse, InsurersDeleteInsurerData, InsurersDeleteInsurerResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PoliciesReadPoliciesData, PoliciesReadPoliciesResponse, PoliciesCreatePolicyData, PoliciesCreatePolicyResponse, PoliciesReadPolicyData, PoliciesReadPolicyResponse, PoliciesUpdatePolicyData, PoliciesUpdatePolicyResponse, PoliciesDeletePolicyData, PoliciesDeletePolicyResponse, PoliciesReadPolicyRiskNotesData, PoliciesReadPolicyRiskNotesResponse, PoliciesReadPolicyRiskItemsData, PoliciesReadPolicyRiskItemsResponse, PoliciesCreatePolicyRiskItemData, PoliciesCreatePolicyRiskItemResponse, PrivateCreateUserData, PrivateCreateUserResponse, ProductsReadProductsData, ProductsReadProductsResponse, ProductsCreateProductData, ProductsCreateProductResponse, ProductsReadProductData, ProductsReadProductResponse, ProductsUpdateProductData, ProductsUpdateProductResponse, ProductsDeleteProductData, ProductsDeleteProductResponse, RiskNotesReadRiskNotesData, RiskNotesReadRiskNotesResponse, RiskNotesCreateRiskNoteData, RiskNotesCreateRiskNoteResponse, RiskNotesReadRiskNoteData, RiskNotesReadRiskNoteResponse, RiskNotesUpdateRiskNoteData, RiskNotesUpdateRiskNoteResponse, RiskNotesDeleteRiskNoteData, RiskNotesDeleteRiskNoteResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
 
 export class ClaimsService {
     /**
@@ -267,6 +267,118 @@ export class ClientsService {
             },
             body: data.requestBody,
             mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class DocumentsService {
+    /**
+     * Read Documents
+     * Retrieve documents.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @param data.entityId
+     * @param data.entityType
+     * @returns DocumentsPublic Successful Response
+     * @throws ApiError
+     */
+    public static readDocuments(data: DocumentsReadDocumentsData = {}): CancelablePromise<DocumentsReadDocumentsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/documents/',
+            query: {
+                skip: data.skip,
+                limit: data.limit,
+                entity_id: data.entityId,
+                entity_type: data.entityType
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Upload Document
+     * Upload a document.
+     * @param data The data for the request.
+     * @param data.formData
+     * @returns DocumentPublic Successful Response
+     * @throws ApiError
+     */
+    public static uploadDocument(data: DocumentsUploadDocumentData): CancelablePromise<DocumentsUploadDocumentResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/documents/upload',
+            formData: data.formData,
+            mediaType: 'multipart/form-data',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Document By Id
+     * Get document by ID.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns DocumentPublic Successful Response
+     * @throws ApiError
+     */
+    public static readDocumentById(data: DocumentsReadDocumentByIdData): CancelablePromise<DocumentsReadDocumentByIdResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/documents/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Remove Document
+     * Delete a document.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns DocumentPublic Successful Response
+     * @throws ApiError
+     */
+    public static removeDocument(data: DocumentsRemoveDocumentData): CancelablePromise<DocumentsRemoveDocumentResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/documents/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Download Document
+     * Download/View a document.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static downloadDocument(data: DocumentsDownloadDocumentData): CancelablePromise<DocumentsDownloadDocumentResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/documents/{id}/download',
+            path: {
+                id: data.id
+            },
             errors: {
                 422: 'Validation Error'
             }

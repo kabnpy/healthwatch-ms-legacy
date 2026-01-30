@@ -284,6 +284,7 @@ class DocumentBase(SQLModel):
     document_type: str  # "Logbook", "ID", "Valuation", "PoliceAbstract", "Receipt"
     file_path: str
     mime_type: str | None = None
+    doc_metadata: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
     uploaded_at: datetime = Field(default_factory=datetime.now)
 
 
@@ -297,6 +298,7 @@ class DocumentUpdate(SQLModel):
     document_type: str | None = None
     file_path: str | None = None
     mime_type: str | None = None
+    doc_metadata: dict[str, Any] | None = None
 
 
 class DocumentPublic(DocumentBase):

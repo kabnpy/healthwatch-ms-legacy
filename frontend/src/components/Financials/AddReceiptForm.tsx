@@ -19,6 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { FileUploadZone } from "@/components/Common/FileUploadZone"
+import { useUploadDocument } from "@/hooks/useDocuments"
 import { useCreateReceipt } from "@/hooks/useFinancials"
 import { useClients } from "@/hooks/useInsurance"
 
@@ -30,6 +32,7 @@ const formSchema = z.object({
   mode: z.string().min(1, "Payment mode is required"),
   reference: z.string().min(1, "Reference is required"),
   notes: z.string().optional(),
+  file: z.instanceof(File, { message: "Proof of payment is required" }),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -47,6 +50,7 @@ export function AddReceiptForm({
 }: AddReceiptFormProps) {
   const { data: clientsData } = useClients(0, 1000)
   const createReceipt = useCreateReceipt()
+  const uploadDocument = useUploadDocument()
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema) as any,
@@ -58,16 +62,38 @@ export function AddReceiptForm({
       mode: "MPESA",
       reference: "",
       notes: "",
-    },
+    } as any,
   })
 
   const onSubmit: SubmitHandler<FormValues> = async (values) => {
     try {
-      await createReceipt.mutateAsync(values as any)
-      toast.success("Receipt created successfully")
+      // 1. Create the Receipt record
+      const receipt = await createReceipt.mutateAsync({
+        client_id: values.client_id,
+        receipt_number: values.receipt_number,
+        amount: values.amount,
+        date_received: values.date_received,
+        mode: values.mode,
+        reference: values.reference,
+        notes: values.notes,
+      } as any)
+
+      // 2. Upload the attachment linked to the Receipt ID
+      await uploadDocument.mutateAsync({
+        file: values.file,
+        entity_type: "Receipt",
+        entity_id: receipt.id,
+        document_type: "Proof of Payment",
+        metadata: {
+          mode: values.mode,
+          reference: values.reference,
+        },
+      })
+
+      toast.success("Receipt and proof saved successfully")
       onSuccess()
     } catch (_error) {
-      toast.error("Failed to create receipt")
+      toast.error("Failed to process receipt")
     }
   }
 
@@ -189,12 +215,34 @@ export function AddReceiptForm({
           )}
         />
 
+        <FormField
+          control={form.control as any}
+          name="file"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Proof of Payment (Scan/Screenshot)</FormLabel>
+              <FormControl>
+                <FileUploadZone
+                  selectedFile={field.value}
+                  onFileSelect={(file) => field.onChange(file)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <div className="flex justify-end gap-2 pt-4">
           <Button variant="outline" type="button" onClick={onCancel}>
             Cancel
           </Button>
-          <Button type="submit" disabled={createReceipt.isPending}>
-            {createReceipt.isPending ? "Saving..." : "Create Receipt"}
+          <Button
+            type="submit"
+            disabled={createReceipt.isPending || uploadDocument.isPending}
+          >
+            {createReceipt.isPending || uploadDocument.isPending
+              ? "Processing..."
+              : "Create Receipt"}
           </Button>
         </div>
       </form>

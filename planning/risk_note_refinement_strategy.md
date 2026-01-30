@@ -30,7 +30,7 @@ Instead of multiple hardcoded sub-templates, we will use a **Dynamic Section Ren
     - Categories like `BENEFITS` or `EXCESS` will render as a vertical list/table of key-value pairs.
 
 ### B. Logic Flow
-1. `UniversalDocumentViewer` loads `RiskNote`.
+1. `DocumentViewer` loads `RiskNote`.
 2. `RiskNoteTemplate` renders the shared Header.
 3. `RiskNoteTemplate` executes the "Aggregation Logic":
    ```typescript

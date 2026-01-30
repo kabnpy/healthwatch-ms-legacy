@@ -1,7 +1,7 @@
 # Strategy: Unified Document Management System
 
 ## 1. Naming & Philosophy
-- **Renaming**: `UniversalDocumentViewer` -> `DocumentViewer`.
+- **Renaming**: `DocumentViewer` -> `DocumentViewer`.
 - **Purpose**: A single UI component that handles BOTH "Generated Templates" (Invoices, Risk Notes) and "External Uploads" (Receipts, ID Scans, Logbooks).
 - **Philosophy**: External-First for evidence. If a document is a "Receipt", we show the original scan. If it is an "Invoice", we render our system template.
 
@@ -29,7 +29,7 @@
 - **Status Tracking**: Add a `status` field to Documents: `Pending Review`, `Verified`, `Rejected`.
 
 ## 6. Action Plan
-1. **Refactor**: Rename `UniversalDocumentViewer` to `DocumentViewer` and simplify imports.
+1. **Refactor**: Rename `DocumentViewer` to `DocumentViewer` and simplify imports.
 2. **Backend Storage**: Implement a basic `/api/v1/utils/upload` endpoint and a `LocalFileSystemProvider`.
 3. **Receipt Workflow**: 
     - Update `AddReceiptForm` to require a file upload.

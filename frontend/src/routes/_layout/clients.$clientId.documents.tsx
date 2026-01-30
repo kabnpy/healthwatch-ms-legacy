@@ -10,8 +10,8 @@ function ClientDocumentsTab() {
   return (
     <div className="pt-4">
       <DocumentManager
-        ownerId={clientId}
-        ownerType="client"
+        entityId={clientId}
+        entityType="Client"
         title="KYC & Legal Documents"
       />
     </div>

@@ -29,5 +29,5 @@
 
 ## Architectural Decisions
 - **Decoupled Financials**: Invoices now act as the primary billing entity, allowing N Risk Notes to be grouped into 1 Invoice.
-- **Loader Pattern**: The `UniversalDocumentViewer` uses internal loader components to prevent unnecessary/failing API calls when switching document types.
+- **Loader Pattern**: The `DocumentViewer` uses internal loader components to prevent unnecessary/failing API calls when switching document types.
 - **Explicit Routing**: Backend router prefixes are now defined explicitly in `app/api/main.py` to prevent accidental double-prefixing.

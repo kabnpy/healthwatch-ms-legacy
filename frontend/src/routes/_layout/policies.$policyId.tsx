@@ -7,7 +7,7 @@ import { DocumentManager } from "@/components/Common/DocumentManager"
 import { DocumentViewerModal } from "@/components/Common/DocumentViewerModal"
 import ErrorComponent from "@/components/Common/ErrorComponent"
 import { RiskNoteTemplate } from "@/components/Documents/templates/RiskNoteTemplate"
-import { UniversalDocumentViewer } from "@/components/Documents/UniversalDocumentViewer"
+import { DocumentViewer } from "@/components/Documents/DocumentViewer"
 import { RiskNoteForm } from "@/components/Insurance/RiskNoteForm"
 import PendingItems from "@/components/Pending/PendingItems"
 import { PolicyHeader } from "@/components/Policies/Dashboard/PolicyHeader"
@@ -247,8 +247,8 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
         {/* TAB 4: DOCUMENTS */}
         <TabsContent value="documents" className="pt-6">
           <DocumentManager
-            ownerId={policy.client_id}
-            ownerType="policy"
+            entityId={policyId}
+            entityType="Policy"
             title="Policy Support Documents"
           />
         </TabsContent>
@@ -262,7 +262,7 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
           title={`Document: ${selectedRiskNoteId}`}
         >
           <Suspense fallback={<PendingItems />}>
-            <UniversalDocumentViewer id={selectedRiskNoteId} type={viewType} />
+            <DocumentViewer id={selectedRiskNoteId} type={viewType} />
           </Suspense>
         </DocumentViewerModal>
       )}

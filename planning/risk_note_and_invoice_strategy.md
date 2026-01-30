@@ -11,7 +11,7 @@
 - **Receipt:** A record of a payment made by a client. lives under **Financials**.
 
 ## 3. Component Architecture
-### `UniversalDocumentViewer.tsx` (formerly `RiskNoteDocument.tsx`)
+### `DocumentViewer.tsx` (formerly `RiskNoteDocument.tsx`)
 - A stateless container that takes a `documentType` and `data`.
 - Uses a registry to render the correct template.
 - **Templates:**
@@ -31,7 +31,7 @@ We need to align the models with the actual business flow:
 ## 5. Implementation Roadmap
 
 ### Phase 1: Viewer Refactoring & Cleanup
-- [x] Rename `RiskNoteDocument.tsx` to `UniversalDocumentViewer.tsx`.
+- [x] Rename `RiskNoteDocument.tsx` to `DocumentViewer.tsx`.
 - [x] Remove `CertificateTemplate.tsx` and all references to "Certificate" mode.
 - [x] Ensure the viewer is "one-way": it displays what it is told to display, no toggles.
 

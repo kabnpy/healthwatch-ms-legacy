@@ -4,7 +4,7 @@ import type { InvoicePublic, ReceiptPublic } from "@/client"
 import { DataTable } from "@/components/Common/DataTable"
 import { DocumentViewerModal } from "@/components/Common/DocumentViewerModal"
 import { SummaryCard } from "@/components/Common/SummaryCard"
-import { UniversalDocumentViewer } from "@/components/Documents/UniversalDocumentViewer"
+import { DocumentViewer } from "@/components/Documents/DocumentViewer"
 import { AddReceiptForm } from "@/components/Financials/AddReceiptForm"
 import { AllocationDialog } from "@/components/Financials/AllocationDialog"
 import { AllocationHistory } from "@/components/Financials/AllocationHistory"
@@ -184,7 +184,7 @@ export function ClientInvoices({ clientId }: ClientInvoicesProps) {
           title={`${selectedDoc.type === "invoice" ? "Invoice" : "Receipt"} Details`}
         >
           <Suspense fallback={<PendingItems />}>
-            <UniversalDocumentViewer
+            <DocumentViewer
               id={selectedDoc.id}
               type={selectedDoc.type}
             />
