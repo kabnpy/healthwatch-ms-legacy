@@ -51,9 +51,7 @@ export const columns: ColumnDef<UserTableData>[] = [
   {
     accessorKey: "is_active",
     header: "Status",
-    cell: ({ row }) => (
-      <StatusIndicator isActive={!!row.original.is_active} />
-    ),
+    cell: ({ row }) => <StatusIndicator isActive={!!row.original.is_active} />,
   },
   {
     id: "actions",

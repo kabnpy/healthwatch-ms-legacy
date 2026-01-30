@@ -46,10 +46,7 @@ export function PolicyHeader({
           <h1 className="text-3xl font-bold tracking-tight">
             {displayName || policyNumber}
           </h1>
-          <StatusIndicator
-            isActive={status === "Active"}
-            label={status}
-          />
+          <StatusIndicator isActive={status === "Active"} label={status} />
         </div>
         {displayName && (
           <span className="text-sm text-muted-foreground font-mono">

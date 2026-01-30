@@ -28,7 +28,7 @@ export const AddRiskNote = ({ policyId, policyNumber }: AddRiskNoteProps) => {
           Add Risk Note
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>New Risk Note</DialogTitle>
           <DialogDescription>
