@@ -1,6 +1,6 @@
+import { zodResolver } from "@hookform/resolvers/zod"
 import { useMemo } from "react"
 import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -13,8 +13,8 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { calculatePremium } from "@/lib/calculator"
 import { useProducts } from "@/hooks/useInsurance"
+import { calculatePremium } from "@/lib/calculator"
 
 const financialsSchema = z.object({
   financials: z.object({
@@ -44,7 +44,7 @@ export function StepFinancials({
   productId,
 }: StepFinancialsProps) {
   const { data: productsData } = useProducts()
-  
+
   const selectedProduct = useMemo(() => {
     return productsData?.data.find((p) => p.id === productId)
   }, [productId, productsData])
@@ -63,8 +63,12 @@ export function StepFinancials({
     hasPassengerLiability: watchedValues.extensions.passengerLiability,
   })
 
-  const isPA = selectedProduct?.class_of_insurance?.toLowerCase().includes("personal accident")
-  const isMotor = selectedProduct?.class_of_insurance?.toLowerCase().includes("motor")
+  const isPA = selectedProduct?.class_of_insurance
+    ?.toLowerCase()
+    .includes("personal accident")
+  const isMotor = selectedProduct?.class_of_insurance
+    ?.toLowerCase()
+    .includes("motor")
 
   return (
     <Form {...form}>
@@ -93,7 +97,9 @@ export function StepFinancials({
                 name="financials.rate"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{isPA ? "Premium (Flat Amount)" : "Rate (%)"}</FormLabel>
+                    <FormLabel>
+                      {isPA ? "Premium (Flat Amount)" : "Rate (%)"}
+                    </FormLabel>
                     <FormControl>
                       <Input type="number" step="0.01" {...field} />
                     </FormControl>
@@ -193,20 +199,21 @@ export function StepFinancials({
                     })}
                   </span>
                 </div>
-                
-                {isMotor && calculation.breakdown.extensions.map((ext) => (
-                  <div
-                    key={ext.name}
-                    className="flex justify-between text-blue-600"
-                  >
-                    <span>+ {ext.name}:</span>
-                    <span>
-                      {ext.amount.toLocaleString(undefined, {
-                        minimumFractionDigits: 2,
-                      })}
-                    </span>
-                  </div>
-                ))}
+
+                {isMotor &&
+                  calculation.breakdown.extensions.map((ext) => (
+                    <div
+                      key={ext.name}
+                      className="flex justify-between text-blue-600"
+                    >
+                      <span>+ {ext.name}:</span>
+                      <span>
+                        {ext.amount.toLocaleString(undefined, {
+                          minimumFractionDigits: 2,
+                        })}
+                      </span>
+                    </div>
+                  ))}
 
                 <div className="border-t pt-2 mt-2">
                   <div className="flex justify-between text-muted-foreground">

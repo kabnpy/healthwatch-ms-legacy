@@ -2,7 +2,8 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useEffect } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
 import { z } from "zod"
-
+import type { ApiError } from "@/client"
+import { Button } from "@/components/ui/button"
 import {
   Form,
   FormControl,
@@ -13,7 +14,6 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { LoadingButton } from "@/components/ui/loading-button"
-import { Button } from "@/components/ui/button"
 import {
   Select,
   SelectContent,
@@ -22,13 +22,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import useCustomToast from "@/hooks/useCustomToast"
-import {
-  usePolicy,
-  useRiskNote,
-  useUpdateRiskNote,
-} from "@/hooks/useInsurance"
+import { usePolicy, useRiskNote, useUpdateRiskNote } from "@/hooks/useInsurance"
 import { handleError } from "@/utils"
-import type { ApiError } from "@/client"
 
 interface RiskNoteFormProps {
   policyId: string
@@ -45,7 +40,9 @@ export const RiskNoteForm = ({
 }: RiskNoteFormProps) => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const { data: policy, isLoading: isLoadingPolicy } = usePolicy(policyId)
-  const { data: existingRiskNote, isLoading: isLoadingRiskNote } = useRiskNote(riskNoteId || "")
+  const { data: existingRiskNote, isLoading: isLoadingRiskNote } = useRiskNote(
+    riskNoteId || "",
+  )
   const updateRiskNote = useUpdateRiskNote()
 
   const formSchema = z.object({
@@ -55,13 +52,13 @@ export const RiskNoteForm = ({
     status: z.string().min(1),
     net_premium: z.coerce.number().min(0),
     commission_amount: z.coerce.number().min(0),
-    details: z.record(z.any()), // Dynamic fields from form_schema
+    details: z.record(z.string(), z.any()), // Dynamic fields from form_schema
   })
 
   type FormData = z.infer<typeof formSchema>
 
   const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as any,
     defaultValues: {
       transaction_type: "New Business",
       start_date: new Date().toISOString().split("T")[0],
@@ -80,12 +77,13 @@ export const RiskNoteForm = ({
     if (existingRiskNote) {
       const items = (existingRiskNote.items_snapshot?.items as any[]) || []
       const riskItem = items[0] || {}
-      
+      const existingRN = existingRiskNote as any
+
       form.reset({
         transaction_type: existingRiskNote.transaction_type,
         start_date: existingRiskNote.start_date,
         end_date: existingRiskNote.end_date,
-        status: existingRiskNote.status,
+        status: existingRN.status || "Draft",
         net_premium: existingRiskNote.net_premium,
         commission_amount: existingRiskNote.commission_amount,
         details: riskItem.details || {},
@@ -131,7 +129,7 @@ export const RiskNoteForm = ({
         onError: (err: Error) => {
           handleError.call(showErrorToast, err as ApiError)
         },
-      }
+      },
     )
   }
 
@@ -139,19 +137,23 @@ export const RiskNoteForm = ({
     return <div className="p-8 text-center">Loading form details...</div>
   }
 
-  const productDetails = (policy?.product?.product_details as any[]) || []
+  const productAny = policy?.product as any
+  const productDetails = (productAny?.product_details as any[]) || []
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit as any)} className="space-y-6">
         <div className="grid grid-cols-2 gap-4 bg-muted/30 p-4 rounded-lg">
           <FormField
-            control={form.control}
+            control={form.control as any}
             name="transaction_type"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Transaction Type</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select type" />
@@ -169,12 +171,15 @@ export const RiskNoteForm = ({
             )}
           />
           <FormField
-            control={form.control}
+            control={form.control as any}
             name="status"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Status</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select status" />
@@ -194,7 +199,7 @@ export const RiskNoteForm = ({
 
         <div className="grid grid-cols-2 gap-4">
           <FormField
-            control={form.control}
+            control={form.control as any}
             name="start_date"
             render={({ field }) => (
               <FormItem>
@@ -207,7 +212,7 @@ export const RiskNoteForm = ({
             )}
           />
           <FormField
-            control={form.control}
+            control={form.control as any}
             name="end_date"
             render={({ field }) => (
               <FormItem>
@@ -227,30 +232,37 @@ export const RiskNoteForm = ({
           </h3>
           <div className="grid grid-cols-2 gap-4">
             {productDetails
-              .filter((f: any) => f.field_type === "input" || f.field_type === "optional")
+              .filter(
+                (f: any) =>
+                  f.field_type === "input" || f.field_type === "optional",
+              )
               .map((field: any) => (
                 <FormField
                   key={field.key}
-                  control={form.control}
+                  control={form.control as any}
                   name={`details.${field.key}`}
-                render={({ field: inputField }) => (
-                  <FormItem>
-                    <FormLabel>{field.label}</FormLabel>
-                    <FormControl>
-                      <Input
-                        type={field.type === "number" ? "number" : "text"}
-                        {...inputField}
-                        value={inputField.value || ""}
-                        onChange={(e) => 
-                          inputField.onChange(field.type === "number" ? e.target.valueAsNumber : e.target.value)
-                        }
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            ))}
+                  render={({ field: inputField }) => (
+                    <FormItem>
+                      <FormLabel>{field.label}</FormLabel>
+                      <FormControl>
+                        <Input
+                          type={field.type === "number" ? "number" : "text"}
+                          {...inputField}
+                          value={inputField.value || ""}
+                          onChange={(e) =>
+                            inputField.onChange(
+                              field.type === "number"
+                                ? e.target.valueAsNumber
+                                : e.target.value,
+                            )
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ))}
           </div>
         </div>
 
@@ -260,7 +272,7 @@ export const RiskNoteForm = ({
           </h3>
           <div className="grid grid-cols-2 gap-4">
             <FormField
-              control={form.control}
+              control={form.control as any}
               name="net_premium"
               render={({ field }) => (
                 <FormItem>
@@ -273,7 +285,7 @@ export const RiskNoteForm = ({
               )}
             />
             <FormField
-              control={form.control}
+              control={form.control as any}
               name="commission_amount"
               render={({ field }) => (
                 <FormItem>
@@ -297,7 +309,9 @@ export const RiskNoteForm = ({
             loading={updateRiskNote.isPending}
             disabled={!riskNoteId}
           >
-            {form.watch("status") === "Active" ? "Finalize & Issue" : "Save Changes"}
+            {form.watch("status") === "Active"
+              ? "Finalize & Issue"
+              : "Save Changes"}
           </LoadingButton>
         </div>
       </form>

@@ -1,10 +1,10 @@
+import { useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { LoadingButton } from "@/components/ui/loading-button"
+import { useProducts } from "@/hooks/useInsurance"
 import { calculatePremium } from "@/lib/calculator"
 import type { WizardState } from "@/types/wizard"
-import { useProducts } from "@/hooks/useInsurance"
-import { useMemo } from "react"
 
 interface StepReviewProps {
   state: WizardState
@@ -20,7 +20,7 @@ export function StepReview({
   isSubmitting,
 }: StepReviewProps) {
   const { data: productsData } = useProducts()
-  
+
   const selectedProduct = useMemo(() => {
     return productsData?.data.find((p) => p.id === state.product_id)
   }, [state.product_id, productsData])
@@ -33,7 +33,9 @@ export function StepReview({
     hasPassengerLiability: state.extensions.passengerLiability,
   })
 
-  const isPA = selectedProduct?.class_of_insurance?.toLowerCase().includes("personal accident")
+  const isPA = selectedProduct?.class_of_insurance
+    ?.toLowerCase()
+    .includes("personal accident")
 
   return (
     <div className="space-y-6">
@@ -55,12 +57,14 @@ export function StepReview({
               <span className="font-medium">{state.asset.description}</span>
             </div>
             <div className="border-t pt-2 mt-2 space-y-1">
-               {Object.entries(state.asset.details || {}).map(([key, value]) => (
-                 <div key={key} className="flex justify-between text-xs">
-                   <span className="text-muted-foreground capitalize">{key.replace(/_/g, ' ')}:</span>
-                   <span className="font-mono">{String(value)}</span>
-                 </div>
-               ))}
+              {Object.entries(state.asset.details || {}).map(([key, value]) => (
+                <div key={key} className="flex justify-between text-xs">
+                  <span className="text-muted-foreground capitalize">
+                    {key.replace(/_/g, " ")}:
+                  </span>
+                  <span className="font-mono">{String(value)}</span>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
@@ -101,7 +105,8 @@ export function StepReview({
       </div>
 
       <div className="bg-blue-50 border border-blue-200 p-4 rounded-md text-sm text-blue-800">
-        Review all details above. Issuing this policy will create the final Risk Note and initiate the debit note for the client.
+        Review all details above. Issuing this policy will create the final Risk
+        Note and initiate the debit note for the client.
       </div>
 
       <div className="flex justify-between pt-4 border-t">

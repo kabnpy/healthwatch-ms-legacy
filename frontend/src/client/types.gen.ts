@@ -289,17 +289,9 @@ export type ProductPublic = {
     insurer_id: string;
     name: string;
     class_of_insurance: string;
-    pricing_strategy?: PricingStrategy;
-    pricing_rules?: {
-        [key: string]: unknown;
-    };
-    form_schema?: Array<{
+    product_details?: Array<{
         [key: string]: unknown;
     }>;
-    default_benefits?: {
-        [key: string]: unknown;
-    };
-    default_clauses?: Array<(string)>;
     default_commission_rate?: number;
     id: string;
 };
@@ -417,6 +409,7 @@ export type RiskItemsPublic = {
 export type RiskNoteCreate = {
     policy_id: string;
     transaction_type: string;
+    status?: string;
     previous_risk_note_id?: (string | null);
     invoice_number?: (string | null);
     created_by_id?: (string | null);
@@ -438,6 +431,7 @@ export type RiskNoteCreate = {
 export type RiskNotePublic = {
     policy_id: string;
     transaction_type: string;
+    status?: string;
     previous_risk_note_id?: (string | null);
     invoice_number?: (string | null);
     created_by_id?: (string | null);

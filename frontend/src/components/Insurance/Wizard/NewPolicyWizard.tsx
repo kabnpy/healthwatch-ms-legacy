@@ -85,7 +85,7 @@ export function NewPolicyWizard({
           policy_id: policy.id,
           description: state.asset?.description || "Insurance Asset",
           cover_description: "Standard",
-          total_premium: 0, 
+          total_premium: 0,
           premium_breakdown: {},
           risk_details: state.asset?.details || {},
           version_number: 1,
@@ -96,7 +96,7 @@ export function NewPolicyWizard({
       // 3. Update the Risk Note (The backend created a draft, but we want to finalize it)
       // For MVP simplicity, we create a SECOND finalized Risk Note and the first one remains as the "New Business" initiator
       // Actually, it's better to just create a new Risk Note with full details.
-      
+
       const { calculatePremium } = await import("@/lib/calculator")
       const calc = calculatePremium({
         sumInsured: state.financials?.sumInsured || 0,
@@ -126,15 +126,15 @@ export function NewPolicyWizard({
         items_snapshot: {
           items: [
             {
-              name: policy.product?.name || "Asset",
+              name: (policy.product as any)?.name || "Asset",
               description: riskItem.description,
               details: state.asset?.details,
-              premium: calc.breakdown.total
-            }
+              premium: calc.breakdown.total,
+            },
           ],
         },
         special_clauses: [],
-      })
+      } as any)
 
       showSuccessToast("Policy Issued Successfully!")
       onSuccess?.()
@@ -148,9 +148,7 @@ export function NewPolicyWizard({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>
-            New Policy Wizard - {steps[step]}
-          </DialogTitle>
+          <DialogTitle>New Policy Wizard - {steps[step]}</DialogTitle>
         </DialogHeader>
 
         <div className="py-4">

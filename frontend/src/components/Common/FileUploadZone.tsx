@@ -1,14 +1,14 @@
-import { FileIcon, UploadCloud, X } from "lucide-react";
-import { useCallback, useState } from "react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { FileIcon, UploadCloud, X } from "lucide-react"
+import { useCallback, useState } from "react"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 interface FileUploadZoneProps {
-  onFileSelect: (file: File | null) => void;
-  selectedFile?: File | null;
-  accept?: string;
-  maxSizeMB?: number;
-  className?: string;
+  onFileSelect: (file: File | null) => void
+  selectedFile?: File | null
+  accept?: string
+  maxSizeMB?: number
+  className?: string
 }
 
 export function FileUploadZone({
@@ -18,61 +18,77 @@ export function FileUploadZone({
   maxSizeMB = 10,
   className,
 }: FileUploadZoneProps) {
-  const [isDragging, setIsDragging] = useState(false);
+  const [isDragging, setIsDragging] = useState(false)
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  }, []);
+    e.preventDefault()
+    setIsDragging(true)
+  }, [])
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-  }, []);
+    e.preventDefault()
+    setIsDragging(false)
+  }, [])
 
-  const validateAndSelect = (file: File) => {
-    if (file.size > maxSizeMB * 1024 * 1024) {
-      alert(`File too large. Maximum size is ${maxSizeMB}MB.`);
-      return;
-    }
-    onFileSelect(file);
-  };
+  const validateAndSelect = useCallback(
+    (file: File) => {
+      if (file.size > maxSizeMB * 1024 * 1024) {
+        alert(`File too large. Maximum size is ${maxSizeMB}MB.`)
+        return
+      }
+      onFileSelect(file)
+    },
+    [maxSizeMB, onFileSelect],
+  )
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
-      e.preventDefault();
-      setIsDragging(false);
-      const file = e.dataTransfer.files?.[0];
-      if (file) validateAndSelect(file);
+      e.preventDefault()
+      setIsDragging(false)
+      const file = e.dataTransfer.files?.[0]
+      if (file) validateAndSelect(file)
     },
-    [onFileSelect, maxSizeMB]
-  );
+    [validateAndSelect],
+  )
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) validateAndSelect(file);
-  };
+    const file = e.target.files?.[0]
+    if (file) validateAndSelect(file)
+  }
 
   const clearFile = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onFileSelect(null);
-  };
+    e.stopPropagation()
+    onFileSelect(null)
+  }
+
+  const handleClick = () => {
+    document.getElementById("file-upload-input")?.click()
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault()
+      handleClick()
+    }
+  }
 
   return (
-    <div
+    <button
+      type="button"
       className={cn(
-        "relative group cursor-pointer transition-all duration-200",
-        "border-2 border-dashed rounded-xl p-6",
+        "relative group cursor-pointer transition-all duration-200 w-full text-left",
+        "border-2 border-dashed rounded-xl p-6 block",
         isDragging
           ? "border-primary bg-primary/5 scale-[1.01]"
           : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/5",
         selectedFile && "border-green-500/50 bg-green-500/5",
-        className
+        className,
       )}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      onClick={() => document.getElementById("file-upload-input")?.click()}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
     >
       <input
         id="file-upload-input"
@@ -119,6 +135,6 @@ export function FileUploadZone({
           </div>
         )}
       </div>
-    </div>
-  );
+    </button>
+  )
 }

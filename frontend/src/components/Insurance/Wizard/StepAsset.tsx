@@ -1,7 +1,5 @@
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useMemo, useEffect } from "react"
+import { useEffect, useMemo } from "react"
 import { useForm } from "react-hook-form"
-import { z } from "zod"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -46,8 +44,8 @@ export function StepAsset({ defaultValues, onNext }: StepAssetProps) {
   }, [selectedProductId, productsData])
 
   const inputFields = useMemo(() => {
-    return (selectedProduct?.product_details || []).filter(
-      (f: any) => f.field_type === "input" || f.field_type === "optional"
+    return ((selectedProduct as any)?.product_details || []).filter(
+      (f: any) => f.field_type === "input" || f.field_type === "optional",
     )
   }, [selectedProduct])
 
@@ -58,14 +56,14 @@ export function StepAsset({ defaultValues, onNext }: StepAssetProps) {
       // Create a sensible description from the first 2-3 input fields
       const summaryParts = inputFields
         .slice(0, 2)
-        .map(f => details[f.key])
-        .filter(v => !!v)
-      
+        .map((f: any) => details[f.key])
+        .filter((v: any) => !!v)
+
       if (summaryParts.length > 0) {
         form.setValue("asset.description", summaryParts.join(" - "))
       }
     }
-  }, [form.watch("asset.details"), selectedProduct, inputFields])
+  }, [selectedProduct, inputFields, form.getValues, form.setValue])
 
   return (
     <Form {...form}>
@@ -100,7 +98,7 @@ export function StepAsset({ defaultValues, onNext }: StepAssetProps) {
             <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
               {selectedProduct.class_of_insurance} Details
             </h3>
-            
+
             <div className="grid grid-cols-2 gap-4">
               {inputFields.map((field: any) => (
                 <FormField
@@ -113,11 +111,18 @@ export function StepAsset({ defaultValues, onNext }: StepAssetProps) {
                       <FormControl>
                         <Input
                           type={field.type === "number" ? "number" : "text"}
-                          placeholder={field.description || `Enter ${field.label.toLowerCase()}`}
+                          placeholder={
+                            field.description ||
+                            `Enter ${field.label.toLowerCase()}`
+                          }
                           {...inputField}
                           value={inputField.value || ""}
-                          onChange={(e) => 
-                            inputField.onChange(field.type === "number" ? e.target.valueAsNumber : e.target.value)
+                          onChange={(e) =>
+                            inputField.onChange(
+                              field.type === "number"
+                                ? e.target.valueAsNumber
+                                : e.target.value,
+                            )
                           }
                         />
                       </FormControl>
@@ -135,7 +140,10 @@ export function StepAsset({ defaultValues, onNext }: StepAssetProps) {
                 <FormItem>
                   <FormLabel>Summary Description</FormLabel>
                   <FormControl>
-                    <Input placeholder="E.g. Toyota Harrier - KCA 123B" {...field} />
+                    <Input
+                      placeholder="E.g. Toyota Harrier - KCA 123B"
+                      {...field}
+                    />
                   </FormControl>
                   <FormDescription className="text-[10px]">
                     This is how the asset will be displayed in lists.
@@ -157,6 +165,14 @@ export function StepAsset({ defaultValues, onNext }: StepAssetProps) {
   )
 }
 
-function FormDescription({ children, className }: { children: React.ReactNode, className?: string }) {
-  return <p className={`text-sm text-muted-foreground ${className}`}>{children}</p>
+function FormDescription({
+  children,
+  className,
+}: {
+  children: React.ReactNode
+  className?: string
+}) {
+  return (
+    <p className={`text-sm text-muted-foreground ${className}`}>{children}</p>
+  )
 }

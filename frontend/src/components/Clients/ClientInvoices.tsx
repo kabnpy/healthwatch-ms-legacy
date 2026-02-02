@@ -1,5 +1,5 @@
 import { CreditCard, Plus, Receipt as ReceiptIcon, Wallet } from "lucide-react"
-import { Suspense, useMemo, useState } from "react"
+import { Suspense, useCallback, useMemo, useState } from "react"
 import type { InvoicePublic, ReceiptPublic } from "@/client"
 import { DataTable } from "@/components/Common/DataTable"
 import { DocumentViewerModal } from "@/components/Common/DocumentViewerModal"
@@ -50,10 +50,10 @@ export function ClientInvoices({ clientId }: ClientInvoicesProps) {
     item: InvoicePublic | ReceiptPublic
   } | null>(null)
 
-  const handleAllocate = (receipt: ReceiptPublic) => {
+  const handleAllocate = useCallback((receipt: ReceiptPublic) => {
     setSelectedReceipt(receipt)
     setIsAllocationOpen(true)
-  }
+  }, [])
 
   const handleVoid = async () => {
     if (!receiptToVoid) return
@@ -184,10 +184,7 @@ export function ClientInvoices({ clientId }: ClientInvoicesProps) {
           title={`${selectedDoc.type === "invoice" ? "Invoice" : "Receipt"} Details`}
         >
           <Suspense fallback={<PendingItems />}>
-            <DocumentViewer
-              id={selectedDoc.id}
-              type={selectedDoc.type}
-            />
+            <DocumentViewer id={selectedDoc.id} type={selectedDoc.type} />
           </Suspense>
         </DocumentViewerModal>
       )}
