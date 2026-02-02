@@ -1,21 +1,21 @@
-import { Printer, X } from "lucide-react";
-import { type ReactNode, useEffect, useRef, useState } from "react";
-import { useReactToPrint } from "react-to-print";
+import { Printer, X } from "lucide-react"
+import { type ReactNode, useEffect, useRef, useState } from "react"
+import { useReactToPrint } from "react-to-print"
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogClose,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialog"
 
 interface DocumentViewerModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  title: string;
-  children: ReactNode;
+  isOpen: boolean
+  onClose: () => void
+  title: string
+  children: ReactNode
 }
 
 export function DocumentViewerModal({
@@ -24,33 +24,33 @@ export function DocumentViewerModal({
   title,
   children,
 }: DocumentViewerModalProps) {
-  const printRef = useRef<HTMLDivElement>(null);
-  const viewportRef = useRef<HTMLDivElement>(null);
-  const [scaleFactor, setScaleFactor] = useState(1);
+  const printRef = useRef<HTMLDivElement>(null)
+  const viewportRef = useRef<HTMLDivElement>(null)
+  const [scaleFactor, setScaleFactor] = useState(1)
 
   const handlePrint = useReactToPrint({
     contentRef: printRef,
     documentTitle: title,
-  });
+  })
 
   useEffect(() => {
-    if (!viewportRef.current) return;
+    if (!viewportRef.current) return
 
     const observer = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        const containerWidth = entry.contentRect.width;
+        const containerWidth = entry.contentRect.width
         // A4 width is 210mm. In px at 96dpi, that's ~794px.
         // We subtract padding (p-8 = 2rem * 2 = 64px)
-        const targetWidth = 794;
-        const availableWidth = containerWidth - 64;
-        const newScale = Math.min(1, availableWidth / targetWidth);
-        setScaleFactor(newScale);
+        const targetWidth = 794
+        const availableWidth = containerWidth - 64
+        const newScale = Math.min(1, availableWidth / targetWidth)
+        setScaleFactor(newScale)
       }
-    });
+    })
 
-    observer.observe(viewportRef.current);
-    return () => observer.disconnect();
-  }, []);
+    observer.observe(viewportRef.current)
+    return () => observer.disconnect()
+  }, [])
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -109,5 +109,5 @@ export function DocumentViewerModal({
         </div>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

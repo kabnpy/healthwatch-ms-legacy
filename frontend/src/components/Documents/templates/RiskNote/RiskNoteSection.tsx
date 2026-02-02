@@ -1,9 +1,9 @@
-import React from "react";
+import type React from "react"
 
 interface RiskNoteSectionProps {
-  title: string;
-  children: React.ReactNode;
-  className?: string;
+  title: string
+  children: React.ReactNode
+  className?: string
 }
 
 export const RiskNoteSection = ({
@@ -20,5 +20,5 @@ export const RiskNoteSection = ({
       </div>
       <div>{children}</div>
     </div>
-  );
-};
+  )
+}

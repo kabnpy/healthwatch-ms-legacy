@@ -11,5 +11,5 @@ export function Letterhead() {
         <p>Email: info@healthwatch.co.ke</p>
       </div>
     </div>
-  );
+  )
 }

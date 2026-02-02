@@ -1,7 +1,7 @@
-import { Letterhead } from "./Letterhead";
+import { Letterhead } from "./Letterhead"
 
 interface BaseDocumentProps {
-  children: React.ReactNode;
+  children: React.ReactNode
 }
 
 export const BaseDocument = ({ children }: BaseDocumentProps) => {
@@ -25,5 +25,5 @@ export const BaseDocument = ({ children }: BaseDocumentProps) => {
         </p>
       </div>
     </div>
-  );
-};
+  )
+}

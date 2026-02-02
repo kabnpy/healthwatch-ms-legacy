@@ -12,9 +12,25 @@ export const InvoiceTemplate = ({
   client,
   lineItems,
 }: InvoiceTemplateProps) => {
+  const clientAny = client as any
   return (
-    <BaseDocument title="INVOICE" documentNumber={invoice.invoice_number}>
+    <BaseDocument>
       <div className="font-sans text-slate-900">
+        {/* DOCUMENT HEADER */}
+        <div className="flex justify-between items-end border-b-2 border-black pb-4 mb-8">
+          <h1 className="text-3xl font-black uppercase tracking-tighter">
+            Invoice
+          </h1>
+          <div className="text-right">
+            <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">
+              Reference No
+            </p>
+            <p className="font-mono font-bold text-lg">
+              {invoice.invoice_number}
+            </p>
+          </div>
+        </div>
+
         {/* CLIENT DETAILS */}
         <div className="mb-10 pl-8">
           <p className="font-bold text-lg uppercase tracking-wide">
@@ -23,7 +39,9 @@ export const InvoiceTemplate = ({
           <p className="whitespace-pre-line text-sm text-slate-700">
             {client.postal_address || "P.O. Box - N/A"}
           </p>
-          <p className="text-sm text-slate-700">{client.city || "Nairobi"}</p>
+          <p className="text-sm text-slate-700">
+            {clientAny.city || "Nairobi"}
+          </p>
           <div className="mt-2 text-sm">
             <span className="font-bold text-slate-500 mr-2">PIN:</span>
             <span className="font-mono">{client.kra_pin}</span>
@@ -102,7 +120,7 @@ export const InvoiceTemplate = ({
                 Total Amount
               </span>
               <span className="font-bold font-mono">
-                {invoice.total_amount.toLocaleString(undefined, {
+                {(invoice.total_amount || 0).toLocaleString(undefined, {
                   minimumFractionDigits: 2,
                 })}
               </span>
@@ -112,7 +130,7 @@ export const InvoiceTemplate = ({
                 Balance Due
               </span>
               <span className="font-bold font-mono">
-                {invoice.balance_due.toLocaleString(undefined, {
+                {(invoice.balance_due || 0).toLocaleString(undefined, {
                   minimumFractionDigits: 2,
                 })}
               </span>

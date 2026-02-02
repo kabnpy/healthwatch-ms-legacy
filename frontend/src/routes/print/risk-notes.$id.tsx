@@ -62,7 +62,7 @@ function RiskNotePrintContent({ id }: { id: string }) {
     return (
       <div className="max-w-[800px] mx-auto bg-white shadow-lg print:shadow-none min-h-screen relative">
         <RiskNoteTemplate riskNote={riskNote} client={client} policy={policy} />
-        
+
         <div className="fixed bottom-8 right-8 print:hidden flex flex-col gap-2">
           {/* Toggle Buttons */}
           <div className="flex bg-white rounded-lg shadow-lg overflow-hidden border">

@@ -6,8 +6,8 @@ import { DataTable } from "@/components/Common/DataTable"
 import { DocumentManager } from "@/components/Common/DocumentManager"
 import { DocumentViewerModal } from "@/components/Common/DocumentViewerModal"
 import ErrorComponent from "@/components/Common/ErrorComponent"
-import { RiskNoteTemplate } from "@/components/Documents/templates/RiskNoteTemplate"
 import { DocumentViewer } from "@/components/Documents/DocumentViewer"
+import { RiskNoteTemplate } from "@/components/Documents/templates/RiskNoteTemplate"
 import { RiskNoteForm } from "@/components/Insurance/RiskNoteForm"
 import PendingItems from "@/components/Pending/PendingItems"
 import { PolicyHeader } from "@/components/Policies/Dashboard/PolicyHeader"
@@ -53,7 +53,7 @@ function PolicyDashboard() {
 // --- Component Content (Suspended) ---
 
 function PolicyDashboardContent({ policyId }: { policyId: string }) {
-  const { policy, latestRiskNote, activeItem, riskNotes, isLoading } =
+  const { policy, latestRiskNote, riskNotes, isLoading } =
     usePolicyDashboard(policyId)
 
   // We need client name for breadcrumbs
@@ -70,7 +70,9 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
   // State for Risk Note Form
   const [riskNoteFormOpen, setRiskNoteFormOpen] = useState(false)
   const [transactionType, setTransactionType] = useState("Endorsement")
-  const [editingRiskNoteId, setEditingRiskNoteId] = useState<string | undefined>()
+  const [editingRiskNoteId, setEditingRiskNoteId] = useState<
+    string | undefined
+  >()
 
   // Handlers
   const handleViewRiskNote = useCallback(
@@ -137,7 +139,7 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
             {/* Main Column: The Document */}
             <div className="lg:col-span-3 space-y-6">
-              {latestRiskNote?.status === "Draft" && (
+              {(latestRiskNote as any)?.status === "Draft" && (
                 <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg flex items-center justify-between shadow-sm">
                   <div className="flex items-center gap-3">
                     <div className="bg-blue-500 p-2 rounded-full">
@@ -148,7 +150,7 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
                         Draft Risk Note Detected
                       </p>
                       <p className="text-xs text-blue-700">
-                        This {latestRiskNote.transaction_type} has not been
+                        This {latestRiskNote?.transaction_type} has not been
                         finalized yet.
                       </p>
                     </div>
