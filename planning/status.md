@@ -1,6 +1,14 @@
 # Project Status (Session End: 2026-02-02)
 
 ## Finished
+- **Decoupled Rendering Logic**
+    - **Frontend Layout Registry**: Moved presentation logic (grid vs. list) from the database to `frontend/src/utils/layoutRegistry.ts`.
+    - **Robust Seeding**: Updated `seed_mock_data.py` with an upsert strategy to ensure existing products are synchronized with the latest schema changes.
+    - **Clean Data Models**: Removed all frontend-specific metadata (`display_type`) from the product JSON schema.
+- **Risk Note Template Refinement**
+    - **List-Style Rendering**: Introduced `RiskNoteListItem` to support granular list layouts for "Benefits and Limits" sections.
+    - **Display Type Control**: Added `display_type` metadata to `Product.product_details` to toggle between `table-row` and `list-item` layouts dynamically.
+    - **Seed Data Enhancement**: Updated core product definitions (Motor, PA) to include categorized benefits as list items for improved readability.
 - **Unified Product Schema & Dynamic Wizard**
     - **Manifest-Driven Architecture**: Centralized all product-specific details (benefits, excess, clauses) into the `Product.form_schema`, removing redundant attributes.
     - **Dynamic Wizard**: Refactored the "New Policy" wizard to dynamically render capture fields from the product schema, supporting product-agnostic data entry.

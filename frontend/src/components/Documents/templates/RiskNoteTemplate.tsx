@@ -1,4 +1,7 @@
+import { getSectionLayout } from "@/utils/layoutRegistry"
 import { BaseDocument } from "../BaseDocument"
+import { RiskNoteGridRow } from "./RiskNote/RiskNoteGridRow"
+import { RiskNoteListItem } from "./RiskNote/RiskNoteListItem"
 import { RiskNoteRow } from "./RiskNote/RiskNoteRow"
 import { RiskNoteSection } from "./RiskNote/RiskNoteSection"
 
@@ -20,9 +23,6 @@ export const RiskNoteTemplate = ({
   const details = riskItem.details || {}
 
   // Aggregate fields by "section" metadata in productDetails
-  // Logic:
-  // - If field_type === "static", use field.value
-  // - If field_type === "input", use details[field.key]
   const dynamicSections = productDetails.reduce(
     (acc: Record<string, any[]>, field: any) => {
       let displayValue = null
@@ -35,14 +35,16 @@ export const RiskNoteTemplate = ({
           displayValue = val
         }
       } else if (field.field_type === "optional") {
-        // Future: Handle optional fields that can be toggled
         displayValue = details[field.key] || field.value
       }
 
       if (displayValue !== null && field.show_in_risknote !== false) {
         const sectionName = field.section || "Additional Details"
         if (!acc[sectionName]) acc[sectionName] = []
-        acc[sectionName].push({ label: field.label, value: displayValue })
+        acc[sectionName].push({
+          label: field.label,
+          value: displayValue,
+        })
       }
       return acc
     },
@@ -140,22 +142,61 @@ export const RiskNoteTemplate = ({
         </div>
 
         {/* DYNAMIC SECTIONS FROM FORM_SCHEMA */}
-        {Object.entries(dynamicSections).map(([sectionName, fields]) => (
-          <RiskNoteSection key={sectionName} title={sectionName}>
-            {fields.map((field, idx) => (
-              <RiskNoteRow
-                key={idx}
-                label={field.label}
-                value={
-                  typeof field.value === "number" &&
-                  field.label.toLowerCase().includes("value")
-                    ? formatCurrency(field.value)
-                    : field.value
-                }
+        {Object.entries(dynamicSections).map(([sectionName, fields]) => {
+          const config = getSectionLayout(sectionName, fields.length)
+
+          if (config.layout === "grid-row") {
+            return (
+              <RiskNoteGridRow
+                key={sectionName}
+                label={sectionName}
+                fields={fields.map((f) => ({
+                  label: f.label,
+                  value:
+                    typeof f.value === "number" &&
+                    f.label.toLowerCase().includes("value")
+                      ? formatCurrency(f.value)
+                      : f.value,
+                }))}
               />
-            ))}
-          </RiskNoteSection>
-        ))}
+            )
+          }
+
+          const isGridSection = config.layout === "list-item" && fields.length > 4
+
+          return (
+            <RiskNoteSection key={sectionName} title={sectionName}>
+              <div className={isGridSection ? "grid grid-cols-2" : ""}>
+                {fields.map((field, idx) =>
+                  config.layout === "list-item" ? (
+                    <RiskNoteListItem
+                      key={idx}
+                      label={field.label}
+                      value={field.value}
+                      noBorderRight={isGridSection && idx % 2 === 0}
+                      showLabel={
+                        config.showLabelInList &&
+                        field.value !== "Included" &&
+                        field.value !== "Yes"
+                      }
+                    />
+                  ) : (
+                    <RiskNoteRow
+                      key={idx}
+                      label={field.label}
+                      value={
+                        typeof field.value === "number" &&
+                        field.label.toLowerCase().includes("value")
+                          ? formatCurrency(field.value)
+                          : field.value
+                      }
+                    />
+                  ),
+                )}
+              </div>
+            </RiskNoteSection>
+          )
+        })}
 
         {/* FINANCIAL SUMMARY */}
         <div className="mt-8 border-t-2 border-black pt-4">
