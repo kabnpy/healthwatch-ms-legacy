@@ -178,6 +178,7 @@ class RiskNoteUpdate(SQLModel):
 
 class RiskNotePublic(RiskNoteBase):
     id: uuid.UUID
+    policy: Optional["PolicyPublic"] = None
 
 
 class RiskNote(RiskNoteBase, table=True):

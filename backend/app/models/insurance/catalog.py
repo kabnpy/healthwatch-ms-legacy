@@ -1,5 +1,5 @@
 import uuid
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Optional
 
 from sqlalchemy import JSON
 from sqlmodel import Field, Relationship, SQLModel
@@ -81,6 +81,7 @@ class ProductUpdate(SQLModel):
 
 class ProductPublic(ProductBase):
     id: uuid.UUID
+    insurer: Optional["InsurerPublic"] = None
 
 
 class Product(ProductBase, table=True):

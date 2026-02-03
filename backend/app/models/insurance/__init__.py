@@ -33,6 +33,7 @@ from .financial import (
     InvoiceLineItem,
     InvoiceLineItemBase,
     InvoiceLineItemCreate,
+    InvoiceLineItemPublic,
     InvoicePublic,
     InvoicesPublic,
     InvoiceUpdate,
@@ -116,6 +117,7 @@ __all__ = [
     "InvoiceLineItem",
     "InvoiceLineItemBase",
     "InvoiceLineItemCreate",
+    "InvoiceLineItemPublic",
     "InvoicePublic",
     "InvoicesPublic",
     "InvoiceUpdate",
@@ -165,3 +167,10 @@ __all__ = [
     "RiskNoteUpdate",
     "RiskNotesPublic",
 ]
+
+# Rebuild models to resolve forward references for OpenAPI generation
+ProductPublic.model_rebuild()
+PolicyPublic.model_rebuild()
+RiskNotePublic.model_rebuild()
+InvoiceLineItemPublic.model_rebuild()
+InvoicePublic.model_rebuild()

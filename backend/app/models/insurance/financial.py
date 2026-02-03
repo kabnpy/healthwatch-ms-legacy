@@ -1,12 +1,12 @@
 import uuid
 from datetime import date
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
     from .client import Client
-    from .policy import RiskNote
+    from .policy import RiskNote, RiskNotePublic
 
 # ==========================================
 # Invoice Models (Pending Payment)
@@ -135,8 +135,14 @@ class ReceiptAllocationsPublic(SQLModel):
 # ==========================================
 
 
+class InvoiceLineItemPublic(InvoiceLineItemBase):
+    id: uuid.UUID
+    risk_note: Optional["RiskNotePublic"] = None
+
+
 class InvoicePublic(InvoiceBase):
     id: uuid.UUID
+    line_items: list[InvoiceLineItemPublic] = []
     allocations: list[ReceiptAllocationBase] = []
 
 
