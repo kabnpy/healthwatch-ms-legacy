@@ -911,6 +911,54 @@ export const InvoiceCreateSchema = {
     title: 'InvoiceCreate'
 } as const;
 
+export const InvoiceLineItemPublicSchema = {
+    properties: {
+        invoice_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Invoice Id'
+        },
+        risk_note_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Risk Note Id'
+        },
+        amount: {
+            type: 'number',
+            title: 'Amount'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        risk_note: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/RiskNotePublic'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        }
+    },
+    type: 'object',
+    required: ['invoice_id', 'risk_note_id', 'amount', 'id'],
+    title: 'InvoiceLineItemPublic'
+} as const;
+
 export const InvoicePublicSchema = {
     properties: {
         invoice_number: {
@@ -969,6 +1017,14 @@ export const InvoicePublicSchema = {
             type: 'string',
             format: 'uuid',
             title: 'Id'
+        },
+        line_items: {
+            items: {
+                '$ref': '#/components/schemas/InvoiceLineItemPublic'
+            },
+            type: 'array',
+            title: 'Line Items',
+            default: []
         },
         allocations: {
             items: {
@@ -1324,12 +1380,6 @@ export const PolicyUpdateSchema = {
     title: 'PolicyUpdate'
 } as const;
 
-export const PricingStrategySchema = {
-    type: 'string',
-    enum: ['Percentage', 'FixedTiered', 'Manual'],
-    title: 'PricingStrategy'
-} as const;
-
 export const PrivateUserCreateSchema = {
     properties: {
         email: {
@@ -1370,34 +1420,13 @@ export const ProductCreateSchema = {
             type: 'string',
             title: 'Class Of Insurance'
         },
-        pricing_strategy: {
-            '$ref': '#/components/schemas/PricingStrategy',
-            default: 'Percentage'
-        },
-        pricing_rules: {
-            additionalProperties: true,
-            type: 'object',
-            title: 'Pricing Rules'
-        },
-        form_schema: {
+        product_details: {
             items: {
                 additionalProperties: true,
                 type: 'object'
             },
             type: 'array',
-            title: 'Form Schema'
-        },
-        default_benefits: {
-            additionalProperties: true,
-            type: 'object',
-            title: 'Default Benefits'
-        },
-        default_clauses: {
-            items: {
-                type: 'string'
-            },
-            type: 'array',
-            title: 'Default Clauses'
+            title: 'Product Details'
         },
         default_commission_rate: {
             type: 'number',
@@ -1425,34 +1454,13 @@ export const ProductPublicSchema = {
             type: 'string',
             title: 'Class Of Insurance'
         },
-        pricing_strategy: {
-            '$ref': '#/components/schemas/PricingStrategy',
-            default: 'Percentage'
-        },
-        pricing_rules: {
-            additionalProperties: true,
-            type: 'object',
-            title: 'Pricing Rules'
-        },
-        form_schema: {
+        product_details: {
             items: {
                 additionalProperties: true,
                 type: 'object'
             },
             type: 'array',
-            title: 'Form Schema'
-        },
-        default_benefits: {
-            additionalProperties: true,
-            type: 'object',
-            title: 'Default Benefits'
-        },
-        default_clauses: {
-            items: {
-                type: 'string'
-            },
-            type: 'array',
-            title: 'Default Clauses'
+            title: 'Product Details'
         },
         default_commission_rate: {
             type: 'number',
@@ -1463,6 +1471,16 @@ export const ProductPublicSchema = {
             type: 'string',
             format: 'uuid',
             title: 'Id'
+        },
+        insurer: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/InsurerPublic'
+                },
+                {
+                    type: 'null'
+                }
+            ]
         }
     },
     type: 'object',
@@ -1506,29 +1524,7 @@ export const ProductUpdateSchema = {
             ],
             title: 'Class Of Insurance'
         },
-        pricing_strategy: {
-            anyOf: [
-                {
-                    '$ref': '#/components/schemas/PricingStrategy'
-                },
-                {
-                    type: 'null'
-                }
-            ]
-        },
-        pricing_rules: {
-            anyOf: [
-                {
-                    additionalProperties: true,
-                    type: 'object'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Pricing Rules'
-        },
-        form_schema: {
+        product_details: {
             anyOf: [
                 {
                     items: {
@@ -1541,33 +1537,7 @@ export const ProductUpdateSchema = {
                     type: 'null'
                 }
             ],
-            title: 'Form Schema'
-        },
-        default_benefits: {
-            anyOf: [
-                {
-                    additionalProperties: true,
-                    type: 'object'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Default Benefits'
-        },
-        default_clauses: {
-            anyOf: [
-                {
-                    items: {
-                        type: 'string'
-                    },
-                    type: 'array'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Default Clauses'
+            title: 'Product Details'
         },
         default_commission_rate: {
             anyOf: [
@@ -1999,6 +1969,11 @@ export const RiskNoteCreateSchema = {
             type: 'string',
             title: 'Transaction Type'
         },
+        status: {
+            type: 'string',
+            title: 'Status',
+            default: 'Draft'
+        },
         previous_risk_note_id: {
             anyOf: [
                 {
@@ -2095,6 +2070,11 @@ export const RiskNotePublicSchema = {
             type: 'string',
             title: 'Transaction Type'
         },
+        status: {
+            type: 'string',
+            title: 'Status',
+            default: 'Draft'
+        },
         previous_risk_note_id: {
             anyOf: [
                 {
@@ -2178,6 +2158,16 @@ export const RiskNotePublicSchema = {
             type: 'string',
             format: 'uuid',
             title: 'Id'
+        },
+        policy: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/PolicyPublic'
+                },
+                {
+                    type: 'null'
+                }
+            ]
         }
     },
     type: 'object',
@@ -2197,6 +2187,17 @@ export const RiskNoteUpdateSchema = {
                 }
             ],
             title: 'Transaction Type'
+        },
+        status: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Status'
         },
         previous_risk_note_id: {
             anyOf: [

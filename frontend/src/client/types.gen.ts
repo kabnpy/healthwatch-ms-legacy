@@ -177,6 +177,15 @@ export type InvoiceCreate = {
     notes?: (string | null);
 };
 
+export type InvoiceLineItemPublic = {
+    invoice_id: string;
+    risk_note_id: string;
+    amount: number;
+    description?: (string | null);
+    id: string;
+    risk_note?: (RiskNotePublic | null);
+};
+
 export type InvoicePublic = {
     invoice_number: string;
     client_id: string;
@@ -187,6 +196,7 @@ export type InvoicePublic = {
     balance_due?: number;
     notes?: (string | null);
     id: string;
+    line_items?: Array<InvoiceLineItemPublic>;
     allocations?: Array<ReceiptAllocationBase>;
 };
 
@@ -258,8 +268,6 @@ export type PolicyUpdate = {
     status?: (string | null);
 };
 
-export type PricingStrategy = 'Percentage' | 'FixedTiered' | 'Manual';
-
 export type PrivateUserCreate = {
     email: string;
     password: string;
@@ -271,17 +279,9 @@ export type ProductCreate = {
     insurer_id: string;
     name: string;
     class_of_insurance: string;
-    pricing_strategy?: PricingStrategy;
-    pricing_rules?: {
-        [key: string]: unknown;
-    };
-    form_schema?: Array<{
+    product_details?: Array<{
         [key: string]: unknown;
     }>;
-    default_benefits?: {
-        [key: string]: unknown;
-    };
-    default_clauses?: Array<(string)>;
     default_commission_rate?: number;
 };
 
@@ -294,6 +294,7 @@ export type ProductPublic = {
     }>;
     default_commission_rate?: number;
     id: string;
+    insurer?: (InsurerPublic | null);
 };
 
 export type ProductsPublic = {
@@ -305,17 +306,9 @@ export type ProductUpdate = {
     insurer_id?: (string | null);
     name?: (string | null);
     class_of_insurance?: (string | null);
-    pricing_strategy?: (PricingStrategy | null);
-    pricing_rules?: ({
-    [key: string]: unknown;
-} | null);
-    form_schema?: (Array<{
+    product_details?: (Array<{
     [key: string]: unknown;
 }> | null);
-    default_benefits?: ({
-    [key: string]: unknown;
-} | null);
-    default_clauses?: (Array<(string)> | null);
     default_commission_rate?: (number | null);
 };
 
@@ -449,6 +442,7 @@ export type RiskNotePublic = {
     };
     special_clauses?: Array<(string)>;
     id: string;
+    policy?: (PolicyPublic | null);
 };
 
 export type RiskNotesPublic = {
@@ -458,6 +452,7 @@ export type RiskNotesPublic = {
 
 export type RiskNoteUpdate = {
     transaction_type?: (string | null);
+    status?: (string | null);
     previous_risk_note_id?: (string | null);
     invoice_number?: (string | null);
     payment_status?: (string | null);

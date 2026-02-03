@@ -162,7 +162,8 @@ export const RiskNoteTemplate = ({
             )
           }
 
-          const isGridSection = config.layout === "list-item" && fields.length > 4
+          const isGridSection =
+            config.layout === "list-item" && fields.length > 4
 
           return (
             <RiskNoteSection key={sectionName} title={sectionName}>

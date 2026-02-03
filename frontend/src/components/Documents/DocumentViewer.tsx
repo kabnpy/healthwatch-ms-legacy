@@ -119,7 +119,7 @@ function InvoiceLoader({ id }: { id: string }) {
     <InvoiceTemplate
       invoice={invoice}
       client={client}
-      lineItems={(invoice as any).line_items || []}
+      lineItems={invoice.line_items || []}
     />
   )
 }
