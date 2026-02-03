@@ -4,15 +4,18 @@ from typing import Any, cast
 from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
 
+from app.models.insurance.catalog import Product
 from app.models.insurance.financial import (
     Invoice,
     InvoiceCreate,
+    InvoiceLineItem,
     InvoiceUpdate,
     Receipt,
     ReceiptAllocation,
     ReceiptAllocationCreate,
     ReceiptCreate,
 )
+from app.models.insurance.policy import Policy, RiskNote
 
 # ==========================================
 # Invoice CRUD
@@ -31,7 +34,14 @@ def get_invoice(session: Session, *, id: uuid.UUID) -> Invoice | None:
     statement = (
         select(Invoice)
         .where(Invoice.id == id)
-        .options(selectinload(cast(Any, Invoice.allocations)))
+        .options(
+            selectinload(cast(Any, Invoice.allocations)),
+            selectinload(cast(Any, Invoice.line_items))
+            .joinedload(cast(Any, InvoiceLineItem.risk_note))
+            .joinedload(cast(Any, RiskNote.policy))
+            .joinedload(cast(Any, Policy.product))
+            .joinedload(cast(Any, Product.insurer)),
+        )
     )
     return session.exec(statement).first()
 
@@ -43,7 +53,14 @@ def get_invoices(
     limit: int = 100,
     client_id: uuid.UUID | None = None,
 ) -> list[Invoice]:
-    statement = select(Invoice).options(selectinload(cast(Any, Invoice.allocations)))
+    statement = select(Invoice).options(
+        selectinload(cast(Any, Invoice.allocations)),
+        selectinload(cast(Any, Invoice.line_items))
+        .joinedload(cast(Any, InvoiceLineItem.risk_note))
+        .joinedload(cast(Any, RiskNote.policy))
+        .joinedload(cast(Any, Policy.product))
+        .joinedload(cast(Any, Product.insurer)),
+    )
     if client_id:
         statement = statement.where(Invoice.client_id == client_id)
     statement = statement.offset(skip).limit(limit)

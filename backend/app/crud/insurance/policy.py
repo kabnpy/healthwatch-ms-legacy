@@ -36,7 +36,7 @@ def create_policy(*, session: Session, policy_in: PolicyCreate) -> Policy:
 
     # Automatically create the first Risk Note for the new policy
     from datetime import date, timedelta
-    
+
     first_risk_note_in = RiskNoteCreate(
         policy_id=db_obj.id,
         transaction_type="New Business",
@@ -48,10 +48,10 @@ def create_policy(*, session: Session, policy_in: PolicyCreate) -> Policy:
         commission_amount=0.0,
         total_amount=0.0,
         items_snapshot={},
-        special_clauses=[]
+        special_clauses=[],
     )
     create_risk_note(session=session, risk_note_in=first_risk_note_in)
-    
+
     return db_obj
 
 
@@ -108,7 +108,7 @@ def create_risk_item(*, session: Session, risk_item_in: RiskItemCreate) -> RiskI
 
 
 def get_risk_item_by_identifier(
-    session: Session, *, identifier: str
+    _session: Session, *, _identifier: str
 ) -> RiskItem | None:
     # In temporal items, identifier might be in risk_details
     # For now, we search by description or similar if needed,

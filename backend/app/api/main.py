@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from app.api.routes import (
     claims,
     clients,
+    documents,
     financials,
     insurers,
     items,
@@ -13,7 +14,6 @@ from app.api.routes import (
     risk_notes,
     users,
     utils,
-    documents,
 )
 from app.core.config import settings
 
