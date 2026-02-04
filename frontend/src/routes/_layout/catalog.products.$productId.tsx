@@ -133,6 +133,7 @@ function ProductDetailContent({ productId }: { productId: string }) {
                             initialData={product}
                             isLoading={mutation.isPending}
                             onCancel={() => methods.reset()}
+                            useContext={true}
                         />
                     </div>
                 </TabsContent>

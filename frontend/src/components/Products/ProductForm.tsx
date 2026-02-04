@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
+import { useForm, useFormContext } from "react-hook-form"
 import { z } from "zod"
 import type { ProductCreate, ProductPublic, ProductUpdate } from "@/client"
 import { Button } from "@/components/ui/button"
@@ -40,6 +40,7 @@ interface ProductFormProps {
   isLoading?: boolean
   submitLabel?: string
   fixedInsurerId?: string
+  useContext?: boolean
 }
 
 export const ProductForm = ({
@@ -49,11 +50,15 @@ export const ProductForm = ({
   isLoading,
   submitLabel = "Save Product",
   fixedInsurerId,
+  useContext = false,
 }: ProductFormProps) => {
   const { data: insurersData } = useInsurers()
   const insurers = insurersData?.data || []
 
-  const form = useForm<FormData>({
+  // If useContext is true, we expect to be wrapped in a FormProvider
+  const context = useFormContext<FormData>()
+  
+  const localForm = useForm<FormData>({
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
       insurer_id: fixedInsurerId || initialData?.insurer_id || "",
@@ -64,120 +69,127 @@ export const ProductForm = ({
     },
   })
 
+  const form = useContext && context ? context : localForm
+
   const handleFormSubmit = (data: FormData) => {
     onSubmit(data as any)
   }
 
-  return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(handleFormSubmit as any)}
-        className="space-y-4"
-      >
-        {!fixedInsurerId && (
-          <FormField
-            control={form.control}
-            name="insurer_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Insurer</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  disabled={!!initialData}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select insurance carrier" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {insurers.map((insurer) => (
-                      <SelectItem key={insurer.id} value={insurer.id}>
-                        {insurer.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-
+  const content = (
+    <form
+      onSubmit={form.handleSubmit(handleFormSubmit as any)}
+      className="space-y-4"
+    >
+      {!fixedInsurerId && (
         <FormField
           control={form.control}
-          name="name"
+          name="insurer_id"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Product Name</FormLabel>
-              <FormControl>
-                <Input placeholder="e.g. Motor Comprehensive - Gold" {...field} />
-              </FormControl>
-              <FormDescription>
-                The public name of the insurance product.
-              </FormDescription>
+              <FormLabel>Insurer</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                disabled={!!initialData}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select insurance carrier" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {insurers.map((insurer) => (
+                    <SelectItem key={insurer.id} value={insurer.id}>
+                      {insurer.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
         />
+      )}
 
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="class_of_insurance"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Class of Insurance</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select class" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="Motor Private">Motor Private</SelectItem>
-                    <SelectItem value="Motor Commercial">Motor Commercial</SelectItem>
-                    <SelectItem value="Fire">Fire</SelectItem>
-                    <SelectItem value="Domestic Package">Domestic Package</SelectItem>
-                    <SelectItem value="Personal Accident">Personal Accident</SelectItem>
-                    <SelectItem value="Marine">Marine</SelectItem>
-                    <SelectItem value="Medical">Medical</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="default_commission_rate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Default Commission %</FormLabel>
+      <FormField
+        control={form.control}
+        name="name"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Product Name</FormLabel>
+            <FormControl>
+              <Input placeholder="e.g. Motor Comprehensive - Gold" {...field} />
+            </FormControl>
+            <FormDescription>
+              The public name of the insurance product.
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <div className="grid grid-cols-2 gap-4">
+        <FormField
+          control={form.control}
+          name="class_of_insurance"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Class of Insurance</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+              >
                 <FormControl>
-                  <Input type="number" step="0.01" {...field} />
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select class" />
+                  </SelectTrigger>
                 </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="flex justify-end gap-4 pt-4">
-          {onCancel && (
-            <Button type="button" variant="outline" onClick={onCancel}>
-              Cancel
-            </Button>
+                <SelectContent>
+                  <SelectItem value="Motor Private">Motor Private</SelectItem>
+                  <SelectItem value="Motor Commercial">Motor Commercial</SelectItem>
+                  <SelectItem value="Fire">Fire</SelectItem>
+                  <SelectItem value="Domestic Package">Domestic Package</SelectItem>
+                  <SelectItem value="Personal Accident">Personal Accident</SelectItem>
+                  <SelectItem value="Marine">Marine</SelectItem>
+                  <SelectItem value="Medical">Medical</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
           )}
-          <LoadingButton type="submit" loading={isLoading}>
-            {submitLabel}
-          </LoadingButton>
-        </div>
-      </form>
-    </Form>
+        />
+        <FormField
+          control={form.control}
+          name="default_commission_rate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Default Commission %</FormLabel>
+              <FormControl>
+                <Input type="number" step="0.01" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      <div className="flex justify-end gap-4 pt-4">
+        {onCancel && (
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+        )}
+        <LoadingButton type="submit" loading={isLoading}>
+          {submitLabel}
+        </LoadingButton>
+      </div>
+    </form>
   )
+
+  // Only wrap in <Form> if we are NOT using external context
+  if (useContext && context) {
+    return content
+  }
+
+  return <Form {...form}>{content}</Form>
 }

@@ -58,8 +58,8 @@ export const SchemaBuilder = () => {
 
       <div className="space-y-4">
         {fields.map((field, index) => (
-          <Card key={field.id} className="relative group overflow-hidden border-l-4 border-l-primary/20 hover:border-l-primary transition-colors">
-            <CardContent className="p-4">
+          <Card key={field.id} className="relative group overflow-hidden border-l-4 border-l-primary/20 hover:border-l-primary transition-colors bg-white shadow-sm">
+            <CardContent className="p-6">
               <div className="flex items-start gap-4">
                 <div className="mt-2 text-muted-foreground/30 cursor-grab active:cursor-grabbing">
                   <GripVertical className="h-5 w-5" />
@@ -159,8 +159,8 @@ export const SchemaBuilder = () => {
                     />
                   </div>
 
-                  {/* Row 3: Flags */}
-                  <div className="flex items-center gap-6 pt-2">
+                  {/* Row 3: Flags and Options */}
+                  <div className="flex flex-wrap items-center gap-x-8 gap-y-4 pt-2">
                     <FormField
                       control={control}
                       name={`product_details.${index}.required`}
@@ -169,7 +169,7 @@ export const SchemaBuilder = () => {
                           <FormControl>
                             <Switch checked={field.value} onCheckedChange={field.onChange} />
                           </FormControl>
-                          <FormLabel className="text-xs font-medium">Required</FormLabel>
+                          <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">Required</FormLabel>
                         </FormItem>
                       )}
                     />
@@ -181,7 +181,7 @@ export const SchemaBuilder = () => {
                           <FormControl>
                             <Switch checked={field.value} onCheckedChange={field.onChange} />
                           </FormControl>
-                          <FormLabel className="text-xs font-medium flex items-center gap-1">
+                          <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70 flex items-center gap-1">
                             <ShieldCheck className="h-3 w-3 text-primary" />
                             Show in Risk Note
                           </FormLabel>
