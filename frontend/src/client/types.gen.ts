@@ -279,19 +279,32 @@ export type ProductCreate = {
     insurer_id: string;
     name: string;
     class_of_insurance: string;
-    product_details?: Array<{
-        [key: string]: unknown;
-    }>;
+    product_details?: Array<ProductDetailItem>;
     default_commission_rate?: number;
+};
+
+export type ProductDetailItem = {
+    key: string;
+    label: string;
+    section: string;
+    field_type: string;
+    input_type?: (string | null);
+    value?: (unknown | null);
+    pricing?: (ProductPricing | null);
+    show_in_risknote?: boolean;
+    required?: boolean;
+};
+
+export type ProductPricing = {
+    type: string;
+    value: number;
 };
 
 export type ProductPublic = {
     insurer_id: string;
     name: string;
     class_of_insurance: string;
-    product_details?: Array<{
-        [key: string]: unknown;
-    }>;
+    product_details?: Array<ProductDetailItem>;
     default_commission_rate?: number;
     id: string;
     insurer?: (InsurerPublic | null);
@@ -306,9 +319,7 @@ export type ProductUpdate = {
     insurer_id?: (string | null);
     name?: (string | null);
     class_of_insurance?: (string | null);
-    product_details?: (Array<{
-    [key: string]: unknown;
-}> | null);
+    product_details?: (Array<ProductDetailItem> | null);
     default_commission_rate?: (number | null);
 };
 

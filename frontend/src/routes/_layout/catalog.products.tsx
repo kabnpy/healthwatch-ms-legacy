@@ -1,0 +1,69 @@
+import { useSuspenseQuery } from "@tanstack/react-query"
+import { createFileRoute } from "@tanstack/react-router"
+import { Search } from "lucide-react"
+import { Suspense } from "react"
+
+import { ProductsService } from "@/client"
+import { DataTable } from "@/components/Common/DataTable"
+import { AddProduct } from "@/components/Products/AddProduct"
+import { columns } from "@/components/Products/columns"
+import PendingItems from "@/components/Pending/PendingItems"
+
+function getProductsQueryOptions() {
+  return {
+    queryFn: () => ProductsService.readProducts({ skip: 0, limit: 100 }),
+    queryKey: ["products"],
+  }
+}
+
+export const Route = createFileRoute("/_layout/catalog/products")({
+  component: Products,
+  head: () => ({
+    meta: [
+      {
+        title: "Products - Catalog",
+      },
+    ],
+  }),
+})
+
+function ProductsTableContent() {
+  const { data: products } = useSuspenseQuery(getProductsQueryOptions())
+
+  if (products.data.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center text-center py-12">
+        <div className="rounded-full bg-muted p-4 mb-4">
+          <Search className="h-8 w-8 text-muted-foreground" />
+        </div>
+        <h3 className="text-lg font-semibold">No products found</h3>
+        <p className="text-muted-foreground">Define a new insurance product to get started</p>
+      </div>
+    )
+  }
+
+  return <DataTable columns={columns} data={products.data} />
+}
+
+function ProductsTable() {
+  return (
+    <Suspense fallback={<PendingItems />}>
+      <ProductsTableContent />
+    </Suspense>
+  )
+}
+
+function Products() {
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-bold tracking-tight">Insurance Products</h2>
+          <p className="text-sm text-muted-foreground">Master list of all products across all carriers.</p>
+        </div>
+        <AddProduct />
+      </div>
+      <ProductsTable />
+    </div>
+  )
+}

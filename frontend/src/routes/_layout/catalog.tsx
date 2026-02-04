@@ -1,0 +1,49 @@
+import {
+  createFileRoute,
+  Link,
+  Outlet,
+  useLocation,
+} from "@tanstack/react-router"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+
+export const Route = createFileRoute("/_layout/catalog")({
+  component: CatalogLayout,
+})
+
+function CatalogLayout() {
+  const location = useLocation()
+  
+  // Determine active tab based on path
+  const activeTab = location.pathname.split("/").pop() || "insurers"
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Catalog</h1>
+          <p className="text-muted-foreground">
+            Manage insurance carriers and their products.
+          </p>
+        </div>
+      </div>
+
+      <Tabs value={activeTab} className="w-full">
+        <TabsList>
+          <TabsTrigger value="insurers" asChild>
+            <Link to="/catalog/insurers">
+              Insurers
+            </Link>
+          </TabsTrigger>
+          <TabsTrigger value="products" asChild>
+            <Link to="/catalog/products">
+              Products
+            </Link>
+          </TabsTrigger>
+        </TabsList>
+        <div className="mt-4">
+          <Outlet />
+        </div>
+      </Tabs>
+    </div>
+  )
+}

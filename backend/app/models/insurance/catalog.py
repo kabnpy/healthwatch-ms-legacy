@@ -16,6 +16,23 @@ class PricingStrategy(str, Enum):
     MANUAL = "Manual"
 
 
+class ProductPricing(SQLModel):
+    type: str  # "percentage" | "fixed"
+    value: float
+
+
+class ProductDetailItem(SQLModel):
+    key: str
+    label: str
+    section: str
+    field_type: str  # "static" | "input" | "optional"
+    input_type: str | None = "text"  # "text" | "number" | "date" | "select" | "boolean"
+    value: Any | None = None
+    pricing: ProductPricing | None = None
+    show_in_risknote: bool = True
+    required: bool = False
+
+
 # ==========================================
 # Insurer Models
 # ==========================================
@@ -61,7 +78,7 @@ class ProductBase(SQLModel):
     name: str
     class_of_insurance: str  # "Motor Private", "Fire"
 
-    product_details: list[dict[str, Any]] = Field(default_factory=list, sa_type=JSON)
+    product_details: list[ProductDetailItem] = Field(default_factory=list, sa_type=JSON)
 
     # Defaults to pre-fill the form
     default_commission_rate: float = 10.0
@@ -75,7 +92,7 @@ class ProductUpdate(SQLModel):
     insurer_id: uuid.UUID | None = None
     name: str | None = None
     class_of_insurance: str | None = None
-    product_details: list[dict[str, Any]] | None = None
+    product_details: list[ProductDetailItem] | None = None
     default_commission_rate: float | None = None
 
 
@@ -94,3 +111,8 @@ class Product(ProductBase, table=True):
 class ProductsPublic(SQLModel):
     data: list[ProductPublic]
     count: int
+
+
+ProductPricing.model_rebuild()
+ProductDetailItem.model_rebuild()
+ProductPublic.model_rebuild()

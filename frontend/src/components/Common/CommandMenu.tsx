@@ -2,6 +2,7 @@ import { useNavigate } from "@tanstack/react-router"
 import {
   CreditCard,
   FileText,
+  Library,
   Receipt as ReceiptIcon,
   Search,
   Settings,
@@ -170,6 +171,18 @@ export function CommandMenu() {
             >
               <Users className="mr-2 h-4 w-4" />
               <span>Browse All Clients</span>
+            </CommandItem>
+            <CommandItem
+              onSelect={() => runCommand(() => navigate({ to: "/catalog/products" }))}
+            >
+              <Shield className="mr-2 h-4 w-4" />
+              <span>Product Catalog</span>
+            </CommandItem>
+            <CommandItem
+              onSelect={() => runCommand(() => navigate({ to: "/catalog/insurers" }))}
+            >
+              <Library className="mr-2 h-4 w-4" />
+              <span>Insurance Carriers</span>
             </CommandItem>
             <CommandItem
               onSelect={() => runCommand(() => navigate({ to: "/items" }))}

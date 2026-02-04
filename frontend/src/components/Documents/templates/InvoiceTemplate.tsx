@@ -68,7 +68,7 @@ export const InvoiceTemplate = ({
                   PIN: {client.kra_pin || "N/A"}
                 </p>
                 <p className="text-[10px] text-gray-500 font-normal">
-                  {client.postal_address} {client.city || "Nairobi"}
+                  {client.postal_address} {(client as any).city || "Nairobi"}
                 </p>
               </div>
             }

@@ -42,7 +42,7 @@ class PolicyPublic(PolicyBase):
     product: ProductPublic | None = None
     items: list["RiskItemPublic"] = []
 
-    @computed_field
+    @computed_field  # type: ignore
     @property
     def display_name(self) -> str:
         if self.product:

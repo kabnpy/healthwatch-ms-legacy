@@ -1422,8 +1422,7 @@ export const ProductCreateSchema = {
         },
         product_details: {
             items: {
-                additionalProperties: true,
-                type: 'object'
+                '$ref': '#/components/schemas/ProductDetailItem'
             },
             type: 'array',
             title: 'Product Details'
@@ -1437,6 +1436,87 @@ export const ProductCreateSchema = {
     type: 'object',
     required: ['insurer_id', 'name', 'class_of_insurance'],
     title: 'ProductCreate'
+} as const;
+
+export const ProductDetailItemSchema = {
+    properties: {
+        key: {
+            type: 'string',
+            title: 'Key'
+        },
+        label: {
+            type: 'string',
+            title: 'Label'
+        },
+        section: {
+            type: 'string',
+            title: 'Section'
+        },
+        field_type: {
+            type: 'string',
+            title: 'Field Type'
+        },
+        input_type: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Input Type',
+            default: 'text'
+        },
+        value: {
+            anyOf: [
+                {},
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Value'
+        },
+        pricing: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/ProductPricing'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        show_in_risknote: {
+            type: 'boolean',
+            title: 'Show In Risknote',
+            default: true
+        },
+        required: {
+            type: 'boolean',
+            title: 'Required',
+            default: false
+        }
+    },
+    type: 'object',
+    required: ['key', 'label', 'section', 'field_type'],
+    title: 'ProductDetailItem'
+} as const;
+
+export const ProductPricingSchema = {
+    properties: {
+        type: {
+            type: 'string',
+            title: 'Type'
+        },
+        value: {
+            type: 'number',
+            title: 'Value'
+        }
+    },
+    type: 'object',
+    required: ['type', 'value'],
+    title: 'ProductPricing'
 } as const;
 
 export const ProductPublicSchema = {
@@ -1456,8 +1536,7 @@ export const ProductPublicSchema = {
         },
         product_details: {
             items: {
-                additionalProperties: true,
-                type: 'object'
+                '$ref': '#/components/schemas/ProductDetailItem'
             },
             type: 'array',
             title: 'Product Details'
@@ -1528,8 +1607,7 @@ export const ProductUpdateSchema = {
             anyOf: [
                 {
                     items: {
-                        additionalProperties: true,
-                        type: 'object'
+                        '$ref': '#/components/schemas/ProductDetailItem'
                     },
                     type: 'array'
                 },
