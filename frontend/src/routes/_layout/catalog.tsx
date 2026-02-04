@@ -14,7 +14,8 @@ function CatalogLayout() {
   const location = useLocation()
   
   // Determine active tab based on path
-  const activeTab = location.pathname.split("/").pop() || "insurers"
+  const isProducts = location.pathname.includes("/catalog/products")
+  const activeTab = isProducts ? "products" : "insurers"
 
   return (
     <div className="flex flex-col gap-6">

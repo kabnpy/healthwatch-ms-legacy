@@ -20,12 +20,13 @@ import { Route as LayoutItemsRouteImport } from './routes/_layout/items'
 import { Route as LayoutCatalogRouteImport } from './routes/_layout/catalog'
 import { Route as LayoutAdminRouteImport } from './routes/_layout/admin'
 import { Route as LayoutClientsIndexRouteImport } from './routes/_layout/clients.index'
+import { Route as LayoutCatalogIndexRouteImport } from './routes/_layout/catalog.index'
 import { Route as PrintRiskNotesIdRouteImport } from './routes/print/risk-notes.$id'
 import { Route as LayoutPoliciesPolicyIdRouteImport } from './routes/_layout/policies.$policyId'
 import { Route as LayoutClientsClientIdRouteImport } from './routes/_layout/clients.$clientId'
-import { Route as LayoutCatalogProductsRouteImport } from './routes/_layout/catalog.products'
-import { Route as LayoutCatalogInsurersRouteImport } from './routes/_layout/catalog.insurers'
 import { Route as LayoutClientsClientIdIndexRouteImport } from './routes/_layout/clients.$clientId.index'
+import { Route as LayoutCatalogProductsIndexRouteImport } from './routes/_layout/catalog.products.index'
+import { Route as LayoutCatalogInsurersIndexRouteImport } from './routes/_layout/catalog.insurers.index'
 import { Route as LayoutClientsClientIdSettingsRouteImport } from './routes/_layout/clients.$clientId.settings'
 import { Route as LayoutClientsClientIdPoliciesRouteImport } from './routes/_layout/clients.$clientId.policies'
 import { Route as LayoutClientsClientIdOverviewRouteImport } from './routes/_layout/clients.$clientId.overview'
@@ -88,6 +89,11 @@ const LayoutClientsIndexRoute = LayoutClientsIndexRouteImport.update({
   path: '/clients/',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutCatalogIndexRoute = LayoutCatalogIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => LayoutCatalogRoute,
+} as any)
 const PrintRiskNotesIdRoute = PrintRiskNotesIdRouteImport.update({
   id: '/print/risk-notes/$id',
   path: '/print/risk-notes/$id',
@@ -103,21 +109,23 @@ const LayoutClientsClientIdRoute = LayoutClientsClientIdRouteImport.update({
   path: '/clients/$clientId',
   getParentRoute: () => LayoutRoute,
 } as any)
-const LayoutCatalogProductsRoute = LayoutCatalogProductsRouteImport.update({
-  id: '/products',
-  path: '/products',
-  getParentRoute: () => LayoutCatalogRoute,
-} as any)
-const LayoutCatalogInsurersRoute = LayoutCatalogInsurersRouteImport.update({
-  id: '/insurers',
-  path: '/insurers',
-  getParentRoute: () => LayoutCatalogRoute,
-} as any)
 const LayoutClientsClientIdIndexRoute =
   LayoutClientsClientIdIndexRouteImport.update({
     id: '/',
     path: '/',
     getParentRoute: () => LayoutClientsClientIdRoute,
+  } as any)
+const LayoutCatalogProductsIndexRoute =
+  LayoutCatalogProductsIndexRouteImport.update({
+    id: '/products/',
+    path: '/products/',
+    getParentRoute: () => LayoutCatalogRoute,
+  } as any)
+const LayoutCatalogInsurersIndexRoute =
+  LayoutCatalogInsurersIndexRouteImport.update({
+    id: '/insurers/',
+    path: '/insurers/',
+    getParentRoute: () => LayoutCatalogRoute,
   } as any)
 const LayoutClientsClientIdSettingsRoute =
   LayoutClientsClientIdSettingsRouteImport.update({
@@ -151,15 +159,15 @@ const LayoutClientsClientIdDocumentsRoute =
   } as any)
 const LayoutCatalogProductsProductIdRoute =
   LayoutCatalogProductsProductIdRouteImport.update({
-    id: '/$productId',
-    path: '/$productId',
-    getParentRoute: () => LayoutCatalogProductsRoute,
+    id: '/products/$productId',
+    path: '/products/$productId',
+    getParentRoute: () => LayoutCatalogRoute,
   } as any)
 const LayoutCatalogInsurersInsurerIdRoute =
   LayoutCatalogInsurersInsurerIdRouteImport.update({
-    id: '/$insurerId',
-    path: '/$insurerId',
-    getParentRoute: () => LayoutCatalogInsurersRoute,
+    id: '/insurers/$insurerId',
+    path: '/insurers/$insurerId',
+    getParentRoute: () => LayoutCatalogRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -172,11 +180,10 @@ export interface FileRoutesByFullPath {
   '/catalog': typeof LayoutCatalogRouteWithChildren
   '/items': typeof LayoutItemsRoute
   '/settings': typeof LayoutSettingsRoute
-  '/catalog/insurers': typeof LayoutCatalogInsurersRouteWithChildren
-  '/catalog/products': typeof LayoutCatalogProductsRouteWithChildren
   '/clients/$clientId': typeof LayoutClientsClientIdRouteWithChildren
   '/policies/$policyId': typeof LayoutPoliciesPolicyIdRoute
   '/print/risk-notes/$id': typeof PrintRiskNotesIdRoute
+  '/catalog/': typeof LayoutCatalogIndexRoute
   '/clients/': typeof LayoutClientsIndexRoute
   '/catalog/insurers/$insurerId': typeof LayoutCatalogInsurersInsurerIdRoute
   '/catalog/products/$productId': typeof LayoutCatalogProductsProductIdRoute
@@ -185,6 +192,8 @@ export interface FileRoutesByFullPath {
   '/clients/$clientId/overview': typeof LayoutClientsClientIdOverviewRoute
   '/clients/$clientId/policies': typeof LayoutClientsClientIdPoliciesRoute
   '/clients/$clientId/settings': typeof LayoutClientsClientIdSettingsRoute
+  '/catalog/insurers/': typeof LayoutCatalogInsurersIndexRoute
+  '/catalog/products/': typeof LayoutCatalogProductsIndexRoute
   '/clients/$clientId/': typeof LayoutClientsClientIdIndexRoute
 }
 export interface FileRoutesByTo {
@@ -193,14 +202,12 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/admin': typeof LayoutAdminRoute
-  '/catalog': typeof LayoutCatalogRouteWithChildren
   '/items': typeof LayoutItemsRoute
   '/settings': typeof LayoutSettingsRoute
   '/': typeof LayoutIndexRoute
-  '/catalog/insurers': typeof LayoutCatalogInsurersRouteWithChildren
-  '/catalog/products': typeof LayoutCatalogProductsRouteWithChildren
   '/policies/$policyId': typeof LayoutPoliciesPolicyIdRoute
   '/print/risk-notes/$id': typeof PrintRiskNotesIdRoute
+  '/catalog': typeof LayoutCatalogIndexRoute
   '/clients': typeof LayoutClientsIndexRoute
   '/catalog/insurers/$insurerId': typeof LayoutCatalogInsurersInsurerIdRoute
   '/catalog/products/$productId': typeof LayoutCatalogProductsProductIdRoute
@@ -209,6 +216,8 @@ export interface FileRoutesByTo {
   '/clients/$clientId/overview': typeof LayoutClientsClientIdOverviewRoute
   '/clients/$clientId/policies': typeof LayoutClientsClientIdPoliciesRoute
   '/clients/$clientId/settings': typeof LayoutClientsClientIdSettingsRoute
+  '/catalog/insurers': typeof LayoutCatalogInsurersIndexRoute
+  '/catalog/products': typeof LayoutCatalogProductsIndexRoute
   '/clients/$clientId': typeof LayoutClientsClientIdIndexRoute
 }
 export interface FileRoutesById {
@@ -223,11 +232,10 @@ export interface FileRoutesById {
   '/_layout/items': typeof LayoutItemsRoute
   '/_layout/settings': typeof LayoutSettingsRoute
   '/_layout/': typeof LayoutIndexRoute
-  '/_layout/catalog/insurers': typeof LayoutCatalogInsurersRouteWithChildren
-  '/_layout/catalog/products': typeof LayoutCatalogProductsRouteWithChildren
   '/_layout/clients/$clientId': typeof LayoutClientsClientIdRouteWithChildren
   '/_layout/policies/$policyId': typeof LayoutPoliciesPolicyIdRoute
   '/print/risk-notes/$id': typeof PrintRiskNotesIdRoute
+  '/_layout/catalog/': typeof LayoutCatalogIndexRoute
   '/_layout/clients/': typeof LayoutClientsIndexRoute
   '/_layout/catalog/insurers/$insurerId': typeof LayoutCatalogInsurersInsurerIdRoute
   '/_layout/catalog/products/$productId': typeof LayoutCatalogProductsProductIdRoute
@@ -236,6 +244,8 @@ export interface FileRoutesById {
   '/_layout/clients/$clientId/overview': typeof LayoutClientsClientIdOverviewRoute
   '/_layout/clients/$clientId/policies': typeof LayoutClientsClientIdPoliciesRoute
   '/_layout/clients/$clientId/settings': typeof LayoutClientsClientIdSettingsRoute
+  '/_layout/catalog/insurers/': typeof LayoutCatalogInsurersIndexRoute
+  '/_layout/catalog/products/': typeof LayoutCatalogProductsIndexRoute
   '/_layout/clients/$clientId/': typeof LayoutClientsClientIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -250,11 +260,10 @@ export interface FileRouteTypes {
     | '/catalog'
     | '/items'
     | '/settings'
-    | '/catalog/insurers'
-    | '/catalog/products'
     | '/clients/$clientId'
     | '/policies/$policyId'
     | '/print/risk-notes/$id'
+    | '/catalog/'
     | '/clients/'
     | '/catalog/insurers/$insurerId'
     | '/catalog/products/$productId'
@@ -263,6 +272,8 @@ export interface FileRouteTypes {
     | '/clients/$clientId/overview'
     | '/clients/$clientId/policies'
     | '/clients/$clientId/settings'
+    | '/catalog/insurers/'
+    | '/catalog/products/'
     | '/clients/$clientId/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -271,14 +282,12 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/admin'
-    | '/catalog'
     | '/items'
     | '/settings'
     | '/'
-    | '/catalog/insurers'
-    | '/catalog/products'
     | '/policies/$policyId'
     | '/print/risk-notes/$id'
+    | '/catalog'
     | '/clients'
     | '/catalog/insurers/$insurerId'
     | '/catalog/products/$productId'
@@ -287,6 +296,8 @@ export interface FileRouteTypes {
     | '/clients/$clientId/overview'
     | '/clients/$clientId/policies'
     | '/clients/$clientId/settings'
+    | '/catalog/insurers'
+    | '/catalog/products'
     | '/clients/$clientId'
   id:
     | '__root__'
@@ -300,11 +311,10 @@ export interface FileRouteTypes {
     | '/_layout/items'
     | '/_layout/settings'
     | '/_layout/'
-    | '/_layout/catalog/insurers'
-    | '/_layout/catalog/products'
     | '/_layout/clients/$clientId'
     | '/_layout/policies/$policyId'
     | '/print/risk-notes/$id'
+    | '/_layout/catalog/'
     | '/_layout/clients/'
     | '/_layout/catalog/insurers/$insurerId'
     | '/_layout/catalog/products/$productId'
@@ -313,6 +323,8 @@ export interface FileRouteTypes {
     | '/_layout/clients/$clientId/overview'
     | '/_layout/clients/$clientId/policies'
     | '/_layout/clients/$clientId/settings'
+    | '/_layout/catalog/insurers/'
+    | '/_layout/catalog/products/'
     | '/_layout/clients/$clientId/'
   fileRoutesById: FileRoutesById
 }
@@ -404,6 +416,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutClientsIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/catalog/': {
+      id: '/_layout/catalog/'
+      path: '/'
+      fullPath: '/catalog/'
+      preLoaderRoute: typeof LayoutCatalogIndexRouteImport
+      parentRoute: typeof LayoutCatalogRoute
+    }
     '/print/risk-notes/$id': {
       id: '/print/risk-notes/$id'
       path: '/print/risk-notes/$id'
@@ -425,26 +444,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutClientsClientIdRouteImport
       parentRoute: typeof LayoutRoute
     }
-    '/_layout/catalog/products': {
-      id: '/_layout/catalog/products'
-      path: '/products'
-      fullPath: '/catalog/products'
-      preLoaderRoute: typeof LayoutCatalogProductsRouteImport
-      parentRoute: typeof LayoutCatalogRoute
-    }
-    '/_layout/catalog/insurers': {
-      id: '/_layout/catalog/insurers'
-      path: '/insurers'
-      fullPath: '/catalog/insurers'
-      preLoaderRoute: typeof LayoutCatalogInsurersRouteImport
-      parentRoute: typeof LayoutCatalogRoute
-    }
     '/_layout/clients/$clientId/': {
       id: '/_layout/clients/$clientId/'
       path: '/'
       fullPath: '/clients/$clientId/'
       preLoaderRoute: typeof LayoutClientsClientIdIndexRouteImport
       parentRoute: typeof LayoutClientsClientIdRoute
+    }
+    '/_layout/catalog/products/': {
+      id: '/_layout/catalog/products/'
+      path: '/products'
+      fullPath: '/catalog/products/'
+      preLoaderRoute: typeof LayoutCatalogProductsIndexRouteImport
+      parentRoute: typeof LayoutCatalogRoute
+    }
+    '/_layout/catalog/insurers/': {
+      id: '/_layout/catalog/insurers/'
+      path: '/insurers'
+      fullPath: '/catalog/insurers/'
+      preLoaderRoute: typeof LayoutCatalogInsurersIndexRouteImport
+      parentRoute: typeof LayoutCatalogRoute
     }
     '/_layout/clients/$clientId/settings': {
       id: '/_layout/clients/$clientId/settings'
@@ -483,55 +502,35 @@ declare module '@tanstack/react-router' {
     }
     '/_layout/catalog/products/$productId': {
       id: '/_layout/catalog/products/$productId'
-      path: '/$productId'
+      path: '/products/$productId'
       fullPath: '/catalog/products/$productId'
       preLoaderRoute: typeof LayoutCatalogProductsProductIdRouteImport
-      parentRoute: typeof LayoutCatalogProductsRoute
+      parentRoute: typeof LayoutCatalogRoute
     }
     '/_layout/catalog/insurers/$insurerId': {
       id: '/_layout/catalog/insurers/$insurerId'
-      path: '/$insurerId'
+      path: '/insurers/$insurerId'
       fullPath: '/catalog/insurers/$insurerId'
       preLoaderRoute: typeof LayoutCatalogInsurersInsurerIdRouteImport
-      parentRoute: typeof LayoutCatalogInsurersRoute
+      parentRoute: typeof LayoutCatalogRoute
     }
   }
 }
 
-interface LayoutCatalogInsurersRouteChildren {
-  LayoutCatalogInsurersInsurerIdRoute: typeof LayoutCatalogInsurersInsurerIdRoute
-}
-
-const LayoutCatalogInsurersRouteChildren: LayoutCatalogInsurersRouteChildren = {
-  LayoutCatalogInsurersInsurerIdRoute: LayoutCatalogInsurersInsurerIdRoute,
-}
-
-const LayoutCatalogInsurersRouteWithChildren =
-  LayoutCatalogInsurersRoute._addFileChildren(
-    LayoutCatalogInsurersRouteChildren,
-  )
-
-interface LayoutCatalogProductsRouteChildren {
-  LayoutCatalogProductsProductIdRoute: typeof LayoutCatalogProductsProductIdRoute
-}
-
-const LayoutCatalogProductsRouteChildren: LayoutCatalogProductsRouteChildren = {
-  LayoutCatalogProductsProductIdRoute: LayoutCatalogProductsProductIdRoute,
-}
-
-const LayoutCatalogProductsRouteWithChildren =
-  LayoutCatalogProductsRoute._addFileChildren(
-    LayoutCatalogProductsRouteChildren,
-  )
-
 interface LayoutCatalogRouteChildren {
-  LayoutCatalogInsurersRoute: typeof LayoutCatalogInsurersRouteWithChildren
-  LayoutCatalogProductsRoute: typeof LayoutCatalogProductsRouteWithChildren
+  LayoutCatalogIndexRoute: typeof LayoutCatalogIndexRoute
+  LayoutCatalogInsurersInsurerIdRoute: typeof LayoutCatalogInsurersInsurerIdRoute
+  LayoutCatalogProductsProductIdRoute: typeof LayoutCatalogProductsProductIdRoute
+  LayoutCatalogInsurersIndexRoute: typeof LayoutCatalogInsurersIndexRoute
+  LayoutCatalogProductsIndexRoute: typeof LayoutCatalogProductsIndexRoute
 }
 
 const LayoutCatalogRouteChildren: LayoutCatalogRouteChildren = {
-  LayoutCatalogInsurersRoute: LayoutCatalogInsurersRouteWithChildren,
-  LayoutCatalogProductsRoute: LayoutCatalogProductsRouteWithChildren,
+  LayoutCatalogIndexRoute: LayoutCatalogIndexRoute,
+  LayoutCatalogInsurersInsurerIdRoute: LayoutCatalogInsurersInsurerIdRoute,
+  LayoutCatalogProductsProductIdRoute: LayoutCatalogProductsProductIdRoute,
+  LayoutCatalogInsurersIndexRoute: LayoutCatalogInsurersIndexRoute,
+  LayoutCatalogProductsIndexRoute: LayoutCatalogProductsIndexRoute,
 }
 
 const LayoutCatalogRouteWithChildren = LayoutCatalogRoute._addFileChildren(

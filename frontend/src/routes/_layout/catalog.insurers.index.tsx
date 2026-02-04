@@ -16,7 +16,7 @@ function getInsurersQueryOptions() {
   }
 }
 
-export const Route = createFileRoute("/_layout/catalog/insurers")({
+export const Route = createFileRoute("/_layout/catalog/insurers/")({
   component: Insurers,
   head: () => ({
     meta: [

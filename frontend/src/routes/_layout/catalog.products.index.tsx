@@ -16,7 +16,7 @@ function getProductsQueryOptions() {
   }
 }
 
-export const Route = createFileRoute("/_layout/catalog/products")({
+export const Route = createFileRoute("/_layout/catalog/products/")({
   component: Products,
   head: () => ({
     meta: [
