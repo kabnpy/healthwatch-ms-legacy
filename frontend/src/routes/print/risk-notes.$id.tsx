@@ -53,8 +53,8 @@ function RiskNotePrintContent({ id }: { id: string }) {
     getClientQueryOptions(policy.client_id),
   )
 
-  const items = (riskNote.items_snapshot?.items as any[]) || []
-  const riskItem = items[0] || {}
+  const policySnapshot = (riskNote.policy_snapshot as any) || {}
+  const riskDetails = policySnapshot.risk_details || {}
 
   const isInvoice = mode === "invoice" || !mode
 
@@ -172,7 +172,7 @@ function RiskNotePrintContent({ id }: { id: string }) {
                 <td className="py-2 font-bold">Sum Insured</td>
                 <td className="py-2 text-right font-mono font-bold">
                   KES{" "}
-                  {riskItem.details?.sum_insured?.toLocaleString() ||
+                  {riskDetails.sum_insured?.toLocaleString() ||
                     "Refer to Schedule"}
                 </td>
               </tr>

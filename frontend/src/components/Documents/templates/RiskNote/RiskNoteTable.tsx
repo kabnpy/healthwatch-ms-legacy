@@ -1,0 +1,192 @@
+import React from "react"
+import { cn } from "@/lib/utils"
+import { Plus, Trash2 } from "lucide-react"
+import { Button } from "@/components/ui/button"
+
+interface RiskNoteSection {
+  name: string
+  content: Record<string, any> | any[] | string | React.ReactNode
+}
+
+interface RiskNoteTableProps {
+  sections: RiskNoteSection[]
+  isEditable?: boolean
+  onChange?: (sectionName: string, updatedContent: any) => void
+  onRemoveSection?: (sectionName: string) => void
+  onAddSection?: () => void
+}
+
+export const RiskNoteTable = ({
+  sections,
+  isEditable = false,
+  onChange,
+  onRemoveSection,
+  onAddSection,
+}: RiskNoteTableProps) => {
+  
+  const handleValueChange = (sectionName: string, key: string, newValue: any) => {
+    if (!onChange) return
+    const section = sections.find(s => s.name === sectionName)
+    if (section && typeof section.content === "object" && !Array.isArray(section.content)) {
+        const updatedContent = { ...(section.content as object), [key]: newValue }
+        onChange(sectionName, updatedContent)
+    }
+  }
+
+  const handleRemoveRow = (sectionName: string, key: string) => {
+    if (!onChange) return
+    const section = sections.find(s => s.name === sectionName)
+    if (section && typeof section.content === "object" && !Array.isArray(section.content)) {
+        const content = section.content as Record<string, any>
+        const { [key]: _, ...restContent } = content
+        onChange(sectionName, restContent)
+    }
+  }
+
+  const handleAddRow = (sectionName: string) => {
+    if (!onChange) return
+    const section = sections.find(s => s.name === sectionName)
+    if (section && typeof section.content === "object" && !Array.isArray(section.content)) {
+        onChange(sectionName, { ...section.content, ["New Field"]: "New Value" })
+    }
+  }
+
+  const renderContentCell = (section: RiskNoteSection) => {
+    const value = section.content
+
+    // 1. Handle React Elements (JSX) - directly injected pre-formatted content
+    if (React.isValidElement(value)) {
+        return value
+    }
+
+    // 2. Handle Arrays (Lists like Special Clauses)
+    if (Array.isArray(value)) {
+      return (
+        <ul className="list-disc list-inside space-y-1">
+          {value.map((item, idx) => (
+            <li key={idx} className="text-[11px] text-black leading-tight">
+              {String(item)}
+            </li>
+          ))}
+        </ul>
+      )
+    }
+    
+    // 3. Handle Nested Objects (Standard Section Fields)
+    if (typeof value === "object" && value !== null) {
+        return (
+            <table className="w-full border-collapse">
+                <tbody>
+                    {Object.entries(value).map(([k, v]) => (
+                        <tr key={k} className="border-b border-black/5 last:border-0 group/row">
+                            <td className="py-1 pr-4 w-1/3 align-top">
+                                <span className="text-[10px] uppercase font-bold text-slate-500">{k.replace(/_/g, " ")}:</span>
+                            </td>
+                            <td className="py-1 align-top">
+                                <div className="flex items-center gap-2">
+                                    <div className="flex-1">
+                                        {isEditable ? (
+                                            <input
+                                                type="text"
+                                                value={String(v)}
+                                                onChange={(e) => handleValueChange(section.name, k, e.target.value)}
+                                                className="w-full bg-transparent border-none text-[11px] focus:ring-1 focus:ring-primary rounded px-1 -ml-1 h-7"
+                                            />
+                                        ) : (
+                                            <span className={cn(
+                                                "text-[11px] text-black leading-tight",
+                                                String(v).startsWith("<<") && "text-slate-400 italic"
+                                            )}>
+                                                {String(v).startsWith("<<") ? "—" : String(v)}
+                                            </span>
+                                        )}
+                                    </div>
+                                    {isEditable && (
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-4 w-4 opacity-0 group-hover/row:opacity-100 text-destructive"
+                                            onClick={() => handleRemoveRow(section.name, k)}
+                                        >
+                                            <Trash2 className="h-3 w-3" />
+                                        </Button>
+                                    )}
+                                </div>
+                            </td>
+                        </tr>
+                    ))}
+                    {isEditable && (
+                        <tr>
+                            <td colSpan={2} className="pt-2">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-5 px-2 text-[9px] text-muted-foreground"
+                                    onClick={() => handleAddRow(section.name)}
+                                >
+                                    <Plus className="h-3 w-3 mr-1" /> Add Field
+                                </Button>
+                            </td>
+                        </tr>
+                    )}
+                </tbody>
+            </table>
+        )
+    }
+
+    // 4. Handle Primitives (String/Number)
+    return (
+      <span className="text-[11px] text-black leading-relaxed">
+        {String(value)}
+      </span>
+    )
+  }
+
+  return (
+    <div className="w-full">
+      <table className="w-full border-collapse border-x border-t border-black">
+        <tbody>
+          {sections.map((section) => (
+            <tr key={section.name} className="border-b border-black group/section">
+              <th
+                scope="row"
+                className="py-3 px-4 w-[20%] align-top bg-slate-50 border-r border-black text-left"
+              >
+                <div className="flex flex-col gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-[0.15em] text-black">
+                        {section.name}
+                    </span>
+                    {isEditable && onRemoveSection && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-5 px-1 text-[8px] uppercase font-bold hover:bg-black/5 text-destructive self-start opacity-0 group-hover/section:opacity-100 transition-opacity"
+                            onClick={() => onRemoveSection(section.name)}
+                        >
+                            <Trash2 className="h-2.5 w-2.5 mr-1" /> Delete
+                        </Button>
+                    )}
+                </div>
+              </th>
+              <td className="py-3 px-4 align-top bg-white">
+                {renderContentCell(section)}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      
+      {isEditable && onAddSection && (
+        <div className="mt-4">
+          <Button
+            variant="outline"
+            className="w-full border-dashed h-8 text-xs"
+            onClick={onAddSection}
+          >
+            <Plus className="h-3 w-3 mr-2" /> Add New Section
+          </Button>
+        </div>
+      )}
+    </div>
+  )
+}

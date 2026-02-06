@@ -1,55 +1,32 @@
-import { getSectionLayout } from "@/utils/layoutRegistry"
 import { BaseDocument } from "../BaseDocument"
-import { RiskNoteGridRow } from "./RiskNote/RiskNoteGridRow"
-import { RiskNoteListItem } from "./RiskNote/RiskNoteListItem"
-import { RiskNoteRow } from "./RiskNote/RiskNoteRow"
-import { RiskNoteSection } from "./RiskNote/RiskNoteSection"
+import { RiskNoteTable } from "./RiskNote/RiskNoteTable"
+import { useState, useEffect, useMemo } from "react"
+import { Button } from "@/components/ui/button"
+import { Save, RefreshCcw } from "lucide-react"
 
 interface RiskNoteTemplateProps {
   riskNote: any
   client: any
   policy: any
+  isEditable?: boolean
+  onSave?: (updatedSnapshot: any) => void
 }
 
 export const RiskNoteTemplate = ({
   riskNote,
   client,
   policy,
+  isEditable = false,
+  onSave,
 }: RiskNoteTemplateProps) => {
-  // Extract snapshot data
-  const items = (riskNote.items_snapshot?.items as any[]) || []
-  const riskItem = items[0] || {}
-  const productDetails = (policy.product?.product_details as any[]) || []
-  const details = riskItem.details || {}
+  const [localSnapshot, setLocalSnapshot] = useState(riskNote.policy_snapshot || {})
 
-  // Aggregate fields by "section" metadata in productDetails
-  const dynamicSections = productDetails.reduce(
-    (acc: Record<string, any[]>, field: any) => {
-      let displayValue = null
-
-      if (field.field_type === "static") {
-        displayValue = field.value
-      } else if (field.field_type === "input") {
-        const val = details[field.key]
-        if (val !== undefined && val !== null && val !== "") {
-          displayValue = val
-        }
-      } else if (field.field_type === "optional") {
-        displayValue = details[field.key] || field.value
-      }
-
-      if (displayValue !== null && field.show_in_risknote !== false) {
-        const sectionName = field.section || "Additional Details"
-        if (!acc[sectionName]) acc[sectionName] = []
-        acc[sectionName].push({
-          label: field.label,
-          value: displayValue,
-        })
-      }
-      return acc
-    },
-    {},
-  )
+  // Keep local state in sync with external changes if not editing
+  useEffect(() => {
+    if (!isEditable) {
+        setLocalSnapshot(riskNote.policy_snapshot || {})
+    }
+  }, [riskNote.policy_snapshot, isEditable])
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-KE", {
@@ -58,192 +35,189 @@ export const RiskNoteTemplate = ({
     }).format(amount)
   }
 
+  const handleSave = () => {
+    onSave?.(localSnapshot)
+  }
+
+  const handleReset = () => {
+    setLocalSnapshot(riskNote.policy_snapshot || {})
+  }
+
+  // --- DATA CONSOLIDATION LOGIC ---
+  const tableSections = useMemo(() => {
+    const sections: any[] = []
+
+    // 1. INSURED
+    sections.push({
+        name: "INSURED",
+        content: (
+            <div className="text-black">
+                <p className="font-bold text-base leading-tight mb-1">{client.name}</p>
+                <div className="flex justify-between items-start gap-8">
+                    <p className="text-[11px] leading-relaxed">
+                        {client.postal_address || "No Address Provided"}<br />
+                        {(client as any).city || "Nairobi"}
+                    </p>
+                    <p className="font-mono text-[11px] font-bold shrink-0">
+                        P.I.N No. {client.kra_pin || "N/A"}
+                    </p>
+                </div>
+            </div>
+        )
+    })
+
+    // 2. CLASS
+    sections.push({
+        name: "CLASS",
+        content: (
+            <div className="flex justify-between items-center w-full text-black">
+                <span className="font-bold uppercase tracking-tight">{policy.product?.name || "N/A"}</span>
+                <span className="font-mono text-[11px] font-bold">
+                    [Policy No. {policy.policy_number}]
+                </span>
+            </div>
+        )
+    })
+
+    // 3. PERIOD
+    sections.push({
+        name: "PERIOD",
+        content: (
+            <div className="flex items-center gap-12 text-black font-bold uppercase tracking-tight">
+                <span>{new Date(riskNote.start_date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</span>
+                <span className="text-slate-400 normal-case font-normal italic">To</span>
+                <span>{new Date(riskNote.end_date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</span>
+            </div>
+        )
+    })
+
+    // 4. COVER
+    sections.push({
+        name: "COVER",
+        content: (
+            <div className="text-black text-[11px] leading-relaxed italic">
+                {policy.product?.class_of_insurance}: Accidental loss or damage to insured property and / or death, bodily injury or loss or damage to property of third parties.
+            </div>
+        )
+    })
+
+    // 5. DYNAMIC RISK SECTIONS (Template + Instance)
+    const template = policy.product?.product_details || {}
+    const instance = localSnapshot.risk_details || {}
+    
+    // Merge logic: template provides structure, instance provides values
+    const merged = { ...template }
+    Object.entries(instance).forEach(([section, fields]) => {
+        if (typeof fields === 'object' && fields !== null && !Array.isArray(fields)) {
+            merged[section] = { ...(merged[section] || {}), ...fields }
+        } else {
+            merged[section] = fields
+        }
+    })
+
+    // Filter out sections already handled manually above
+    const manualSections = ["INSURED", "CLASS", "PERIOD", "COVER", "ANNUAL PREMIUM", "FINANCIAL SUMMARY", "INSURER", "AUTHENTICATION"]
+    
+    Object.entries(merged).forEach(([name, content]) => {
+        if (!manualSections.includes(name.toUpperCase())) {
+            sections.push({ name, content })
+        }
+    })
+
+    // 6. ANNUAL PREMIUM
+    const taxRows: Record<string, string> = {}
+    Object.entries(riskNote.taxes || {}).forEach(([name, amt]) => {
+        taxRows[name.replace(/([A-Z])/g, " $1")] = formatCurrency(amt as number)
+    })
+
+    sections.push({
+        name: "ANNUAL PREMIUM",
+        content: {
+            "Premium": formatCurrency(riskNote.net_premium),
+            ...taxRows,
+            "Total Amount Payable": (
+                <span className="text-[13px] font-black text-black">
+                    {formatCurrency(riskNote.total_amount)}
+                </span>
+            )
+        }
+    })
+
+    // 7. INSURER
+    sections.push({
+        name: "INSURER",
+        content: (
+            <div className="flex justify-between items-center text-black">
+                <span className="font-bold">{policy.product?.insurer?.name || "N/A"}</span>
+                <span className="italic text-slate-400 text-[9px] font-mono uppercase tracking-tighter">
+                    Verified Digital Document
+                </span>
+            </div>
+        )
+    })
+
+    return sections
+  }, [client, policy, riskNote, localSnapshot.risk_details])
+
+  const handleUpdateSection = (sectionName: string, updatedContent: any) => {
+    setLocalSnapshot({
+        ...localSnapshot,
+        risk_details: {
+            ...localSnapshot.risk_details,
+            [sectionName]: updatedContent
+        }
+    })
+  }
+
   return (
-    <BaseDocument>
-      <div className="space-y-4">
-        {/* Document Header Info */}
-        <div className="flex justify-between items-start border-b-2 border-black pb-4">
-          <div>
-            <h1 className="text-2xl font-black uppercase tracking-tighter">
-              Risk Note
-            </h1>
-            <p className="text-[10px] text-gray-500 font-mono uppercase">
-              Ref: {riskNote.invoice_number || "DRAFT"}
-            </p>
-          </div>
-          <div className="text-right">
-            <div
-              className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded ${
-                riskNote.status === "Draft"
-                  ? "bg-yellow-100 text-yellow-800"
-                  : "bg-green-100 text-green-800"
-              }`}
-            >
-              {riskNote.status}
+    <div className="relative group">
+      {/* EDITING TOOLBAR */}
+      {isEditable && (
+        <div className="absolute -top-12 left-0 right-0 flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-30">
+            <Button size="sm" variant="outline" className="bg-white shadow-sm" onClick={handleReset}>
+                <RefreshCcw className="h-3 w-3 mr-2" /> Reset
+            </Button>
+            <Button size="sm" className="shadow-sm" onClick={handleSave}>
+                <Save className="h-3 w-3 mr-2" /> Save Draft Changes
+            </Button>
+        </div>
+      )}
+
+      <BaseDocument>
+        <div className="space-y-4">
+          {/* Document Header Info */}
+          <div className="flex justify-between items-start border-b-2 border-black pb-4">
+            <div>
+              <h1 className="text-2xl font-black uppercase tracking-tighter text-black">
+                Risk Note
+              </h1>
+              <p className="text-[10px] text-slate-500 font-mono uppercase">
+                Ref: {riskNote.invoice_number || "DRAFT"}
+              </p>
+            </div>
+            <div className="text-right">
+              <div
+                className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded border ${
+                  riskNote.status === "Draft"
+                    ? "bg-amber-100 text-amber-800 border-amber-200"
+                    : "bg-emerald-100 text-emerald-800 border-emerald-200"
+                }`}
+              >
+                {riskNote.status}
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* CORE DETAILS SECTION */}
-        <div className="mt-6 border-t border-black">
-          <RiskNoteRow
-            label="Insured"
-            value={
-              <div className="font-bold">
-                <p>{client.name}</p>
-                <p className="text-[10px] text-gray-500 font-normal">
-                  PIN: {client.kra_pin || "N/A"}
-                </p>
-                <p className="text-[10px] text-gray-500 font-normal">
-                  {client.postal_address} {client.city}
-                </p>
-              </div>
-            }
-          />
-          <RiskNoteRow
-            label="Class"
-            value={
-              <div className="flex justify-between items-center w-full">
-                <span className="font-bold">
-                  {policy.product?.class_of_insurance || "N/A"}
-                </span>
-                <span className="text-[10px] bg-gray-100 px-2 py-0.5 rounded">
-                  Policy No: {policy.policy_number}
-                </span>
-              </div>
-            }
-          />
-          <RiskNoteRow
-            label="Period"
-            value={
-              <div className="font-bold">
-                {new Date(riskNote.start_date).toLocaleDateString("en-GB", {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                })}{" "}
-                To{" "}
-                {new Date(riskNote.end_date).toLocaleDateString("en-GB", {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                })}
-              </div>
-            }
-          />
-          <RiskNoteRow
-            label="Cover"
-            value={
-              <div className="text-[11px] leading-relaxed italic text-gray-700">
-                {riskItem.cover || "As per policy terms and conditions."}
-              </div>
-            }
-          />
-        </div>
-
-        {/* DYNAMIC SECTIONS FROM FORM_SCHEMA */}
-        {Object.entries(dynamicSections).map(([sectionName, fields]) => {
-          const config = getSectionLayout(sectionName, fields.length)
-
-          if (config.layout === "grid-row") {
-            return (
-              <RiskNoteGridRow
-                key={sectionName}
-                label={sectionName}
-                fields={fields.map((f) => ({
-                  label: f.label,
-                  value:
-                    typeof f.value === "number" &&
-                    f.label.toLowerCase().includes("value")
-                      ? formatCurrency(f.value)
-                      : f.value,
-                }))}
+          {/* UNIFIED TABLE BODY */}
+          <div className="mt-2">
+              <RiskNoteTable 
+                sections={tableSections} 
+                isEditable={isEditable} 
+                onChange={handleUpdateSection}
               />
-            )
-          }
-
-          const isGridSection =
-            config.layout === "list-item" && fields.length > 4
-
-          return (
-            <RiskNoteSection key={sectionName} title={sectionName}>
-              <div className={isGridSection ? "grid grid-cols-2" : ""}>
-                {fields.map((field, idx) =>
-                  config.layout === "list-item" ? (
-                    <RiskNoteListItem
-                      key={idx}
-                      label={field.label}
-                      value={field.value}
-                      noBorderRight={isGridSection && idx % 2 === 0}
-                      showLabel={
-                        config.showLabelInList &&
-                        field.value !== "Included" &&
-                        field.value !== "Yes"
-                      }
-                    />
-                  ) : (
-                    <RiskNoteRow
-                      key={idx}
-                      label={field.label}
-                      value={
-                        typeof field.value === "number" &&
-                        field.label.toLowerCase().includes("value")
-                          ? formatCurrency(field.value)
-                          : field.value
-                      }
-                    />
-                  ),
-                )}
-              </div>
-            </RiskNoteSection>
-          )
-        })}
-
-        {/* FINANCIAL SUMMARY */}
-        <div className="mt-8 border-t-2 border-black pt-4">
-          <div className="ml-auto w-1/2">
-            <RiskNoteRow
-              label="Premium"
-              value={formatCurrency(riskNote.net_premium)}
-              className="border-t border-black"
-              labelClassName="bg-transparent"
-            />
-            {Object.entries(riskNote.taxes || {}).map(
-              ([taxName, amount]: [string, any]) => (
-                <RiskNoteRow
-                  key={taxName}
-                  label={taxName.replace(/([A-Z])/g, " $1")}
-                  value={formatCurrency(amount)}
-                  labelClassName="bg-transparent"
-                />
-              ),
-            )}
-            <RiskNoteRow
-              label="Annual Premium"
-              value={
-                <span className="text-sm font-black">
-                  {formatCurrency(riskNote.total_amount)}
-                </span>
-              }
-              labelClassName="bg-gray-100"
-              valueClassName="bg-gray-100"
-            />
           </div>
         </div>
-
-        {/* INSURER FOOTER */}
-        <div className="mt-12 text-[11px]">
-          <RiskNoteRow
-            label="Insurer"
-            value={
-              <span className="font-bold">
-                {policy.product?.insurer?.name || "N/A"}
-              </span>
-            }
-            className="border-t border-b-0"
-          />
-        </div>
-      </div>
-    </BaseDocument>
+      </BaseDocument>
+    </div>
   )
 }

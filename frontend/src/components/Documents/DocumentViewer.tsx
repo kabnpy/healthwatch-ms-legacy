@@ -1,4 +1,4 @@
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query"
+import { useQuery, useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { AlertCircle, FileText, Loader2 } from "lucide-react"
 import { Suspense } from "react"
 
@@ -17,6 +17,8 @@ import {
 } from "@/client"
 import { InvoiceTemplate } from "./templates/InvoiceTemplate"
 import { RiskNoteTemplate } from "./templates/RiskNoteTemplate"
+import useCustomToast from "@/hooks/useCustomToast"
+import { handleError } from "@/utils"
 
 // --- Types ---
 
@@ -84,6 +86,9 @@ function ErrorDisplay({ id, message }: { id: string; message?: string }) {
 // --- Loader Components (Internal) ---
 
 function RiskNoteLoader({ id }: { id: string }) {
+  const { showSuccessToast, showErrorToast } = useCustomToast()
+  const qClient = useQueryClient()
+
   const { data: riskNote } = useSuspenseQuery({
     queryFn: () => RiskNotesService.readRiskNote({ id }),
     queryKey: ["risk-notes", id],
@@ -99,8 +104,24 @@ function RiskNoteLoader({ id }: { id: string }) {
     queryKey: ["clients", policy.client_id],
   }) as { data: ClientPublic }
 
+  const mutation = useMutation({
+    mutationFn: (updatedSnapshot: any) => 
+        RiskNotesService.updateRiskNote({ id, requestBody: { policy_snapshot: updatedSnapshot } }),
+    onSuccess: () => {
+        showSuccessToast("Risk Note draft updated successfully")
+        qClient.invalidateQueries({ queryKey: ["risk-notes", id] })
+    },
+    onError: (err: any) => handleError.bind(showErrorToast)(err)
+  })
+
   return (
-    <RiskNoteTemplate riskNote={riskNote} client={client} policy={policy} />
+    <RiskNoteTemplate 
+        riskNote={riskNote} 
+        client={client} 
+        policy={policy} 
+        isEditable={riskNote.status === "Draft"}
+        onSave={(snap) => mutation.mutate(snap)}
+    />
   )
 }
 

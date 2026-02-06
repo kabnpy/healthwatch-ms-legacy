@@ -1,6 +1,5 @@
 import type { ClientPublic, InvoicePublic } from "@/client"
 import { BaseDocument } from "../BaseDocument"
-import { RiskNoteRow } from "./RiskNote/RiskNoteRow"
 
 interface InvoiceTemplateProps {
   invoice: InvoicePublic
@@ -37,19 +36,19 @@ export const InvoiceTemplate = ({
         {/* DOCUMENT HEADER */}
         <div className="flex justify-between items-start border-b-2 border-black pb-4">
           <div>
-            <h1 className="text-2xl font-black uppercase tracking-tighter">
+            <h1 className="text-2xl font-black uppercase tracking-tighter text-black">
               Debit Note
             </h1>
-            <p className="text-[10px] text-gray-500 font-mono uppercase">
+            <p className="text-[10px] text-slate-500 font-mono uppercase">
               Ref: {invoice.invoice_number}
             </p>
           </div>
           <div className="text-right">
             <div
-              className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded ${
+              className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded border ${
                 invoice.status === "Paid"
-                  ? "bg-green-100 text-green-800"
-                  : "bg-yellow-100 text-yellow-800"
+                  ? "bg-emerald-100 text-emerald-800 border-emerald-200"
+                  : "bg-amber-100 text-amber-800 border-amber-200"
               }`}
             >
               {invoice.status}
@@ -57,143 +56,137 @@ export const InvoiceTemplate = ({
           </div>
         </div>
 
-        {/* CORE DETAILS SECTION */}
-        <div className="mt-6 border-t border-black">
-          <RiskNoteRow
-            label="Insured"
-            value={
-              <div className="font-bold">
-                <p>{client.name}</p>
-                <p className="text-[10px] text-gray-500 font-normal">
-                  PIN: {client.kra_pin || "N/A"}
-                </p>
-                <p className="text-[10px] text-gray-500 font-normal">
-                  {client.postal_address} {(client as any).city || "Nairobi"}
-                </p>
-              </div>
-            }
-          />
-          <RiskNoteRow
-            label="Date"
-            value={<span className="font-bold">{yearRange}</span>}
-          />
-          <RiskNoteRow
-            label="Insurer"
-            value={<span className="font-bold">{insurerName}</span>}
-          />
+        {/* CORE DETAILS SECTION (Boxy Style) */}
+        <div className="mt-6">
+          <table className="w-full border-collapse border-x border-t border-black text-black">
+            <tbody>
+                <tr className="border-b border-black">
+                    <th scope="row" className="w-[20%] bg-slate-50 p-3 text-[10px] font-black uppercase tracking-widest text-black border-r border-black text-left align-top">Insured</th>
+                    <td className="p-3 text-[11px] align-top bg-white">
+                        <div className="text-black">
+                            <p className="font-bold text-base leading-tight mb-1">{client.name}</p>
+                            <div className="flex justify-between items-start gap-8">
+                                <p className="text-[11px] leading-relaxed">
+                                    {client.postal_address || "No Address Provided"}<br />
+                                    {(client as any).city || "Nairobi"}
+                                </p>
+                                <p className="font-mono text-[11px] font-bold shrink-0">
+                                    P.I.N No. {client.kra_pin || "N/A"}
+                                </p>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr className="border-b border-black">
+                    <th scope="row" className="w-[20%] bg-slate-50 p-3 text-[10px] font-black uppercase tracking-widest text-black border-r border-black text-left align-middle">Date</th>
+                    <td className="p-3 text-[11px] align-middle font-bold bg-white">{yearRange}</td>
+                </tr>
+                <tr className="border-b border-black">
+                    <th scope="row" className="w-[20%] bg-slate-50 p-3 text-[10px] font-black uppercase tracking-widest text-black border-r border-black text-left align-middle">Insurer</th>
+                    <td className="p-3 text-[11px] align-middle font-bold bg-white uppercase tracking-tight">{insurerName}</td>
+                </tr>
+            </tbody>
+          </table>
         </div>
 
-        {/* INSURANCE TABLE HEADER */}
-        <div className="grid grid-cols-12 border-x border-b border-black bg-gray-100/50">
-          <div className="col-span-1 border-r border-black p-2 text-[9px] font-black uppercase text-center">
-            #
-          </div>
-          <div className="col-span-4 border-r border-black p-2 text-[9px] font-black uppercase">
-            Class of Insurance
-          </div>
-          <div className="col-span-5 border-r border-black p-2 text-[9px] font-black uppercase">
-            Policy No / Period
-          </div>
-          <div className="col-span-2 p-2 text-[9px] font-black uppercase text-right">
-            Annual Premium
-          </div>
+        {/* LINE ITEMS (Multi-column list) */}
+        <div className="border-x border-black bg-white overflow-hidden">
+            <table className="w-full border-collapse">
+                <thead>
+                    <tr className="bg-slate-100 border-b border-black">
+                        <th className="w-12 border-r border-black p-2 text-[9px] font-black uppercase text-center text-black">#</th>
+                        <th className="border-r border-black p-2 text-[9px] font-black uppercase text-left text-black">Class of Insurance</th>
+                        <th className="border-r border-black p-2 text-[9px] font-black uppercase text-left text-black">Policy No / Period</th>
+                        <th className="w-32 p-2 text-[9px] font-black uppercase text-right text-black">Amount (KSH)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {lineItems.map((item, i) => {
+                        const riskNote = item.risk_note
+                        const policy = riskNote?.policy
+                        const product = policy?.product
+
+                        const period = riskNote
+                            ? `${new Date(riskNote.start_date).toLocaleDateString("en-GB")} - ${new Date(riskNote.end_date).toLocaleDateString("en-GB")}`
+                            : "N/A"
+
+                        return (
+                            <tr key={item.id || i} className="border-b border-black last:border-b-0 bg-white">
+                                <td className="border-r border-black p-2 text-[10px] text-center font-mono text-slate-600">
+                                    {(i + 1).toString().padStart(2, "0")}
+                                </td>
+                                <td className="border-r border-black p-2 text-[11px] font-bold text-black uppercase">
+                                    {product?.class_of_insurance || item.description || "N/A"}
+                                </td>
+                                <td className="border-r border-black p-2 text-[10px]">
+                                    <div className="font-bold text-black font-mono">
+                                        {policy?.policy_number || "N/A"}
+                                    </div>
+                                    <div className="text-slate-500 font-mono text-[9px]">
+                                        {period}
+                                    </div>
+                                </td>
+                                <td className="p-2 text-[11px] font-black text-right font-mono text-black">
+                                    {(item.amount || 0).toLocaleString(undefined, {
+                                        minimumFractionDigits: 2,
+                                    })}
+                                </td>
+                            </tr>
+                        )
+                    })}
+                </tbody>
+            </table>
         </div>
 
-        {/* INSURANCE TABLE ROWS */}
-        {lineItems.map((item, i) => {
-          const riskNote = item.risk_note
-          const policy = riskNote?.policy
-          const product = policy?.product
-
-          const period = riskNote
-            ? `${new Date(riskNote.start_date).toLocaleDateString("en-GB")} - ${new Date(riskNote.end_date).toLocaleDateString("en-GB")}`
-            : "N/A"
-
-          return (
-            <div
-              key={item.id || i}
-              className="grid grid-cols-12 border-x border-b border-black bg-white"
-            >
-              <div className="col-span-1 border-r border-black p-2 text-[10px] text-center font-mono">
-                {(i + 1).toString().padStart(2, "0")}
-              </div>
-              <div className="col-span-4 border-r border-black p-2 text-[11px] font-bold">
-                {product?.class_of_insurance || item.description || "N/A"}
-              </div>
-              <div className="col-span-5 border-r border-black p-2 text-[10px]">
-                <div className="font-bold text-gray-900">
-                  {policy?.policy_number || "N/A"}
-                </div>
-                <div className="text-gray-500 font-mono text-[9px]">
-                  {period}
-                </div>
-              </div>
-              <div className="col-span-2 p-2 text-[11px] font-bold text-right font-mono">
-                {(item.amount || 0).toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                })}
-              </div>
-            </div>
-          )
-        })}
-
-        {/* FINANCIAL SUMMARY */}
-        <div className="mt-8 border-t-2 border-black pt-4">
-          <div className="ml-auto w-1/2">
-            <RiskNoteRow
-              label="Total Premium"
-              value={
-                <span className="text-sm font-black">
-                  {formatCurrency(invoice.total_amount || 0)}
-                </span>
-              }
-              labelClassName="bg-gray-100"
-              valueClassName="bg-gray-100"
-            />
-            {invoice.balance_due !== invoice.total_amount && (
-              <RiskNoteRow
-                label="Balance Due"
-                value={
-                  <span className="text-sm font-black text-red-600">
-                    {formatCurrency(invoice.balance_due || 0)}
-                  </span>
-                }
-                labelClassName="bg-transparent"
-              />
-            )}
-          </div>
+        {/* FINANCIAL SUMMARY (Boxy Style) */}
+        <div className="border-x border-b border-black">
+            <table className="w-full border-collapse">
+                <tbody>
+                    <tr className="border-t border-black">
+                        <th scope="row" className="w-[80%] bg-slate-50 p-2 text-[10px] font-black uppercase tracking-widest text-black border-r border-black text-right">Total Premium Payable</th>
+                        <td className="p-2 text-[13px] font-black text-black text-right bg-white">
+                            {formatCurrency(invoice.total_amount || 0)}
+                        </td>
+                    </tr>
+                    {invoice.balance_due !== invoice.total_amount && (
+                        <tr className="border-t border-black">
+                            <th scope="row" className="w-[80%] bg-slate-50 p-2 text-[10px] font-bold uppercase tracking-widest text-red-600 border-r border-black text-right">Balance Due</th>
+                            <td className="p-2 text-[13px] font-black text-red-600 text-right bg-white">
+                                {formatCurrency(invoice.balance_due || 0)}
+                            </td>
+                        </tr>
+                    )}
+                </tbody>
+            </table>
         </div>
 
-        {/* PAYMENT INSTRUCTIONS */}
-        <div className="mt-12 border-t border-black pt-4">
-          <RiskNoteRow
-            label="Payment"
-            value={
-              <div className="grid grid-cols-2 gap-4 text-[10px]">
-                <div>
-                  <p className="font-bold uppercase mb-1">MPESA Paybill</p>
-                  <p>
-                    Business No: <span className="font-bold">555000</span>
-                  </p>
-                  <p>
-                    Account:{" "}
-                    <span className="font-bold font-mono">
-                      {client.kra_pin}
-                    </span>
-                  </p>
-                </div>
-                <div>
-                  <p className="font-bold uppercase mb-1">Cheque / EFT</p>
-                  <p>
-                    Payable to:{" "}
-                    <span className="font-bold">
-                      HealthWatch Insurance Brokers Ltd
-                    </span>
-                  </p>
-                </div>
-              </div>
-            }
-          />
+        {/* PAYMENT INSTRUCTIONS (Boxy Style) */}
+        <div className="mt-8 border border-black">
+            <table className="w-full border-collapse">
+                <tbody>
+                    <tr>
+                        <th scope="row" className="w-[20%] bg-slate-50 p-3 text-[10px] font-black uppercase tracking-widest text-black border-r border-black text-left align-top">Payment</th>
+                        <td className="p-3 align-top bg-white">
+                            <div className="grid grid-cols-2 gap-8 text-[10px] text-black">
+                                <div>
+                                    <p className="font-bold uppercase mb-1 border-b border-black/10 pb-1 text-black">MPESA Paybill</p>
+                                    <div className="space-y-0.5 mt-2">
+                                        <p>Business No: <span className="font-bold">555000</span></p>
+                                        <p>Account No: <span className="font-bold font-mono">{client.kra_pin}</span></p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="font-bold uppercase mb-1 border-b border-black/10 pb-1 text-black">Cheque / EFT</p>
+                                    <div className="space-y-0.5 mt-2">
+                                        <p className="font-bold">HealthWatch Insurance Brokers Ltd</p>
+                                        <p className="italic text-slate-500">Bank details available on request</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
       </div>
     </BaseDocument>
