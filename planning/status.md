@@ -27,9 +27,8 @@
 - **Frontend Build Recovery**: Resolving persistent TypeScript errors in the auto-generated client and components.
 
 ## Next Steps
-1. **Consolidated Semantic Layout**: Implement the strategy in `planning/consolidated_risknote_layout.md` to unify all document sections into a single high-density table.
-2. **Frontend Build Verification**: Finalize TypeScript fixes in `DocumentViewer.tsx` and `RiskNoteForm.tsx` to ensure a clean production build after system restart.
-3. **Build Verification**: Run `npm run build` until successful.
+1. **Frontend Build Verification**: Finalize TypeScript fixes in `DocumentViewer.tsx` and `RiskNoteForm.tsx` to ensure a clean production build after system restart.
+2. **Build Verification**: Run `npm run build` until successful.
 
 ## Architectural Decisions
 - **Unified Policy Entity**: 1 Policy = 1 Cover Instance. This simplifies data capture and document generation significantly.
