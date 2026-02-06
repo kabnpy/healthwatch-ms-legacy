@@ -20,7 +20,6 @@ export type Body_login_login_access_token = {
 export type ClaimCreate = {
     claim_number: string;
     policy_id: string;
-    risk_item_id?: (string | null);
     date_of_loss: string;
     date_reported?: string;
     description: string;
@@ -31,7 +30,6 @@ export type ClaimCreate = {
 export type ClaimPublic = {
     claim_number: string;
     policy_id: string;
-    risk_item_id?: (string | null);
     date_of_loss: string;
     date_reported?: string;
     description: string;
@@ -48,7 +46,6 @@ export type ClaimsPublic = {
 export type ClaimUpdate = {
     claim_number?: (string | null);
     policy_id?: (string | null);
-    risk_item_id?: (string | null);
     date_of_loss?: (string | null);
     date_reported?: (string | null);
     description?: (string | null);
@@ -247,6 +244,16 @@ export type PolicyCreate = {
     product_id?: (string | null);
     status?: string;
     created_at?: string;
+    start_date?: (string | null);
+    end_date?: (string | null);
+    description?: (string | null);
+    total_premium?: number;
+    premium_breakdown?: {
+        [key: string]: unknown;
+    };
+    risk_details?: {
+        [key: string]: unknown;
+    };
 };
 
 export type PolicyPublic = {
@@ -255,9 +262,18 @@ export type PolicyPublic = {
     product_id?: (string | null);
     status?: string;
     created_at?: string;
+    start_date?: (string | null);
+    end_date?: (string | null);
+    description?: (string | null);
+    total_premium?: number;
+    premium_breakdown?: {
+        [key: string]: unknown;
+    };
+    risk_details?: {
+        [key: string]: unknown;
+    };
     id: string;
     product?: (ProductPublic | null);
-    items?: Array<RiskItemPublic>;
     readonly display_name: string;
 };
 
@@ -266,6 +282,16 @@ export type PolicyUpdate = {
     client_id?: (string | null);
     product_id?: (string | null);
     status?: (string | null);
+    start_date?: (string | null);
+    end_date?: (string | null);
+    description?: (string | null);
+    total_premium?: (number | null);
+    premium_breakdown?: ({
+    [key: string]: unknown;
+} | null);
+    risk_details?: ({
+    [key: string]: unknown;
+} | null);
 };
 
 export type PrivateUserCreate = {
@@ -279,32 +305,19 @@ export type ProductCreate = {
     insurer_id: string;
     name: string;
     class_of_insurance: string;
-    product_details?: Array<ProductDetailItem>;
+    product_details?: {
+        [key: string]: unknown;
+    };
     default_commission_rate?: number;
-};
-
-export type ProductDetailItem = {
-    key: string;
-    label: string;
-    section: string;
-    field_type: string;
-    input_type?: (string | null);
-    value?: (unknown | null);
-    pricing?: (ProductPricing | null);
-    show_in_risknote?: boolean;
-    required?: boolean;
-};
-
-export type ProductPricing = {
-    type: string;
-    value: number;
 };
 
 export type ProductPublic = {
     insurer_id: string;
     name: string;
     class_of_insurance: string;
-    product_details?: Array<ProductDetailItem>;
+    product_details?: {
+        [key: string]: unknown;
+    };
     default_commission_rate?: number;
     id: string;
     insurer?: (InsurerPublic | null);
@@ -319,7 +332,9 @@ export type ProductUpdate = {
     insurer_id?: (string | null);
     name?: (string | null);
     class_of_insurance?: (string | null);
-    product_details?: (Array<ProductDetailItem> | null);
+    product_details?: ({
+    [key: string]: unknown;
+} | null);
     default_commission_rate?: (number | null);
 };
 
@@ -370,46 +385,6 @@ export type ReceiptsPublic = {
     count: number;
 };
 
-export type RiskItemCreate = {
-    policy_id: string;
-    version_number?: number;
-    valid_from?: string;
-    valid_to?: (string | null);
-    is_active?: boolean;
-    description: string;
-    cover_description: string;
-    total_premium?: number;
-    premium_breakdown?: {
-        [key: string]: unknown;
-    };
-    risk_details?: {
-        [key: string]: unknown;
-    };
-};
-
-export type RiskItemPublic = {
-    policy_id: string;
-    version_number?: number;
-    valid_from?: string;
-    valid_to?: (string | null);
-    is_active?: boolean;
-    description: string;
-    cover_description: string;
-    total_premium?: number;
-    premium_breakdown?: {
-        [key: string]: unknown;
-    };
-    risk_details?: {
-        [key: string]: unknown;
-    };
-    id: string;
-};
-
-export type RiskItemsPublic = {
-    data: Array<RiskItemPublic>;
-    count: number;
-};
-
 export type RiskNoteCreate = {
     policy_id: string;
     transaction_type: string;
@@ -426,7 +401,7 @@ export type RiskNoteCreate = {
     };
     commission_amount: number;
     total_amount: number;
-    items_snapshot?: {
+    policy_snapshot?: {
         [key: string]: unknown;
     };
     special_clauses?: Array<(string)>;
@@ -448,7 +423,7 @@ export type RiskNotePublic = {
     };
     commission_amount: number;
     total_amount: number;
-    items_snapshot?: {
+    policy_snapshot?: {
         [key: string]: unknown;
     };
     special_clauses?: Array<(string)>;
@@ -475,7 +450,7 @@ export type RiskNoteUpdate = {
 } | null);
     commission_amount?: (number | null);
     total_amount?: (number | null);
-    items_snapshot?: ({
+    policy_snapshot?: ({
     [key: string]: unknown;
 } | null);
     special_clauses?: (Array<(string)> | null);
@@ -834,19 +809,6 @@ export type PoliciesReadPolicyRiskNotesData = {
 };
 
 export type PoliciesReadPolicyRiskNotesResponse = (RiskNotesPublic);
-
-export type PoliciesReadPolicyRiskItemsData = {
-    id: string;
-};
-
-export type PoliciesReadPolicyRiskItemsResponse = (RiskItemsPublic);
-
-export type PoliciesCreatePolicyRiskItemData = {
-    id: string;
-    requestBody: RiskItemCreate;
-};
-
-export type PoliciesCreatePolicyRiskItemResponse = (RiskItemPublic);
 
 export type PrivateCreateUserData = {
     requestBody: PrivateUserCreate;

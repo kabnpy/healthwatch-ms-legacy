@@ -97,18 +97,6 @@ export const ClaimCreateSchema = {
             format: 'uuid',
             title: 'Policy Id'
         },
-        risk_item_id: {
-            anyOf: [
-                {
-                    type: 'string',
-                    format: 'uuid'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Risk Item Id'
-        },
         date_of_loss: {
             type: 'string',
             format: 'date',
@@ -149,18 +137,6 @@ export const ClaimPublicSchema = {
             type: 'string',
             format: 'uuid',
             title: 'Policy Id'
-        },
-        risk_item_id: {
-            anyOf: [
-                {
-                    type: 'string',
-                    format: 'uuid'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Risk Item Id'
         },
         date_of_loss: {
             type: 'string',
@@ -221,18 +197,6 @@ export const ClaimUpdateSchema = {
                 }
             ],
             title: 'Policy Id'
-        },
-        risk_item_id: {
-            anyOf: [
-                {
-                    type: 'string',
-                    format: 'uuid'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Risk Item Id'
         },
         date_of_loss: {
             anyOf: [
@@ -1253,6 +1217,56 @@ export const PolicyCreateSchema = {
             type: 'string',
             format: 'date-time',
             title: 'Created At'
+        },
+        start_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Start Date'
+        },
+        end_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'End Date'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        total_premium: {
+            type: 'number',
+            title: 'Total Premium',
+            default: 0
+        },
+        premium_breakdown: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Premium Breakdown'
+        },
+        risk_details: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Risk Details'
         }
     },
     type: 'object',
@@ -1293,6 +1307,56 @@ export const PolicyPublicSchema = {
             format: 'date-time',
             title: 'Created At'
         },
+        start_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Start Date'
+        },
+        end_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'End Date'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        total_premium: {
+            type: 'number',
+            title: 'Total Premium',
+            default: 0
+        },
+        premium_breakdown: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Premium Breakdown'
+        },
+        risk_details: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Risk Details'
+        },
         id: {
             type: 'string',
             format: 'uuid',
@@ -1307,14 +1371,6 @@ export const PolicyPublicSchema = {
                     type: 'null'
                 }
             ]
-        },
-        items: {
-            items: {
-                '$ref': '#/components/schemas/RiskItemPublic'
-            },
-            type: 'array',
-            title: 'Items',
-            default: []
         },
         display_name: {
             type: 'string',
@@ -1374,6 +1430,76 @@ export const PolicyUpdateSchema = {
                 }
             ],
             title: 'Status'
+        },
+        start_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Start Date'
+        },
+        end_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'End Date'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        total_premium: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Total Premium'
+        },
+        premium_breakdown: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Premium Breakdown'
+        },
+        risk_details: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Risk Details'
         }
     },
     type: 'object',
@@ -1421,10 +1547,8 @@ export const ProductCreateSchema = {
             title: 'Class Of Insurance'
         },
         product_details: {
-            items: {
-                '$ref': '#/components/schemas/ProductDetailItem'
-            },
-            type: 'array',
+            additionalProperties: true,
+            type: 'object',
             title: 'Product Details'
         },
         default_commission_rate: {
@@ -1436,87 +1560,6 @@ export const ProductCreateSchema = {
     type: 'object',
     required: ['insurer_id', 'name', 'class_of_insurance'],
     title: 'ProductCreate'
-} as const;
-
-export const ProductDetailItemSchema = {
-    properties: {
-        key: {
-            type: 'string',
-            title: 'Key'
-        },
-        label: {
-            type: 'string',
-            title: 'Label'
-        },
-        section: {
-            type: 'string',
-            title: 'Section'
-        },
-        field_type: {
-            type: 'string',
-            title: 'Field Type'
-        },
-        input_type: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Input Type',
-            default: 'text'
-        },
-        value: {
-            anyOf: [
-                {},
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Value'
-        },
-        pricing: {
-            anyOf: [
-                {
-                    '$ref': '#/components/schemas/ProductPricing'
-                },
-                {
-                    type: 'null'
-                }
-            ]
-        },
-        show_in_risknote: {
-            type: 'boolean',
-            title: 'Show In Risknote',
-            default: true
-        },
-        required: {
-            type: 'boolean',
-            title: 'Required',
-            default: false
-        }
-    },
-    type: 'object',
-    required: ['key', 'label', 'section', 'field_type'],
-    title: 'ProductDetailItem'
-} as const;
-
-export const ProductPricingSchema = {
-    properties: {
-        type: {
-            type: 'string',
-            title: 'Type'
-        },
-        value: {
-            type: 'number',
-            title: 'Value'
-        }
-    },
-    type: 'object',
-    required: ['type', 'value'],
-    title: 'ProductPricing'
 } as const;
 
 export const ProductPublicSchema = {
@@ -1535,10 +1578,8 @@ export const ProductPublicSchema = {
             title: 'Class Of Insurance'
         },
         product_details: {
-            items: {
-                '$ref': '#/components/schemas/ProductDetailItem'
-            },
-            type: 'array',
+            additionalProperties: true,
+            type: 'object',
             title: 'Product Details'
         },
         default_commission_rate: {
@@ -1606,10 +1647,8 @@ export const ProductUpdateSchema = {
         product_details: {
             anyOf: [
                 {
-                    items: {
-                        '$ref': '#/components/schemas/ProductDetailItem'
-                    },
-                    type: 'array'
+                    additionalProperties: true,
+                    type: 'object'
                 },
                 {
                     type: 'null'
@@ -1886,156 +1925,6 @@ export const ReceiptsPublicSchema = {
     title: 'ReceiptsPublic'
 } as const;
 
-export const RiskItemCreateSchema = {
-    properties: {
-        policy_id: {
-            type: 'string',
-            format: 'uuid',
-            title: 'Policy Id'
-        },
-        version_number: {
-            type: 'integer',
-            title: 'Version Number',
-            default: 1
-        },
-        valid_from: {
-            type: 'string',
-            format: 'date',
-            title: 'Valid From'
-        },
-        valid_to: {
-            anyOf: [
-                {
-                    type: 'string',
-                    format: 'date'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Valid To'
-        },
-        is_active: {
-            type: 'boolean',
-            title: 'Is Active',
-            default: true
-        },
-        description: {
-            type: 'string',
-            title: 'Description'
-        },
-        cover_description: {
-            type: 'string',
-            title: 'Cover Description'
-        },
-        total_premium: {
-            type: 'number',
-            title: 'Total Premium',
-            default: 0
-        },
-        premium_breakdown: {
-            additionalProperties: true,
-            type: 'object',
-            title: 'Premium Breakdown'
-        },
-        risk_details: {
-            additionalProperties: true,
-            type: 'object',
-            title: 'Risk Details'
-        }
-    },
-    type: 'object',
-    required: ['policy_id', 'description', 'cover_description'],
-    title: 'RiskItemCreate'
-} as const;
-
-export const RiskItemPublicSchema = {
-    properties: {
-        policy_id: {
-            type: 'string',
-            format: 'uuid',
-            title: 'Policy Id'
-        },
-        version_number: {
-            type: 'integer',
-            title: 'Version Number',
-            default: 1
-        },
-        valid_from: {
-            type: 'string',
-            format: 'date',
-            title: 'Valid From'
-        },
-        valid_to: {
-            anyOf: [
-                {
-                    type: 'string',
-                    format: 'date'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Valid To'
-        },
-        is_active: {
-            type: 'boolean',
-            title: 'Is Active',
-            default: true
-        },
-        description: {
-            type: 'string',
-            title: 'Description'
-        },
-        cover_description: {
-            type: 'string',
-            title: 'Cover Description'
-        },
-        total_premium: {
-            type: 'number',
-            title: 'Total Premium',
-            default: 0
-        },
-        premium_breakdown: {
-            additionalProperties: true,
-            type: 'object',
-            title: 'Premium Breakdown'
-        },
-        risk_details: {
-            additionalProperties: true,
-            type: 'object',
-            title: 'Risk Details'
-        },
-        id: {
-            type: 'string',
-            format: 'uuid',
-            title: 'Id'
-        }
-    },
-    type: 'object',
-    required: ['policy_id', 'description', 'cover_description', 'id'],
-    title: 'RiskItemPublic'
-} as const;
-
-export const RiskItemsPublicSchema = {
-    properties: {
-        data: {
-            items: {
-                '$ref': '#/components/schemas/RiskItemPublic'
-            },
-            type: 'array',
-            title: 'Data'
-        },
-        count: {
-            type: 'integer',
-            title: 'Count'
-        }
-    },
-    type: 'object',
-    required: ['data', 'count'],
-    title: 'RiskItemsPublic'
-} as const;
-
 export const RiskNoteCreateSchema = {
     properties: {
         policy_id: {
@@ -2119,10 +2008,10 @@ export const RiskNoteCreateSchema = {
             type: 'number',
             title: 'Total Amount'
         },
-        items_snapshot: {
+        policy_snapshot: {
             additionalProperties: true,
             type: 'object',
-            title: 'Items Snapshot'
+            title: 'Policy Snapshot'
         },
         special_clauses: {
             items: {
@@ -2220,10 +2109,10 @@ export const RiskNotePublicSchema = {
             type: 'number',
             title: 'Total Amount'
         },
-        items_snapshot: {
+        policy_snapshot: {
             additionalProperties: true,
             type: 'object',
-            title: 'Items Snapshot'
+            title: 'Policy Snapshot'
         },
         special_clauses: {
             items: {
@@ -2380,7 +2269,7 @@ export const RiskNoteUpdateSchema = {
             ],
             title: 'Total Amount'
         },
-        items_snapshot: {
+        policy_snapshot: {
             anyOf: [
                 {
                     additionalProperties: true,
@@ -2390,7 +2279,7 @@ export const RiskNoteUpdateSchema = {
                     type: 'null'
                 }
             ],
-            title: 'Items Snapshot'
+            title: 'Policy Snapshot'
         },
         special_clauses: {
             anyOf: [

@@ -86,6 +86,18 @@ export const useCreatePolicy = () => {
   })
 }
 
+export const useUpdatePolicy = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) =>
+      PoliciesService.updatePolicy({ id, requestBody: data }),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ["policies"] })
+      queryClient.invalidateQueries({ queryKey: ["policies", id] })
+    },
+  })
+}
+
 // 3. RISK NOTES
 export const useRiskNotes = (policyId?: string, skip = 0, limit = 100) => {
   return useQuery({
@@ -134,31 +146,10 @@ export const useProducts = (insurerId?: string, skip = 0, limit = 100) => {
   })
 }
 
-// 5. RISK ITEMS
-export const useRiskItems = (policyId: string) => {
-  return useQuery({
-    queryKey: ["risk-items", policyId],
-    queryFn: () => PoliciesService.readPolicyRiskItems({ id: policyId }),
-    enabled: !!policyId,
-  })
-}
-
-export const useCreateRiskItem = () => {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: ({ policyId, data }: { policyId: string; data: any }) =>
-      PoliciesService.createPolicyRiskItem({ id: policyId, requestBody: data }),
-    onSuccess: (_, { policyId }) => {
-      queryClient.invalidateQueries({ queryKey: ["risk-items", policyId] })
-    },
-  })
-}
-
-// 6. DASHBOARD AGGREGATOR
+// 5. DASHBOARD AGGREGATOR
 export const usePolicyDashboard = (policyId: string) => {
   const policyQuery = usePolicy(policyId)
   const riskNotesQuery = useRiskNotes(policyId)
-  const riskItemsQuery = useRiskItems(policyId)
 
   // Helper to find latest risk note (most recent start date)
   const latestRiskNote = riskNotesQuery.data?.data?.sort(
@@ -166,25 +157,16 @@ export const usePolicyDashboard = (policyId: string) => {
       new Date(b.start_date).getTime() - new Date(a.start_date).getTime(),
   )[0]
 
-  // Helper to find active risk item (assuming first one is active for MVP or filtered)
-  // Real implementation might filter by 'is_active' or date range
-  const activeItem = riskItemsQuery.data?.data?.[0]
-
   return {
     policy: policyQuery.data,
     latestRiskNote,
-    activeItem,
     riskNotes: riskNotesQuery.data?.data || [],
-    riskItems: riskItemsQuery.data?.data || [],
-    isLoading:
-      policyQuery.isLoading ||
-      riskNotesQuery.isLoading ||
-      riskItemsQuery.isLoading,
-    error: policyQuery.error || riskNotesQuery.error || riskItemsQuery.error,
+    isLoading: policyQuery.isLoading || riskNotesQuery.isLoading,
+    error: policyQuery.error || riskNotesQuery.error,
   }
 }
 
-// 7. CORRESPONDENCE / DOCUMENTS
+// 6. CORRESPONDENCE / DOCUMENTS
 export const useCorrespondences = (clientId: string) => {
   return useQuery({
     queryKey: ["correspondences", clientId],
@@ -207,7 +189,7 @@ export const useCreateCorrespondence = () => {
   })
 }
 
-// 8. FINANCIALS (Invoices & Receipts)
+// 7. FINANCIALS (Invoices & Receipts)
 export const useInvoices = (clientId?: string, skip = 0, limit = 100) => {
   return useQuery({
     queryKey: ["invoices", { clientId, skip, limit }],
