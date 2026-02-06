@@ -28,7 +28,7 @@ const formSchema = z.object({
   name: z.string().min(1, "Product name is required"),
   class_of_insurance: z.string().min(1, "Class of insurance is required"),
   default_commission_rate: z.coerce.number().min(0).max(100),
-  product_details: z.array(z.any()).default([]),
+  product_details: z.record(z.string(), z.any()).default({}),
 })
 
 type FormData = z.infer<typeof formSchema>
@@ -65,11 +65,11 @@ export const ProductForm = ({
       name: initialData?.name || "",
       class_of_insurance: initialData?.class_of_insurance || "",
       default_commission_rate: initialData?.default_commission_rate ?? 10.0,
-      product_details: initialData?.product_details || [],
+      product_details: (initialData?.product_details as any) || {},
     },
   })
 
-  const form = useContext && context ? context : localForm
+  const form = useContext && context ? context : (localForm as any)
 
   const handleFormSubmit = (data: FormData) => {
     onSubmit(data as any)
@@ -77,14 +77,15 @@ export const ProductForm = ({
 
   const content = (
     <form
-      onSubmit={form.handleSubmit(handleFormSubmit as any)}
+      onSubmit={(form as any).handleSubmit(handleFormSubmit as any)}
       className="space-y-4"
     >
-      {!fixedInsurerId && (
-        <FormField
-          control={form.control}
-          name="insurer_id"
-          render={({ field }) => (
+              {!fixedInsurerId && (
+                <FormField
+                  control={(form as any).control}
+                  name="insurer_id"
+                  render={({ field }) => (
+      
             <FormItem>
               <FormLabel>Insurer</FormLabel>
               <Select
@@ -112,7 +113,7 @@ export const ProductForm = ({
       )}
 
       <FormField
-        control={form.control}
+        control={(form as any).control}
         name="name"
         render={({ field }) => (
           <FormItem>
@@ -130,7 +131,7 @@ export const ProductForm = ({
 
       <div className="grid grid-cols-2 gap-4">
         <FormField
-          control={form.control}
+          control={(form as any).control}
           name="class_of_insurance"
           render={({ field }) => (
             <FormItem>
@@ -159,7 +160,7 @@ export const ProductForm = ({
           )}
         />
         <FormField
-          control={form.control}
+          control={(form as any).control}
           name="default_commission_rate"
           render={({ field }) => (
             <FormItem>

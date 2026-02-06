@@ -6,7 +6,7 @@ import { useForm, FormProvider } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 
-import { ProductsService, type ProductUpdate } from "@/client"
+import { ProductsService } from "@/client"
 import { queryClient } from "@/queryClient"
 import PendingItems from "@/components/Pending/PendingItems"
 import { Button } from "@/components/ui/button"
@@ -24,7 +24,7 @@ const productSchema = z.object({
   name: z.string().min(1, "Product name is required"),
   class_of_insurance: z.string().min(1, "Class of insurance is required"),
   default_commission_rate: z.coerce.number().min(0).max(100),
-  product_details: z.array(z.any()).default([]),
+  product_details: z.record(z.string(), z.any()).default({}),
 })
 
 type ProductFormData = z.infer<typeof productSchema>
@@ -67,13 +67,13 @@ function ProductDetailContent({ productId }: { productId: string }) {
       name: product.name,
       class_of_insurance: product.class_of_insurance,
       default_commission_rate: product.default_commission_rate,
-      product_details: product.product_details || [],
+      product_details: (product.product_details as any) || {},
     },
   })
 
   const mutation = useMutation({
     mutationFn: (data: ProductFormData) =>
-      ProductsService.updateProduct({ id: productId, requestBody: data as ProductUpdate }),
+      ProductsService.updateProduct({ id: productId, requestBody: data as any }),
     onSuccess: () => {
       showSuccessToast("Product updated successfully")
       qClient.invalidateQueries({ queryKey: ["products"] })
