@@ -25,6 +25,14 @@ class PolicyBase(SQLModel):
     status: str = "Active"
     created_at: datetime = Field(default_factory=datetime.now)
 
+    # Cover Details (Merged from RiskItem)
+    start_date: date | None = None
+    end_date: date | None = None
+    description: str | None = None
+    total_premium: float = Field(default=0.0)
+    premium_breakdown: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
+    risk_details: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
+
 
 class PolicyCreate(PolicyBase):
     pass
@@ -35,22 +43,24 @@ class PolicyUpdate(SQLModel):
     client_id: uuid.UUID | None = None
     product_id: uuid.UUID | None = None
     status: str | None = None
+    start_date: date | None = None
+    end_date: date | None = None
+    description: str | None = None
+    total_premium: float | None = None
+    premium_breakdown: dict[str, Any] | None = None
+    risk_details: dict[str, Any] | None = None
 
 
 class PolicyPublic(PolicyBase):
     id: uuid.UUID
     product: ProductPublic | None = None
-    items: list["RiskItemPublic"] = []
 
     @computed_field  # type: ignore
     @property
     def display_name(self) -> str:
         if self.product:
-            # Safe access to items list
-            if self.items and len(self.items) > 0:
-                return (
-                    f"{self.product.class_of_insurance} - {self.items[0].description}"
-                )
+            if self.description:
+                return f"{self.product.class_of_insurance} - {self.description}"
             return f"{self.product.name}"
         return self.policy_number
 
@@ -62,63 +72,11 @@ class Policy(PolicyBase, table=True):
     product: Optional["Product"] = Relationship(back_populates="policies")
 
     risk_notes: list["RiskNote"] = Relationship(back_populates="policy")
-    items: list["RiskItem"] = Relationship(back_populates="policy")
     claims: list["Claim"] = Relationship(back_populates="policy")
 
 
 class PoliciesPublic(SQLModel):
     data: list[PolicyPublic]
-    count: int
-
-
-# ==========================================
-# Risk Item Models
-# ==========================================
-
-
-class RiskItemBase(SQLModel):
-    policy_id: uuid.UUID = Field(foreign_key="policy.id")
-    version_number: int = Field(default=1)
-    valid_from: date = Field(default_factory=date.today)
-    valid_to: date | None = None
-    is_active: bool = Field(default=True)
-
-    description: str
-    cover_description: str
-    total_premium: float = Field(default=0.0)
-    premium_breakdown: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
-    risk_details: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
-
-
-class RiskItemCreate(RiskItemBase):
-    pass
-
-
-class RiskItemUpdate(SQLModel):
-    version_number: int | None = None
-    valid_from: date | None = None
-    valid_to: date | None = None
-    is_active: bool | None = None
-    description: str | None = None
-    cover_description: str | None = None
-    total_premium: float | None = None
-    premium_breakdown: dict[str, Any] | None = None
-    risk_details: dict[str, Any] | None = None
-
-
-class RiskItemPublic(RiskItemBase):
-    id: uuid.UUID
-
-
-class RiskItem(RiskItemBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-
-    policy: "Policy" = Relationship(back_populates="items")
-    claims: list["Claim"] = Relationship(back_populates="risk_item")
-
-
-class RiskItemsPublic(SQLModel):
-    data: list[RiskItemPublic]
     count: int
 
 
@@ -141,18 +99,17 @@ class RiskNoteBase(SQLModel):
     start_date: date
     end_date: date
 
-    # Invoice Totals (Aggregated from all items)
+    # Invoice Totals
     net_premium: float
     taxes: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
     commission_amount: float
     total_amount: float
 
     # SNAPSHOTS:
-    # 1. The items as they were at this moment in time
-    # Structure: { "item_uuid": {"description": "...", "premium": 500, "details": {...}} }
-    items_snapshot: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
+    # A frozen state of the policy at this moment in time
+    policy_snapshot: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
 
-    # 2. Policy level clauses added to this note
+    # Policy level clauses added to this note
     special_clauses: list[str] = Field(default_factory=list, sa_type=JSON)
 
 
@@ -172,7 +129,7 @@ class RiskNoteUpdate(SQLModel):
     taxes: dict[str, Any] | None = None
     commission_amount: float | None = None
     total_amount: float | None = None
-    items_snapshot: dict[str, Any] | None = None
+    policy_snapshot: dict[str, Any] | None = None
     special_clauses: list[str] | None = None
 
 
@@ -204,7 +161,6 @@ class RiskNotesPublic(SQLModel):
 class ClaimBase(SQLModel):
     claim_number: str = Field(unique=True)
     policy_id: uuid.UUID = Field(foreign_key="policy.id")
-    risk_item_id: uuid.UUID | None = Field(default=None, foreign_key="riskitem.id")
 
     date_of_loss: date
     date_reported: date = Field(default_factory=date.today)
@@ -220,7 +176,6 @@ class ClaimCreate(ClaimBase):
 class ClaimUpdate(SQLModel):
     claim_number: str | None = None
     policy_id: uuid.UUID | None = None
-    risk_item_id: uuid.UUID | None = None
     date_of_loss: date | None = None
     date_reported: date | None = None
     description: str | None = None
@@ -236,7 +191,6 @@ class Claim(ClaimBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
 
     policy: "Policy" = Relationship(back_populates="claims")
-    risk_item: Optional["RiskItem"] = Relationship(back_populates="claims")
     events: list["ClaimEvent"] = Relationship(back_populates="claim")
 
 

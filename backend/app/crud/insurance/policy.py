@@ -3,6 +3,7 @@ from collections.abc import Sequence
 from datetime import date
 from typing import Any, cast
 
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
 
@@ -19,9 +20,6 @@ from app.models.insurance.policy import (
     Policy,
     PolicyCreate,
     PolicyUpdate,
-    RiskItem,
-    RiskItemCreate,
-    RiskItemUpdate,
     RiskNote,
     RiskNoteCreate,
     RiskNoteUpdate,
@@ -41,13 +39,13 @@ def create_policy(*, session: Session, policy_in: PolicyCreate) -> Policy:
         policy_id=db_obj.id,
         transaction_type="New Business",
         status="Draft",
-        start_date=date.today(),
-        end_date=date.today() + timedelta(days=365),
-        net_premium=0.0,
+        start_date=db_obj.start_date or date.today(),
+        end_date=db_obj.end_date or (date.today() + timedelta(days=365)),
+        net_premium=db_obj.total_premium, # Default to policy total for draft
         taxes={},
         commission_amount=0.0,
-        total_amount=0.0,
-        items_snapshot={},
+        total_amount=db_obj.total_premium,
+        policy_snapshot=jsonable_encoder(db_obj),
         special_clauses=[],
     )
     create_risk_note(session=session, risk_note_in=first_risk_note_in)
@@ -61,7 +59,6 @@ def get_policy(session: Session, *, id: uuid.UUID) -> Policy | None:
         .where(Policy.id == id)
         .options(
             selectinload(cast(Any, Policy.product)),
-            selectinload(cast(Any, Policy.items)),
         )
     )
     return session.exec(statement).first()
@@ -82,7 +79,6 @@ def get_policies_by_client_id(
         .where(Policy.client_id == client_id)
         .options(
             selectinload(cast(Any, Policy.product)),
-            selectinload(cast(Any, Policy.items)),
         )
     )
     return session.exec(statement).all()
@@ -99,37 +95,16 @@ def update_policy(
     return db_policy
 
 
-def create_risk_item(*, session: Session, risk_item_in: RiskItemCreate) -> RiskItem:
-    db_obj = RiskItem.model_validate(risk_item_in)
-    session.add(db_obj)
-    session.commit()
-    session.refresh(db_obj)
-    return db_obj
-
-
-def get_risk_item_by_identifier(
-    _session: Session, *, _identifier: str
-) -> RiskItem | None:
-    # In temporal items, identifier might be in risk_details
-    # For now, we search by description or similar if needed,
-    # but the old identifier column is gone.
-    return None
-
-
-def update_risk_item(
-    *, session: Session, db_risk_item: RiskItem, risk_item_in: RiskItemUpdate
-) -> RiskItem:
-    risk_item_data = risk_item_in.model_dump(exclude_unset=True)
-    db_risk_item.sqlmodel_update(risk_item_data)
-    session.add(db_risk_item)
-    session.commit()
-    session.refresh(db_risk_item)
-    return db_risk_item
-
-
 def create_risk_note(*, session: Session, risk_note_in: RiskNoteCreate) -> RiskNote:
     # 1. Create the Risk Note
     db_obj = RiskNote.model_validate(risk_note_in)
+    
+    # Ensure policy_snapshot is populated if not provided
+    if not db_obj.policy_snapshot:
+        policy = session.get(Policy, db_obj.policy_id)
+        if policy:
+            db_obj.policy_snapshot = jsonable_encoder(policy)
+
     session.add(db_obj)
     session.commit()
     session.refresh(db_obj)
@@ -220,7 +195,7 @@ def get_policies(
     client_id: uuid.UUID | None = None,
 ) -> list[Policy]:
     statement = select(Policy).options(
-        selectinload(cast(Any, Policy.product)), selectinload(cast(Any, Policy.items))
+        selectinload(cast(Any, Policy.product))
     )
     if client_id:
         statement = statement.where(Policy.client_id == client_id)
@@ -279,35 +254,6 @@ def count_claims(
 
 def delete_claim(session: Session, *, db_claim: Claim) -> None:
     session.delete(db_claim)
-    session.commit()
-
-
-def get_risk_items(
-    session: Session,
-    *,
-    skip: int = 0,
-    limit: int = 100,
-    policy_id: uuid.UUID | None = None,
-) -> list[RiskItem]:
-    statement = select(RiskItem)
-    if policy_id:
-        statement = statement.where(RiskItem.policy_id == policy_id)
-    statement = statement.offset(skip).limit(limit)
-    return list(session.exec(statement).all())
-
-
-def count_risk_items(session: Session, *, policy_id: uuid.UUID | None = None) -> int:
-    from sqlmodel import func
-
-    statement = select(RiskItem)
-    if policy_id:
-        statement = statement.where(RiskItem.policy_id == policy_id)
-    count_statement = select(func.count()).select_from(statement.subquery())
-    return session.exec(count_statement).one()
-
-
-def delete_risk_item(session: Session, *, db_risk_item: RiskItem) -> None:
-    session.delete(db_risk_item)
     session.commit()
 
 

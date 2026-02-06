@@ -38,13 +38,20 @@ def read_invoices(
     _current_user: CurrentUser,
     skip: int = 0,
     limit: int = 100,
-    client_id: uuid.UUID | None = None,
+    client_id: str | None = None,
 ) -> Any:
     """
     Retrieve invoices.
     """
+    client_uuid: uuid.UUID | None = None
+    if client_id:
+        try:
+            client_uuid = uuid.UUID(client_id)
+        except ValueError:
+            pass
+
     invoices = get_invoices(
-        session=session, skip=skip, limit=limit, client_id=client_id
+        session=session, skip=skip, limit=limit, client_id=client_uuid
     )
     return InvoicesPublic(data=invoices, count=len(invoices))
 
@@ -81,13 +88,20 @@ def read_receipts(
     _current_user: CurrentUser,
     skip: int = 0,
     limit: int = 100,
-    client_id: uuid.UUID | None = None,
+    client_id: str | None = None,
 ) -> Any:
     """
     Retrieve receipts.
     """
+    client_uuid: uuid.UUID | None = None
+    if client_id:
+        try:
+            client_uuid = uuid.UUID(client_id)
+        except ValueError:
+            pass
+
     receipts = get_receipts(
-        session=session, skip=skip, limit=limit, client_id=client_id
+        session=session, skip=skip, limit=limit, client_id=client_uuid
     )
     return ReceiptsPublic(data=receipts, count=len(receipts))
 

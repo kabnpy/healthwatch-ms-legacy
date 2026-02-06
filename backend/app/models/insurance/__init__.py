@@ -8,8 +8,6 @@ from .catalog import (
     Product,
     ProductBase,
     ProductCreate,
-    ProductDetailItem,
-    ProductPricing,
     ProductPublic,
     ProductsPublic,
     ProductUpdate,
@@ -74,12 +72,6 @@ from .policy import (
     PolicyCreate,
     PolicyPublic,
     PolicyUpdate,
-    RiskItem,
-    RiskItemBase,
-    RiskItemCreate,
-    RiskItemPublic,
-    RiskItemsPublic,
-    RiskItemUpdate,
     RiskNote,
     RiskNoteBase,
     RiskNoteCreate,
@@ -101,8 +93,6 @@ __all__ = [
     "ProductPublic",
     "ProductUpdate",
     "ProductsPublic",
-    "ProductDetailItem",
-    "ProductPricing",
     "Client",
     "ClientBase",
     "ClientCreate",
@@ -158,12 +148,6 @@ __all__ = [
     "PolicyCreate",
     "PolicyPublic",
     "PolicyUpdate",
-    "RiskItem",
-    "RiskItemBase",
-    "RiskItemCreate",
-    "RiskItemPublic",
-    "RiskItemUpdate",
-    "RiskItemsPublic",
     "RiskNote",
     "RiskNoteBase",
     "RiskNoteCreate",
@@ -173,7 +157,6 @@ __all__ = [
 ]
 
 # Rebuild models to resolve forward references for OpenAPI generation
-ProductPublic.model_rebuild()
 PolicyPublic.model_rebuild()
 RiskNotePublic.model_rebuild()
 InvoiceLineItemPublic.model_rebuild()

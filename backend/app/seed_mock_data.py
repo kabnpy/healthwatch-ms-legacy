@@ -1,5 +1,6 @@
 import logging
 from datetime import date
+from typing import Any
 
 from sqlmodel import Session, select
 
@@ -9,9 +10,6 @@ from app.models import (
     Insurer,
     Policy,
     Product,
-    ProductDetailItem,
-    ProductPricing,
-    RiskItem,
     RiskNote,
 )
 
@@ -40,7 +38,7 @@ def create_mock_data() -> None:
         def upsert_product(
             name: str,
             class_of_insurance: str,
-            product_details: list[ProductDetailItem],
+            product_details: dict[str, Any],
         ) -> Product:
             product = session.exec(select(Product).where(Product.name == name)).first()
             if not product:
@@ -60,288 +58,73 @@ def create_mock_data() -> None:
             return product
 
         # PRODUCT: PERSONAL ACCIDENT
-        pa_details = [
-            ProductDetailItem(
-                key="occupation",
-                label="Occupation",
-                input_type="text",
-                field_type="input",
-                section="OCCUPATION",
-            ),
-            ProductDetailItem(
-                key="acc_death",
-                label="Accidental Death",
-                field_type="static",
-                section="BENEFITS",
-                value="Kshs. 500,000/-",
-            ),
-            ProductDetailItem(
-                key="perm_total_disability",
-                label="Permanent Total Disablement",
-                field_type="static",
-                section="BENEFITS",
-                value="Kshs. 500,000/-",
-            ),
-            ProductDetailItem(
-                key="hosp_cash",
-                label="Hospital Cash",
-                field_type="static",
-                section="BENEFITS",
-                value="Kshs. 1,000/-",
-            ),
-            ProductDetailItem(
-                key="ttd",
-                label="Accidental temporary total disability",
-                field_type="static",
-                section="BENEFITS",
-                value="Kshs. 5,000/- (Weekly benefits 104 weeks)",
-            ),
-            ProductDetailItem(
-                key="med_expenses",
-                label="Accidental medical expenses",
-                field_type="static",
-                section="BENEFITS",
-                value="Kshs. 70,000/-",
-            ),
-            ProductDetailItem(
-                key="appliances",
-                label="Artificial appliances (Accidental Loss)",
-                field_type="static",
-                section="BENEFITS",
-                value="Kshs. 10,000/-",
-            ),
-            ProductDetailItem(
-                key="funeral_grant",
-                label="Last expense (Accidental Death)",
-                field_type="static",
-                section="BENEFITS",
-                value="Kshs. 50,000/-",
-            ),
-            ProductDetailItem(
-                key="clause_24hr",
-                label="24hour cover",
-                field_type="static",
-                section="SPECIAL CLAUSES",
-                value="Including Piloting and Aircrew duties",
-            ),
-            ProductDetailItem(
-                key="clause_duty",
-                label="Duty or pleasure",
-                field_type="static",
-                section="SPECIAL CLAUSES",
-                value="Included",
-            ),
-            ProductDetailItem(
-                key="clause_worldwide",
-                label="Worldwide limits",
-                field_type="static",
-                section="SPECIAL CLAUSES",
-                value="Included",
-            ),
-            ProductDetailItem(
-                key="clause_disappearance",
-                label="Disappearance clause",
-                field_type="static",
-                section="SPECIAL CLAUSES",
-                value="Included",
-            ),
-            ProductDetailItem(
-                key="clause_age",
-                label="Age limits 16-65 years",
-                field_type="static",
-                section="SPECIAL CLAUSES",
-                value="Included",
-            ),
-            ProductDetailItem(
-                key="excl_racing",
-                label="Racing Risks",
-                field_type="static",
-                section="EXCLUDED RISKS",
-                value="Included",
-            ),
-            ProductDetailItem(
-                key="excl_winter",
-                label="Winter sports",
-                field_type="static",
-                section="EXCLUDED RISKS",
-                value="Included",
-            ),
-            ProductDetailItem(
-                key="excl_suicide",
-                label="Suicide or attempted suicide",
-                field_type="static",
-                section="EXCLUDED RISKS",
-                value="Included",
-            ),
-            ProductDetailItem(
-                key="excl_war",
-                label="War and kindred risks",
-                field_type="static",
-                section="EXCLUDED RISKS",
-                value="Included",
-            ),
-            ProductDetailItem(
-                key="excl_liquor",
-                label="Influence of intoxicating Liquor or drugs",
-                field_type="static",
-                section="EXCLUDED RISKS",
-                value="Included",
-            ),
-        ]
+        pa_details = {
+            "OCCUPATION": {"Occupation": "<<text>>"},
+            "BENEFITS": {
+                "Accidental Death": "Kshs. 500,000/-",
+                "Permanent Total Disablement": "Kshs. 500,000/-",
+                "Hospital Cash": "Kshs. 1,000/-",
+                "Accidental temporary total disability": "Kshs. 5,000/- (Weekly benefits 104 weeks)",
+                "Accidental medical expenses": "Kshs. 70,000/-",
+                "Artificial appliances (Accidental Loss)": "Kshs. 10,000/-",
+                "Last expense (Accidental Death)": "Kshs. 50,000/-",
+            },
+            "SPECIAL CLAUSES": [
+                "24hour cover including Piloting and Aircrew duties",
+                "Duty or pleasure",
+                "Worldwide limits",
+                "Disappearance clause",
+                "Age limits 16-65 years",
+            ],
+            "EXCLUDED RISKS": [
+                "Racing Risks",
+                "Winter sports",
+                "Suicide or attempted suicide",
+                "War and kindred risks",
+                "Influence of intoxicating Liquor or drugs",
+            ],
+        }
         upsert_product("Maxpac Personal Accident", "Personal Accident", pa_details)
 
         # PRODUCT: MOTOR PRIVATE
-        motor_details = [
-            ProductDetailItem(
-                key="reg_no",
-                label="Reg. No",
-                input_type="text",
-                field_type="input",
-                section="VEHICLE DETAILS",
-            ),
-            ProductDetailItem(
-                key="make",
-                label="Make",
-                input_type="text",
-                field_type="input",
-                section="VEHICLE DETAILS",
-            ),
-            ProductDetailItem(
-                key="year",
-                label="Year",
-                input_type="number",
-                field_type="input",
-                section="VEHICLE DETAILS",
-            ),
-            ProductDetailItem(
-                key="value",
-                label="Value Kshs.",
-                input_type="number",
-                field_type="input",
-                section="VEHICLE DETAILS",
-                pricing=ProductPricing(type="percentage", value=3.25),
-            ),
-            ProductDetailItem(
-                key="tp_persons",
-                label="Third Party Persons",
-                field_type="static",
-                section="HIGH-END BENEFITS & LIMITS",
-                value="Kshs. 10,000,000.00",
-            ),
-            ProductDetailItem(
-                key="tp_property",
-                label="Third Party Property",
-                field_type="static",
-                section="HIGH-END BENEFITS & LIMITS",
-                value="Kshs. 30,000,000.00",
-            ),
-            ProductDetailItem(
-                key="pass_liability",
-                label="Passengers Legal Liability",
-                field_type="static",
-                section="HIGH-END BENEFITS & LIMITS",
-                value="Kshs. 4,000,000 per person and Kshs. 20,000,000.00 per event",
-            ),
-            ProductDetailItem(
-                key="towing",
-                label="Towing & Recovery",
-                field_type="static",
-                section="HIGH-END BENEFITS & LIMITS",
-                value="Kshs. 100,000.00",
-            ),
-            ProductDetailItem(
-                key="repair_limit",
-                label="Authorized repair limit",
-                field_type="static",
-                section="HIGH-END BENEFITS & LIMITS",
-                value="Kshs. 100,000.00",
-            ),
-            ProductDetailItem(
-                key="windscreen",
-                label="Windscreen/Window glass",
-                field_type="static",
-                section="HIGH-END BENEFITS & LIMITS",
-                value="Fully covered on replacement cost",
-            ),
-            ProductDetailItem(
-                key="mirrors",
-                label="Side mirrors & Housing",
-                field_type="static",
-                section="HIGH-END BENEFITS & LIMITS",
-                value="Replacement Cost Max Kshs. 100,000.00",
-            ),
-            ProductDetailItem(
-                key="exc_od",
-                label="Own Damage and Partial",
-                field_type="static",
-                section="EXCESS",
-                value="2.5% of value minimum Kshs. 15,000/- Max Kshs. 100,000.00",
-            ),
-            ProductDetailItem(
-                key="exc_tp_damage",
-                label="Third Party damage claims",
-                field_type="static",
-                section="EXCESS",
-                value="Kshs. 5,000.00",
-            ),
-            ProductDetailItem(
-                key="exc_tp_injury",
-                label="Third Party Injury",
-                field_type="static",
-                section="EXCESS",
-                value="Nil",
-            ),
-            ProductDetailItem(
-                key="clause_perils",
-                label="Including Special Perils",
-                field_type="static",
-                section="SPECIAL CLAUSES",
-                value="Included",
-            ),
-            ProductDetailItem(
-                key="clause_riot",
-                label="Including riot, Strike and civil commotion",
-                field_type="static",
-                section="SPECIAL CLAUSES",
-                value="Included",
-            ),
-        ]
+        motor_details = {
+            "VEHICLE DETAILS": {
+                "Reg. No": "<<text>>",
+                "Make": "<<text>>",
+                "Year": "<<number>>",
+                "Value Kshs.": "<<number>>",
+            },
+            "HIGH-END BENEFITS & LIMITS": {
+                "Third Party Persons": "Kshs. 10,000,000.00",
+                "Third Party Property": "Kshs. 30,000,000.00",
+                "Passengers Legal Liability": "Kshs. 4,000,000 per person and Kshs. 20,000,000.00 per event",
+                "Towing & Recovery": "Kshs. 100,000.00",
+                "Authorized repair limit": "Kshs. 100,000.00",
+                "Windscreen/Window glass": "Fully covered on replacement cost",
+                "Side mirrors & Housing": "Replacement Cost Max Kshs. 100,000.00",
+            },
+            "EXCESS": {
+                "Own Damage and Partial": "2.5% of value minimum Kshs. 15,000/- Max Kshs. 100,000.00",
+                "Third Party damage claims": "Kshs. 5,000.00",
+                "Third Party Injury": "Nil",
+            },
+            "SPECIAL CLAUSES": [
+                "Including Special Perils",
+                "Including riot, Strike and civil commotion",
+            ],
+        }
         motor_product = upsert_product(
             "Motor Private - Comprehensive", "Motor Private", motor_details
         )
 
         # PRODUCT: DOMESTIC PACKAGE
-        domestic_details = [
-            ProductDetailItem(
-                key="location",
-                label="Location",
-                input_type="text",
-                field_type="input",
-                section="LOCATION",
-            ),
-            ProductDetailItem(
-                key="value",
-                label="Value Kshs.",
-                input_type="number",
-                field_type="input",
-                section="LOCATION",
-                pricing=ProductPricing(type="percentage", value=1.5),
-            ),
-            ProductDetailItem(
-                key="sec_b",
-                label="Section B: (Contents)",
-                field_type="static",
-                section="INTEREST & SUM INSURED",
-                value="Kshs. 6,430,000/- (As per the attached Schedule)",
-            ),
-            ProductDetailItem(
-                key="sec_c",
-                label="Section C: (All Risks)",
-                field_type="static",
-                section="INTEREST & SUM INSURED",
-                value="Kshs. 450,000/- (As per the attached Schedule)",
-            ),
-        ]
+        domestic_details = {
+            "LOCATION": {"Location": "<<text>>", "Value Kshs.": "<<number>>"},
+            "INTEREST & SUM INSURED": {
+                "Section B: (Contents)": "Kshs. 6,430,000/- (As per the attached Schedule)",
+                "Section C: (All Risks)": "Kshs. 450,000/- (As per the attached Schedule)",
+            },
+        }
         upsert_product(
             "Domestic Package - HomeShield", "Domestic Package", domestic_details
         )
@@ -375,20 +158,9 @@ def create_mock_data() -> None:
                 client_id=client.id,
                 product_id=motor_product.id,
                 status="Active",
-            )
-            session.add(policy)
-            session.commit()
-            session.refresh(policy)
-
-        # 4. MOTOR RISK ITEM
-        item = session.exec(
-            select(RiskItem).where(RiskItem.policy_id == policy.id)
-        ).first()
-        if not item:
-            item = RiskItem(
-                policy_id=policy.id,
+                start_date=date(2025, 8, 2),
+                end_date=date(2026, 8, 1),
                 description="KCM 780L - Toyota Landcruiser Prado",
-                cover_description="Comprehensive",
                 total_premium=153438.0,
                 premium_breakdown={
                     "basic": 152750.0,
@@ -401,23 +173,46 @@ def create_mock_data() -> None:
                     "value": 4700000.0,
                 },
             )
-            session.add(item)
+            session.add(policy)
             session.commit()
-            session.refresh(item)
+            session.refresh(policy)
         else:
-            # Update item snapshot details if needed
-            item.risk_details = {
+            # Update policy details if needed
+            policy.start_date = date(2025, 8, 2)
+            policy.end_date = date(2026, 8, 1)
+            policy.description = "KCM 780L - Toyota Landcruiser Prado"
+            policy.total_premium = 153438.0
+            policy.premium_breakdown = {
+                "basic": 152750.0,
+                "levies": {"trainingLevy": 306.0, "phcf": 382.0},
+            }
+            policy.risk_details = {
                 "reg_no": "KCM 780L",
                 "make": "Toyota Landcruiser Prado",
                 "year": 2016,
                 "value": 4700000.0,
             }
-            session.add(item)
+            session.add(policy)
+            session.commit()
 
         # 5. MOTOR RISK NOTE
         rn = session.exec(
             select(RiskNote).where(RiskNote.policy_id == policy.id)
         ).first()
+        
+        # Snapshot helper
+        def get_policy_snapshot(p: Policy):
+            dump = p.model_dump()
+            # Convert dates to strings for JSON
+            if dump.get("start_date"): dump["start_date"] = str(dump["start_date"])
+            if dump.get("end_date"): dump["end_date"] = str(dump["end_date"])
+            if dump.get("created_at"): dump["created_at"] = str(dump["created_at"])
+            # Remove UUIDs if needed, or keep as strings
+            dump["id"] = str(dump["id"])
+            dump["client_id"] = str(dump["client_id"])
+            if dump.get("product_id"): dump["product_id"] = str(dump["product_id"])
+            return dump
+
         if not rn:
             rn = RiskNote(
                 policy_id=policy.id,
@@ -430,34 +225,14 @@ def create_mock_data() -> None:
                 commission_amount=15275.0,
                 total_amount=153438.0,
                 status="Active",
-                items_snapshot={
-                    "items": [
-                        {
-                            "name": motor_product.name,
-                            "description": item.description,
-                            "cover": item.cover_description,
-                            "premium": item.total_premium,
-                            "details": item.risk_details,
-                        }
-                    ]
-                },
+                policy_snapshot=get_policy_snapshot(policy),
                 special_clauses=[],
             )
             session.add(rn)
             session.commit()
         else:
-            # IMPORTANT: Update snapshot to reflect latest product fields
-            rn.items_snapshot = {
-                "items": [
-                    {
-                        "name": motor_product.name,
-                        "description": item.description,
-                        "cover": item.cover_description,
-                        "premium": item.total_premium,
-                        "details": item.risk_details,
-                    }
-                ]
-            }
+            # IMPORTANT: Update snapshot to reflect latest policy fields
+            rn.policy_snapshot = get_policy_snapshot(policy)
             session.add(rn)
             session.commit()
 
