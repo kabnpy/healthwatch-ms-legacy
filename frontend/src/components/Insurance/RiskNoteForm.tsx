@@ -75,8 +75,7 @@ export const RiskNoteForm = ({
   // Populate form when data is loaded
   useEffect(() => {
     if (existingRiskNote) {
-      const items = (existingRiskNote.items_snapshot?.items as any[]) || []
-      const riskItem = items[0] || {}
+      const policySnapshot = (existingRiskNote.policy_snapshot as any) || {}
       const existingRN = existingRiskNote as any
 
       form.reset({
@@ -86,25 +85,31 @@ export const RiskNoteForm = ({
         status: existingRN.status || "Draft",
         net_premium: existingRiskNote.net_premium,
         commission_amount: existingRiskNote.commission_amount,
-        details: riskItem.details || {},
+        details: policySnapshot.risk_details || policy?.risk_details || {},
       })
+    } else if (policy) {
+        form.reset({
+            transaction_type: "New Business",
+            start_date: policy.start_date || new Date().toISOString().split("T")[0],
+            end_date: policy.end_date || new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split("T")[0],
+            status: "Draft",
+            net_premium: policy.total_premium || 0,
+            commission_amount: (policy.total_premium || 0) * 0.1,
+            details: policy.risk_details || {},
+        })
     }
-  }, [existingRiskNote, form])
+  }, [existingRiskNote, policy, form])
 
   const onSubmit: SubmitHandler<FormData> = (data) => {
     if (!riskNoteId) return
 
-    // Prepare items snapshot
-    const product = policy?.product
-    const items_snapshot = {
-      items: [
-        {
-          name: product?.name || "Insurance Item",
-          description: `${product?.class_of_insurance || "Insurance"} cover`,
-          details: data.details,
-          premium: data.net_premium,
-        },
-      ],
+    // Preparing the snapshot of the policy
+    const policy_snapshot = {
+        ...(policy || {}),
+        risk_details: data.details,
+        start_date: data.start_date,
+        end_date: data.end_date,
+        total_premium: data.net_premium,
     }
 
     // Basic tax calculation for now (matching seeding logic)
@@ -114,7 +119,7 @@ export const RiskNoteForm = ({
 
     const payload = {
       ...data,
-      items_snapshot,
+      policy_snapshot,
       taxes: { trainingLevy, phcf },
       total_amount,
     }

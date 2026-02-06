@@ -1,4 +1,3 @@
-import { useEffect, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import {
@@ -9,7 +8,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
 import {
   Select,
   SelectContent,
@@ -30,44 +28,19 @@ export function StepAsset({ defaultValues, onNext }: StepAssetProps) {
   const form = useForm({
     defaultValues: {
       product_id: defaultValues?.product_id || "",
-      asset: {
-        description: defaultValues?.asset?.description || "",
-        details: defaultValues?.asset?.details || {},
-      },
     },
   })
 
   const selectedProductId = form.watch("product_id")
 
-  const selectedProduct = useMemo(() => {
-    return productsData?.data.find((p) => p.id === selectedProductId)
-  }, [selectedProductId, productsData])
-
-  const inputFields = useMemo(() => {
-    return ((selectedProduct as any)?.product_details || []).filter(
-      (f: any) => f.field_type === "input" || f.field_type === "optional",
-    )
-  }, [selectedProduct])
-
-  // Helper to generate a summary description based on the fields
-  useEffect(() => {
-    const details = form.getValues("asset.details")
-    if (selectedProduct && Object.keys(details).length > 0) {
-      // Create a sensible description from the first 2-3 input fields
-      const summaryParts = inputFields
-        .slice(0, 2)
-        .map((f: any) => details[f.key])
-        .filter((v: any) => !!v)
-
-      if (summaryParts.length > 0) {
-        form.setValue("asset.description", summaryParts.join(" - "))
-      }
-    }
-  }, [selectedProduct, inputFields, form.getValues, form.setValue])
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onNext)} className="space-y-6">
+        <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 mb-6">
+            <p className="text-sm text-blue-700 font-medium">Step 1: Select Insurance Product</p>
+            <p className="text-xs text-blue-600 mt-1">Choose the baseline product for this policy.</p>
+        </div>
+
         <FormField
           control={form.control}
           name="product_id"
@@ -76,8 +49,8 @@ export function StepAsset({ defaultValues, onNext }: StepAssetProps) {
               <FormLabel>Insurance Product</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a product" />
+                  <SelectTrigger className="h-12 text-base">
+                    <SelectValue placeholder="Search or select a product..." />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -93,86 +66,12 @@ export function StepAsset({ defaultValues, onNext }: StepAssetProps) {
           )}
         />
 
-        {selectedProduct && (
-          <div className="space-y-4 border-t pt-6">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-              {selectedProduct.class_of_insurance} Details
-            </h3>
-
-            <div className="grid grid-cols-2 gap-4">
-              {inputFields.map((field: any) => (
-                <FormField
-                  key={field.key}
-                  control={form.control}
-                  name={`asset.details.${field.key}`}
-                  render={({ field: inputField }) => (
-                    <FormItem>
-                      <FormLabel>{field.label}</FormLabel>
-                      <FormControl>
-                        <Input
-                          type={field.type === "number" ? "number" : "text"}
-                          placeholder={
-                            field.description ||
-                            `Enter ${field.label.toLowerCase()}`
-                          }
-                          {...inputField}
-                          value={inputField.value || ""}
-                          onChange={(e) =>
-                            inputField.onChange(
-                              field.type === "number"
-                                ? e.target.valueAsNumber
-                                : e.target.value,
-                            )
-                          }
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              ))}
-            </div>
-
-            <FormField
-              control={form.control}
-              name="asset.description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Summary Description</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="E.g. Toyota Harrier - KCA 123B"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription className="text-[10px]">
-                    This is how the asset will be displayed in lists.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        )}
-
-        <div className="flex justify-end pt-4">
-          <Button type="submit" disabled={!selectedProductId}>
-            Next: Coverage & Financials
+        <div className="flex justify-end pt-8">
+          <Button type="submit" disabled={!selectedProductId} size="lg" className="px-10">
+            Next: Product Details
           </Button>
         </div>
       </form>
     </Form>
-  )
-}
-
-function FormDescription({
-  children,
-  className,
-}: {
-  children: React.ReactNode
-  className?: string
-}) {
-  return (
-    <p className={`text-sm text-muted-foreground ${className}`}>{children}</p>
   )
 }

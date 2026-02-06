@@ -11,6 +11,7 @@ import { RiskNoteTemplate } from "@/components/Documents/templates/RiskNoteTempl
 import { RiskNoteForm } from "@/components/Insurance/RiskNoteForm"
 import PendingItems from "@/components/Pending/PendingItems"
 import { PolicyHeader } from "@/components/Policies/Dashboard/PolicyHeader"
+import { AssetCard } from "@/components/Policies/Dashboard/AssetCard"
 import { getColumns as getRiskNoteColumns } from "@/components/RiskNotes/columns"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -187,6 +188,8 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
 
             {/* Sidebar: Live Data & Quick Actions */}
             <div className="lg:col-span-1 space-y-6">
+              <AssetCard policy={policy} />
+
               {/* Live Expiry Sidebar Card */}
               <Card className="border-l-4 border-l-blue-500 shadow-sm">
                 <CardHeader className="pb-2">

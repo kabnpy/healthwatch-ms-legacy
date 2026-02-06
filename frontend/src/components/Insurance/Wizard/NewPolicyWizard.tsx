@@ -1,4 +1,5 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
+import { RiskNotesService } from "@/client"
 import {
   Dialog,
   DialogContent,
@@ -8,15 +9,17 @@ import {
 import useCustomToast from "@/hooks/useCustomToast"
 import {
   useCreatePolicy,
-  useCreateRiskItem,
   useCreateRiskNote,
+  useUpdateRiskNote,
+  useProducts,
 } from "@/hooks/useInsurance"
-import type { WizardState } from "@/types/wizard"
 import { StepAsset } from "./StepAsset"
+import { StepBlueprint } from "./StepBlueprint"
 import { StepFinancials } from "./StepFinancials"
 import { StepReview } from "./StepReview"
+import { cn } from "@/lib/utils"
 
-const steps = ["Product & Asset", "Financials", "Review"]
+const steps = ["Product", "Details", "Financials", "Review"]
 
 interface NewPolicyWizardProps {
   clientId: string
@@ -33,18 +36,15 @@ export function NewPolicyWizard({
 }: NewPolicyWizardProps) {
   const [step, setStep] = useState(0)
   const { showSuccessToast, showErrorToast } = useCustomToast()
+  const { data: productsData } = useProducts()
 
   const createPolicy = useCreatePolicy()
-  const createRiskItem = useCreateRiskItem()
   const createRiskNote = useCreateRiskNote()
+  const updateRiskNote = useUpdateRiskNote()
 
-  const [state, setState] = useState<Partial<WizardState>>({
+  const [state, setState] = useState<any>({
     product_id: "",
-    asset: {
-      identifier: "",
-      description: "",
-      details: {},
-    },
+    details: {},
     financials: {
       sumInsured: 0,
       rate: 4.5,
@@ -56,11 +56,20 @@ export function NewPolicyWizard({
       excessProtector: false,
       passengerLiability: false,
     },
-    benefitOverrides: {},
   })
 
+  const selectedProduct = useMemo(() => {
+    return productsData?.data.find((p) => p.id === state.product_id)
+  }, [state.product_id, productsData])
+
   const handleNext = (data: any) => {
-    setState((prev) => ({ ...prev, ...data }))
+    if (step === 0) {
+        setState((prev: any) => ({ ...prev, product_id: data.product_id }))
+    } else if (step === 1) {
+        setState((prev: any) => ({ ...prev, details: data }))
+    } else {
+        setState((prev: any) => ({ ...prev, ...data }))
+    }
     setStep((s) => s + 1)
   }
 
@@ -70,33 +79,9 @@ export function NewPolicyWizard({
 
   const handleIssuePolicy = async () => {
     try {
-      // 1. Create Policy (This also creates an initial blank Risk Note in backend)
-      const policy = await createPolicy.mutateAsync({
-        policy_number: `P/${Math.floor(Math.random() * 1000000)}`,
-        client_id: clientId,
-        product_id: state.product_id,
-        status: "Active",
-      })
+      if (!selectedProduct) throw new Error("No product selected")
 
-      // 2. Create Risk Item
-      const riskItem = await createRiskItem.mutateAsync({
-        policyId: policy.id,
-        data: {
-          policy_id: policy.id,
-          description: state.asset?.description || "Insurance Asset",
-          cover_description: "Standard",
-          total_premium: 0,
-          premium_breakdown: {},
-          risk_details: state.asset?.details || {},
-          version_number: 1,
-          is_active: true,
-        },
-      })
-
-      // 3. Update the Risk Note (The backend created a draft, but we want to finalize it)
-      // For MVP simplicity, we create a SECOND finalized Risk Note and the first one remains as the "New Business" initiator
-      // Actually, it's better to just create a new Risk Note with full details.
-
+      // 1. Calculate Financials
       const { calculatePremium } = await import("@/lib/calculator")
       const calc = calculatePremium({
         sumInsured: state.financials?.sumInsured || 0,
@@ -105,42 +90,91 @@ export function NewPolicyWizard({
         hasExcessProtector: state.extensions?.excessProtector || false,
       })
 
-      await createRiskNote.mutateAsync({
-        policy_id: policy.id,
-        transaction_type: "New Business",
-        start_date: state.financials?.startDate || "",
-        end_date: new Date(
-          new Date(state.financials?.startDate || "").setFullYear(
-            new Date(state.financials?.startDate || "").getFullYear() + 1,
-          ),
-        )
-          .toISOString()
-          .split("T")[0],
-        net_premium:
-          calc.breakdown.basic +
-          calc.breakdown.extensions.reduce((acc, curr) => acc + curr.amount, 0),
-        taxes: calc.breakdown.levies as any,
-        commission_amount: calc.breakdown.basic * 0.125,
-        total_amount: calc.breakdown.total,
+      const startDate = state.financials?.startDate || new Date().toISOString().split("T")[0]
+      const endDate = new Date(
+        new Date(startDate).setFullYear(
+          new Date(startDate).getFullYear() + 1,
+        ),
+      ).toISOString().split("T")[0]
+
+      // 2. Create Policy with all details (This auto-creates a Draft Risk Note in backend)
+      console.log("Creating policy with data:", {
+        policy_number: `P/${Math.floor(Math.random() * 1000000)}`,
+        client_id: clientId,
+        product_id: state.product_id,
         status: "Active",
-        items_snapshot: {
-          items: [
-            {
-              name: (policy.product as any)?.name || "Asset",
-              description: riskItem.description,
-              details: state.asset?.details,
-              premium: calc.breakdown.total,
+        start_date: startDate,
+        end_date: endDate,
+        description: state.details?.description || selectedProduct.name,
+        total_premium: calc.breakdown.total,
+        premium_breakdown: calc.breakdown as any,
+        risk_details: state.details,
+      })
+      const policy = await createPolicy.mutateAsync({
+        policy_number: `P/${Math.floor(Math.random() * 1000000)}`,
+        client_id: clientId,
+        product_id: state.product_id,
+        status: "Active",
+        start_date: startDate,
+        end_date: endDate,
+        description: state.details?.description || selectedProduct.name,
+        total_premium: calc.breakdown.total,
+        premium_breakdown: calc.breakdown as any,
+        risk_details: state.details,
+      })
+      console.log("Policy created successfully:", policy)
+
+      // 3. Finalize Risk Note
+      // FIND THE AUTO-CREATED DRAFT RISK NOTE
+      console.log("Fetching draft risk note for policy:", policy.id)
+      const riskNotesResponse = await RiskNotesService.readRiskNotes({ policyId: policy.id })
+      console.log("Risk notes found:", riskNotesResponse.data)
+      const draftRiskNote = riskNotesResponse.data.find(rn => rn.status === "Draft")
+
+      if (draftRiskNote) {
+        console.log("Updating draft risk note:", draftRiskNote.id)
+        await updateRiskNote.mutateAsync({
+          id: draftRiskNote.id,
+          data: {
+            transaction_type: "New Business",
+            start_date: startDate,
+            end_date: endDate,
+            net_premium: calc.breakdown.basic + (calc.breakdown.extensions?.reduce((acc: number, curr: any) => acc + curr.amount, 0) || 0),
+            taxes: calc.breakdown.levies as any,
+            commission_amount: calc.breakdown.basic * ((selectedProduct.default_commission_rate || 10.0) / 100),
+            total_amount: calc.breakdown.total,
+            status: "Active",
+            policy_snapshot: {
+                id: policy.id,
+                policy_number: policy.policy_number,
+                client_id: policy.client_id,
+                product_id: policy.product_id,
+                status: policy.status,
+                start_date: policy.start_date,
+                end_date: policy.end_date,
+                description: policy.description,
+                total_premium: policy.total_premium,
+                risk_details: policy.risk_details,
+                premium_breakdown: policy.premium_breakdown,
             },
-          ],
-        },
-        special_clauses: [],
-      } as any)
+            special_clauses: [],
+          }
+        })
+        console.log("Risk note updated successfully")
+      } else {
+        console.warn("No draft risk note found to update")
+      }
 
       showSuccessToast("Policy Issued Successfully!")
       onSuccess?.()
       onClose()
-    } catch (_error) {
-      showErrorToast("Failed to issue policy")
+    } catch (err: any) {
+      console.error("Policy Issuance Error:", err)
+      let message = "Failed to issue policy"
+      if (err.body?.detail) {
+        message = typeof err.body.detail === 'string' ? err.body.detail : JSON.stringify(err.body.detail)
+      }
+      showErrorToast(message)
     }
   }
 
@@ -148,7 +182,7 @@ export function NewPolicyWizard({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>New Policy Wizard - {steps[step]}</DialogTitle>
+          <DialogTitle>Issue New Policy - {steps[step]}</DialogTitle>
         </DialogHeader>
 
         <div className="py-4">
@@ -157,43 +191,47 @@ export function NewPolicyWizard({
             {steps.map((s, i) => (
               <div key={i} className="flex flex-col items-center flex-1">
                 <div
-                  className={`size-8 rounded-full flex items-center justify-center text-sm font-bold ${i <= step ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
+                  className={`size-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${i <= step ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
                 >
                   {i + 1}
                 </div>
-                <span className="text-xs mt-1">{s}</span>
+                <span className={cn("text-[10px] mt-1 font-bold uppercase tracking-wider", i <= step ? "text-primary" : "text-muted-foreground")}>{s}</span>
               </div>
             ))}
           </div>
 
           {step === 0 && (
             <StepAsset
-              defaultValues={{
-                product_id: state.product_id,
-                asset: state.asset,
-              }}
-              onNext={(data) => handleNext(data)}
+              defaultValues={{ product_id: state.product_id }}
+              onNext={handleNext}
             />
           )}
           {step === 1 && (
+            <StepBlueprint
+              productId={state.product_id}
+              defaultValues={state.details}
+              onNext={handleNext}
+              onBack={handleBack}
+            />
+          )}
+          {step === 2 && (
             <StepFinancials
               productId={state.product_id || ""}
               defaultValues={{
                 financials: state.financials,
                 extensions: state.extensions,
               }}
-              onNext={(data) => handleNext(data)}
+              onNext={handleNext}
               onBack={handleBack}
             />
           )}
-          {step === 2 && (
+          {step === 3 && (
             <StepReview
-              state={state as WizardState}
+              state={state}
               onIssue={handleIssuePolicy}
               onBack={handleBack}
               isSubmitting={
                 createPolicy.isPending ||
-                createRiskItem.isPending ||
                 createRiskNote.isPending
               }
             />

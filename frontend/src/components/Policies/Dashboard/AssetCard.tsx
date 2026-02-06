@@ -1,25 +1,25 @@
 import { Car } from "lucide-react"
-import type { RiskItemPublic } from "@/client"
+import type { PolicyPublic } from "@/client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface AssetCardProps {
-  item?: RiskItemPublic
+  policy?: PolicyPublic
 }
 
-export function AssetCard({ item }: AssetCardProps) {
-  if (!item) {
+export function AssetCard({ policy }: AssetCardProps) {
+  if (!policy) {
     return (
       <Card className="h-full border-dashed bg-muted/40">
         <CardContent className="flex flex-col items-center justify-center h-full py-12 text-muted-foreground">
           <Car className="size-12 mb-4 opacity-50" />
-          <p>No Risk Item Found</p>
+          <p>No Policy Data Found</p>
         </CardContent>
       </Card>
     )
   }
 
   // Assuming details is a generic dict
-  const details = (item.risk_details as Record<string, any>) || {}
+  const details = (policy.risk_details as Record<string, any>) || {}
 
   return (
     <Card className="h-full shadow-sm">
@@ -32,9 +32,9 @@ export function AssetCard({ item }: AssetCardProps) {
       <CardContent>
         <div className="flex flex-col gap-4">
           <div>
-            <div className="text-xl font-bold truncate">{item.description}</div>
+            <div className="text-xl font-bold truncate">{policy.description}</div>
             <p className="text-sm text-muted-foreground">
-              {item.cover_description}
+              {policy.product?.class_of_insurance || "Insurance"} cover
             </p>
           </div>
 
