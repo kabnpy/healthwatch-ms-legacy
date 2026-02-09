@@ -1,6 +1,13 @@
 # Project Status (Session End: 2026-02-06)
 
 ## Finished
+- **Standardized Wizard Layout**: Refactored the New Policy Wizard to use a compact `max-w-3xl` modal with a stacked layout (Inputs then Preview), significantly improving readability and eliminating layout issues on smaller screens.
+- **Motor Private Premium Calculator**: Implemented tiered rate logic with exclusive higher limits, "High-End" benefits (inclusive PVT/Excess), and "OM Rescue Plus" benefit for Motor Private covers.
+- **Policy Wizard Value Sync**: Implemented logic to automatically transfer "Value" from Step 1 (Details) to "Sum Insured" in Step 2 (Financials) for percentage-based covers.
+- **Standardized Client Table**:
+    - Removed the "Primary Contact" column.
+    - Unified the "Client Type" badge styling (removed visual distinction between Corporate and Individual).
+- **Granular Postal Address Refinement**: Successfully split the single address field into `postal_number`, `postal_code`, and `town` across backend models, database, and all frontend components/templates.
 - **Consolidated Semantic Layout (Information Density)**
     - **Unified Table Engine**: Refactored `RiskNoteTable` to render the *entire* document body within a single semantic `<table>`.
     - **Section Spanning**: Implemented section headers as internal table rows with `colSpan={2}`, improving visual flow and reducing vertical white space.
@@ -27,8 +34,11 @@
 - **Frontend Build Recovery**: Resolving persistent TypeScript errors in the auto-generated client and components.
 
 ## Next Steps
-1. **Frontend Build Verification**: Finalize TypeScript fixes in `DocumentViewer.tsx` and `RiskNoteForm.tsx` to ensure a clean production build after system restart.
-2. **Build Verification**: Run `npm run build` until successful.
+1. **Invoice & Cover Refinement**:
+    - **Decouple Invoices**: Refactor backend to create a new Invoice for every Risk Note (stop auto-merging).
+    - **Cover Display Names**: Implement "Motor Private - [Reg No]" formatting in the frontend.
+2. **Frontend Build Verification**: Finalize TypeScript fixes in `DocumentViewer.tsx` and `RiskNoteForm.tsx` to ensure a clean production build after system restart.
+3. **Build Verification**: Run `npm run build` until successful.
 
 ## Architectural Decisions
 - **Unified Policy Entity**: 1 Policy = 1 Cover Instance. This simplifies data capture and document generation significantly.
