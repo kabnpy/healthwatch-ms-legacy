@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { useProducts } from "@/hooks/useInsurance"
 import { calculatePremium } from "@/lib/calculator"
+import type { WizardFinancials, WizardExtensions, EnhancedProduct } from "@/types/insurance"
 
 const financialsSchema = z.object({
   financials: z.object({
@@ -32,7 +33,10 @@ const financialsSchema = z.object({
 })
 
 interface StepFinancialsProps {
-  defaultValues: any
+  defaultValues: {
+    financials: WizardFinancials
+    extensions: WizardExtensions
+  }
   onNext: (data: any) => void
   onBack: () => void
   productId: string
@@ -47,7 +51,7 @@ export function StepFinancials({
   const { data: productsData } = useProducts()
 
   const selectedProduct = useMemo(() => {
-    return productsData?.data.find((p) => p.id === productId)
+    return productsData?.data.find((p) => p.id === productId) as EnhancedProduct | undefined
   }, [productId, productsData])
 
   const form = useForm({

@@ -1,12 +1,13 @@
-import { useMemo } from "react"
+import React, { useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { LoadingButton } from "@/components/ui/loading-button"
 import { useProducts } from "@/hooks/useInsurance"
 import { calculatePremium } from "@/lib/calculator"
+import type { WizardState, EnhancedProduct } from "@/types/insurance"
 
 interface StepReviewProps {
-  state: any
+  state: WizardState
   onIssue: () => void
   onBack: () => void
   isSubmitting?: boolean
@@ -21,7 +22,7 @@ export function StepReview({
   const { data: productsData } = useProducts()
 
   const selectedProduct = useMemo(() => {
-    return productsData?.data.find((p) => p.id === state.product_id)
+    return productsData?.data.find((p) => p.id === state.product_id) as EnhancedProduct | undefined
   }, [state.product_id, productsData])
 
   const calculation = calculatePremium({
@@ -52,17 +53,28 @@ export function StepReview({
               <span className="font-bold">{selectedProduct?.name}</span>
             </div>
             <div className="border-t pt-2 mt-2 space-y-1">
-              {Object.entries(state.details || {}).map(([key, value]) => (
-                <div key={key} className="flex justify-between text-xs">
-                  <span className="text-muted-foreground font-medium">
-                    {key}:
-                  </span>
-                  <span className="font-mono">{String(value)}</span>
-                </div>
-              ))}
-              {Object.keys(state.details || {}).length === 0 && (
-                <p className="text-xs text-muted-foreground italic">No manual inputs required.</p>
-              )}
+              {(() => {
+                const renderEntries = (obj: any, prefix = ""): React.ReactNode => {
+                  return Object.entries(obj || {}).map(([key, value]) => {
+                    const label = prefix ? `${prefix} > ${key}` : key
+                    if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+                      return <React.Fragment key={label}>{renderEntries(value, label)}</React.Fragment>
+                    }
+                    return (
+                      <div key={label} className="flex justify-between text-xs">
+                        <span className="text-muted-foreground font-medium">
+                          {label.replace(/_/g, " ")}:
+                        </span>
+                        <span className="font-mono">{String(value)}</span>
+                      </div>
+                    )
+                  })
+                }
+                const entries = renderEntries(state.details)
+                return Object.keys(state.details || {}).length === 0 ? (
+                  <p className="text-xs text-muted-foreground italic">No manual inputs required.</p>
+                ) : entries
+              })()}
             </div>
           </CardContent>
         </Card>

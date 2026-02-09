@@ -42,31 +42,62 @@ export const slugify = (text: string): string => {
     .replace(/-+$/, "") // Trim - from end of text
 }
 
-export const getPolicyDisplayName = (riskNote: any): string => {
-  const policySnapshot = riskNote?.policy_snapshot || {}
-  const riskDetails = policySnapshot?.risk_details || {}
-  
-  // Try to find Product/Class Name
-  const className = 
-    policySnapshot?.product?.class_of_insurance || 
-    riskNote?.policy?.product?.class_of_insurance || 
-    "Insurance Policy"
+/**
+ * Deeply searches an object for a value matching any of the provided keys.
+ */
+export const recursiveSearch = (obj: any, targetKeys: string[]): any => {
+  if (!obj || typeof obj !== "object") return null
 
-  if (className.toLowerCase().includes("motor private")) {
-    // Look for registration number in VEHICLE DETAILS
-    const vehicleDetails = riskDetails["VEHICLE DETAILS"] || {}
-    const regNo = vehicleDetails["reg_no"] || vehicleDetails["Reg No"] || ""
-    
-    if (regNo) {
-      return `${className} - ${regNo}`
+  // 1. Try immediate keys (case-insensitive)
+  for (const [key, value] of Object.entries(obj)) {
+    if (targetKeys.some(tk => tk.toLowerCase() === key.toLowerCase().trim())) {
+      if (value && typeof value === "string" && !value.includes("<<")) {
+        return value
+      }
     }
   }
 
-  // Fallback to description if available
-  const description = policySnapshot?.description || riskNote?.policy?.description
-  if (description) {
-    return `${className} - ${description}`
+  // 2. Recurse into children
+  for (const value of Object.values(obj)) {
+    if (typeof value === "object" && value !== null) {
+      const found = recursiveSearch(value, targetKeys)
+      if (found) return found
+    }
   }
 
-  return className
+  return null
+}
+
+export const getPolicyDisplayName = (riskNote: any): string => {
+  const policySnapshot = riskNote?.policy_snapshot || {}
+  const riskDetails = policySnapshot?.risk_details || riskNote?.policy?.risk_details || {}
+  
+  // 1. Determine Base Class Name
+  const className = 
+    policySnapshot?.product?.class_of_insurance || 
+    riskNote?.policy?.product?.class_of_insurance || 
+    policySnapshot?.product?.name ||
+    riskNote?.policy?.product?.name ||
+    "Insurance Policy"
+
+  const trimmedClass = className.trim()
+
+  // 2. Robust Extraction for Motor Private
+  if (trimmedClass.toLowerCase().includes("motor private")) {
+    const regNo = recursiveSearch(riskDetails, ["reg_no", "Reg No", "Reg. No", "Registration"])
+    if (regNo) {
+      return `${trimmedClass} - ${regNo.trim()}`
+    }
+  }
+
+  // 3. General Redundancy Check for Description
+  const description = policySnapshot?.description || riskNote?.policy?.description
+  if (description) {
+    const trimmedDesc = description.trim()
+    if (trimmedDesc && trimmedDesc.toLowerCase() !== trimmedClass.toLowerCase()) {
+      return `${trimmedClass} - ${trimmedDesc}`
+    }
+  }
+
+  return trimmedClass
 }

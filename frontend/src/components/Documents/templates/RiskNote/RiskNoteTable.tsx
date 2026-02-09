@@ -1,12 +1,7 @@
 import React from "react"
-import { cn } from "@/lib/utils"
 import { Plus, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-
-interface RiskNoteSection {
-  name: string
-  content: Record<string, any> | any[] | string | React.ReactNode
-}
+import type { RiskNoteSection, RiskNoteContentValue } from "@/types/insurance"
 
 interface RiskNoteTableProps {
   sections: RiskNoteSection[]
@@ -27,7 +22,7 @@ export const RiskNoteTable = ({
   const handleValueChange = (sectionName: string, key: string, newValue: any) => {
     if (!onChange) return
     const section = sections.find(s => s.name === sectionName)
-    if (section && typeof section.content === "object" && !Array.isArray(section.content)) {
+    if (section && typeof section.content === "object" && section.content !== null && !Array.isArray(section.content)) {
         const updatedContent = { ...(section.content as object), [key]: newValue }
         onChange(sectionName, updatedContent)
     }
@@ -36,7 +31,7 @@ export const RiskNoteTable = ({
   const handleRemoveRow = (sectionName: string, key: string) => {
     if (!onChange) return
     const section = sections.find(s => s.name === sectionName)
-    if (section && typeof section.content === "object" && !Array.isArray(section.content)) {
+    if (section && typeof section.content === "object" && section.content !== null && !Array.isArray(section.content)) {
         const content = section.content as Record<string, any>
         const { [key]: _, ...restContent } = content
         onChange(sectionName, restContent)
@@ -46,9 +41,27 @@ export const RiskNoteTable = ({
   const handleAddRow = (sectionName: string) => {
     if (!onChange) return
     const section = sections.find(s => s.name === sectionName)
-    if (section && typeof section.content === "object" && !Array.isArray(section.content)) {
-        onChange(sectionName, { ...section.content, ["New Field"]: "New Value" })
+    if (section && typeof section.content === "object" && section.content !== null && !Array.isArray(section.content)) {
+        onChange(sectionName, { ...(section.content as Record<string, any>), ["New Field"]: "New Value" })
     }
+  }
+
+  const renderValue = (v: RiskNoteContentValue): React.ReactNode => {
+    if (v === null || v === undefined) return "—"
+    if (React.isValidElement(v)) return v
+    if (typeof v === "object") {
+        if (Array.isArray(v)) {
+            return (
+                <ul className="list-disc list-inside">
+                    {v.map((item, i) => <li key={i}>{renderValue(item)}</li>)}
+                </ul>
+            )
+        }
+        // If it's a nested object but we are already in a table row, just JSON stringify or show summary
+        return JSON.stringify(v)
+    }
+    const strV = String(v)
+    return strV.startsWith("<<") ? "—" : strV
   }
 
   const renderContentCell = (section: RiskNoteSection) => {
@@ -65,7 +78,7 @@ export const RiskNoteTable = ({
         <ul className="list-disc list-inside space-y-1">
           {value.map((item, idx) => (
             <li key={idx} className="text-[11px] text-black leading-tight">
-              {String(item)}
+              {renderValue(item)}
             </li>
           ))}
         </ul>
@@ -88,17 +101,14 @@ export const RiskNoteTable = ({
                                         {isEditable ? (
                                             <input
                                                 type="text"
-                                                value={String(v)}
+                                                value={typeof v === "object" ? JSON.stringify(v) : String(v)}
                                                 onChange={(e) => handleValueChange(section.name, k, e.target.value)}
                                                 className="w-full bg-transparent border-none text-[11px] focus:ring-1 focus:ring-primary rounded px-1 -ml-1 h-7"
                                             />
                                         ) : (
-                                            <span className={cn(
-                                                "text-[11px] text-black leading-tight",
-                                                String(v).startsWith("<<") && "text-slate-400 italic"
-                                            )}>
-                                                {String(v).startsWith("<<") ? "—" : String(v)}
-                                            </span>
+                                            <div className="text-[11px] text-black leading-tight">
+                                                {renderValue(v)}
+                                            </div>
                                         )}
                                     </div>
                                     {isEditable && (

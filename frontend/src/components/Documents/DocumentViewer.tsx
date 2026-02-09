@@ -19,6 +19,7 @@ import { InvoiceTemplate } from "./templates/InvoiceTemplate"
 import { RiskNoteTemplate } from "./templates/RiskNoteTemplate"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
+import type { EnhancedRiskNote, EnhancedPolicy } from "@/types/insurance"
 
 // --- Types ---
 
@@ -116,9 +117,9 @@ function RiskNoteLoader({ id }: { id: string }) {
 
   return (
     <RiskNoteTemplate 
-        riskNote={riskNote} 
+        riskNote={riskNote as EnhancedRiskNote} 
         client={client} 
-        policy={policy} 
+        policy={policy as EnhancedPolicy} 
         isEditable={riskNote.status === "Draft"}
         onSave={(snap) => mutation.mutate(snap)}
     />

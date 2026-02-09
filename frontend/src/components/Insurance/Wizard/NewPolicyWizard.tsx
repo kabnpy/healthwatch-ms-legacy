@@ -18,6 +18,8 @@ import { StepBlueprint } from "./StepBlueprint"
 import { StepFinancials } from "./StepFinancials"
 import { StepReview } from "./StepReview"
 import { cn } from "@/lib/utils"
+import { injectWizardData } from "@/utils/documentData"
+import type { WizardState, EnhancedProduct } from "@/types/insurance"
 
 const steps = ["Product", "Details", "Financials", "Review"]
 
@@ -42,7 +44,7 @@ export function NewPolicyWizard({
   const createRiskNote = useCreateRiskNote()
   const updateRiskNote = useUpdateRiskNote()
 
-  const [state, setState] = useState<any>({
+  const [state, setState] = useState<WizardState>({
     product_id: "",
     details: {},
     financials: {
@@ -55,41 +57,46 @@ export function NewPolicyWizard({
       pvt: false,
       excessProtector: false,
       passengerLiability: false,
+      omRescuePlus: false,
     },
   })
 
   const selectedProduct = useMemo(() => {
-    return productsData?.data.find((p) => p.id === state.product_id)
+    return productsData?.data.find((p) => p.id === state.product_id) as EnhancedProduct | undefined
   }, [state.product_id, productsData])
 
   const handleNext = (data: any) => {
     if (step === 0) {
-      setState((prev: any) => ({ ...prev, product_id: data.product_id }))
+      setState((prev) => ({ ...prev, product_id: data.product_id }))
     } else if (step === 1) {
-      // Sync logic: Extract "Value" or "Sum Insured" from details
-      let extractedValue = 0
-      const detailKeys = Object.keys(data)
-      const valueKey = detailKeys.find((k) => /value|sum insured/i.test(k))
-
-      if (valueKey) {
-        const val = data[valueKey]
-        // Remove currency symbols/commas if string, then parse
-        const cleanVal =
-          typeof val === "string" ? val.toString().replace(/[^0-9.]/g, "") : val
-        extractedValue = Number(cleanVal) || 0
+      // Sync logic: Extract "Value" or "Sum Insured" from details (recursive search)
+      const findValue = (obj: any): number => {
+        if (!obj || typeof obj !== "object") return 0
+        for (const [k, v] of Object.entries(obj)) {
+          if (/value|sum insured/i.test(k) && typeof v !== "object") {
+            const cleanVal = typeof v === "string" ? v.replace(/[^0-9.]/g, "") : v
+            return Number(cleanVal) || 0
+          }
+          if (typeof v === "object") {
+            const found = findValue(v)
+            if (found > 0) return found
+          }
+        }
+        return 0
       }
 
-      setState((prev: any) => ({
+      const extractedValue = findValue(data)
+
+      setState((prev) => ({
         ...prev,
         details: data,
         financials: {
           ...prev.financials,
-          sumInsured:
-            extractedValue > 0 ? extractedValue : prev.financials.sumInsured,
+          sumInsured: extractedValue > 0 ? extractedValue : prev.financials.sumInsured,
         },
       }))
     } else {
-      setState((prev: any) => ({ ...prev, ...data }))
+      setState((prev) => ({ ...prev, ...data }))
     }
     setStep((s) => s + 1)
   }
@@ -118,6 +125,9 @@ export function NewPolicyWizard({
         ),
       ).toISOString().split("T")[0]
 
+      // Structure the risk details using the product blueprint
+      const structuredRiskDetails = injectWizardData(selectedProduct.product_details, state.details)
+
       // 2. Create Policy with all details (This auto-creates a Draft Risk Note in backend)
       console.log("Creating policy with data:", {
         policy_number: `P/${Math.floor(Math.random() * 1000000)}`,
@@ -129,7 +139,7 @@ export function NewPolicyWizard({
         description: state.details?.description || selectedProduct.name,
         total_premium: calc.breakdown.total,
         premium_breakdown: calc.breakdown as any,
-        risk_details: state.details,
+        risk_details: structuredRiskDetails,
       })
       const policy = await createPolicy.mutateAsync({
         policy_number: `P/${Math.floor(Math.random() * 1000000)}`,
@@ -141,7 +151,7 @@ export function NewPolicyWizard({
         description: state.details?.description || selectedProduct.name,
         total_premium: calc.breakdown.total,
         premium_breakdown: calc.breakdown as any,
-        risk_details: state.details,
+        risk_details: structuredRiskDetails,
       })
       console.log("Policy created successfully:", policy)
 

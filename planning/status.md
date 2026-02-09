@@ -3,8 +3,11 @@
 ## Finished
 - **Invoice & Cover Refinement**:
     - **Explicit Invoicing (Wizard)**: Refactored backend to stop automatic invoice generation and implemented a Bulk Invoice API. Added a frontend `InvoiceWizard` component allowing users to explicitly select risk notes for invoicing.
-    - **Enhanced Cover Display Names**: Implemented dynamic naming logic (e.g., "Motor Private - [Reg No]") in both backend `PolicyPublic` model and frontend utilities, improving visibility across the dashboard, search, and tables.
-    - **Build Recovery**: Resolved persistent TypeScript errors in `StepFinancials.tsx` and dependency issues in `InvoiceWizard.tsx`, achieving a clean production build.
+    - **Enhanced Cover Display Names**: Implemented dynamic naming logic (e.g., "Motor Private - [Reg No]") in both backend `PolicyPublic` model and frontend utilities using recursive search for maximum robustness.
+    - **Rendering Fidelity**: Fixed `[object Object]` display bugs in document templates and wizard reviews by implementing recursive object rendering and JSX-aware cell handlers.
+    - **Type Integrity**: Introduced `EnhancedPolicy` and `EnhancedRiskNote` interfaces to eliminate `any` usage in core insurance components.
+    - **Structured Data Capture**: Integrated `injectWizardData` to ensure captured policy details match the structured product blueprint.
+    - **Build Recovery**: Achieved a clean production build after resolving several TypeScript and dependency issues.
 - **Standardized Wizard Layout**: Refactored the New Policy Wizard to use a compact `max-w-3xl` modal with a stacked layout (Inputs then Preview), significantly improving readability and eliminating layout issues on smaller screens.
 - **Motor Private Premium Calculator**: Implemented tiered rate logic with exclusive higher limits, "High-End" benefits (inclusive PVT/Excess), and "OM Rescue Plus" benefit for Motor Private covers.
 - **Policy Wizard Value Sync**: Implemented logic to automatically transfer "Value" from Step 1 (Details) to "Sum Insured" in Step 2 (Financials) for percentage-based covers.

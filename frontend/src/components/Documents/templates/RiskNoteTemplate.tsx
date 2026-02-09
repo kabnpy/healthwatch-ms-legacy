@@ -3,11 +3,18 @@ import { RiskNoteTable } from "./RiskNote/RiskNoteTable"
 import { useState, useEffect, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Save, RefreshCcw } from "lucide-react"
+import type { 
+    EnhancedRiskNote, 
+    EnhancedPolicy, 
+    RiskNoteSection,
+    RiskNoteContentValue 
+} from "@/types/insurance"
+import type { ClientPublic } from "@/client"
 
 interface RiskNoteTemplateProps {
-  riskNote: any
-  client: any
-  policy: any
+  riskNote: EnhancedRiskNote
+  client: ClientPublic
+  policy: EnhancedPolicy
   isEditable?: boolean
   onSave?: (updatedSnapshot: any) => void
 }
@@ -19,7 +26,7 @@ export const RiskNoteTemplate = ({
   isEditable = false,
   onSave,
 }: RiskNoteTemplateProps) => {
-  const [localSnapshot, setLocalSnapshot] = useState(riskNote.policy_snapshot || {})
+  const [localSnapshot, setLocalSnapshot] = useState<Record<string, any>>(riskNote.policy_snapshot || {})
 
   // Keep local state in sync with external changes if not editing
   useEffect(() => {
@@ -45,7 +52,7 @@ export const RiskNoteTemplate = ({
 
   // --- DATA CONSOLIDATION LOGIC ---
   const tableSections = useMemo(() => {
-    const sections: any[] = []
+    const sections: RiskNoteSection[] = []
 
     // 1. INSURED
     sections.push({
@@ -103,11 +110,11 @@ export const RiskNoteTemplate = ({
     })
 
     // 5. DYNAMIC RISK SECTIONS (Template + Instance)
-    const template = policy.product?.product_details || {}
-    const instance = localSnapshot.risk_details || {}
+    const template: Record<string, any> = policy.product?.product_details || {}
+    const instance: Record<string, any> = localSnapshot.risk_details || {}
     
     // Merge logic: template provides structure, instance provides values
-    const merged = { ...template }
+    const merged: Record<string, any> = { ...template }
     Object.entries(instance).forEach(([section, fields]) => {
         if (typeof fields === 'object' && fields !== null && !Array.isArray(fields)) {
             merged[section] = { ...(merged[section] || {}), ...fields }
@@ -121,12 +128,12 @@ export const RiskNoteTemplate = ({
     
     Object.entries(merged).forEach(([name, content]) => {
         if (!manualSections.includes(name.toUpperCase())) {
-            sections.push({ name, content })
+            sections.push({ name, content: content as RiskNoteContentValue })
         }
     })
 
     // 6. ANNUAL PREMIUM
-    const taxRows: Record<string, string> = {}
+    const taxRows: Record<string, RiskNoteContentValue> = {}
     Object.entries(riskNote.taxes || {}).forEach(([name, amt]) => {
         taxRows[name.replace(/([A-Z])/g, " $1")] = formatCurrency(amt as number)
     })

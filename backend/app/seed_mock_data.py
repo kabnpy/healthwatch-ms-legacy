@@ -168,10 +168,12 @@ def create_mock_data() -> None:
                     "levies": {"trainingLevy": 306.0, "phcf": 382.0},
                 },
                 risk_details={
-                    "reg_no": "KCM 780L",
-                    "make": "Toyota Landcruiser Prado",
-                    "year": 2016,
-                    "value": 4700000.0,
+                    "VEHICLE DETAILS": {
+                        "Reg. No": "KCM 780L",
+                        "Make": "Toyota Landcruiser Prado",
+                        "Year": 2016,
+                        "Value Kshs.": 4700000.0,
+                    }
                 },
             )
             session.add(policy)
@@ -188,10 +190,12 @@ def create_mock_data() -> None:
                 "levies": {"trainingLevy": 306.0, "phcf": 382.0},
             }
             policy.risk_details = {
-                "reg_no": "KCM 780L",
-                "make": "Toyota Landcruiser Prado",
-                "year": 2016,
-                "value": 4700000.0,
+                "VEHICLE DETAILS": {
+                    "Reg. No": "KCM 780L",
+                    "Make": "Toyota Landcruiser Prado",
+                    "Year": 2016,
+                    "Value Kshs.": 4700000.0,
+                }
             }
             session.add(policy)
             session.commit()

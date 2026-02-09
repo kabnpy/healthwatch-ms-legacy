@@ -58,18 +58,36 @@ class PolicyPublic(PolicyBase):
     @computed_field  # type: ignore
     @property
     def display_name(self) -> str:
+        def recursive_search(obj: Any, targets: list[str]) -> str | None:
+            if not isinstance(obj, dict):
+                return None
+            # 1. Immediate match
+            for k, v in obj.items():
+                if any(t.lower() == str(k).lower().strip() for t in targets):
+                    if v and isinstance(v, str) and "<<" not in v:
+                        return v.strip()
+            # 2. Recurse
+            for v in obj.values():
+                res = recursive_search(v, targets)
+                if res:
+                    return res
+            return None
+
         if self.product:
             base_name = self.product.class_of_insurance or self.product.name
             
             # Refinement for Motor Private: Add Reg No if available
             if "motor private" in base_name.lower():
-                vehicle_details = self.risk_details.get("VEHICLE DETAILS", {})
-                reg_no = vehicle_details.get("reg_no") or vehicle_details.get("Reg No")
+                reg_no = recursive_search(self.risk_details, ["reg_no", "Reg No", "Reg. No", "Registration"])
                 if reg_no:
                     return f"{base_name} - {reg_no}"
             
             if self.description:
-                return f"{base_name} - {self.description}"
+                trimmed_desc = self.description.strip()
+                trimmed_base = base_name.strip()
+                if trimmed_desc.lower() != trimmed_base.lower() and trimmed_desc:
+                    return f"{base_name} - {trimmed_desc}"
+            
             return base_name
         return self.policy_number
 

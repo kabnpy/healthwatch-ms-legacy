@@ -74,6 +74,20 @@ Update the UI (and potentially the backend response) to dynamically format the d
 5.  **Frontend: Invoice Wizard**: Implement the modal/wizard to select items and create invoice.
 6.  **Apply Display Name**: Update UI across the app.
 
+---
+
+## Part 3: Unify Document Data Capture & Storage (Completed)
+- Successfully integrated `injectWizardData` into `NewPolicyWizard.tsx`.
+- Data is now structured according to the product blueprint before saving.
+- This ensures registration numbers and other details are nested correctly (e.g., inside "VEHICLE DETAILS").
+
+## Part 4: Rendering Fidelity & Type Safety (Completed)
+- **Resolved `[object Object]` bugs**: Updated `RiskNoteTable.tsx` and `StepReview.tsx` to recursively render nested objects and handle React elements (JSX) without string conversion.
+- **Improved Type Safety**:
+    - Created `frontend/src/types/insurance.ts` with `EnhancedPolicy`, `EnhancedRiskNote`, and `RiskNoteSection` types.
+    - Replaced generic `any` with specific interfaces in `RiskNoteTemplate`, `StepFinancials`, and `NewPolicyWizard`.
+- **Robust Display Names**: Refined `getPolicyDisplayName` and backend `display_name` with a recursive search algorithm to find registration numbers regardless of nesting level.
+
 ## Future Considerations
 - **Merge Invoices**: Allow users to manually combine multiple draft/unpaid invoices into one if they *do* want a single bill.
 - **Other Classes**: Extend the display name logic to Property (Plot No), Medical (Member No), etc.

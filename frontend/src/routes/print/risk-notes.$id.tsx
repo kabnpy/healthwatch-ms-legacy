@@ -7,6 +7,7 @@ import { z } from "zod"
 import { ClientsService, PoliciesService, RiskNotesService } from "@/client"
 import PendingItems from "@/components/Pending/PendingItems"
 import { Button } from "@/components/ui/button"
+import type { EnhancedRiskNote, EnhancedPolicy } from "@/types/insurance"
 
 const searchSchema = z.object({
   mode: z.enum(["invoice", "certificate"]).default("invoice").optional(),
@@ -61,7 +62,11 @@ function RiskNotePrintContent({ id }: { id: string }) {
   if (isInvoice) {
     return (
       <div className="max-w-[800px] mx-auto bg-white shadow-lg print:shadow-none min-h-screen relative">
-        <RiskNoteTemplate riskNote={riskNote} client={client} policy={policy} />
+        <RiskNoteTemplate 
+            riskNote={riskNote as EnhancedRiskNote} 
+            client={client} 
+            policy={policy as EnhancedPolicy} 
+        />
 
         <div className="fixed bottom-8 right-8 print:hidden flex flex-col gap-2">
           {/* Toggle Buttons */}

@@ -26,6 +26,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useFinancialSummary } from "@/hooks/useFinancials"
 import { useClient, usePolicyDashboard } from "@/hooks/useInsurance"
 import { queryClient } from "@/queryClient"
+import type { EnhancedRiskNote, EnhancedPolicy } from "@/types/insurance"
 
 // --- Route Definition ---
 
@@ -172,9 +173,9 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
                     Current Master Risk Note
                   </div>
                   <RiskNoteTemplate
-                    riskNote={latestRiskNote}
+                    riskNote={latestRiskNote as EnhancedRiskNote}
                     client={client}
-                    policy={policy}
+                    policy={policy as EnhancedPolicy}
                   />
                 </div>
               ) : (

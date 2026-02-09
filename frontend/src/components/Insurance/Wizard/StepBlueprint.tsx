@@ -13,11 +13,12 @@ import { Input } from "@/components/ui/input"
 import { useProducts } from "@/hooks/useInsurance"
 import { extractWizardFields } from "@/utils/documentData"
 import { ArrowLeft } from "lucide-react"
+import type { EnhancedProduct } from "@/types/insurance"
 
 interface StepBlueprintProps {
   productId: string
-  defaultValues: any
-  onNext: (data: any) => void
+  defaultValues: Record<string, any>
+  onNext: (data: Record<string, any>) => void
   onBack: () => void
 }
 
@@ -25,7 +26,7 @@ export function StepBlueprint({ productId, defaultValues, onNext, onBack }: Step
   const { data: productsData } = useProducts()
   
   const selectedProduct = useMemo(() => {
-    return productsData?.data.find((p) => p.id === productId)
+    return productsData?.data.find((p) => p.id === productId) as EnhancedProduct | undefined
   }, [productId, productsData])
 
   const wizardFields = useMemo(() => {
@@ -40,7 +41,7 @@ export function StepBlueprint({ productId, defaultValues, onNext, onBack }: Step
   if (!selectedProduct) return null
 
   return (
-    <Form {...form}>
+    <Form {...(form as any)}>
       <form onSubmit={form.handleSubmit(onNext)} className="space-y-6">
         <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 mb-6">
             <p className="text-sm text-slate-700 font-medium">{selectedProduct.name}</p>
@@ -55,9 +56,9 @@ export function StepBlueprint({ productId, defaultValues, onNext, onBack }: Step
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {wizardFields.map((field) => (
                     <FormField
-                        key={field.label}
+                        key={field.path.join(".")}
                         control={form.control}
-                        name={field.label} // For now, mapping inputs to labels for simplicity
+                        name={field.path.join(".")}
                         render={({ field: inputField }) => (
                             <FormItem>
                                 <FormLabel>{field.label}</FormLabel>
@@ -66,6 +67,7 @@ export function StepBlueprint({ productId, defaultValues, onNext, onBack }: Step
                                         type={field.type === 'number' ? 'number' : 'text'} 
                                         placeholder={`Enter ${field.label.toLowerCase()}...`}
                                         {...inputField} 
+                                        value={inputField.value || ""}
                                     />
                                 </FormControl>
                                 <FormMessage />
