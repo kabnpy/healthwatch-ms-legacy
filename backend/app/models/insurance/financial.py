@@ -28,6 +28,13 @@ class InvoiceCreate(InvoiceBase):
     pass
 
 
+class InvoiceBulkCreate(SQLModel):
+    client_id: uuid.UUID
+    risk_note_ids: list[uuid.UUID]
+    date_issued: date = Field(default_factory=date.today)
+    notes: str | None = None
+
+
 class InvoiceUpdate(SQLModel):
     invoice_number: str | None = None
     due_date: date | None = None

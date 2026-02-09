@@ -11,25 +11,31 @@ Additionally, the display name for covers (specifically Motor Private) is generi
 
 ---
 
-## Part 1: Invoice Generation Refinement
+## Part 1: Invoice Generation Wizard
 
 ### The Problem
-The current `create_risk_note` CRUD logic searches for an existing `Invoice` with status "Unpaid" and appends the new `RiskNote` as a line item. This forces a "one invoice per client" model until payment is made.
+Automatic invoice generation (even 1:1) removes user control. Users often need to group specific policies together or split them based on internal accounting requirements.
 
 ### The Solution
-Refactor the backend logic to **always create a new Invoice** for a new Risk Note.
+Implement an **Invoice Generation Wizard**. 
+- Stop automatic creation of Invoices when a Risk Note is created.
+- Risk Notes remain in a "Pending Invoicing" state until a user explicitly selects them for an invoice.
+- The Wizard allows selecting multiple Risk Notes for a single invoice and setting an explicit "Invoice Date".
+- This wizard can be repurposed to add/remove items from existing unpaid invoices.
 
 ### Implementation Plan
-1.  **Backend (`backend/app/crud/insurance/policy.py`)**:
-    *   Locate `create_risk_note`.
-    *   Remove or comment out the logic that queries for an existing `Unpaid` invoice.
-    *   Ensure a new `Invoice` is instantiated and saved for every new `RiskNote`.
-    *   Ensure the `invoice_number` generation remains robust.
+1.  **Backend Changes**:
+    *   **Modify `create_risk_note`**: Remove the auto-invoicing logic entirely.
+    *   **New CRUD/API**: Implement a "Bulk Invoice Create" endpoint that takes a list of `risk_note_ids`.
+    *   **Uninvoiced Query**: Add a helper to fetch Risk Notes for a client that are not yet linked to any `InvoiceLineItem`.
 
-2.  **Verification**:
-    *   Create a Risk Note -> Check Invoice List (Should see Invoice A).
-    *   Create another Risk Note for same client -> Check Invoice List (Should see Invoice B).
-    *   Verify `AllocationDialog` (Receipts) still lists all pending invoices correctly.
+2.  **Frontend Changes**:
+    *   **New Component**: `InvoiceWizard.tsx`.
+    *   **UI Integration**: Add a "Generate Invoice" button in the Client's Invoice tab.
+    *   **Workflow**: 
+        1. Open Wizard -> Show list of "Pending Risk Notes".
+        2. User selects one or more -> Reviews totals.
+        3. User clicks "Generate" -> Backend creates Invoice + Line Items.
 
 ---
 
@@ -61,9 +67,12 @@ Update the UI (and potentially the backend response) to dynamically format the d
 ---
 
 ## Execution Steps (Atomic)
-1.  **Refactor Invoice CRUD**: Change backend logic to stop auto-merging.
-2.  **Frontend Helper**: Implement `getPolicyDisplayName`.
-3.  **Apply Display Name**: Update `CoverageCard`, `Policies/columns.tsx`, and `ClientInvoices`.
+1.  **Backend: Cleanup `create_risk_note`**: Remove auto-invoice logic.
+2.  **Backend: Bulk Invoice API**: Create endpoint to generate an invoice from multiple Risk Note IDs.
+3.  **Frontend: Display Name Helper**: Implement `getPolicyDisplayName`.
+4.  **Frontend: Pending Risk Notes List**: Add a way to view uninvoiced Risk Notes.
+5.  **Frontend: Invoice Wizard**: Implement the modal/wizard to select items and create invoice.
+6.  **Apply Display Name**: Update UI across the app.
 
 ## Future Considerations
 - **Merge Invoices**: Allow users to manually combine multiple draft/unpaid invoices into one if they *do* want a single bill.

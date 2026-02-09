@@ -140,8 +140,9 @@ def create_mock_data() -> None:
                 name="Agnes Njoki Mwangi",
                 kra_pin="A001158997L",
                 phone="0733980566",
-                postal_address="P.O. Box 11908 - 00100",
-                city="Nairobi",
+                postal_number="11908",
+                postal_code="00100",
+                town="Nairobi",
                 email="agnes@example.com",
             )
             session.add(client)

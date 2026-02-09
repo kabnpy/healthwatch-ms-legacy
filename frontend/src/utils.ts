@@ -41,3 +41,32 @@ export const slugify = (text: string): string => {
     .replace(/^-+/, "") // Trim - from start of text
     .replace(/-+$/, "") // Trim - from end of text
 }
+
+export const getPolicyDisplayName = (riskNote: any): string => {
+  const policySnapshot = riskNote?.policy_snapshot || {}
+  const riskDetails = policySnapshot?.risk_details || {}
+  
+  // Try to find Product/Class Name
+  const className = 
+    policySnapshot?.product?.class_of_insurance || 
+    riskNote?.policy?.product?.class_of_insurance || 
+    "Insurance Policy"
+
+  if (className.toLowerCase().includes("motor private")) {
+    // Look for registration number in VEHICLE DETAILS
+    const vehicleDetails = riskDetails["VEHICLE DETAILS"] || {}
+    const regNo = vehicleDetails["reg_no"] || vehicleDetails["Reg No"] || ""
+    
+    if (regNo) {
+      return `${className} - ${regNo}`
+    }
+  }
+
+  // Fallback to description if available
+  const description = policySnapshot?.description || riskNote?.policy?.description
+  if (description) {
+    return `${className} - ${description}`
+  }
+
+  return className
+}

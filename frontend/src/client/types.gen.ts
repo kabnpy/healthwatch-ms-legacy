@@ -59,7 +59,9 @@ export type ClientCreate = {
     kra_pin: string;
     email?: (string | null);
     phone: string;
-    postal_address?: (string | null);
+    postal_number?: (string | null);
+    postal_code?: (string | null);
+    town?: (string | null);
     contacts?: Array<{
         [key: string]: unknown;
     }>;
@@ -71,7 +73,9 @@ export type ClientPublic = {
     kra_pin: string;
     email?: (string | null);
     phone: string;
-    postal_address?: (string | null);
+    postal_number?: (string | null);
+    postal_code?: (string | null);
+    town?: (string | null);
     contacts?: Array<{
         [key: string]: unknown;
     }>;
@@ -89,7 +93,9 @@ export type ClientUpdate = {
     kra_pin?: (string | null);
     email?: (string | null);
     phone?: (string | null);
-    postal_address?: (string | null);
+    postal_number?: (string | null);
+    postal_code?: (string | null);
+    town?: (string | null);
     contacts?: (Array<{
     [key: string]: unknown;
 }> | null);
@@ -161,6 +167,13 @@ export type InsurerUpdate = {
     name?: (string | null);
     email?: (string | null);
     phone?: (string | null);
+};
+
+export type InvoiceBulkCreate = {
+    client_id: string;
+    risk_note_ids: Array<(string)>;
+    date_issued?: string;
+    notes?: (string | null);
 };
 
 export type InvoiceCreate = {
@@ -648,6 +661,12 @@ export type FinancialsReadInvoiceData = {
 
 export type FinancialsReadInvoiceResponse = (InvoicePublic);
 
+export type FinancialsCreateBulkInvoiceData = {
+    requestBody: InvoiceBulkCreate;
+};
+
+export type FinancialsCreateBulkInvoiceResponse = (InvoicePublic);
+
 export type FinancialsReadReceiptsData = {
     clientId?: (string | null);
     limit?: number;
@@ -850,9 +869,11 @@ export type ProductsDeleteProductData = {
 export type ProductsDeleteProductResponse = (Message);
 
 export type RiskNotesReadRiskNotesData = {
+    clientId?: (string | null);
     limit?: number;
     policyId?: (string | null);
     skip?: number;
+    uninvoicedOnly?: boolean;
 };
 
 export type RiskNotesReadRiskNotesResponse = (RiskNotesPublic);

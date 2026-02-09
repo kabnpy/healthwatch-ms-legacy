@@ -99,10 +99,23 @@ export const useUpdatePolicy = () => {
 }
 
 // 3. RISK NOTES
-export const useRiskNotes = (policyId?: string, skip = 0, limit = 100) => {
+export const useRiskNotes = (
+  policyId?: string,
+  skip = 0,
+  limit = 100,
+  clientId?: string,
+  uninvoicedOnly?: boolean,
+) => {
   return useQuery({
-    queryKey: ["risk-notes", { policyId, skip, limit }],
-    queryFn: () => RiskNotesService.readRiskNotes({ policyId, skip, limit }),
+    queryKey: ["risk-notes", { policyId, skip, limit, clientId, uninvoicedOnly }],
+    queryFn: () =>
+      RiskNotesService.readRiskNotes({
+        policyId,
+        skip,
+        limit,
+        clientId,
+        uninvoicedOnly,
+      }),
   })
 }
 

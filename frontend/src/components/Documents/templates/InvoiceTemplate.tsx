@@ -67,8 +67,9 @@ export const InvoiceTemplate = ({
                             <p className="font-bold text-base leading-tight mb-1">{client.name}</p>
                             <div className="flex justify-between items-start gap-8">
                                 <p className="text-[11px] leading-relaxed">
-                                    {client.postal_address || "No Address Provided"}<br />
-                                    {(client as any).city || "Nairobi"}
+                                    {client.postal_number ? `P.O. Box ${client.postal_number}` : "No Address Provided"}
+                                    {client.postal_code && ` - ${client.postal_code}`}<br />
+                                    {client.town || "Nairobi"}
                                 </p>
                                 <p className="font-mono text-[11px] font-bold shrink-0">
                                     P.I.N No. {client.kra_pin || "N/A"}

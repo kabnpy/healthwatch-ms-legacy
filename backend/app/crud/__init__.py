@@ -97,6 +97,7 @@ __all__ = [
     "count_correspondences",
     "delete_correspondence",
     "create_invoice",
+    "create_invoice_bulk",
     "get_invoice",
     "get_invoices",
     "update_invoice",

@@ -36,7 +36,9 @@ const formSchema = z.object({
   kra_pin: z.string().min(11, "KRA PIN must be 11 characters").max(11),
   email: z.string().email("Invalid email").or(z.literal("")),
   phone: z.string().min(10, "Phone number is required"),
-  postal_address: z.string().optional(),
+  postal_number: z.string().optional(),
+  postal_code: z.string().optional(),
+  town: z.string().optional(),
   contacts: z.array(contactSchema).default([]),
 })
 
@@ -65,7 +67,9 @@ export const ClientForm = ({
       kra_pin: initialData?.kra_pin || "",
       email: initialData?.email || "",
       phone: initialData?.phone || "",
-      postal_address: initialData?.postal_address || "",
+      postal_number: (initialData as any)?.postal_number || "",
+      postal_code: (initialData as any)?.postal_code || "",
+      town: (initialData as any)?.town || "",
       contacts: (initialData?.contacts as any) || [],
     },
   })
@@ -79,7 +83,9 @@ export const ClientForm = ({
     const formattedData = {
       ...data,
       email: data.email === "" ? null : data.email,
-      postal_address: data.postal_address || null,
+      postal_number: data.postal_number || null,
+      postal_code: data.postal_code || null,
+      town: data.town || null,
     }
     onSubmit(formattedData as any)
   }
@@ -177,19 +183,47 @@ export const ClientForm = ({
           />
         </div>
 
-        <FormField
-          control={form.control}
-          name="postal_address"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Postal Address</FormLabel>
-              <FormControl>
-                <Input placeholder="P.O. Box 1234, Nairobi" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="grid grid-cols-3 gap-4">
+          <FormField
+            control={form.control}
+            name="postal_number"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>P.O. Box</FormLabel>
+                <FormControl>
+                  <Input placeholder="12345" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="postal_code"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Postal Code</FormLabel>
+                <FormControl>
+                  <Input placeholder="00100" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="town"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Town</FormLabel>
+                <FormControl>
+                  <Input placeholder="Nairobi" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <div className="space-y-4 pt-4">
           <div className="flex items-center justify-between">

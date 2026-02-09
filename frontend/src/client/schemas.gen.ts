@@ -309,7 +309,7 @@ export const ClientCreateSchema = {
             type: 'string',
             title: 'Phone'
         },
-        postal_address: {
+        postal_number: {
             anyOf: [
                 {
                     type: 'string'
@@ -318,7 +318,29 @@ export const ClientCreateSchema = {
                     type: 'null'
                 }
             ],
-            title: 'Postal Address'
+            title: 'Postal Number'
+        },
+        postal_code: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Postal Code'
+        },
+        town: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Town'
         },
         contacts: {
             items: {
@@ -364,7 +386,7 @@ export const ClientPublicSchema = {
             type: 'string',
             title: 'Phone'
         },
-        postal_address: {
+        postal_number: {
             anyOf: [
                 {
                     type: 'string'
@@ -373,7 +395,29 @@ export const ClientPublicSchema = {
                     type: 'null'
                 }
             ],
-            title: 'Postal Address'
+            title: 'Postal Number'
+        },
+        postal_code: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Postal Code'
+        },
+        town: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Town'
         },
         contacts: {
             items: {
@@ -451,7 +495,7 @@ export const ClientUpdateSchema = {
             ],
             title: 'Phone'
         },
-        postal_address: {
+        postal_number: {
             anyOf: [
                 {
                     type: 'string'
@@ -460,7 +504,29 @@ export const ClientUpdateSchema = {
                     type: 'null'
                 }
             ],
-            title: 'Postal Address'
+            title: 'Postal Number'
+        },
+        postal_code: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Postal Code'
+        },
+        town: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Town'
         },
         contacts: {
             anyOf: [
@@ -813,6 +879,43 @@ export const InsurersPublicSchema = {
     type: 'object',
     required: ['data', 'count'],
     title: 'InsurersPublic'
+} as const;
+
+export const InvoiceBulkCreateSchema = {
+    properties: {
+        client_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Client Id'
+        },
+        risk_note_ids: {
+            items: {
+                type: 'string',
+                format: 'uuid'
+            },
+            type: 'array',
+            title: 'Risk Note Ids'
+        },
+        date_issued: {
+            type: 'string',
+            format: 'date',
+            title: 'Date Issued'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        }
+    },
+    type: 'object',
+    required: ['client_id', 'risk_note_ids'],
+    title: 'InvoiceBulkCreate'
 } as const;
 
 export const InvoiceCreateSchema = {

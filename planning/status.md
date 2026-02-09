@@ -1,6 +1,10 @@
 # Project Status (Session End: 2026-02-06)
 
 ## Finished
+- **Invoice & Cover Refinement**:
+    - **Explicit Invoicing (Wizard)**: Refactored backend to stop automatic invoice generation and implemented a Bulk Invoice API. Added a frontend `InvoiceWizard` component allowing users to explicitly select risk notes for invoicing.
+    - **Enhanced Cover Display Names**: Implemented dynamic naming logic (e.g., "Motor Private - [Reg No]") in both backend `PolicyPublic` model and frontend utilities, improving visibility across the dashboard, search, and tables.
+    - **Build Recovery**: Resolved persistent TypeScript errors in `StepFinancials.tsx` and dependency issues in `InvoiceWizard.tsx`, achieving a clean production build.
 - **Standardized Wizard Layout**: Refactored the New Policy Wizard to use a compact `max-w-3xl` modal with a stacked layout (Inputs then Preview), significantly improving readability and eliminating layout issues on smaller screens.
 - **Motor Private Premium Calculator**: Implemented tiered rate logic with exclusive higher limits, "High-End" benefits (inclusive PVT/Excess), and "OM Rescue Plus" benefit for Motor Private covers.
 - **Policy Wizard Value Sync**: Implemented logic to automatically transfer "Value" from Step 1 (Details) to "Sum Insured" in Step 2 (Financials) for percentage-based covers.
@@ -34,11 +38,8 @@
 - **Frontend Build Recovery**: Resolving persistent TypeScript errors in the auto-generated client and components.
 
 ## Next Steps
-1. **Invoice & Cover Refinement**:
-    - **Decouple Invoices**: Refactor backend to create a new Invoice for every Risk Note (stop auto-merging).
-    - **Cover Display Names**: Implement "Motor Private - [Reg No]" formatting in the frontend.
-2. **Frontend Build Verification**: Finalize TypeScript fixes in `DocumentViewer.tsx` and `RiskNoteForm.tsx` to ensure a clean production build after system restart.
-3. **Build Verification**: Run `npm run build` until successful.
+1. **Frontend Stability**: Monitor the production build for any further TypeScript issues as new features are added.
+2. **eTIMS Integration Prep**: Start planning for tax compliance (invoice number formatting and external API sync).
 
 ## Architectural Decisions
 - **Unified Policy Entity**: 1 Policy = 1 Cover Instance. This simplifies data capture and document generation significantly.

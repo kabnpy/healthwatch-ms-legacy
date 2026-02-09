@@ -59,9 +59,18 @@ class PolicyPublic(PolicyBase):
     @property
     def display_name(self) -> str:
         if self.product:
+            base_name = self.product.class_of_insurance or self.product.name
+            
+            # Refinement for Motor Private: Add Reg No if available
+            if "motor private" in base_name.lower():
+                vehicle_details = self.risk_details.get("VEHICLE DETAILS", {})
+                reg_no = vehicle_details.get("reg_no") or vehicle_details.get("Reg No")
+                if reg_no:
+                    return f"{base_name} - {reg_no}"
+            
             if self.description:
-                return f"{self.product.class_of_insurance} - {self.description}"
-            return f"{self.product.name}"
+                return f"{base_name} - {self.description}"
+            return base_name
         return self.policy_number
 
 

@@ -29,6 +29,7 @@ from .insurance.client import (
 from .insurance.financial import (
     Invoice,
     InvoiceBase,
+    InvoiceBulkCreate,
     InvoiceCreate,
     InvoiceLineItem,
     InvoiceLineItemBase,
@@ -141,6 +142,7 @@ __all__ = [
     "CorrespondencesPublic",
     "Invoice",
     "InvoiceBase",
+    "InvoiceBulkCreate",
     "InvoiceCreate",
     "InvoiceLineItem",
     "InvoiceLineItemBase",

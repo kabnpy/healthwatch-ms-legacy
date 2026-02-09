@@ -12,10 +12,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { getPolicyDisplayName } from "@/utils"
 
 export const getColumns = (
   onView: (riskNote: RiskNotePublic) => void,
 ): ColumnDef<RiskNotePublic>[] => [
+  {
+    accessorKey: "display_name",
+    header: "Policy / Cover",
+    cell: ({ row }) => (
+      <span className="font-medium text-foreground">
+        {getPolicyDisplayName(row.original)}
+      </span>
+    ),
+  },
   {
     accessorKey: "invoice_number",
     header: "Ref / Invoice #",

@@ -2,6 +2,7 @@ import { FileText, Shield } from "lucide-react"
 import type { RiskNotePublic } from "@/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { getPolicyDisplayName } from "@/utils"
 
 interface CoverageCardProps {
   riskNote?: RiskNotePublic
@@ -24,7 +25,7 @@ export function CoverageCard({ riskNote, onViewBreakdown }: CoverageCardProps) {
     <Card className="h-full border-l-4 border-l-green-600 shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
-          Current Coverage
+          {getPolicyDisplayName(riskNote)}
         </CardTitle>
         <Shield className="size-4 text-green-600" />
       </CardHeader>

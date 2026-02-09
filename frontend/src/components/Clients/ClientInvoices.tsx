@@ -1,4 +1,4 @@
-import { CreditCard, Plus, Receipt as ReceiptIcon, Wallet } from "lucide-react"
+import { CreditCard, FilePlus, Plus, Receipt as ReceiptIcon, Wallet } from "lucide-react"
 import { Suspense, useCallback, useMemo, useState } from "react"
 import type { InvoicePublic, ReceiptPublic } from "@/client"
 import { DataTable } from "@/components/Common/DataTable"
@@ -8,6 +8,7 @@ import { DocumentViewer } from "@/components/Documents/DocumentViewer"
 import { AddReceiptForm } from "@/components/Financials/AddReceiptForm"
 import { AllocationDialog } from "@/components/Financials/AllocationDialog"
 import { AllocationHistory } from "@/components/Financials/AllocationHistory"
+import { InvoiceWizard } from "@/components/Financials/InvoiceWizard"
 import { getReceiptColumns } from "@/components/Financials/ReceiptColumns"
 import { getColumns as getInvoiceColumns } from "@/components/Invoices/columns"
 import PendingItems from "@/components/Pending/PendingItems"
@@ -39,6 +40,7 @@ export function ClientInvoices({ clientId }: ClientInvoicesProps) {
   } | null>(null)
 
   const [isAddReceiptOpen, setIsAddReceiptOpen] = useState(false)
+  const [isInvoiceWizardOpen, setIsInvoiceWizardOpen] = useState(false)
   const [selectedReceipt, setSelectedReceipt] = useState<ReceiptPublic | null>(
     null,
   )
@@ -99,10 +101,20 @@ export function ClientInvoices({ clientId }: ClientInvoicesProps) {
         <h2 className="text-2xl font-bold tracking-tight text-primary">
           Financial Statement
         </h2>
-        <Button className="gap-2" onClick={() => setIsAddReceiptOpen(true)}>
-          <Plus className="size-4" />
-          Log Payment
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            className="gap-2" 
+            onClick={() => setIsInvoiceWizardOpen(true)}
+          >
+            <FilePlus className="size-4" />
+            Generate Invoice
+          </Button>
+          <Button className="gap-2" onClick={() => setIsAddReceiptOpen(true)}>
+            <Plus className="size-4" />
+            Log Payment
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -173,6 +185,12 @@ export function ClientInvoices({ clientId }: ClientInvoicesProps) {
           onClose={() => setIsAllocationOpen(false)}
         />
       )}
+
+      <InvoiceWizard
+        clientId={clientId}
+        isOpen={isInvoiceWizardOpen}
+        onClose={() => setIsInvoiceWizardOpen(false)}
+      />
 
       {selectedDoc && (
         <DocumentViewerModal

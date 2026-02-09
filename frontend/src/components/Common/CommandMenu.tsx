@@ -98,7 +98,7 @@ export function CommandMenu() {
             {policiesData?.data.map((policy) => (
               <CommandItem
                 key={policy.id}
-                value={policy.policy_number}
+                value={`${policy.policy_number} ${policy.display_name}`}
                 onSelect={() => {
                   runCommand(() =>
                     navigate({
@@ -109,7 +109,12 @@ export function CommandMenu() {
                 }}
               >
                 <Shield className="mr-2 h-4 w-4" />
-                <span>{policy.policy_number}</span>
+                <div className="flex flex-col">
+                  <span>{policy.display_name}</span>
+                  <span className="text-[10px] text-muted-foreground">
+                    {policy.policy_number}
+                  </span>
+                </div>
                 <CommandShortcut>{policy.status}</CommandShortcut>
               </CommandItem>
             ))}

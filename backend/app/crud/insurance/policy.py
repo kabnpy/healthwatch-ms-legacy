@@ -109,53 +109,6 @@ def create_risk_note(*, session: Session, risk_note_in: RiskNoteCreate) -> RiskN
     session.commit()
     session.refresh(db_obj)
 
-    # 2. Handle Invoicing Logic
-    policy = session.get(Policy, db_obj.policy_id)
-    if not policy:
-        return db_obj
-
-    amount = db_obj.total_amount
-
-    # Check for an existing Unpaid invoice for this client
-    statement = select(Invoice).where(
-        Invoice.client_id == policy.client_id, Invoice.status == "Unpaid"
-    )
-    invoice = session.exec(statement).first()
-
-    if not invoice:
-        # Create a new invoice
-        invoice = Invoice(
-            invoice_number=f"INV-{uuid.uuid4().hex[:8].upper()}",
-            client_id=policy.client_id,
-            date_issued=date.today(),
-            total_amount=0.0,
-            balance_due=0.0,
-            status="Unpaid",
-        )
-        session.add(invoice)
-        session.commit()
-        session.refresh(invoice)
-
-    # Create Line Item linking Risk Note to Invoice
-    line_item = InvoiceLineItem(
-        invoice_id=invoice.id,
-        risk_note_id=db_obj.id,
-        amount=amount,
-        description=f"{db_obj.transaction_type} - {policy.policy_number}",
-    )
-    session.add(line_item)
-
-    # Update Invoice Totals
-    invoice.total_amount += amount
-    invoice.balance_due += amount
-    session.add(invoice)
-
-    # Update RiskNote with Invoice Number
-    db_obj.invoice_number = invoice.invoice_number
-    session.add(db_obj)
-
-    session.commit()
-    session.refresh(db_obj)
     return db_obj
 
 
@@ -263,20 +216,43 @@ def get_risk_notes(
     skip: int = 0,
     limit: int = 100,
     policy_id: uuid.UUID | None = None,
+    client_id: uuid.UUID | None = None,
+    uninvoiced_only: bool = False,
 ) -> list[RiskNote]:
     statement = select(RiskNote)
     if policy_id:
         statement = statement.where(RiskNote.policy_id == policy_id)
+    if client_id:
+        statement = statement.join(Policy).where(Policy.client_id == client_id)
+    if uninvoiced_only:
+        # A risk note is uninvoiced if it has no invoice_line_items
+        # Or more simply, if invoice_number is null (though line items are more robust)
+        statement = statement.where(RiskNote.invoice_number == None)
+        # Filters out drafts as well since we only want to invoice finalized notes
+        statement = statement.where(RiskNote.status != "Draft")
+
     statement = statement.offset(skip).limit(limit)
     return list(session.exec(statement).all())
 
 
-def count_risk_notes(session: Session, *, policy_id: uuid.UUID | None = None) -> int:
+def count_risk_notes(
+    session: Session,
+    *,
+    policy_id: uuid.UUID | None = None,
+    client_id: uuid.UUID | None = None,
+    uninvoiced_only: bool = False,
+) -> int:
     from sqlmodel import func
 
     statement = select(RiskNote)
     if policy_id:
         statement = statement.where(RiskNote.policy_id == policy_id)
+    if client_id:
+        statement = statement.join(Policy).where(Policy.client_id == client_id)
+    if uninvoiced_only:
+        statement = statement.where(RiskNote.invoice_number == None)
+        statement = statement.where(RiskNote.status != "Draft")
+
     count_statement = select(func.count()).select_from(statement.subquery())
     return session.exec(count_statement).one()
 

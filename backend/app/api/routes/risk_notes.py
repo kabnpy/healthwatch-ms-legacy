@@ -36,13 +36,25 @@ def read_risk_notes(
     skip: int = 0,
     limit: int = 100,
     policy_id: uuid.UUID | None = None,
+    client_id: uuid.UUID | None = None,
+    uninvoiced_only: bool = False,
 ) -> Any:
     """
     Retrieve risk notes.
     """
-    count = count_risk_notes(session=session, policy_id=policy_id)
+    count = count_risk_notes(
+        session=session,
+        policy_id=policy_id,
+        client_id=client_id,
+        uninvoiced_only=uninvoiced_only,
+    )
     risk_notes = get_risk_notes(
-        session=session, skip=skip, limit=limit, policy_id=policy_id
+        session=session,
+        skip=skip,
+        limit=limit,
+        policy_id=policy_id,
+        client_id=client_id,
+        uninvoiced_only=uninvoiced_only,
     )
     return RiskNotesPublic(data=risk_notes, count=count)
 

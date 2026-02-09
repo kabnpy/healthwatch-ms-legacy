@@ -64,11 +64,32 @@ export function NewPolicyWizard({
 
   const handleNext = (data: any) => {
     if (step === 0) {
-        setState((prev: any) => ({ ...prev, product_id: data.product_id }))
+      setState((prev: any) => ({ ...prev, product_id: data.product_id }))
     } else if (step === 1) {
-        setState((prev: any) => ({ ...prev, details: data }))
+      // Sync logic: Extract "Value" or "Sum Insured" from details
+      let extractedValue = 0
+      const detailKeys = Object.keys(data)
+      const valueKey = detailKeys.find((k) => /value|sum insured/i.test(k))
+
+      if (valueKey) {
+        const val = data[valueKey]
+        // Remove currency symbols/commas if string, then parse
+        const cleanVal =
+          typeof val === "string" ? val.toString().replace(/[^0-9.]/g, "") : val
+        extractedValue = Number(cleanVal) || 0
+      }
+
+      setState((prev: any) => ({
+        ...prev,
+        details: data,
+        financials: {
+          ...prev.financials,
+          sumInsured:
+            extractedValue > 0 ? extractedValue : prev.financials.sumInsured,
+        },
+      }))
     } else {
-        setState((prev: any) => ({ ...prev, ...data }))
+      setState((prev: any) => ({ ...prev, ...data }))
     }
     setStep((s) => s + 1)
   }
@@ -180,7 +201,7 @@ export function NewPolicyWizard({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Issue New Policy - {steps[step]}</DialogTitle>
         </DialogHeader>

@@ -7,6 +7,7 @@ from sqlmodel import Session, select
 from app.models.insurance.catalog import Product
 from app.models.insurance.financial import (
     Invoice,
+    InvoiceBulkCreate,
     InvoiceCreate,
     InvoiceLineItem,
     InvoiceUpdate,
@@ -28,6 +29,53 @@ def create_invoice(*, session: Session, invoice_in: InvoiceCreate) -> Invoice:
     session.commit()
     session.refresh(db_obj)
     return db_obj
+
+
+def create_invoice_bulk(*, session: Session, bulk_in: InvoiceBulkCreate) -> Invoice:
+    # 1. Create the Invoice
+    invoice = Invoice(
+        invoice_number=f"INV-{uuid.uuid4().hex[:8].upper()}",
+        client_id=bulk_in.client_id,
+        date_issued=bulk_in.date_issued,
+        notes=bulk_in.notes,
+        total_amount=0.0,
+        balance_due=0.0,
+        status="Unpaid",
+    )
+    session.add(invoice)
+    session.commit()
+    session.refresh(invoice)
+
+    total_amount = 0.0
+
+    # 2. Link Risk Notes via Line Items
+    for rn_id in bulk_in.risk_note_ids:
+        rn = session.get(RiskNote, rn_id)
+        if rn:
+            policy = session.get(Policy, rn.policy_id)
+            policy_num = policy.policy_number if policy else "Unknown"
+            
+            line_item = InvoiceLineItem(
+                invoice_id=invoice.id,
+                risk_note_id=rn.id,
+                amount=rn.total_amount,
+                description=f"{rn.transaction_type} - {policy_num}",
+            )
+            session.add(line_item)
+            total_amount += rn.total_amount
+            
+            # Update Risk Note with Invoice Number
+            rn.invoice_number = invoice.invoice_number
+            session.add(rn)
+
+    # 3. Update Invoice Totals
+    invoice.total_amount = total_amount
+    invoice.balance_due = total_amount
+    session.add(invoice)
+    
+    session.commit()
+    session.refresh(invoice)
+    return invoice
 
 
 def get_invoice(session: Session, *, id: uuid.UUID) -> Invoice | None:

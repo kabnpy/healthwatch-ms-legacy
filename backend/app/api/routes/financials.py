@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException
 from app.api.deps import CurrentUser, SessionDep
 from app.crud.insurance import (
     create_invoice,
+    create_invoice_bulk,
     create_receipt,
     create_receipt_allocation,
     get_invoice,
@@ -15,6 +16,7 @@ from app.crud.insurance import (
     void_receipt,
 )
 from app.models import (
+    InvoiceBulkCreate,
     InvoiceCreate,
     InvoicePublic,
     InvoicesPublic,
@@ -75,6 +77,16 @@ def create_new_invoice(
     Create new invoice.
     """
     return create_invoice(session=session, invoice_in=invoice_in)
+
+
+@router.post("/bulk-invoices/", response_model=InvoicePublic)
+def create_bulk_invoice(
+    *, session: SessionDep, _current_user: CurrentUser, bulk_in: InvoiceBulkCreate
+) -> Any:
+    """
+    Create an invoice from multiple Risk Notes.
+    """
+    return create_invoice_bulk(session=session, bulk_in=bulk_in)
 
 
 # ==========================================

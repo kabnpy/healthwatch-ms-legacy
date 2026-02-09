@@ -21,7 +21,9 @@ class ClientBase(SQLModel):
     kra_pin: str = Field(unique=True, index=True)
     email: str | None = None
     phone: str
-    postal_address: str | None = None
+    postal_number: str | None = None
+    postal_code: str | None = None
+    town: str | None = None
 
     # Multi-contact system (especially for Corporate)
     # Structure: [{"name": "...", "role": "...", "phone": "...", "email": "..."}]
@@ -38,7 +40,9 @@ class ClientUpdate(SQLModel):
     kra_pin: str | None = None
     email: str | None = None
     phone: str | None = None
-    postal_address: str | None = None
+    postal_number: str | None = None
+    postal_code: str | None = None
+    town: str | None = None
     contacts: list[dict[str, Any]] | None = None
 
 

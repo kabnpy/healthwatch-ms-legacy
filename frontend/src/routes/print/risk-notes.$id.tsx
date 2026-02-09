@@ -131,7 +131,9 @@ function RiskNotePrintContent({ id }: { id: string }) {
           </h2>
           <p className="font-bold text-lg">{client.name}</p>
           <p className="text-sm whitespace-pre-line">
-            {client.postal_address || "No postal address provided"}
+            {client.postal_number ? `P.O. Box ${client.postal_number}` : "No postal address provided"}
+            {client.postal_code && ` - ${client.postal_code}`}
+            {client.town && `, ${client.town}`}
           </p>
           <p className="text-sm mt-2">
             <span className="font-semibold">PIN:</span> {client.kra_pin}
