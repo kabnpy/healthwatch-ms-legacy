@@ -99,6 +99,10 @@ def create_risk_note(*, session: Session, risk_note_in: RiskNoteCreate) -> RiskN
     # 1. Create the Risk Note
     db_obj = RiskNote.model_validate(risk_note_in)
     
+    # Generate unique risk_note_number if not provided
+    if not db_obj.risk_note_number:
+        db_obj.risk_note_number = f"RSK-{uuid.uuid4().hex[:8].upper()}"
+
     # Ensure policy_snapshot is populated if not provided
     if not db_obj.policy_snapshot:
         policy = session.get(Policy, db_obj.policy_id)

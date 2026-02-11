@@ -2035,6 +2035,10 @@ export const RiskNoteCreateSchema = {
             format: 'uuid',
             title: 'Policy Id'
         },
+        risk_note_number: {
+            type: 'string',
+            title: 'Risk Note Number'
+        },
         transaction_type: {
             type: 'string',
             title: 'Transaction Type'
@@ -2125,7 +2129,7 @@ export const RiskNoteCreateSchema = {
         }
     },
     type: 'object',
-    required: ['policy_id', 'transaction_type', 'start_date', 'end_date', 'net_premium', 'commission_amount', 'total_amount'],
+    required: ['policy_id', 'risk_note_number', 'transaction_type', 'start_date', 'end_date', 'net_premium', 'commission_amount', 'total_amount'],
     title: 'RiskNoteCreate'
 } as const;
 
@@ -2135,6 +2139,10 @@ export const RiskNotePublicSchema = {
             type: 'string',
             format: 'uuid',
             title: 'Policy Id'
+        },
+        risk_note_number: {
+            type: 'string',
+            title: 'Risk Note Number'
         },
         transaction_type: {
             type: 'string',
@@ -2241,7 +2249,7 @@ export const RiskNotePublicSchema = {
         }
     },
     type: 'object',
-    required: ['policy_id', 'transaction_type', 'start_date', 'end_date', 'net_premium', 'commission_amount', 'total_amount', 'id'],
+    required: ['policy_id', 'risk_note_number', 'transaction_type', 'start_date', 'end_date', 'net_premium', 'commission_amount', 'total_amount', 'id'],
     title: 'RiskNotePublic'
 } as const;
 
@@ -2257,6 +2265,17 @@ export const RiskNoteUpdateSchema = {
                 }
             ],
             title: 'Transaction Type'
+        },
+        risk_note_number: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Risk Note Number'
         },
         status: {
             anyOf: [

@@ -400,6 +400,7 @@ export type ReceiptsPublic = {
 
 export type RiskNoteCreate = {
     policy_id: string;
+    risk_note_number: string;
     transaction_type: string;
     status?: string;
     previous_risk_note_id?: (string | null);
@@ -422,6 +423,7 @@ export type RiskNoteCreate = {
 
 export type RiskNotePublic = {
     policy_id: string;
+    risk_note_number: string;
     transaction_type: string;
     status?: string;
     previous_risk_note_id?: (string | null);
@@ -451,6 +453,7 @@ export type RiskNotesPublic = {
 
 export type RiskNoteUpdate = {
     transaction_type?: (string | null);
+    risk_note_number?: (string | null);
     status?: (string | null);
     previous_risk_note_id?: (string | null);
     invoice_number?: (string | null);

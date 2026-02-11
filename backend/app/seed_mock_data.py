@@ -221,6 +221,7 @@ def create_mock_data() -> None:
         if not rn:
             rn = RiskNote(
                 policy_id=policy.id,
+                risk_note_number="RSK-SEED-001",
                 transaction_type="New Business",
                 invoice_number="HW-MOT-001",
                 start_date=date(2025, 8, 2),

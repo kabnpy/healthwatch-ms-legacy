@@ -27,15 +27,15 @@ export const getColumns = (
     ),
   },
   {
-    accessorKey: "invoice_number",
-    header: "Ref / Invoice #",
+    accessorKey: "risk_note_number",
+    header: "Risk Note #",
     cell: ({ row }) => (
       <button
         type="button"
         onClick={() => onView(row.original)}
         className="font-mono font-medium text-primary hover:underline"
       >
-        {row.original.invoice_number || "Draft"}
+        {row.original.risk_note_number || "Draft"}
       </button>
     ),
   },
