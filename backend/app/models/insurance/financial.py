@@ -6,7 +6,7 @@ from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
     from .client import Client
-    from .policy import RiskNote
+    from .policy import RiskNote, RiskNotePublic
 
 # ==========================================
 # Invoice Models (Pending Payment)

@@ -54,7 +54,7 @@ def create_invoice_bulk(*, session: Session, bulk_in: InvoiceBulkCreate) -> Invo
         if rn:
             policy = session.get(Policy, rn.policy_id)
             policy_num = policy.policy_number if policy else "Unknown"
-            
+
             line_item = InvoiceLineItem(
                 invoice_id=invoice.id,
                 risk_note_id=rn.id,
@@ -63,7 +63,7 @@ def create_invoice_bulk(*, session: Session, bulk_in: InvoiceBulkCreate) -> Invo
             )
             session.add(line_item)
             total_amount += rn.total_amount
-            
+
             # Update Risk Note with Invoice Number
             rn.invoice_number = invoice.invoice_number
             session.add(rn)
@@ -72,7 +72,7 @@ def create_invoice_bulk(*, session: Session, bulk_in: InvoiceBulkCreate) -> Invo
     invoice.total_amount = total_amount
     invoice.balance_due = total_amount
     session.add(invoice)
-    
+
     session.commit()
     session.refresh(invoice)
     return invoice

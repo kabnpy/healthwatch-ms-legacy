@@ -204,18 +204,22 @@ def create_mock_data() -> None:
         rn = session.exec(
             select(RiskNote).where(RiskNote.policy_id == policy.id)
         ).first()
-        
+
         # Snapshot helper
-        def get_policy_snapshot(p: Policy):
+        def get_policy_snapshot(p: Policy) -> dict[str, Any]:
             dump = p.model_dump()
             # Convert dates to strings for JSON
-            if dump.get("start_date"): dump["start_date"] = str(dump["start_date"])
-            if dump.get("end_date"): dump["end_date"] = str(dump["end_date"])
-            if dump.get("created_at"): dump["created_at"] = str(dump["created_at"])
+            if dump.get("start_date"):
+                dump["start_date"] = str(dump["start_date"])
+            if dump.get("end_date"):
+                dump["end_date"] = str(dump["end_date"])
+            if dump.get("created_at"):
+                dump["created_at"] = str(dump["created_at"])
             # Remove UUIDs if needed, or keep as strings
             dump["id"] = str(dump["id"])
             dump["client_id"] = str(dump["client_id"])
-            if dump.get("product_id"): dump["product_id"] = str(dump["product_id"])
+            if dump.get("product_id"):
+                dump["product_id"] = str(dump["product_id"])
             return dump
 
         if not rn:

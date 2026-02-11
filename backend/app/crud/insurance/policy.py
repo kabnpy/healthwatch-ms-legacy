@@ -7,7 +7,6 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
 
-from app.models.insurance.financial import Invoice, InvoiceLineItem
 from app.models.insurance.policy import (
     Claim,
     ClaimCreate,
@@ -33,7 +32,7 @@ def create_policy(*, session: Session, policy_in: PolicyCreate) -> Policy:
     session.refresh(db_obj)
 
     # Automatically create the first Risk Note for the new policy
-    from datetime import date, timedelta
+    from datetime import timedelta
 
     first_risk_note_in = RiskNoteCreate(
         policy_id=db_obj.id,
@@ -41,7 +40,7 @@ def create_policy(*, session: Session, policy_in: PolicyCreate) -> Policy:
         status="Draft",
         start_date=db_obj.start_date or date.today(),
         end_date=db_obj.end_date or (date.today() + timedelta(days=365)),
-        net_premium=db_obj.total_premium, # Default to policy total for draft
+        net_premium=db_obj.total_premium,  # Default to policy total for draft
         taxes={},
         commission_amount=0.0,
         total_amount=db_obj.total_premium,
@@ -98,7 +97,7 @@ def update_policy(
 def create_risk_note(*, session: Session, risk_note_in: RiskNoteCreate) -> RiskNote:
     # 1. Create the Risk Note
     db_obj = RiskNote.model_validate(risk_note_in)
-    
+
     # Generate unique risk_note_number if not provided
     if not db_obj.risk_note_number:
         db_obj.risk_note_number = f"RSK-{uuid.uuid4().hex[:8].upper()}"
@@ -151,9 +150,7 @@ def get_policies(
     limit: int = 100,
     client_id: uuid.UUID | None = None,
 ) -> list[Policy]:
-    statement = select(Policy).options(
-        selectinload(cast(Any, Policy.product))
-    )
+    statement = select(Policy).options(selectinload(cast(Any, Policy.product)))
     if client_id:
         statement = statement.where(Policy.client_id == client_id)
     statement = statement.offset(skip).limit(limit)
@@ -231,7 +228,7 @@ def get_risk_notes(
     if uninvoiced_only:
         # A risk note is uninvoiced if it has no invoice_line_items
         # Or more simply, if invoice_number is null (though line items are more robust)
-        statement = statement.where(RiskNote.invoice_number == None)
+        statement = statement.where(RiskNote.invoice_number is None)
         # Filters out drafts as well since we only want to invoice finalized notes
         statement = statement.where(RiskNote.status != "Draft")
 
@@ -254,7 +251,7 @@ def count_risk_notes(
     if client_id:
         statement = statement.join(Policy).where(Policy.client_id == client_id)
     if uninvoiced_only:
-        statement = statement.where(RiskNote.invoice_number == None)
+        statement = statement.where(RiskNote.invoice_number is None)
         statement = statement.where(RiskNote.status != "Draft")
 
     count_statement = select(func.count()).select_from(statement.subquery())
