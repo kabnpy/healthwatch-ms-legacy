@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { Clock, CreditCard, FileDown, Mail } from "lucide-react"
+import { Clock, FileDown, Mail } from "lucide-react"
 import { Suspense, useCallback, useState } from "react"
 import { PoliciesService } from "@/client"
 import { DataTable } from "@/components/Common/DataTable"
@@ -11,7 +11,6 @@ import { RiskNoteTemplate } from "@/components/Documents/templates/RiskNoteTempl
 import { RiskNoteForm } from "@/components/Insurance/RiskNoteForm"
 import PendingItems from "@/components/Pending/PendingItems"
 import { PolicyHeader } from "@/components/Policies/Dashboard/PolicyHeader"
-import { AssetCard } from "@/components/Policies/Dashboard/AssetCard"
 import { getColumns as getRiskNoteColumns } from "@/components/RiskNotes/columns"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -23,7 +22,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useFinancialSummary } from "@/hooks/useFinancials"
 import { useClient, usePolicyDashboard } from "@/hooks/useInsurance"
 import { queryClient } from "@/queryClient"
 import type { EnhancedRiskNote, EnhancedPolicy } from "@/types/insurance"
@@ -60,7 +58,6 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
 
   // We need client name for breadcrumbs
   const { data: client } = useClient(policy?.client_id || "")
-  const { summary } = useFinancialSummary(policy?.client_id || "")
 
   // State for Document Viewer
   const [viewerOpen, setViewerOpen] = useState(false)
@@ -189,8 +186,6 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
 
             {/* Sidebar: Live Data & Quick Actions */}
             <div className="lg:col-span-1 space-y-6">
-              <AssetCard policy={policy} />
-
               {/* Live Expiry Sidebar Card */}
               <Card className="border-l-4 border-l-blue-500 shadow-sm">
                 <CardHeader className="pb-2">
@@ -214,35 +209,6 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
                       }}
                     />
                   </div>
-                </CardContent>
-              </Card>
-
-              {/* Financial Summary sidebar card */}
-              <Card className="border-l-4 border-l-green-500 shadow-sm">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-xs font-bold uppercase text-muted-foreground flex items-center gap-2">
-                    <CreditCard className="size-3" />
-                    Live Balance
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    KES {(summary?.totalDue || 0).toLocaleString()}
-                  </div>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-tighter">
-                    Outstanding for Client
-                  </p>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full mt-4 text-xs h-8 border border-dashed"
-                    onClick={() =>
-                      handleViewRiskNote(latestRiskNote?.id || "", "invoice")
-                    }
-                    disabled={!latestRiskNote}
-                  >
-                    View Latest Debit Note
-                  </Button>
                 </CardContent>
               </Card>
 

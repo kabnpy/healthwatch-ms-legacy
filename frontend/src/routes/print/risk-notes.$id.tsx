@@ -115,7 +115,7 @@ function RiskNotePrintContent({ id }: { id: string }) {
         </div>
         <div className="text-right">
           <p className="font-mono text-xl font-bold">
-            {riskNote.invoice_number || "Draft"}
+            {isInvoice ? (riskNote.invoice_number || "Draft") : (riskNote.risk_note_number || "Draft")}
           </p>
           <p className="text-sm mt-1">
             Date: {new Date().toLocaleDateString()}
@@ -271,7 +271,7 @@ function RiskNotePrintContent({ id }: { id: string }) {
             <p className="font-bold text-black mb-1">Payment Instructions:</p>
             <p>
               Please pay via MPESA Paybill: <strong>555000</strong>, Account:{" "}
-              <strong>{riskNote.invoice_number || "Draft"}</strong>
+              <strong>{isInvoice ? (riskNote.invoice_number || "Draft") : (riskNote.risk_note_number || "Draft")}</strong>
             </p>
             <p>
               Cheques payable to: <strong>HealthWatch Insurance Agency</strong>

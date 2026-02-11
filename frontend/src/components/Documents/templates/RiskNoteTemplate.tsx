@@ -114,21 +114,40 @@ export const RiskNoteTemplate = ({
     const instance: Record<string, any> = localSnapshot.risk_details || {}
     
     // Merge logic: template provides structure, instance provides values
-    const merged: Record<string, any> = { ...template }
-    Object.entries(instance).forEach(([section, fields]) => {
-        if (typeof fields === 'object' && fields !== null && !Array.isArray(fields)) {
-            merged[section] = { ...(merged[section] || {}), ...fields }
-        } else {
-            merged[section] = fields
+    // We iterate over the template sections to ensure order and grouping
+    const manualSections = ["INSURED", "CLASS", "PERIOD", "COVER", "ANNUAL PREMIUM", "FINANCIAL SUMMARY", "INSURER", "AUTHENTICATION"]
+    
+    // First, handle sections defined in the template
+    Object.entries(template).forEach(([name, templateContent]) => {
+        const upperName = name.toUpperCase()
+        if (!manualSections.includes(upperName)) {
+            const instanceContent = instance[name] || instance[upperName] || {}
+            
+            let mergedContent = templateContent
+            if (typeof templateContent === 'object' && templateContent !== null) {
+                // If it's a structured section (like VEHICLE DETAILS)
+                mergedContent = { ...templateContent }
+                if (typeof instanceContent === 'object' && instanceContent !== null) {
+                    Object.entries(instanceContent).forEach(([k, v]) => {
+                        // Only override if the value is not a placeholder or if it has actual data
+                        if (v !== undefined && v !== null && v !== "" && v !== "[ EMPTY ]") {
+                            mergedContent[k] = v
+                        }
+                    })
+                }
+            } else if (instanceContent && instanceContent !== "[ EMPTY ]") {
+                mergedContent = instanceContent
+            }
+
+            sections.push({ name: upperName, content: mergedContent as RiskNoteContentValue })
         }
     })
 
-    // Filter out sections already handled manually above
-    const manualSections = ["INSURED", "CLASS", "PERIOD", "COVER", "ANNUAL PREMIUM", "FINANCIAL SUMMARY", "INSURER", "AUTHENTICATION"]
-    
-    Object.entries(merged).forEach(([name, content]) => {
-        if (!manualSections.includes(name.toUpperCase())) {
-            sections.push({ name, content: content as RiskNoteContentValue })
+    // Then, add any sections from instance that weren't in template (fallback for legacy/custom)
+    Object.entries(instance).forEach(([name, content]) => {
+        const upperName = name.toUpperCase()
+        if (!manualSections.includes(upperName) && !sections.find(s => s.name === upperName)) {
+            sections.push({ name: upperName, content: content as RiskNoteContentValue })
         }
     })
 
@@ -156,10 +175,7 @@ export const RiskNoteTemplate = ({
         name: "INSURER",
         content: (
             <div className="flex justify-between items-center text-black">
-                <span className="font-bold">{policy.product?.insurer?.name || "N/A"}</span>
-                <span className="italic text-slate-400 text-[9px] font-mono uppercase tracking-tighter">
-                    Verified Digital Document
-                </span>
+                <span className="font-bold uppercase text-[11px]">{policy.product?.insurer?.name || "N/A"}</span>
             </div>
         )
     })
@@ -200,7 +216,7 @@ export const RiskNoteTemplate = ({
                 Risk Note
               </h1>
               <p className="text-[10px] text-slate-500 font-mono uppercase">
-                Ref: {riskNote.invoice_number || "DRAFT"}
+                Ref: {riskNote.risk_note_number || "DRAFT"}
               </p>
             </div>
             <div className="text-right">

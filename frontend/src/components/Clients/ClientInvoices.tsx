@@ -1,9 +1,8 @@
-import { CreditCard, FilePlus, Plus, Receipt as ReceiptIcon, Wallet } from "lucide-react"
+import { FilePlus, Plus } from "lucide-react"
 import { Suspense, useCallback, useMemo, useState } from "react"
 import type { InvoicePublic, ReceiptPublic } from "@/client"
 import { DataTable } from "@/components/Common/DataTable"
 import { DocumentViewerModal } from "@/components/Common/DocumentViewerModal"
-import { SummaryCard } from "@/components/Common/SummaryCard"
 import { DocumentViewer } from "@/components/Documents/DocumentViewer"
 import { AddReceiptForm } from "@/components/Financials/AddReceiptForm"
 import { AllocationDialog } from "@/components/Financials/AllocationDialog"
@@ -29,7 +28,7 @@ interface ClientInvoicesProps {
 }
 
 export function ClientInvoices({ clientId }: ClientInvoicesProps) {
-  const { invoices, receipts, summary, isLoading } =
+  const { invoices, receipts, isLoading } =
     useFinancialSummary(clientId)
   const voidMutation = useVoidReceipt()
 
@@ -99,7 +98,7 @@ export function ClientInvoices({ clientId }: ClientInvoicesProps) {
     <div className="space-y-6 pt-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold tracking-tight text-primary">
-          Financial Statement
+          Invoices
         </h2>
         <div className="flex gap-2">
           <Button 
@@ -115,27 +114,6 @@ export function ClientInvoices({ clientId }: ClientInvoicesProps) {
             Log Payment
           </Button>
         </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <SummaryCard
-          title="Total Invoiced"
-          value={`KES ${summary.totalInvoiced.toLocaleString()}`}
-          description="Billed for all policies"
-          icon={ReceiptIcon}
-        />
-        <SummaryCard
-          title="Total Paid"
-          value={`KES ${summary.totalPaid.toLocaleString()}`}
-          description="Verified receipts"
-          icon={Wallet}
-        />
-        <SummaryCard
-          title="Outstanding Balance"
-          value={`KES ${summary.totalDue.toLocaleString()}`}
-          description="Current due amount"
-          icon={CreditCard}
-        />
       </div>
 
       <Tabs defaultValue="invoices" className="w-full">

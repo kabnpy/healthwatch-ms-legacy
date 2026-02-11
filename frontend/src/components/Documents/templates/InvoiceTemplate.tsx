@@ -61,8 +61,8 @@ export const InvoiceTemplate = ({
           <table className="w-full border-collapse border-x border-t border-black text-black">
             <tbody>
                 <tr className="border-b border-black">
-                    <th scope="row" className="w-[20%] bg-slate-50 p-3 text-[10px] font-black uppercase tracking-widest text-black border-r border-black text-left align-top">Insured</th>
-                    <td className="p-3 text-[11px] align-top bg-white">
+                    <th scope="row" className="w-[20%] p-3 text-[11px] font-black uppercase tracking-widest text-black border-r border-black text-left align-top">Insured</th>
+                    <td className="p-3 text-[11px] align-top">
                         <div className="text-black">
                             <p className="font-bold text-base leading-tight mb-1">{client.name}</p>
                             <div className="flex justify-between items-start gap-8">
@@ -79,12 +79,12 @@ export const InvoiceTemplate = ({
                     </td>
                 </tr>
                 <tr className="border-b border-black">
-                    <th scope="row" className="w-[20%] bg-slate-50 p-3 text-[10px] font-black uppercase tracking-widest text-black border-r border-black text-left align-middle">Date</th>
-                    <td className="p-3 text-[11px] align-middle font-bold bg-white">{yearRange}</td>
+                    <th scope="row" className="w-[20%] p-3 text-[11px] font-black uppercase tracking-widest text-black border-r border-black text-left align-middle">Date</th>
+                    <td className="p-3 text-[11px] align-middle font-bold">{yearRange}</td>
                 </tr>
                 <tr className="border-b border-black">
-                    <th scope="row" className="w-[20%] bg-slate-50 p-3 text-[10px] font-black uppercase tracking-widest text-black border-r border-black text-left align-middle">Insurer</th>
-                    <td className="p-3 text-[11px] align-middle font-bold bg-white uppercase tracking-tight">{insurerName}</td>
+                    <th scope="row" className="w-[20%] p-3 text-[11px] font-black uppercase tracking-widest text-black border-r border-black text-left align-middle">Insurer</th>
+                    <td className="p-3 text-[11px] align-middle font-bold uppercase tracking-tight">{insurerName}</td>
                 </tr>
             </tbody>
           </table>
@@ -94,7 +94,7 @@ export const InvoiceTemplate = ({
         <div className="border-x border-black bg-white overflow-hidden">
             <table className="w-full border-collapse">
                 <thead>
-                    <tr className="bg-slate-100 border-b border-black">
+                    <tr className="border-b border-black">
                         <th className="w-12 border-r border-black p-2 text-[9px] font-black uppercase text-center text-black">#</th>
                         <th className="border-r border-black p-2 text-[9px] font-black uppercase text-left text-black">Class of Insurance</th>
                         <th className="border-r border-black p-2 text-[9px] font-black uppercase text-left text-black">Policy No / Period</th>
@@ -112,7 +112,7 @@ export const InvoiceTemplate = ({
                             : "N/A"
 
                         return (
-                            <tr key={item.id || i} className="border-b border-black last:border-b-0 bg-white">
+                            <tr key={item.id || i} className="border-b border-black last:border-b-0">
                                 <td className="border-r border-black p-2 text-[10px] text-center font-mono text-slate-600">
                                     {(i + 1).toString().padStart(2, "0")}
                                 </td>
@@ -144,15 +144,15 @@ export const InvoiceTemplate = ({
             <table className="w-full border-collapse">
                 <tbody>
                     <tr className="border-t border-black">
-                        <th scope="row" className="w-[80%] bg-slate-50 p-2 text-[10px] font-black uppercase tracking-widest text-black border-r border-black text-right">Total Premium Payable</th>
-                        <td className="p-2 text-[13px] font-black text-black text-right bg-white">
+                        <th scope="row" className="w-[80%] p-2 text-[11px] font-black uppercase tracking-widest text-black border-r border-black text-right">Total Premium Payable</th>
+                        <td className="p-2 text-[13px] font-black text-black text-right">
                             {formatCurrency(invoice.total_amount || 0)}
                         </td>
                     </tr>
                     {invoice.balance_due !== invoice.total_amount && (
                         <tr className="border-t border-black">
-                            <th scope="row" className="w-[80%] bg-slate-50 p-2 text-[10px] font-bold uppercase tracking-widest text-red-600 border-r border-black text-right">Balance Due</th>
-                            <td className="p-2 text-[13px] font-black text-red-600 text-right bg-white">
+                            <th scope="row" className="w-[80%] p-2 text-[11px] font-bold uppercase tracking-widest text-red-600 border-r border-black text-right">Balance Due</th>
+                            <td className="p-2 text-[13px] font-black text-red-600 text-right">
                                 {formatCurrency(invoice.balance_due || 0)}
                             </td>
                         </tr>
@@ -166,14 +166,14 @@ export const InvoiceTemplate = ({
             <table className="w-full border-collapse">
                 <tbody>
                     <tr>
-                        <th scope="row" className="w-[20%] bg-slate-50 p-3 text-[10px] font-black uppercase tracking-widest text-black border-r border-black text-left align-top">Payment</th>
-                        <td className="p-3 align-top bg-white">
+                        <th scope="row" className="w-[20%] p-3 text-[11px] font-black uppercase tracking-widest text-black border-r border-black text-left align-top">Payment</th>
+                        <td className="p-3 align-top">
                             <div className="grid grid-cols-2 gap-8 text-[10px] text-black">
                                 <div>
                                     <p className="font-bold uppercase mb-1 border-b border-black/10 pb-1 text-black">MPESA Paybill</p>
                                     <div className="space-y-0.5 mt-2">
                                         <p>Business No: <span className="font-bold">555000</span></p>
-                                        <p>Account No: <span className="font-bold font-mono">{client.kra_pin}</span></p>
+                                        <p>Account No: <span className="font-bold font-mono text-[11px]">{invoice.invoice_number}</span></p>
                                     </div>
                                 </div>
                                 <div>
