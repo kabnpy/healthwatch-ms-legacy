@@ -12,14 +12,14 @@ This plan outlines the steps to stabilize and polish the HealthWatch MS core fun
     - [x] Run backend tests to ensure 1:1 Policy/RiskItem refactor is stable.
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Type Stabilization' (cf0192d)
 
-## Phase 2: UI/UX Refinement & Polish
-- [ ] Task: Implement Refined Empty States & Skeletons
-    - [ ] Update `Client Hub` empty states to be contextual and instructive.
-    - [ ] Add/Refine skeleton loaders for the Insurance Dashboard tabs.
-- [ ] Task: Aesthetic Standardization
-    - [ ] Audit UI for adherence to "Subtle Neutrals" palette.
-    - [ ] Ensure "Visual Clarity" (whitespace) is consistent across all main views.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: UI/UX Refinement' (Protocol in workflow.md)
+## Phase 2: UI/UX Refinement & Polish [checkpoint: 61888cc]
+- [x] Task: Implement Refined Empty States & Skeletons (61888cc)
+    - [x] Update `Client Hub` empty states to be contextual and instructive.
+    - [x] Add/Refine skeleton loaders for the Insurance Dashboard tabs.
+- [x] Task: Aesthetic Standardization (verified)
+    - [x] Audit UI for adherence to "Subtle Neutrals" palette.
+    - [x] Ensure "Visual Clarity" (whitespace) is consistent across all main views.
+- [x] Task: Conductor - User Manual Verification 'Phase 2: UI/UX Refinement' (61888cc)
 
 ## Phase 3: Workflow Hardening & Final Verification
 - [ ] Task: Harden Core Insurance Flows
