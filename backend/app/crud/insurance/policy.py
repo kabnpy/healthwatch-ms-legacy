@@ -22,6 +22,7 @@ from app.models.insurance.policy import (
     PolicyUpdate,
     RiskNote,
     RiskNoteCreate,
+    RiskNoteStatus,
     RiskNoteUpdate,
 )
 
@@ -34,11 +35,12 @@ def create_policy(*, session: Session, policy_in: PolicyCreate) -> Policy:
 
     # Automatically create the first Risk Note for the new policy
     from datetime import timedelta
+    from app.services.policy import policy_service
 
     first_risk_note_in = RiskNoteCreate(
         policy_id=db_obj.id,
         transaction_type="New Business",
-        status="Draft",
+        status=RiskNoteStatus.DRAFT,
         start_date=db_obj.start_date or date.today(),
         end_date=db_obj.end_date or (date.today() + timedelta(days=365)),
         net_premium=db_obj.total_premium,  # Default to policy total for draft
@@ -48,7 +50,7 @@ def create_policy(*, session: Session, policy_in: PolicyCreate) -> Policy:
         policy_snapshot=jsonable_encoder(db_obj),
         special_clauses=[],
     )
-    create_risk_note(session=session, risk_note_in=first_risk_note_in)
+    policy_service.create_risk_note_with_invoice(session=session, risk_note_in=first_risk_note_in)
 
     return db_obj
 

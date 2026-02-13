@@ -17,6 +17,7 @@ from app.crud.insurance.policy import (
 from app.crud.insurance.policy import (
     update_risk_note as crud_update_risk_note,
 )
+from app.services.policy import policy_service
 from app.models import (
     Message,
     RiskNote,
@@ -79,7 +80,9 @@ def create_risk_note(
     """
     Create new risk note.
     """
-    risk_note = crud_create_risk_note(session=session, risk_note_in=risk_note_in)
+    risk_note = policy_service.create_risk_note_with_invoice(
+        session=session, risk_note_in=risk_note_in, created_by_id=_current_user.id
+    )
     return risk_note
 
 

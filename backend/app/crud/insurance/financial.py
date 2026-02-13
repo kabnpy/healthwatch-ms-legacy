@@ -12,6 +12,7 @@ from app.models.insurance.financial import (
     InvoiceBulkCreate,
     InvoiceCreate,
     InvoiceLineItem,
+    InvoiceLineItemCreate,
     InvoiceUpdate,
     Receipt,
     ReceiptAllocation,
@@ -27,6 +28,14 @@ from app.models.insurance.policy import Policy, RiskNote
 
 def create_invoice(*, session: Session, invoice_in: InvoiceCreate) -> Invoice:
     db_obj = Invoice.model_validate(invoice_in)
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
+
+
+def create_invoice_line_item(*, session: Session, line_item_in: InvoiceLineItemCreate) -> InvoiceLineItem:
+    db_obj = InvoiceLineItem.model_validate(line_item_in)
     session.add(db_obj)
     session.commit()
     session.refresh(db_obj)

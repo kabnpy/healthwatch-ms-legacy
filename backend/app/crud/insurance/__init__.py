@@ -17,6 +17,7 @@ from .client import (
 from .financial import (
     create_invoice,
     create_invoice_bulk,
+    create_invoice_line_item,
     create_receipt,
     create_receipt_allocation,
     get_invoice,
@@ -57,6 +58,7 @@ __all__ = [
     "update_correspondence",
     "create_invoice",
     "create_invoice_bulk",
+    "create_invoice_line_item",
     "get_invoice",
     "get_invoices",
     "update_invoice",
