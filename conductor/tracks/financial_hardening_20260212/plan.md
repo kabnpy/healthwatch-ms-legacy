@@ -30,7 +30,7 @@ This plan outlines the steps to implement financial precision, architectural sep
 - [x] Task: Establish Service Layer [a265467]
     - [ ] Implement: Create `backend/app/services/` directory
     - [ ] Implement: Move Risk Note + Invoice atomic logic to PolicyService
-- [ ] Task: Refactor Document Model with PostgreSQL Inheritance
+- [x] Task: Refactor Document Model with PostgreSQL Inheritance [db4cc39]
     - [ ] Write Tests: Verify referential integrity and polymorphic behavior
     - [ ] Implement: Create new document hierarchy
 - [ ] Task: Implement Motor Private Schema Validation
