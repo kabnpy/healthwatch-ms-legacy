@@ -3,7 +3,7 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException
 
-from app.api.deps import CurrentUser, SessionDep
+from app.api.deps import CurrentUser, SessionDep, StaffUser
 from app.crud.insurance.policy import (
     count_policies,
     get_policies,
@@ -63,7 +63,7 @@ def read_policy(session: SessionDep, _current_user: CurrentUser, id: uuid.UUID) 
 
 @router.post("/", response_model=PolicyPublic)
 def create_policy(
-    *, session: SessionDep, _current_user: CurrentUser, policy_in: PolicyCreate
+    *, session: SessionDep, _current_user: StaffUser, policy_in: PolicyCreate
 ) -> Any:
     """
     Create new policy.
@@ -85,7 +85,7 @@ def create_policy(
 def update_policy(
     *,
     session: SessionDep,
-    _current_user: CurrentUser,
+    _current_user: StaffUser,
     id: uuid.UUID,
     policy_in: PolicyUpdate,
 ) -> Any:
@@ -102,7 +102,7 @@ def update_policy(
 
 @router.delete("/{id}", response_model=Message)
 def delete_policy(
-    session: SessionDep, _current_user: CurrentUser, id: uuid.UUID
+    session: SessionDep, _current_user: StaffUser, id: uuid.UUID
 ) -> Any:
     """
     Delete a policy.

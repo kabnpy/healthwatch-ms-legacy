@@ -1,9 +1,9 @@
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 
-from app.api.deps import CurrentUser, SessionDep
+from app.api.deps import CurrentUser, SessionDep, require_role, StaffUser
 from app.crud.insurance.client import (
     count_clients,
     get_client_by_kra_pin,
@@ -28,6 +28,7 @@ from app.models import (
     CorrespondencePublic,
     CorrespondencesPublic,
     Message,
+    UserRole,
 )
 
 router = APIRouter()
@@ -58,7 +59,7 @@ def read_client(session: SessionDep, _current_user: CurrentUser, id: uuid.UUID) 
 
 @router.post("/", response_model=ClientPublic)
 def create_client(
-    *, session: SessionDep, _current_user: CurrentUser, client_in: ClientCreate
+    *, session: SessionDep, _current_user: StaffUser, client_in: ClientCreate
 ) -> Any:
     """
     Create new client.
@@ -78,7 +79,7 @@ def create_client(
 def update_client(
     *,
     session: SessionDep,
-    _current_user: CurrentUser,
+    _current_user: StaffUser,
     id: uuid.UUID,
     client_in: ClientUpdate,
 ) -> Any:
@@ -94,9 +95,7 @@ def update_client(
 
 
 @router.delete("/{id}", response_model=Message)
-def delete_client(
-    session: SessionDep, _current_user: CurrentUser, id: uuid.UUID
-) -> Any:
+def delete_client(session: SessionDep, _current_user: StaffUser, id: uuid.UUID) -> Any:
     """
     Delete a client.
     """
@@ -125,7 +124,7 @@ def read_client_correspondences(
 def create_client_correspondence(
     *,
     session: SessionDep,
-    _current_user: CurrentUser,
+    _current_user: StaffUser,
     id: uuid.UUID,
     correspondence_in: CorrespondenceCreate,
 ) -> Any:

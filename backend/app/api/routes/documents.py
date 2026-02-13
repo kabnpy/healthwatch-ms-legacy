@@ -6,7 +6,7 @@ from typing import Any
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 
-from app.api.deps import CurrentUser, SessionDep
+from app.api.deps import CurrentUser, SessionDep, StaffUser
 from app.core.storage import storage
 from app.crud.insurance.policy import (
     count_documents,
@@ -51,7 +51,7 @@ def read_documents(
 async def upload_document(
     *,
     session: SessionDep,
-    _current_user: CurrentUser,
+    _current_user: StaffUser,
     file: UploadFile = File(...),
     entity_type: str = Form(...),
     entity_id: uuid.UUID = Form(...),
@@ -116,7 +116,7 @@ def read_document_by_id(
 def remove_document(
     *,
     session: SessionDep,
-    _current_user: CurrentUser,
+    _current_user: StaffUser,
     id: uuid.UUID,
 ) -> Any:
     """

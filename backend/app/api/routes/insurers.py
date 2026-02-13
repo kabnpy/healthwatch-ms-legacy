@@ -3,7 +3,7 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException
 
-from app.api.deps import CurrentUser, SessionDep
+from app.api.deps import CurrentUser, SessionDep, StaffUser
 from app.crud.insurance.catalog import (
     count_insurers,
     get_insurer_by_name,
@@ -55,7 +55,7 @@ def read_insurer(session: SessionDep, _current_user: CurrentUser, id: uuid.UUID)
 
 @router.post("/", response_model=InsurerPublic)
 def create_insurer(
-    *, session: SessionDep, _current_user: CurrentUser, insurer_in: InsurerCreate
+    *, session: SessionDep, _current_user: StaffUser, insurer_in: InsurerCreate
 ) -> Any:
     """
     Create new insurer.
@@ -75,7 +75,7 @@ def create_insurer(
 def update_insurer(
     *,
     session: SessionDep,
-    _current_user: CurrentUser,
+    _current_user: StaffUser,
     id: uuid.UUID,
     insurer_in: InsurerUpdate,
 ) -> Any:
@@ -93,9 +93,7 @@ def update_insurer(
 
 
 @router.delete("/{id}", response_model=Message)
-def delete_insurer(
-    session: SessionDep, _current_user: CurrentUser, id: uuid.UUID
-) -> Any:
+def delete_insurer(session: SessionDep, _current_user: StaffUser, id: uuid.UUID) -> Any:
     """
     Delete an insurer.
     """

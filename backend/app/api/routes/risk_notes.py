@@ -3,7 +3,7 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException
 
-from app.api.deps import CurrentUser, SessionDep
+from app.api.deps import CurrentUser, SessionDep, StaffUser
 from app.crud.insurance.policy import (
     count_risk_notes,
     get_risk_notes,
@@ -74,7 +74,7 @@ def read_risk_note(
 
 @router.post("/", response_model=RiskNotePublic)
 def create_risk_note(
-    *, session: SessionDep, _current_user: CurrentUser, risk_note_in: RiskNoteCreate
+    *, session: SessionDep, _current_user: StaffUser, risk_note_in: RiskNoteCreate
 ) -> Any:
     """
     Create new risk note.
@@ -87,7 +87,7 @@ def create_risk_note(
 def update_risk_note(
     *,
     session: SessionDep,
-    _current_user: CurrentUser,
+    _current_user: StaffUser,
     id: uuid.UUID,
     risk_note_in: RiskNoteUpdate,
 ) -> Any:
@@ -106,7 +106,7 @@ def update_risk_note(
 
 @router.delete("/{id}", response_model=Message)
 def delete_risk_note(
-    session: SessionDep, _current_user: CurrentUser, id: uuid.UUID
+    session: SessionDep, _current_user: StaffUser, id: uuid.UUID
 ) -> Any:
     """
     Delete a risk note.
