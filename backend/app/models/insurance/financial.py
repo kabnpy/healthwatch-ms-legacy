@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 class InvoiceBase(AuditMixin, SQLModel):
     model_config = ConfigDict(validate_assignment=True)
     invoice_number: str = Field(unique=True, index=True)
-    client_id: uuid.UUID = Field(foreign_key="client.id")
+    client_id: uuid.UUID = Field(foreign_key="client.id", index=True)
     date_issued: date = Field(default_factory=date.today)
     due_date: date | None = None
     status: InvoiceStatus = Field(default=InvoiceStatus.UNPAID)  # Unpaid, Partial, Paid, Cancelled
@@ -68,8 +68,8 @@ class Invoice(InvoiceBase, table=True):
 
 
 class InvoiceLineItemBase(SQLModel):
-    invoice_id: uuid.UUID = Field(foreign_key="invoice.id")
-    risk_note_id: uuid.UUID = Field(foreign_key="risknote.id")
+    invoice_id: uuid.UUID = Field(foreign_key="invoice.id", index=True)
+    risk_note_id: uuid.UUID = Field(foreign_key="risknote.id", index=True)
     amount: Decimal = Field(sa_type=Numeric(precision=15, scale=2))
     description: str | None = None
 
@@ -92,7 +92,7 @@ class InvoiceLineItem(InvoiceLineItemBase, table=True):
 
 class ReceiptBase(AuditMixin, SQLModel):
     receipt_number: str = Field(unique=True, index=True)
-    client_id: uuid.UUID = Field(foreign_key="client.id")
+    client_id: uuid.UUID = Field(foreign_key="client.id", index=True)
     date_received: date
     amount: Decimal = Field(sa_type=Numeric(precision=15, scale=2))
     unallocated_amount: Decimal = Field(
@@ -102,7 +102,7 @@ class ReceiptBase(AuditMixin, SQLModel):
     reference: str  # Transaction ID, Cheque No
     notes: str | None = None
     status: ReceiptStatus = Field(default=ReceiptStatus.ACTIVE)
-    created_by_id: uuid.UUID | None = Field(default=None, foreign_key="user.id")
+    created_by_id: uuid.UUID | None = Field(default=None, foreign_key="user.id", index=True)
 
 
 class ReceiptCreate(ReceiptBase):
@@ -126,9 +126,9 @@ class ReceiptUpdate(SQLModel):
 
 
 class ReceiptAllocationBase(SQLModel):
-    receipt_id: uuid.UUID = Field(foreign_key="receipt.id")
-    invoice_id: uuid.UUID = Field(foreign_key="invoice.id")
-    risk_note_id: uuid.UUID | None = Field(default=None, foreign_key="risknote.id")
+    receipt_id: uuid.UUID = Field(foreign_key="receipt.id", index=True)
+    invoice_id: uuid.UUID = Field(foreign_key="invoice.id", index=True)
+    risk_note_id: uuid.UUID | None = Field(default=None, foreign_key="risknote.id", index=True)
     amount_allocated: Decimal = Field(sa_type=Numeric(precision=15, scale=2))
 
 

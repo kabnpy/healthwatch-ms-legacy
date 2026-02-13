@@ -73,7 +73,7 @@ class ClientsPublic(SQLModel):
 
 
 class CorrespondenceBase(AuditMixin, SQLModel):
-    client_id: uuid.UUID = Field(foreign_key="client.id")
+    client_id: uuid.UUID = Field(foreign_key="client.id", index=True)
     subject: str
     summary: str | None = None  # For Search
     file_path: str

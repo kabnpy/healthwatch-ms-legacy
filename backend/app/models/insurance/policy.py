@@ -31,8 +31,8 @@ if TYPE_CHECKING:
 class PolicyBase(AuditMixin, SQLModel):
     model_config = ConfigDict(validate_assignment=True)
     policy_number: str = Field(unique=True, index=True)
-    client_id: uuid.UUID = Field(foreign_key="client.id")
-    product_id: uuid.UUID | None = Field(default=None, foreign_key="product.id")
+    client_id: uuid.UUID = Field(foreign_key="client.id", index=True)
+    product_id: uuid.UUID | None = Field(default=None, foreign_key="product.id", index=True)
     status: PolicyStatus = Field(default=PolicyStatus.ACTIVE)
 
     # Cover Details (Merged from RiskItem)
@@ -127,15 +127,15 @@ class PoliciesPublic(SQLModel):
 
 
 class RiskNoteBase(AuditMixin, SQLModel):
-    policy_id: uuid.UUID = Field(foreign_key="policy.id")
+    policy_id: uuid.UUID = Field(foreign_key="policy.id", index=True)
     risk_note_number: str | None = Field(default=None, unique=True, index=True)
     transaction_type: str  # "New Business", "Renewal", "Endorsement", "Cancellation"
     status: RiskNoteStatus = Field(default=RiskNoteStatus.DRAFT)
     previous_risk_note_id: uuid.UUID | None = Field(
-        default=None, foreign_key="risknote.id"
+        default=None, foreign_key="risknote.id", index=True
     )
     invoice_number: str | None = None
-    created_by_id: uuid.UUID | None = Field(default=None, foreign_key="user.id")
+    created_by_id: uuid.UUID | None = Field(default=None, foreign_key="user.id", index=True)
     payment_status: str = Field(default="Unpaid")
 
     start_date: date
@@ -203,7 +203,7 @@ class RiskNotesPublic(SQLModel):
 
 class ClaimBase(AuditMixin, SQLModel):
     claim_number: str = Field(unique=True)
-    policy_id: uuid.UUID = Field(foreign_key="policy.id")
+    policy_id: uuid.UUID = Field(foreign_key="policy.id", index=True)
 
     date_of_loss: date
     date_reported: date = Field(default_factory=date.today)
@@ -250,10 +250,10 @@ class ClaimsPublic(SQLModel):
 
 
 class ClaimEventBase(SQLModel):
-    claim_id: uuid.UUID = Field(foreign_key="claim.id")
+    claim_id: uuid.UUID = Field(foreign_key="claim.id", index=True)
     event_type: ClaimEventType
     description: str
-    created_by_id: uuid.UUID | None = Field(default=None, foreign_key="user.id")
+    created_by_id: uuid.UUID | None = Field(default=None, foreign_key="user.id", index=True)
     created_at: datetime = Field(default_factory=datetime.now)
 
 
@@ -282,7 +282,7 @@ class ClaimEventsPublic(SQLModel):
 
 class DocumentBase(SQLModel):
     entity_type: DocumentEntityType
-    entity_id: uuid.UUID
+    entity_id: uuid.UUID = Field(index=True)
     document_type: DocumentType
     file_path: str
     mime_type: str | None = None

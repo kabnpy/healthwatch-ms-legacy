@@ -7,4 +7,6 @@ class AuditMixin(SQLModel):
     updated_at: datetime = Field(default_factory=datetime.now, sa_column_kwargs={"onupdate": datetime.now})
     
     deleted_at: datetime | None = Field(default=None, index=True)
-    deleted_by_id: uuid.UUID | None = Field(default=None, foreign_key="user.id")
+    deleted_by_id: uuid.UUID | None = Field(
+        default=None, foreign_key="user.id", index=True
+    )

@@ -60,7 +60,7 @@ class InsurersPublic(SQLModel):
 
 
 class ProductBase(AuditMixin, SQLModel):
-    insurer_id: uuid.UUID = Field(foreign_key="insurer.id")
+    insurer_id: uuid.UUID = Field(foreign_key="insurer.id", index=True)
     name: str
     class_of_insurance: str  # "Motor Private", "Fire"
 
