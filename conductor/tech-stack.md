@@ -6,8 +6,8 @@
 - **ORM:** SQLModel (with SQLAlchemy and Pydantic)
 - **Database:** PostgreSQL
 - **Migrations:** Alembic
-- **Authentication:** JWT (PyJWT) with Passlib (bcrypt)
-- **Testing:** Pytest
+- **Authentication:** JWT (PyJWT) with Passlib (bcrypt) and **Simplified RBAC**
+- **Testing:** Pytest (TDD driven with focus on precision and state filtering)
 
 ## Frontend
 - **Language:** TypeScript
