@@ -1,5 +1,6 @@
 import logging
 from datetime import date
+from decimal import Decimal
 from typing import Any
 
 from sqlmodel import Session, select
@@ -162,7 +163,7 @@ def create_mock_data() -> None:
                 start_date=date(2025, 8, 2),
                 end_date=date(2026, 8, 1),
                 description="KCM 780L - Toyota Landcruiser Prado",
-                total_premium=153438.0,
+                total_premium=Decimal("153438.0"),
                 premium_breakdown={
                     "basic": 152750.0,
                     "levies": {"trainingLevy": 306.0, "phcf": 382.0},
@@ -184,7 +185,7 @@ def create_mock_data() -> None:
             policy.start_date = date(2025, 8, 2)
             policy.end_date = date(2026, 8, 1)
             policy.description = "KCM 780L - Toyota Landcruiser Prado"
-            policy.total_premium = 153438.0
+            policy.total_premium = Decimal("153438.0")
             policy.premium_breakdown = {
                 "basic": 152750.0,
                 "levies": {"trainingLevy": 306.0, "phcf": 382.0},
@@ -220,6 +221,10 @@ def create_mock_data() -> None:
             dump["client_id"] = str(dump["client_id"])
             if dump.get("product_id"):
                 dump["product_id"] = str(dump["product_id"])
+            
+            # Convert Decimals to float for JSON snapshot
+            if isinstance(dump.get("total_premium"), Decimal):
+                dump["total_premium"] = float(dump["total_premium"])
             return dump
 
         if not rn:
@@ -230,10 +235,10 @@ def create_mock_data() -> None:
                 invoice_number="HW-MOT-001",
                 start_date=date(2025, 8, 2),
                 end_date=date(2026, 8, 1),
-                net_premium=152750.0,
+                net_premium=Decimal("152750.0"),
                 taxes={"trainingLevy": 306.0, "phcf": 382.0},
-                commission_amount=15275.0,
-                total_amount=153438.0,
+                commission_amount=Decimal("15275.0"),
+                total_amount=Decimal("153438.0"),
                 status="Active",
                 policy_snapshot=get_policy_snapshot(policy),
                 special_clauses=[],

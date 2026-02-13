@@ -1,6 +1,7 @@
 import uuid
 from collections.abc import Sequence
 from datetime import date
+from decimal import Decimal
 from typing import Any, cast
 
 from fastapi.encoders import jsonable_encoder
@@ -42,7 +43,7 @@ def create_policy(*, session: Session, policy_in: PolicyCreate) -> Policy:
         end_date=db_obj.end_date or (date.today() + timedelta(days=365)),
         net_premium=db_obj.total_premium,  # Default to policy total for draft
         taxes={},
-        commission_amount=0.0,
+        commission_amount=Decimal("0.0"),
         total_amount=db_obj.total_premium,
         policy_snapshot=jsonable_encoder(db_obj),
         special_clauses=[],

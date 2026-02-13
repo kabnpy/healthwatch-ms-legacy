@@ -19,10 +19,9 @@ from app.models import (
     Receipt,
     ReceiptAllocation,
     Policy,
-    RiskItem,
     RiskNote,
     Claim,
-    PolicyDocument,
+    Document,
 )
 from tests.utils.user import authentication_token_from_email
 from tests.utils.utils import get_superuser_token_headers
@@ -35,7 +34,7 @@ def db() -> Generator[Session, None, None]:
         init_db(session)
         yield session
         # Delete records in correct order to avoid foreign key constraint violations
-        statement = delete(PolicyDocument)
+        statement = delete(Document)
         session.execute(statement)
         statement = delete(Claim)
         session.execute(statement)
@@ -46,8 +45,6 @@ def db() -> Generator[Session, None, None]:
         statement = delete(Receipt)
         session.execute(statement)
         statement = delete(Invoice)
-        session.execute(statement)
-        statement = delete(RiskItem)
         session.execute(statement)
         statement = delete(RiskNote)
         session.execute(statement)

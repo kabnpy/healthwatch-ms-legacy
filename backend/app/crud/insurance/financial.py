@@ -1,4 +1,5 @@
 import uuid
+from decimal import Decimal
 from typing import Any, cast
 
 from sqlalchemy.orm import selectinload
@@ -38,15 +39,15 @@ def create_invoice_bulk(*, session: Session, bulk_in: InvoiceBulkCreate) -> Invo
         client_id=bulk_in.client_id,
         date_issued=bulk_in.date_issued,
         notes=bulk_in.notes,
-        total_amount=0.0,
-        balance_due=0.0,
+        total_amount=Decimal("0.0"),
+        balance_due=Decimal("0.0"),
         status="Unpaid",
     )
     session.add(invoice)
     session.commit()
     session.refresh(invoice)
 
-    total_amount = 0.0
+    total_amount = Decimal("0.0")
 
     # 2. Link Risk Notes via Line Items
     for rn_id in bulk_in.risk_note_ids:

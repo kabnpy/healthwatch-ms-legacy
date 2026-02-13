@@ -88,8 +88,9 @@ def test_create_risk_note(db: Session) -> None:
         transaction_type="New Business",
         start_date=date(2024, 1, 1),
         end_date=date(2024, 12, 31),
-        premium_breakdown={"basic": 1000.0, "total": 1100.0},
+        net_premium=1000.0,
         commission_amount=100.0,
+        total_amount=1100.0,
     )
     risk_note = crud.create_risk_note(session=db, risk_note_in=risk_note_in)
     assert risk_note.risk_note_number == risk_note_in.risk_note_number
@@ -139,8 +140,9 @@ def test_create_receipt_allocation(db: Session) -> None:
         transaction_type="New Business",
         start_date=date(2024, 1, 1),
         end_date=date(2024, 12, 31),
-        premium_breakdown={"basic": 1000.0, "total": 1100.0},
+        net_premium=1000.0,
         commission_amount=100.0,
+        total_amount=1100.0,
     )
     risk_note = crud.create_risk_note(session=db, risk_note_in=risk_note_in)
     
@@ -155,11 +157,18 @@ def test_create_receipt_allocation(db: Session) -> None:
     receipt = crud.create_receipt(session=db, receipt_in=receipt_in)
     
     # We need an invoice for the allocation
-    # The risk_note creation already creates an invoice in crud.create_risk_note
     from app.models.insurance.financial import Invoice
     from sqlmodel import select
-    invoice = db.exec(select(Invoice).where(Invoice.client_id == client.id)).first()
-    assert invoice is not None
+    
+    invoice = Invoice(
+        invoice_number=random_lower_string(),
+        client_id=client.id,
+        total_amount=1100.0,
+        balance_due=1100.0,
+    )
+    db.add(invoice)
+    db.commit()
+    db.refresh(invoice)
 
     allocation_in = ReceiptAllocationCreate(
         receipt_id=receipt.id,

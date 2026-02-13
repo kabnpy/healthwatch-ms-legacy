@@ -1,7 +1,9 @@
 import uuid
 from datetime import date
+from decimal import Decimal
 from typing import TYPE_CHECKING, Optional
 
+from sqlalchemy import Numeric
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
@@ -19,8 +21,12 @@ class InvoiceBase(SQLModel):
     date_issued: date = Field(default_factory=date.today)
     due_date: date | None = None
     status: str = "Unpaid"  # Unpaid, Partial, Paid, Cancelled
-    total_amount: float = 0.0
-    balance_due: float = 0.0
+    total_amount: Decimal = Field(
+        default=Decimal("0.0"), sa_type=Numeric(precision=15, scale=2)
+    )
+    balance_due: Decimal = Field(
+        default=Decimal("0.0"), sa_type=Numeric(precision=15, scale=2)
+    )
     notes: str | None = None
 
 
@@ -39,8 +45,8 @@ class InvoiceUpdate(SQLModel):
     invoice_number: str | None = None
     due_date: date | None = None
     status: str | None = None
-    total_amount: float | None = None
-    balance_due: float | None = None
+    total_amount: Decimal | None = None
+    balance_due: Decimal | None = None
     notes: str | None = None
 
 
@@ -60,7 +66,7 @@ class Invoice(InvoiceBase, table=True):
 class InvoiceLineItemBase(SQLModel):
     invoice_id: uuid.UUID = Field(foreign_key="invoice.id")
     risk_note_id: uuid.UUID = Field(foreign_key="risknote.id")
-    amount: float
+    amount: Decimal = Field(sa_type=Numeric(precision=15, scale=2))
     description: str | None = None
 
 
@@ -84,8 +90,10 @@ class ReceiptBase(SQLModel):
     receipt_number: str = Field(unique=True, index=True)
     client_id: uuid.UUID = Field(foreign_key="client.id")
     date_received: date
-    amount: float
-    unallocated_amount: float = Field(default=0.0)
+    amount: Decimal = Field(sa_type=Numeric(precision=15, scale=2))
+    unallocated_amount: Decimal = Field(
+        default=Decimal("0.0"), sa_type=Numeric(precision=15, scale=2)
+    )
     mode: str  # Cash, Cheque, MPESA, Bank Transfer
     reference: str  # Transaction ID, Cheque No
     notes: str | None = None
@@ -100,8 +108,8 @@ class ReceiptCreate(ReceiptBase):
 class ReceiptUpdate(SQLModel):
     receipt_number: str | None = None
     date_received: date | None = None
-    amount: float | None = None
-    unallocated_amount: float | None = None
+    amount: Decimal | None = None
+    unallocated_amount: Decimal | None = None
     mode: str | None = None
     reference: str | None = None
     notes: str | None = None
@@ -117,7 +125,7 @@ class ReceiptAllocationBase(SQLModel):
     receipt_id: uuid.UUID = Field(foreign_key="receipt.id")
     invoice_id: uuid.UUID = Field(foreign_key="invoice.id")
     risk_note_id: uuid.UUID | None = Field(default=None, foreign_key="risknote.id")
-    amount_allocated: float
+    amount_allocated: Decimal = Field(sa_type=Numeric(precision=15, scale=2))
 
 
 class ReceiptAllocationCreate(ReceiptAllocationBase):

@@ -1,4 +1,5 @@
 import uuid
+from decimal import Decimal
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 
@@ -76,8 +77,7 @@ def test_create_receipt(
     assert response.status_code == 200
     content = response.json()
     assert content["receipt_number"] == data["receipt_number"]
-    assert content["amount"] == 500.0
-
+    assert Decimal(content["amount"]) == Decimal("500.0")
 def test_allocate_receipt(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:

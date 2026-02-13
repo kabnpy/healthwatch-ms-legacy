@@ -1,9 +1,10 @@
 import uuid
 from datetime import date, datetime
+from decimal import Decimal
 from typing import TYPE_CHECKING, Any, Optional
 
 from pydantic import computed_field
-from sqlalchemy import JSON
+from sqlalchemy import JSON, Numeric
 from sqlmodel import Field, Relationship, SQLModel
 
 from .catalog import ProductPublic
@@ -29,7 +30,9 @@ class PolicyBase(SQLModel):
     start_date: date | None = None
     end_date: date | None = None
     description: str | None = None
-    total_premium: float = Field(default=0.0)
+    total_premium: Decimal = Field(
+        default=Decimal("0.0"), sa_type=Numeric(precision=15, scale=2)
+    )
     premium_breakdown: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
     risk_details: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
 
@@ -46,7 +49,7 @@ class PolicyUpdate(SQLModel):
     start_date: date | None = None
     end_date: date | None = None
     description: str | None = None
-    total_premium: float | None = None
+    total_premium: Decimal | None = None
     premium_breakdown: dict[str, Any] | None = None
     risk_details: dict[str, Any] | None = None
 
@@ -130,10 +133,10 @@ class RiskNoteBase(SQLModel):
     end_date: date
 
     # Invoice Totals
-    net_premium: float
+    net_premium: Decimal = Field(sa_type=Numeric(precision=15, scale=2))
     taxes: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
-    commission_amount: float
-    total_amount: float
+    commission_amount: Decimal = Field(sa_type=Numeric(precision=15, scale=2))
+    total_amount: Decimal = Field(sa_type=Numeric(precision=15, scale=2))
 
     # SNAPSHOTS:
     # A frozen state of the policy at this moment in time
@@ -156,10 +159,10 @@ class RiskNoteUpdate(SQLModel):
     payment_status: str | None = None
     start_date: date | None = None
     end_date: date | None = None
-    net_premium: float | None = None
+    net_premium: Decimal | None = None
     taxes: dict[str, Any] | None = None
-    commission_amount: float | None = None
-    total_amount: float | None = None
+    commission_amount: Decimal | None = None
+    total_amount: Decimal | None = None
     policy_snapshot: dict[str, Any] | None = None
     special_clauses: list[str] | None = None
 
@@ -197,7 +200,9 @@ class ClaimBase(SQLModel):
     date_reported: date = Field(default_factory=date.today)
     description: str
     status: str = "Reported"
-    reserve_amount: float = 0.0
+    reserve_amount: Decimal = Field(
+        default=Decimal("0.0"), sa_type=Numeric(precision=15, scale=2)
+    )
 
 
 class ClaimCreate(ClaimBase):
@@ -211,7 +216,7 @@ class ClaimUpdate(SQLModel):
     date_reported: date | None = None
     description: str | None = None
     status: str | None = None
-    reserve_amount: float | None = None
+    reserve_amount: Decimal | None = None
 
 
 class ClaimPublic(ClaimBase):
