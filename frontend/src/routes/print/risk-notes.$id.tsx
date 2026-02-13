@@ -158,8 +158,8 @@ function RiskNotePrintContent({ id }: { id: string }) {
             <p className="text-xs uppercase text-gray-500">
               Period of Insurance
             </p>
-            <p className="font-semibold">From: {riskNote.start_date}</p>
-            <p className="font-semibold">To: {riskNote.end_date}</p>
+            <p className="font-semibold">From: {riskNote.coverage_start}</p>
+            <p className="font-semibold">To: {riskNote.coverage_end}</p>
           </div>
         </div>
       </div>

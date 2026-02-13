@@ -110,7 +110,7 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
 
   const daysToExpiry = latestRiskNote
     ? Math.ceil(
-        (new Date(latestRiskNote.end_date).getTime() - Date.now()) /
+        (new Date(latestRiskNote.coverage_end || (latestRiskNote as any).end_date).getTime() - Date.now()) /
           (1000 * 60 * 60 * 24),
       )
     : 0

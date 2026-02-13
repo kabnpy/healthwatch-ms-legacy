@@ -22,10 +22,10 @@ This plan outlines the steps to stabilize and polish the HealthWatch MS core fun
 - [x] Task: Conductor - User Manual Verification 'Phase 2: UI/UX Refinement' (61888cc)
 
 ## Phase 3: Workflow Hardening & Final Verification
-- [ ] Task: Harden Core Insurance Flows
-    - [ ] Verify "New Business" wizard end-to-end with various inputs.
-    - [ ] Ensure Risk Note/Debit Note generation is robust and correctly formatted.
-- [ ] Task: Final Quality Audit
-    - [ ] Run full test suite (Pytest & Playwright).
-    - [ ] Execute final linting check (`ruff` and `biome`).
+- [x] Task: Harden Core Insurance Flows (verified)
+    - [x] Verify "New Business" wizard end-to-end with various inputs.
+    - [x] Ensure Risk Note/Debit Note generation is robust and correctly formatted.
+- [x] Task: Final Quality Audit (verified)
+    - [x] Run full test suite (Pytest & Playwright).
+    - [x] Execute final linting check (`ruff` and `biome`).
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Workflow Hardening' (Protocol in workflow.md)

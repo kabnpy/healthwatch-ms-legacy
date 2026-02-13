@@ -63,6 +63,56 @@ class PolicyUpdate(SQLModel):
     inception_date: date | None = None
 
 
+class Policy(PolicyBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+
+    client: "Client" = Relationship(back_populates="policies")
+    product: Optional["Product"] = Relationship(back_populates="policies")
+
+    risk_notes: list["RiskNote"] = Relationship(
+        back_populates="policy",
+        sa_relationship_kwargs={
+            "order_by": "RiskNote.effective_date.desc(), RiskNote.created_at.desc()",
+            "lazy": "selectin"
+        }
+    )
+    claims: list["Claim"] = Relationship(back_populates="policy")
+
+    @property
+    def current_risk_note(self) -> Optional["RiskNote"]:
+        """Get most recent risk note (current state)"""
+        # Sorted by effective_date DESC in relationship
+        active_notes = [
+            rn for rn in self.risk_notes 
+            if rn.status in [RiskNoteStatus.ISSUED, RiskNoteStatus.ACTIVE]
+        ]
+        return active_notes[0] if active_notes else None
+    
+    @property
+    def current_risk_details(self) -> Dict[str, Any]:
+        """Get current coverage details from latest risk note"""
+        rn = self.current_risk_note
+        return rn.policy_snapshot.get("risk_details", {}) if rn else {}
+    
+    @property
+    def current_premium(self) -> Decimal:
+        """Get current total premium from latest risk note"""
+        rn = self.current_risk_note
+        return rn.total_amount if rn else Decimal("0")
+    
+    @property
+    def current_term_start(self) -> Optional[date]:
+        """Get current coverage period start"""
+        rn = self.current_risk_note
+        return rn.coverage_start if rn else None
+    
+    @property
+    def current_term_end(self) -> Optional[date]:
+        """Get current coverage period end"""
+        rn = self.current_risk_note
+        return rn.coverage_end if rn else None
+
+
 class PolicyPublic(PolicyBase):
     id: uuid.UUID
     product: ProductPublic | None = None
@@ -139,6 +189,7 @@ class PolicyPublic(PolicyBase):
             base_name = self.product.class_of_insurance or self.product.name
 
             # Refinement for Motor Private: Add Reg No if available
+            # Note: In PolicyPublic, we use current_risk_details (computed)
             risk_details = self.current_risk_details
             if "motor private" in base_name.lower():
                 reg_no = recursive_search(
@@ -149,56 +200,6 @@ class PolicyPublic(PolicyBase):
 
             return base_name
         return self.policy_number
-
-
-class Policy(PolicyBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-
-    client: "Client" = Relationship(back_populates="policies")
-    product: Optional["Product"] = Relationship(back_populates="policies")
-
-    risk_notes: list["RiskNote"] = Relationship(
-        back_populates="policy",
-        sa_relationship_kwargs={
-            "order_by": "RiskNote.effective_date.desc(), RiskNote.created_at.desc()",
-            "lazy": "selectin"
-        }
-    )
-    claims: list["Claim"] = Relationship(back_populates="policy")
-
-    @property
-    def current_risk_note(self) -> Optional["RiskNote"]:
-        """Get most recent risk note (current state)"""
-        # Sorted by effective_date DESC in relationship
-        active_notes = [
-            rn for rn in self.risk_notes 
-            if rn.status in [RiskNoteStatus.ISSUED, RiskNoteStatus.ACTIVE]
-        ]
-        return active_notes[0] if active_notes else None
-    
-    @property
-    def current_risk_details(self) -> Dict[str, Any]:
-        """Get current coverage details from latest risk note"""
-        rn = self.current_risk_note
-        return rn.policy_snapshot.get("risk_details", {}) if rn else {}
-    
-    @property
-    def current_premium(self) -> Decimal:
-        """Get current total premium from latest risk note"""
-        rn = self.current_risk_note
-        return rn.total_amount if rn else Decimal("0")
-    
-    @property
-    def current_term_start(self) -> Optional[date]:
-        """Get current coverage period start"""
-        rn = self.current_risk_note
-        return rn.coverage_start if rn else None
-    
-    @property
-    def current_term_end(self) -> Optional[date]:
-        """Get current coverage period end"""
-        rn = self.current_risk_note
-        return rn.coverage_end if rn else None
 
 
 class PoliciesPublic(SQLModel):
@@ -259,7 +260,7 @@ class RiskNoteUpdate(SQLModel):
 
 class RiskNotePublic(RiskNoteBase):
     id: uuid.UUID
-    policy: Optional["PolicyPublic"] = None
+    policy: Optional[PolicyPublic] = None
     taxes: Dict[str, Any] = Field(default_factory=dict)
     policy_snapshot: Dict[str, Any] = Field(default_factory=dict)
     special_clauses: List[str] = Field(default_factory=list)
@@ -267,20 +268,16 @@ class RiskNotePublic(RiskNoteBase):
 
 class RiskNote(RiskNoteBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+
+    policy: Policy = Relationship(back_populates="risk_notes")
+    invoice_line_items: list["InvoiceLineItem"] = Relationship(back_populates="risk_note")
+    allocations: list["ReceiptAllocation"] = Relationship(back_populates="risk_note")
+
     taxes: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    # SNAPSHOTS:
-    # A frozen state of the policy at this moment in time
     policy_snapshot: Dict[str, Any] = Field(
         default_factory=dict, sa_column=Column(JSON)
     )
-    # Policy level clauses added to this note
     special_clauses: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-
-    policy: "Policy" = Relationship(back_populates="risk_notes")
-    invoice_line_items: list["InvoiceLineItem"] = Relationship(
-        back_populates="risk_note"
-    )
-    allocations: list["ReceiptAllocation"] = Relationship(back_populates="risk_note")
 
 
 class RiskNotesPublic(SQLModel):
@@ -294,9 +291,8 @@ class RiskNotesPublic(SQLModel):
 
 
 class ClaimBase(AuditMixin, SQLModel):
-    claim_number: str = Field(unique=True)
+    claim_number: str = Field(unique=True, index=True)
     policy_id: uuid.UUID = Field(foreign_key="policy.id", index=True)
-
     date_of_loss: date
     date_reported: date = Field(default_factory=date.today)
     description: str
@@ -402,23 +398,9 @@ class DocumentPublic(DocumentBase):
 
 class Document(DocumentBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    entity_type: DocumentEntityType = Field(index=True)
-    entity_id: uuid.UUID = Field(index=True)
+    entity_type: DocumentEntityType
+    entity_id: uuid.UUID
     doc_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-
-    # Polymorphic specialized Foreign Keys
-    client_id: Optional[uuid.UUID] = Field(
-        default=None, foreign_key="client.id", ondelete="CASCADE", index=True
-    )
-    policy_id: Optional[uuid.UUID] = Field(
-        default=None, foreign_key="policy.id", ondelete="CASCADE", index=True
-    )
-    claim_id: Optional[uuid.UUID] = Field(
-        default=None, foreign_key="claim.id", ondelete="CASCADE", index=True
-    )
-    risk_note_id: Optional[uuid.UUID] = Field(
-        default=None, foreign_key="risknote.id", ondelete="CASCADE", index=True
-    )
 
 
 class DocumentsPublic(SQLModel):

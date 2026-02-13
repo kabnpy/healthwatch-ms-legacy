@@ -47,8 +47,8 @@ export const RiskNoteForm = ({
 
   const formSchema = z.object({
     transaction_type: z.string().min(1),
-    start_date: z.string().min(1),
-    end_date: z.string().min(1),
+    coverage_start: z.string().min(1),
+    coverage_end: z.string().min(1),
     status: z.string().min(1),
     net_premium: z.coerce.number().min(0),
     commission_amount: z.coerce.number().min(0),
@@ -61,8 +61,8 @@ export const RiskNoteForm = ({
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
       transaction_type: "New Business",
-      start_date: new Date().toISOString().split("T")[0],
-      end_date: new Date(new Date().setFullYear(new Date().getFullYear() + 1))
+      coverage_start: new Date().toISOString().split("T")[0],
+      coverage_end: new Date(new Date().setFullYear(new Date().getFullYear() + 1))
         .toISOString()
         .split("T")[0],
       status: "Draft",
@@ -80,26 +80,27 @@ export const RiskNoteForm = ({
 
       form.reset({
         transaction_type: existingRiskNote.transaction_type,
-        start_date: existingRiskNote.start_date,
-        end_date: existingRiskNote.end_date,
+        coverage_start: existingRiskNote.coverage_start || (existingRiskNote as any).start_date,
+        coverage_end: existingRiskNote.coverage_end || (existingRiskNote as any).end_date,
         status: existingRN.status || "Draft",
         net_premium: Number(existingRiskNote.net_premium),
         commission_amount: Number(existingRiskNote.commission_amount),
-        details: policySnapshot.risk_details || policy?.risk_details || {},
+        details: policySnapshot.risk_details || (policy as any)?.current_risk_details || {},
       })
     } else if (policy) {
+      const latestRN = (policy as any).latest_risk_note
       form.reset({
         transaction_type: "New Business",
-        start_date: policy.start_date || new Date().toISOString().split("T")[0],
-        end_date:
-          policy.end_date ||
+        coverage_start: latestRN?.coverage_start || new Date().toISOString().split("T")[0],
+        coverage_end:
+          latestRN?.coverage_end ||
           new Date(new Date().setFullYear(new Date().getFullYear() + 1))
             .toISOString()
             .split("T")[0],
         status: "Draft",
-        net_premium: Number(policy.total_premium || 0),
-        commission_amount: Number(policy.total_premium || 0) * 0.1,
-        details: policy.risk_details || {},
+        net_premium: Number(latestRN?.net_premium || 0),
+        commission_amount: Number(latestRN?.commission_amount || 0),
+        details: (policy as any).current_risk_details || {},
       })
     }
   }, [existingRiskNote, policy, form])
@@ -111,9 +112,9 @@ export const RiskNoteForm = ({
     const policy_snapshot = {
       ...(policy || {}),
       risk_details: data.details,
-      start_date: data.start_date,
-      end_date: data.end_date,
-      total_premium: data.net_premium,
+      coverage_start: data.coverage_start,
+      coverage_end: data.coverage_end,
+      net_premium: data.net_premium,
     }
 
     // Basic tax calculation for now (matching seeding logic)
@@ -122,15 +123,19 @@ export const RiskNoteForm = ({
     const total_amount = data.net_premium + trainingLevy + phcf
 
     const payload = {
-      ...data,
+      transaction_type: data.transaction_type,
+      coverage_start: data.coverage_start,
+      coverage_end: data.coverage_end,
+      net_premium: data.net_premium,
+      commission_amount: data.commission_amount,
       status: data.status as RiskNoteStatus,
       policy_snapshot,
-      taxes: { trainingLevy, phcf },
+      levies: { training_levy: trainingLevy, phcf: phcf },
       total_amount,
     }
 
     updateRiskNote.mutate(
-      { id: riskNoteId, data: payload },
+      { id: riskNoteId, data: payload as any },
       {
         onSuccess: () => {
           showSuccessToast("Risk Note updated successfully")
@@ -210,7 +215,7 @@ export const RiskNoteForm = ({
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control as any}
-            name="start_date"
+            name="coverage_start"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Start Date</FormLabel>
@@ -223,7 +228,7 @@ export const RiskNoteForm = ({
           />
           <FormField
             control={form.control as any}
-            name="end_date"
+            name="coverage_end"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>End Date</FormLabel>

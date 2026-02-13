@@ -283,8 +283,7 @@ def update_document(
     document_in: DocumentUpdate,
 ) -> Document:
     document_data = document_in.model_dump(exclude_unset=True)
-    db_obj = Policy.model_validate(document_data)
-    db_document.sqlmodel_update(db_obj)
+    db_document.sqlmodel_update(document_data)
     session.add(db_document)
     session.commit()
     session.refresh(db_document)

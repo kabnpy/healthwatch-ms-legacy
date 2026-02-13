@@ -4,7 +4,7 @@ import { useState } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
 import { z } from "zod"
 
-import type { ApiError, PolicyCreate, PolicyStatus } from "@/client"
+import type { ApiError, PolicyCreateExtended, PolicyStatus } from "@/client"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -39,12 +39,16 @@ const formSchema = z.object({
   policy_number: z.string().min(1, "Policy number is required"),
   product_id: z.string().uuid("Please select a product"),
   status: z.string().default("Active"),
+  coverage_start: z.string().min(1, "Start date is required"),
+  coverage_end: z.string().min(1, "End date is required"),
 })
 
 interface FormData {
   policy_number: string
   product_id: string
   status: string
+  coverage_start: string
+  coverage_end: string
 }
 
 interface AddPolicyProps {
@@ -63,16 +67,22 @@ export const AddPolicy = ({ clientId }: AddPolicyProps) => {
       policy_number: "",
       product_id: "",
       status: "Active",
+      coverage_start: new Date().toISOString().split("T")[0],
+      coverage_end: new Date(new Date().setFullYear(new Date().getFullYear() + 1))
+        .toISOString()
+        .split("T")[0],
     },
   })
 
   const onSubmit: SubmitHandler<FormData> = (data) => {
-    const policyData: PolicyCreate = {
+    const policyData: PolicyCreateExtended = {
       ...data,
       status: data.status as PolicyStatus,
       client_id: clientId,
+      risk_details: {}, // Empty for basic addition
+      inception_date: data.coverage_start,
     }
-    createPolicy.mutate(policyData, {
+    createPolicy.mutate(policyData as any, {
       onSuccess: () => {
         showSuccessToast("Policy created successfully")
         form.reset()
@@ -148,6 +158,35 @@ export const AddPolicy = ({ clientId }: AddPolicyProps) => {
                 </FormItem>
               )}
             />
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="coverage_start"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Start Date</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="coverage_end"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>End Date</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <FormField
               control={form.control}

@@ -180,8 +180,8 @@ export const usePolicyDashboard = (policyId: string) => {
     ...policy,
     current_risk_details: policy.current_risk_details || latestRiskNote?.policy_snapshot?.risk_details || {},
     total_premium: policy.total_premium || latestRiskNote?.total_amount || 0,
-    start_date: policy.start_date || latestRiskNote?.coverage_start || (latestRiskNote as any)?.start_date,
-    end_date: policy.end_date || latestRiskNote?.coverage_end || (latestRiskNote as any)?.end_date,
+    coverage_start: policy.start_date || latestRiskNote?.coverage_start,
+    coverage_end: policy.end_date || latestRiskNote?.coverage_end,
   } : undefined
 
   return {

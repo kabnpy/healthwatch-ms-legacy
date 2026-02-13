@@ -91,8 +91,8 @@ export const RiskNoteTemplate = ({
     })
 
     // 3. PERIOD
-    const startDate = (riskNote as any).coverage_start || riskNote.start_date
-    const endDate = (riskNote as any).coverage_end || riskNote.end_date
+    const startDate = riskNote.coverage_start
+    const endDate = riskNote.coverage_end
 
     sections.push({
       name: "PERIOD",

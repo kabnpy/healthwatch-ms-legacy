@@ -48,13 +48,13 @@ export function CoverageCard({ riskNote, onViewBreakdown }: CoverageCardProps) {
               <span className="text-muted-foreground block text-xs uppercase">
                 Start Date
               </span>
-              <span className="font-semibold">{riskNote.start_date}</span>
+              <span className="font-semibold">{riskNote.coverage_start || (riskNote as any).start_date}</span>
             </div>
             <div>
               <span className="text-muted-foreground block text-xs uppercase">
                 End Date
               </span>
-              <span className="font-semibold">{riskNote.end_date}</span>
+              <span className="font-semibold">{riskNote.coverage_end || (riskNote as any).end_date}</span>
             </div>
           </div>
 
