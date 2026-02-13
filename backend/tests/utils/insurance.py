@@ -1,12 +1,12 @@
 import uuid
-from datetime import date
+from datetime import date, timedelta
 from sqlmodel import Session
 
 from app import crud
 from app.models import (
     Insurer, InsurerCreate,
     Product, ProductCreate,
-    Policy, PolicyCreate,
+    Policy, PolicyCreateExtended,
     RiskNote, RiskNoteCreate,
     Receipt, ReceiptCreate,
     Invoice, InvoiceCreate,
@@ -43,12 +43,21 @@ def create_random_policy(db: Session, client_id: uuid.UUID | None = None, produc
         product_id = product.id
     
     policy_number = random_lower_string()
-    policy_in = PolicyCreate(
+    policy_in = PolicyCreateExtended(
         policy_number=policy_number,
         client_id=client_id,
-        product_id=product_id
+        product_id=product_id,
+        coverage_start=date.today(),
+        coverage_end=date.today() + timedelta(days=365),
+        risk_details={"info": "random details"}
     )
-    return policy_service.create_policy(session=db, policy_in=policy_in)
+    return policy_service.create_policy(
+        session=db, 
+        policy_in=policy_in,
+        risk_details=policy_in.risk_details,
+        coverage_start=policy_in.coverage_start,
+        coverage_end=policy_in.coverage_end
+    )
 
 def create_random_receipt(db: Session, client_id: uuid.UUID | None = None) -> Receipt:
     if not client_id:

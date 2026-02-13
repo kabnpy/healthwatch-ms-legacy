@@ -71,6 +71,8 @@ from .insurance.policy import (
     Policy,
     PolicyBase,
     PolicyCreate,
+    PolicyCreateExtended,
+    EndorsementCreate,
     PolicyPublic,
     PolicyUpdate,
     RiskNote,
@@ -82,6 +84,7 @@ from .insurance.policy import (
 )
 from .enums import (
     PolicyStatus,
+    TransactionType,
     RiskNoteStatus,
     InvoiceStatus,
     ReceiptStatus,
@@ -194,6 +197,8 @@ __all__ = [
     "Policy",
     "PolicyBase",
     "PolicyCreate",
+    "PolicyCreateExtended",
+    "EndorsementCreate",
     "PolicyPublic",
     "PolicyUpdate",
     "RiskNote",
@@ -203,6 +208,7 @@ __all__ = [
     "RiskNoteUpdate",
     "RiskNotesPublic",
     "PolicyStatus",
+    "TransactionType",
     "RiskNoteStatus",
     "InvoiceStatus",
     "ReceiptStatus",

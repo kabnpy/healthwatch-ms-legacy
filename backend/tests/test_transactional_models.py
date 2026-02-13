@@ -37,6 +37,7 @@ def test_policy_computed_properties(db: Session) -> None:
             "risk_details": {"vehicle": {"value": 1000000}}
         },
         net_premium=Decimal("10000.00"),
+        levies={},
         commission_amount=Decimal("1000.00"),
         total_amount=Decimal("10500.00"),
     )
@@ -56,6 +57,7 @@ def test_policy_computed_properties(db: Session) -> None:
             "risk_details": {"vehicle": {"value": 1200000}}
         },
         net_premium=Decimal("2000.00"),
+        levies={},
         commission_amount=Decimal("200.00"),
         total_amount=Decimal("2100.00"),
     )
@@ -78,15 +80,9 @@ def test_policy_has_no_duplicated_data(db: Session) -> None:
         status=PolicyStatus.ACTIVE,
     )
     
-    # These should raise AttributeError if columns are removed
-    try:
-        val = getattr(policy, "risk_details")
-        assert False, "Policy should not have risk_details attribute"
-    except AttributeError:
-        pass
-        
-    try:
-        val = getattr(policy, "total_premium")
-        assert False, "Policy should not have total_premium attribute"
-    except AttributeError:
-        pass
+    # These should NOT be in the __dict__ (which represents loaded columns)
+    assert "risk_details" not in policy.__dict__
+    assert "total_premium" not in policy.__dict__
+    assert "premium_breakdown" not in policy.__dict__
+    assert "start_date" not in policy.__dict__
+    assert "end_date" not in policy.__dict__

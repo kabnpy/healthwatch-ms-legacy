@@ -78,7 +78,11 @@ def test_endorsement_creation(db: Session) -> None:
     # 3. Verify
     db.refresh(policy)
     assert len(policy.risk_notes) == 2
-    # latest risk note by effective_date DESC
+    
+    # Sort locally to verify logic
+    sorted_notes = sorted(policy.risk_notes, key=lambda x: (x.effective_date, x.created_at), reverse=True)
+    assert sorted_notes[0].id == endorsement_rn.id
+    
     assert policy.current_risk_note.id == endorsement_rn.id
     assert policy.current_risk_details == new_risk_details
     assert endorsement_rn.transaction_type == "Endorsement"

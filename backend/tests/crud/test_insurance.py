@@ -11,7 +11,6 @@ from app.models import (
     ReceiptAllocationCreate,
 )
 from tests.utils.utils import random_lower_string, random_email
-import uuid
 from datetime import date
 
 
@@ -86,9 +85,10 @@ def test_create_risk_note(db: Session) -> None:
         risk_note_number=random_lower_string(),
         policy_id=policy.id,
         transaction_type="New Business",
-        start_date=date(2024, 1, 1),
-        end_date=date(2024, 12, 31),
+        coverage_start=date(2024, 1, 1),
+        coverage_end=date(2024, 12, 31),
         net_premium=1000.0,
+        levies={},
         commission_amount=100.0,
         total_amount=1100.0,
     )
@@ -138,9 +138,10 @@ def test_create_receipt_allocation(db: Session) -> None:
         risk_note_number=random_lower_string(),
         policy_id=policy.id,
         transaction_type="New Business",
-        start_date=date(2024, 1, 1),
-        end_date=date(2024, 12, 31),
+        coverage_start=date(2024, 1, 1),
+        coverage_end=date(2024, 12, 31),
         net_premium=1000.0,
+        levies={},
         commission_amount=100.0,
         total_amount=1100.0,
     )
@@ -158,7 +159,6 @@ def test_create_receipt_allocation(db: Session) -> None:
     
     # We need an invoice for the allocation
     from app.models.insurance.financial import Invoice
-    from sqlmodel import select
     
     invoice = Invoice(
         invoice_number=random_lower_string(),

@@ -5,7 +5,6 @@ from app.models import (
     ClientCreate,
     PolicyCreate,
     RiskNoteCreate,
-    InvoiceCreate,
 )
 from tests.utils.utils import random_lower_string, random_email
 from datetime import date
@@ -32,8 +31,8 @@ def test_floating_point_precision_error(db: Session) -> None:
         risk_note_number=random_lower_string(),
         policy_id=policy.id,
         transaction_type="New Business",
-        start_date=date(2024, 1, 1),
-        end_date=date(2024, 12, 31),
+        coverage_start=date(2024, 1, 1),
+        coverage_end=date(2024, 12, 31),
         net_premium=Decimal("0.1"),
         commission_amount=Decimal("0.2"),
         total_amount=Decimal("0.1") + Decimal("0.2"),
@@ -74,8 +73,8 @@ def test_money_should_be_precise(db: Session) -> None:
         risk_note_number=random_lower_string(),
         policy_id=policy.id,
         transaction_type="New Business",
-        start_date=date(2024, 1, 1),
-        end_date=date(2024, 12, 31),
+        coverage_start=date(2024, 1, 1),
+        coverage_end=date(2024, 12, 31),
         net_premium=total,
         commission_amount=Decimal("0.0"),
         total_amount=total,

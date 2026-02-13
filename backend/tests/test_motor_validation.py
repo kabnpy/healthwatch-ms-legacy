@@ -1,9 +1,9 @@
-import pytest
 from sqlmodel import Session
-from app.models import PolicyCreate, Client, Product
+from app.models import Product
 from app import crud
-from tests.utils.utils import random_lower_string, random_email
+from tests.utils.utils import random_lower_string
 from tests.utils.client import create_random_client
+from datetime import date, timedelta
 
 from fastapi.testclient import TestClient
 from app.core.config import settings
@@ -30,6 +30,7 @@ def test_motor_private_validation_fails_with_missing_fields(
         "policy_number": random_lower_string(),
         "client_id": str(db_client.id),
         "product_id": str(product.id),
+        "coverage_end": str(date.today() + timedelta(days=365)),
         "risk_details": {"something": "irrelevant"} # Missing Reg No, Make, etc.
     }
     
@@ -64,10 +65,10 @@ def test_motor_private_validation_passes_with_correct_fields(
         "policy_number": random_lower_string(),
         "client_id": str(db_client.id),
         "product_id": str(product.id),
+        "coverage_end": str(date.today() + timedelta(days=365)),
         "risk_details": {
             "Reg. No": "KCM 123X",
             "Make": "Toyota",
-            "Model": "Prado",
             "Year": 2020,
             "Value Kshs.": 5000000.0
         }

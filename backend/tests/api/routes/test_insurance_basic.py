@@ -1,14 +1,12 @@
-import uuid
 from fastapi.testclient import TestClient
 from sqlmodel import Session
+from datetime import date, timedelta
 
 from app.core.config import settings
 from tests.utils.insurance import (
     create_random_insurer,
     create_random_product,
     create_random_policy,
-    
-    create_random_claim
 )
 from tests.utils.client import create_random_client
 from tests.utils.utils import random_email, random_lower_string
@@ -55,6 +53,7 @@ def test_create_policy(
         "policy_number": random_lower_string(),
         "client_id": str(db_client.id),
         "product_id": str(product.id),
+        "coverage_end": str(date.today() + timedelta(days=365)),
         "risk_details": {"info": "some generic info"}
     }
     response = client.post(

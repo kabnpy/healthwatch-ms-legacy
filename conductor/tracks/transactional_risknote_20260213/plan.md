@@ -12,10 +12,10 @@ Establish the new schema by removing duplicated fields from `Policy` and ensurin
 ## Phase 2: Service and CRUD Layer Refactoring
 Refactor the backend logic to handle the atomic creation of policies and risk notes.
 
-- [x] Task: **Write Tests for PolicyService**: Define tests for atomic policy creation and endorsement flows using the new pattern. (bdc24dd)
-- [x] Task: **Refactor PolicyService.create_policy**: Update the service to create a `Policy` container and an initial `RiskNote` in one atomic transaction. (bdc24dd)
-- [x] Task: **Refactor Endorsement Logic**: Ensure updates to policy details always result in a new `RiskNote` rather than a `Policy` update. (bdc24dd)
-- [x] Task: **Verify CRUD Integrity**: Ensure `backend/app/crud/` functions for Policy and RiskNote respect the new schema. (bdc24dd)
+- [x] Task: **Write Tests for PolicyService**: Define tests for atomic policy creation and endorsement flows using the new pattern. (e3f0b3f)
+- [x] Task: **Refactor PolicyService.create_policy**: Update the service to create a `Policy` container and an initial `RiskNote` in one atomic transaction. (e3f0b3f)
+- [x] Task: **Refactor Endorsement Logic**: Ensure updates to policy details always result in a new `RiskNote` rather than a `Policy` update. (e3f0b3f)
+- [x] Task: **Verify CRUD Integrity**: Ensure `backend/app/crud/` functions for Policy and RiskNote respect the new schema. (e3f0b3f)
 - [ ] Task: **Conductor - User Manual Verification 'Phase 2: Service and CRUD Layer Refactoring' (Protocol in workflow.md)**
 
 ## Phase 3: Frontend Data Integration
