@@ -1,5 +1,6 @@
 import uuid
 from typing import TYPE_CHECKING, Any, Optional
+from decimal import Decimal
 
 from pydantic import ConfigDict
 from sqlalchemy import JSON
@@ -92,6 +93,40 @@ class Product(ProductBase, table=True):
 
     insurer: "Insurer" = Relationship(back_populates="products")
     policies: list["Policy"] = Relationship(back_populates="product")
+
+    def validate_risk_details(self, risk_details: dict[str, Any]) -> dict[str, Any]:
+        """
+        Validate that risk_details conform to this product's schema.
+        Returns validated/cleaned dict or raises ValidationError.
+        """
+        if "motor private" in self.class_of_insurance.lower():
+            from app.schemas.insurance import MotorPrivateRiskDetails
+            # Extract nested data if it exists
+            risk_data = risk_details
+            if "VEHICLE DETAILS" in risk_details:
+                risk_data = risk_details["VEHICLE DETAILS"]
+            
+            # This will raise ValidationError if invalid
+            validated = MotorPrivateRiskDetails(**risk_data)
+            return {"VEHICLE DETAILS": validated.model_dump(by_alias=True)}
+        
+        return risk_details
+        
+    def calculate_premium(self, risk_details: dict[str, Any]) -> Decimal:
+        """
+        Calculate premium based on product pricing rules and risk details.
+        Returns net premium (before levies).
+        """
+        if "motor private" in self.class_of_insurance.lower():
+            # Get value from nested or flat
+            risk_data = risk_details.get("VEHICLE DETAILS", risk_details)
+            value = float(risk_data.get("Value Kshs.", 0))
+            
+            # Simple 3.25% with 15,000 minimum
+            premium = max(15000.0, value * 0.0325)
+            return Decimal(str(premium)).quantize(Decimal("0.01"))
+            
+        return Decimal("0.00")
 
 
 class ProductsPublic(SQLModel):

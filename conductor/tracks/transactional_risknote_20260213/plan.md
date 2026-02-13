@@ -1,6 +1,6 @@
 # Implementation Plan: Transactional RiskNote Architectural Refactor
 
-## Phase 1: Database and Model Refactoring
+## Phase 1: Database and Model Refactoring [checkpoint: 33bf144]
 Establish the new schema by removing duplicated fields from `Policy` and ensuring `RiskNote` contains the full state.
 
 - [x] Task: **Write Tests for Updated Models**: Create tests that verify the new schema constraints and the immutability of issued `RiskNotes`. (879c037)
@@ -12,10 +12,10 @@ Establish the new schema by removing duplicated fields from `Policy` and ensurin
 ## Phase 2: Service and CRUD Layer Refactoring
 Refactor the backend logic to handle the atomic creation of policies and risk notes.
 
-- [ ] Task: **Write Tests for PolicyService**: Define tests for atomic policy creation and endorsement flows using the new pattern.
-- [ ] Task: **Refactor PolicyService.create_policy**: Update the service to create a `Policy` container and an initial `RiskNote` in one atomic transaction.
-- [ ] Task: **Refactor Endorsement Logic**: Ensure updates to policy details always result in a new `RiskNote` rather than a `Policy` update.
-- [ ] Task: **Verify CRUD Integrity**: Ensure `backend/app/crud/` functions for Policy and RiskNote respect the new schema.
+- [x] Task: **Write Tests for PolicyService**: Define tests for atomic policy creation and endorsement flows using the new pattern. (bdc24dd)
+- [x] Task: **Refactor PolicyService.create_policy**: Update the service to create a `Policy` container and an initial `RiskNote` in one atomic transaction. (bdc24dd)
+- [x] Task: **Refactor Endorsement Logic**: Ensure updates to policy details always result in a new `RiskNote` rather than a `Policy` update. (bdc24dd)
+- [x] Task: **Verify CRUD Integrity**: Ensure `backend/app/crud/` functions for Policy and RiskNote respect the new schema. (bdc24dd)
 - [ ] Task: **Conductor - User Manual Verification 'Phase 2: Service and CRUD Layer Refactoring' (Protocol in workflow.md)**
 
 ## Phase 3: Frontend Data Integration

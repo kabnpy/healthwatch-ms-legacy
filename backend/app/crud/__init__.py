@@ -28,6 +28,7 @@ from .insurance.client import (
 )
 from .insurance.financial import (
     create_invoice,
+    create_invoice_line_item,
     create_receipt,
     create_receipt_allocation,
     get_invoice,
@@ -97,6 +98,7 @@ __all__ = [
     "count_correspondences",
     "delete_correspondence",
     "create_invoice",
+    "create_invoice_line_item",
     "create_invoice_bulk",
     "get_invoice",
     "get_invoices",

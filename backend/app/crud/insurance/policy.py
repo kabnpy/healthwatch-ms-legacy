@@ -1,10 +1,8 @@
 import uuid
 from collections.abc import Sequence
-from datetime import date
-from decimal import Decimal
+from datetime import datetime
 from typing import Any, cast
 
-from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
 
@@ -22,36 +20,19 @@ from app.models.insurance.policy import (
     PolicyUpdate,
     RiskNote,
     RiskNoteCreate,
-    RiskNoteStatus,
     RiskNoteUpdate,
 )
 
 
 def create_policy(*, session: Session, policy_in: PolicyCreate) -> Policy:
+    """
+    Creates a Policy container record.
+    Note: Business logic for initial RiskNote is handled in PolicyService.
+    """
     db_obj = Policy.model_validate(policy_in)
     session.add(db_obj)
     session.commit()
     session.refresh(db_obj)
-
-    # Automatically create the first Risk Note for the new policy
-    from datetime import timedelta
-    from app.services.policy import policy_service
-
-    first_risk_note_in = RiskNoteCreate(
-        policy_id=db_obj.id,
-        transaction_type="New Business",
-        status=RiskNoteStatus.DRAFT,
-        start_date=db_obj.start_date or date.today(),
-        end_date=db_obj.end_date or (date.today() + timedelta(days=365)),
-        net_premium=db_obj.total_premium,  # Default to policy total for draft
-        taxes={},
-        commission_amount=Decimal("0.0"),
-        total_amount=db_obj.total_premium,
-        policy_snapshot=jsonable_encoder(db_obj),
-        special_clauses=[],
-    )
-    policy_service.create_risk_note_with_invoice(session=session, risk_note_in=first_risk_note_in)
-
     return db_obj
 
 
@@ -105,13 +86,8 @@ def create_risk_note(*, session: Session, risk_note_in: RiskNoteCreate) -> RiskN
 
     # Generate unique risk_note_number if not provided
     if not db_obj.risk_note_number:
-        db_obj.risk_note_number = f"RSK-{uuid.uuid4().hex[:8].upper()}"
-
-    # Ensure policy_snapshot is populated if not provided
-    if not db_obj.policy_snapshot:
-        policy = session.get(Policy, db_obj.policy_id)
-        if policy:
-            db_obj.policy_snapshot = jsonable_encoder(policy)
+        from app.services.policy import generate_risk_note_number
+        db_obj.risk_note_number = generate_risk_note_number()
 
     session.add(db_obj)
     session.commit()
@@ -233,10 +209,7 @@ def get_risk_notes(
     if client_id:
         statement = statement.join(Policy).where(Policy.client_id == client_id)
     if uninvoiced_only:
-        # A risk note is uninvoiced if it has no invoice_line_items
-        # Or more simply, if invoice_number is null (though line items are more robust)
-        statement = statement.where(RiskNote.invoice_number is None)
-        # Filters out drafts as well since we want to invoice finalized notes
+        statement = statement.where(RiskNote.invoice_number == None)
         statement = statement.where(RiskNote.status != "Draft")
 
     statement = statement.offset(skip).limit(limit)
@@ -258,7 +231,7 @@ def count_risk_notes(
     if client_id:
         statement = statement.join(Policy).where(Policy.client_id == client_id)
     if uninvoiced_only:
-        statement = statement.where(RiskNote.invoice_number is None)
+        statement = statement.where(RiskNote.invoice_number == None)
         statement = statement.where(RiskNote.status != "Draft")
 
     count_statement = select(func.count()).select_from(statement.subquery())
@@ -310,7 +283,8 @@ def update_document(
     document_in: DocumentUpdate,
 ) -> Document:
     document_data = document_in.model_dump(exclude_unset=True)
-    db_document.sqlmodel_update(document_data)
+    db_obj = Policy.model_validate(document_data)
+    db_document.sqlmodel_update(db_obj)
     session.add(db_document)
     session.commit()
     session.refresh(db_document)
