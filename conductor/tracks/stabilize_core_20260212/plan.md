@@ -7,9 +7,9 @@ This plan outlines the steps to stabilize and polish the HealthWatch MS core fun
     - [x] Resolve errors in auto-generated client types.
     - [x] Fix type mismatches in `frontend/src/types/insurance.ts` and related components.
     - [x] Ensure `npm run build` passes in the frontend.
-- [ ] Task: Backend Schema and Migration Verification
-    - [ ] Verify `risk_note_number` migration is consistent with the latest models.
-    - [ ] Run backend tests to ensure 1:1 Policy/RiskItem refactor is stable.
+- [x] Task: Backend Schema and Migration Verification (verified)
+    - [x] Verify `risk_note_number` migration is consistent with the latest models.
+    - [x] Run backend tests to ensure 1:1 Policy/RiskItem refactor is stable.
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Type Stabilization' (Protocol in workflow.md)
 
 ## Phase 2: UI/UX Refinement & Polish
