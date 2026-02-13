@@ -18,17 +18,17 @@ Refactor the backend logic to handle the atomic creation of policies and risk no
 - [x] Task: **Verify CRUD Integrity**: Ensure `backend/app/crud/` functions for Policy and RiskNote respect the new schema. (e3f0b3f)
 - [ ] Task: **Conductor - User Manual Verification 'Phase 2: Service and CRUD Layer Refactoring' (Protocol in workflow.md)**
 
-## Phase 3: Frontend Data Integration
+## Phase 3: Frontend Data Integration [checkpoint: 30bc787]
 Update the React application to correctly fetch and display policy data from the transactional snapshots.
 
-- [ ] Task: **Update API Client and Hooks**: Refactor TanStack Query hooks in `frontend/src/hooks/useInsurance.ts` to reflect the schema changes.
-- [ ] Task: **Update Policy Dashboard and Details**: Refactor components in `frontend/src/routes/` to read current state from `latest_risk_note`.
-- [ ] Task: **Refactor New Policy Wizard**: Update `NewPolicyWizard.tsx` to handle the new atomic creation flow and validation.
+- [x] Task: **Update API Client and Hooks**: Refactor TanStack Query hooks in `frontend/src/hooks/useInsurance.ts` to reflect the schema changes. (30bc787)
+- [x] Task: **Update Policy Dashboard and Details**: Refactor components in `frontend/src/routes/` to read current state from `latest_risk_note`. (30bc787)
+- [x] Task: **Refactor New Policy Wizard**: Update `NewPolicyWizard.tsx` to handle the new atomic creation flow and validation. (30bc787)
 - [ ] Task: **Conductor - User Manual Verification 'Phase 3: Frontend Data Integration' (Protocol in workflow.md)**
 
-## Phase 4: Data Seeding and Final Verification
+## Phase 4: Data Seeding and Final Verification [checkpoint: 1610efc]
 Finalize the refactor by updating the seed data and performing a full system validation.
 
-- [ ] Task: **Update backend/app/seed_mock_data.py**: Rewrite the mock data generation script to align with the new transactional pattern.
-- [ ] Task: **Final Integration Testing**: Run the complete `pytest` and `playwright` suites to ensure system-wide stability.
+- [x] Task: **Update backend/app/seed_mock_data.py**: Rewrite the mock data generation script to align with the new transactional pattern. (1610efc)
+- [x] Task: **Final Integration Testing**: Run the complete `pytest` and `playwright` suites to ensure system-wide stability. (1610efc)
 - [ ] Task: **Conductor - User Manual Verification 'Phase 4: Data Seeding and Final Verification' (Protocol in workflow.md)**
