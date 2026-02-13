@@ -18,7 +18,7 @@ This plan outlines the steps to implement financial precision, architectural sep
     - [ ] Write Tests: Verify enum validation in models
     - [ ] Implement: Create Enums for all entity statuses
     - [ ] Implement: Update models and migrations
-- [ ] Task: Implement Role-Based Access Control (RBAC)
+- [x] Task: Implement Role-Based Access Control (RBAC) [b3fea53]
     - [ ] Write Tests: Verify access denial for VIEWER on mutation routes
     - [ ] Implement: Create @require_role decorator
     - [ ] Implement: Apply to API endpoints
