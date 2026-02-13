@@ -1,9 +1,10 @@
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import { Plus, Users } from "lucide-react"
+import { Plus, ShieldOff } from "lucide-react"
 import { useState } from "react"
 import { PoliciesService } from "@/client"
 import { DataTable } from "@/components/Common/DataTable"
+import { EmptyState } from "@/components/Common/EmptyState"
 import { NewPolicyWizard } from "@/components/Insurance/Wizard/NewPolicyWizard"
 import { columns as policyColumns } from "@/components/Policies/columns"
 import { Button } from "@/components/ui/button"
@@ -35,15 +36,16 @@ function ClientPolicies() {
         </Button>
       </div>
       {policies.data.length === 0 ? (
-        <div className="flex flex-col items-center justify-center text-center py-12 border rounded-lg bg-muted/5">
-          <div className="rounded-full bg-muted p-4 mb-4">
-            <Users className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <h3 className="text-lg font-semibold">No policies found</h3>
-          <p className="text-muted-foreground">
-            Create a new policy using the wizard
-          </p>
-        </div>
+        <EmptyState
+          title="No policies found"
+          description="This client doesn't have any insurance policies yet. Use the wizard to create one."
+          icon={ShieldOff}
+          action={{
+            label: "Create First Policy",
+            onClick: () => setWizardOpen(true),
+            icon: Plus,
+          }}
+        />
       ) : (
         <DataTable columns={policyColumns} data={policies.data} />
       )}

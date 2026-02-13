@@ -7,8 +7,8 @@ import {
 } from "@tanstack/react-router"
 import { Suspense } from "react"
 import { ClientsService } from "@/client"
+import { ClientHubSkeleton } from "@/components/Clients/ClientHubSkeleton"
 import ErrorComponent from "@/components/Common/ErrorComponent"
-import PendingItems from "@/components/Pending/PendingItems"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { queryClient } from "@/queryClient"
 
@@ -99,7 +99,7 @@ function ClientHubLayout() {
   const { clientId } = Route.useParams()
 
   return (
-    <Suspense fallback={<PendingItems />}>
+    <Suspense fallback={<ClientHubSkeleton />}>
       <ClientHubContent clientId={clientId} />
     </Suspense>
   )

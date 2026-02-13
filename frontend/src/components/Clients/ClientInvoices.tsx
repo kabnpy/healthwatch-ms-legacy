@@ -1,16 +1,17 @@
-import { FilePlus, Plus } from "lucide-react"
+import { FilePlus, FileText, Plus, Receipt } from "lucide-react"
 import { Suspense, useCallback, useMemo, useState } from "react"
 import type { InvoicePublic, ReceiptPublic } from "@/client"
 import { DataTable } from "@/components/Common/DataTable"
 import { DocumentViewerModal } from "@/components/Common/DocumentViewerModal"
 import { DocumentViewer } from "@/components/Documents/DocumentViewer"
+import { EmptyState } from "@/components/Common/EmptyState"
 import { AddReceiptForm } from "@/components/Financials/AddReceiptForm"
 import { AllocationDialog } from "@/components/Financials/AllocationDialog"
 import { AllocationHistory } from "@/components/Financials/AllocationHistory"
 import { InvoiceWizard } from "@/components/Financials/InvoiceWizard"
+import { InvoicesSkeleton } from "@/components/Financials/InvoicesSkeleton"
 import { getReceiptColumns } from "@/components/Financials/ReceiptColumns"
 import { getColumns as getInvoiceColumns } from "@/components/Invoices/columns"
-import PendingItems from "@/components/Pending/PendingItems"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -28,8 +29,7 @@ interface ClientInvoicesProps {
 }
 
 export function ClientInvoices({ clientId }: ClientInvoicesProps) {
-  const { invoices, receipts, isLoading } =
-    useFinancialSummary(clientId)
+  const { invoices, receipts, isLoading } = useFinancialSummary(clientId)
   const voidMutation = useVoidReceipt()
 
   const [viewerOpen, setViewerOpen] = useState(false)
@@ -92,7 +92,7 @@ export function ClientInvoices({ clientId }: ClientInvoicesProps) {
     [handleAllocate],
   )
 
-  if (isLoading) return <PendingItems />
+  if (isLoading) return <InvoicesSkeleton />
 
   return (
     <div className="space-y-6 pt-4">
@@ -101,9 +101,9 @@ export function ClientInvoices({ clientId }: ClientInvoicesProps) {
           Invoices
         </h2>
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            className="gap-2" 
+          <Button
+            variant="outline"
+            className="gap-2"
             onClick={() => setIsInvoiceWizardOpen(true)}
           >
             <FilePlus className="size-4" />
@@ -123,19 +123,45 @@ export function ClientInvoices({ clientId }: ClientInvoicesProps) {
         </TabsList>
 
         <TabsContent value="invoices" className="pt-4">
-          <DataTable
-            columns={invoiceColumns}
-            data={invoices}
-            searchPlaceholder="Search invoices..."
-          />
+          {invoices.length === 0 ? (
+            <EmptyState
+              title="No invoices found"
+              description="There are no invoices for this client yet. Use the wizard to generate one from pending risk notes."
+              icon={FileText}
+              action={{
+                label: "Generate Invoice",
+                onClick: () => setIsInvoiceWizardOpen(true),
+                icon: FilePlus,
+              }}
+            />
+          ) : (
+            <DataTable
+              columns={invoiceColumns}
+              data={invoices}
+              searchPlaceholder="Search invoices..."
+            />
+          )}
         </TabsContent>
 
         <TabsContent value="receipts" className="pt-4">
-          <DataTable
-            columns={receiptColumns}
-            data={receipts}
-            searchPlaceholder="Search receipts..."
-          />
+          {receipts.length === 0 ? (
+            <EmptyState
+              title="No receipts found"
+              description="No payments have been logged for this client yet."
+              icon={Receipt}
+              action={{
+                label: "Log First Payment",
+                onClick: () => setIsAddReceiptOpen(true),
+                icon: Plus,
+              }}
+            />
+          ) : (
+            <DataTable
+              columns={receiptColumns}
+              data={receipts}
+              searchPlaceholder="Search receipts..."
+            />
+          )}
         </TabsContent>
       </Tabs>
 
@@ -179,7 +205,7 @@ export function ClientInvoices({ clientId }: ClientInvoicesProps) {
           }}
           title={`${selectedDoc.type === "invoice" ? "Invoice" : "Receipt"} Details`}
         >
-          <Suspense fallback={<PendingItems />}>
+          <Suspense fallback={<InvoicesSkeleton />}>
             <DocumentViewer id={selectedDoc.id} type={selectedDoc.type} />
           </Suspense>
         </DocumentViewerModal>

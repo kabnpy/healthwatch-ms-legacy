@@ -11,6 +11,7 @@ import { RiskNoteTemplate } from "@/components/Documents/templates/RiskNoteTempl
 import { RiskNoteForm } from "@/components/Insurance/RiskNoteForm"
 import PendingItems from "@/components/Pending/PendingItems"
 import { PolicyHeader } from "@/components/Policies/Dashboard/PolicyHeader"
+import { PolicyDashboardSkeleton } from "@/components/Policies/Dashboard/PolicyDashboardSkeleton"
 import { getColumns as getRiskNoteColumns } from "@/components/RiskNotes/columns"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -24,7 +25,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useClient, usePolicyDashboard } from "@/hooks/useInsurance"
 import { queryClient } from "@/queryClient"
-import type { EnhancedRiskNote, EnhancedPolicy } from "@/types/insurance"
+import type { EnhancedPolicy, EnhancedRiskNote } from "@/types/insurance"
 
 // --- Route Definition ---
 
@@ -44,7 +45,7 @@ function PolicyDashboard() {
   const { policyId } = Route.useParams()
 
   return (
-    <Suspense fallback={<PendingItems />}>
+    <Suspense fallback={<PolicyDashboardSkeleton />}>
       <PolicyDashboardContent policyId={policyId} />
     </Suspense>
   )
