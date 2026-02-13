@@ -1,10 +1,10 @@
 import uuid
 from datetime import date, datetime
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Optional, Dict, List
 
 from pydantic import computed_field, ConfigDict
-from sqlalchemy import JSON, Numeric
+from sqlalchemy import JSON, Numeric, Column
 from sqlmodel import Field, Relationship, SQLModel
 
 from .catalog import ProductPublic
@@ -42,12 +42,11 @@ class PolicyBase(AuditMixin, SQLModel):
     total_premium: Decimal = Field(
         default=Decimal("0.0"), sa_type=Numeric(precision=15, scale=2)
     )
-    premium_breakdown: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
-    risk_details: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
 
 
 class PolicyCreate(PolicyBase):
-    pass
+    premium_breakdown: Dict[str, Any] = Field(default_factory=dict)
+    risk_details: Dict[str, Any] = Field(default_factory=dict)
 
 
 class PolicyUpdate(SQLModel):
@@ -59,13 +58,15 @@ class PolicyUpdate(SQLModel):
     end_date: date | None = None
     description: str | None = None
     total_premium: Decimal | None = None
-    premium_breakdown: dict[str, Any] | None = None
-    risk_details: dict[str, Any] | None = None
+    premium_breakdown: Dict[str, Any] | None = None
+    risk_details: Dict[str, Any] | None = None
 
 
 class PolicyPublic(PolicyBase):
     id: uuid.UUID
     product: ProductPublic | None = None
+    premium_breakdown: Dict[str, Any] = Field(default_factory=dict)
+    risk_details: Dict[str, Any] = Field(default_factory=dict)
 
     @computed_field  # type: ignore
     @property
@@ -108,6 +109,10 @@ class PolicyPublic(PolicyBase):
 
 class Policy(PolicyBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    premium_breakdown: Dict[str, Any] = Field(
+        default_factory=dict, sa_column=Column(JSON)
+    )
+    risk_details: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
 
     client: "Client" = Relationship(back_populates="policies")
     product: Optional["Product"] = Relationship(back_populates="policies")
@@ -143,20 +148,14 @@ class RiskNoteBase(AuditMixin, SQLModel):
 
     # Invoice Totals
     net_premium: Decimal = Field(sa_type=Numeric(precision=15, scale=2))
-    taxes: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
     commission_amount: Decimal = Field(sa_type=Numeric(precision=15, scale=2))
     total_amount: Decimal = Field(sa_type=Numeric(precision=15, scale=2))
 
-    # SNAPSHOTS:
-    # A frozen state of the policy at this moment in time
-    policy_snapshot: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
-
-    # Policy level clauses added to this note
-    special_clauses: list[str] = Field(default_factory=list, sa_type=JSON)
-
 
 class RiskNoteCreate(RiskNoteBase):
-    pass
+    taxes: Dict[str, Any] = Field(default_factory=dict)
+    policy_snapshot: Dict[str, Any] = Field(default_factory=dict)
+    special_clauses: List[str] = Field(default_factory=list)
 
 
 class RiskNoteUpdate(SQLModel):
@@ -169,20 +168,31 @@ class RiskNoteUpdate(SQLModel):
     start_date: date | None = None
     end_date: date | None = None
     net_premium: Decimal | None = None
-    taxes: dict[str, Any] | None = None
+    taxes: Dict[str, Any] | None = None
     commission_amount: Decimal | None = None
     total_amount: Decimal | None = None
-    policy_snapshot: dict[str, Any] | None = None
-    special_clauses: list[str] | None = None
+    policy_snapshot: Dict[str, Any] | None = None
+    special_clauses: List[str] | None = None
 
 
 class RiskNotePublic(RiskNoteBase):
     id: uuid.UUID
     policy: Optional["PolicyPublic"] = None
+    taxes: Dict[str, Any] = Field(default_factory=dict)
+    policy_snapshot: Dict[str, Any] = Field(default_factory=dict)
+    special_clauses: List[str] = Field(default_factory=list)
 
 
 class RiskNote(RiskNoteBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    taxes: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    # SNAPSHOTS:
+    # A frozen state of the policy at this moment in time
+    policy_snapshot: Dict[str, Any] = Field(
+        default_factory=dict, sa_column=Column(JSON)
+    )
+    # Policy level clauses added to this note
+    special_clauses: List[str] = Field(default_factory=list, sa_column=Column(JSON))
 
     policy: "Policy" = Relationship(back_populates="risk_notes")
     invoice_line_items: list["InvoiceLineItem"] = Relationship(
@@ -276,39 +286,57 @@ class ClaimEventsPublic(SQLModel):
 
 
 # ==========================================
-# Polymorphic Document Models
+# Polymorphic Document Model (Single Table)
 # ==========================================
 
 
 class DocumentBase(SQLModel):
-    entity_type: DocumentEntityType
-    entity_id: uuid.UUID = Field(index=True)
+    model_config = ConfigDict(validate_assignment=True)
     document_type: DocumentType
     file_path: str
     mime_type: str | None = None
-    doc_metadata: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
     uploaded_at: datetime = Field(default_factory=datetime.now)
 
 
 class DocumentCreate(DocumentBase):
-    pass
+    entity_type: DocumentEntityType
+    entity_id: uuid.UUID
+    doc_metadata: Dict[str, Any] = Field(default_factory=dict)
 
 
 class DocumentUpdate(SQLModel):
-    entity_type: DocumentEntityType | None = None
-    entity_id: uuid.UUID | None = None
     document_type: DocumentType | None = None
     file_path: str | None = None
     mime_type: str | None = None
-    doc_metadata: dict[str, Any] | None = None
+    doc_metadata: Dict[str, Any] | None = None
 
 
 class DocumentPublic(DocumentBase):
     id: uuid.UUID
+    entity_type: DocumentEntityType
+    entity_id: uuid.UUID
+    doc_metadata: Dict[str, Any] = Field(default_factory=dict)
 
 
 class Document(DocumentBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    entity_type: DocumentEntityType = Field(index=True)
+    entity_id: uuid.UUID = Field(index=True)
+    doc_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+
+    # Polymorphic specialized Foreign Keys
+    client_id: Optional[uuid.UUID] = Field(
+        default=None, foreign_key="client.id", ondelete="CASCADE", index=True
+    )
+    policy_id: Optional[uuid.UUID] = Field(
+        default=None, foreign_key="policy.id", ondelete="CASCADE", index=True
+    )
+    claim_id: Optional[uuid.UUID] = Field(
+        default=None, foreign_key="claim.id", ondelete="CASCADE", index=True
+    )
+    risk_note_id: Optional[uuid.UUID] = Field(
+        default=None, foreign_key="risknote.id", ondelete="CASCADE", index=True
+    )
 
 
 class DocumentsPublic(SQLModel):

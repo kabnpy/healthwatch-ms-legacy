@@ -282,7 +282,21 @@ def create_claim_event(
 
 
 def create_document(*, session: Session, document_in: DocumentCreate) -> Document:
-    db_obj = Document.model_validate(document_in)
+    from app.models.enums import DocumentEntityType
+
+    # Determine which specialized FK to populate
+    update_data = {}
+    if document_in.entity_type == DocumentEntityType.CLIENT:
+        update_data["client_id"] = document_in.entity_id
+    elif document_in.entity_type == DocumentEntityType.POLICY:
+        update_data["policy_id"] = document_in.entity_id
+    elif document_in.entity_type == DocumentEntityType.CLAIM:
+        update_data["claim_id"] = document_in.entity_id
+    elif document_in.entity_type == DocumentEntityType.RISK_NOTE:
+        update_data["risk_note_id"] = document_in.entity_id
+
+    db_obj = Document.model_validate(document_in, update=update_data)
+
     session.add(db_obj)
     session.commit()
     session.refresh(db_obj)
