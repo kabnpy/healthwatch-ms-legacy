@@ -11,5 +11,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Transactional RiskNote Architectural Refactor**
+- [x] **Track: Transactional RiskNote Architectural Refactor**
 *Link: [./tracks/transactional_risknote_20260213/](./tracks/transactional_risknote_20260213/)*
