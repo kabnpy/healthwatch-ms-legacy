@@ -8,6 +8,7 @@ from sqlalchemy import JSON, Numeric
 from sqlmodel import Field, Relationship, SQLModel
 
 from .catalog import ProductPublic
+from ..mixins import AuditMixin
 
 if TYPE_CHECKING:
     from .catalog import Product
@@ -19,12 +20,11 @@ if TYPE_CHECKING:
 # ==========================================
 
 
-class PolicyBase(SQLModel):
+class PolicyBase(AuditMixin, SQLModel):
     policy_number: str = Field(unique=True, index=True)
     client_id: uuid.UUID = Field(foreign_key="client.id")
     product_id: uuid.UUID | None = Field(default=None, foreign_key="product.id")
     status: str = "Active"
-    created_at: datetime = Field(default_factory=datetime.now)
 
     # Cover Details (Merged from RiskItem)
     start_date: date | None = None
@@ -117,7 +117,7 @@ class PoliciesPublic(SQLModel):
 # ==========================================
 
 
-class RiskNoteBase(SQLModel):
+class RiskNoteBase(AuditMixin, SQLModel):
     policy_id: uuid.UUID = Field(foreign_key="policy.id")
     risk_note_number: str | None = Field(default=None, unique=True, index=True)
     transaction_type: str  # "New Business", "Renewal", "Endorsement", "Cancellation"
@@ -192,7 +192,7 @@ class RiskNotesPublic(SQLModel):
 # ==========================================
 
 
-class ClaimBase(SQLModel):
+class ClaimBase(AuditMixin, SQLModel):
     claim_number: str = Field(unique=True)
     policy_id: uuid.UUID = Field(foreign_key="policy.id")
 

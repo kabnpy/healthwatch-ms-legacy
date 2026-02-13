@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import Numeric
 from sqlmodel import Field, Relationship, SQLModel
+from ..mixins import AuditMixin
 
 if TYPE_CHECKING:
     from .client import Client
@@ -15,7 +16,7 @@ if TYPE_CHECKING:
 # ==========================================
 
 
-class InvoiceBase(SQLModel):
+class InvoiceBase(AuditMixin, SQLModel):
     invoice_number: str = Field(unique=True, index=True)
     client_id: uuid.UUID = Field(foreign_key="client.id")
     date_issued: date = Field(default_factory=date.today)
@@ -86,7 +87,7 @@ class InvoiceLineItem(InvoiceLineItemBase, table=True):
 # ==========================================
 
 
-class ReceiptBase(SQLModel):
+class ReceiptBase(AuditMixin, SQLModel):
     receipt_number: str = Field(unique=True, index=True)
     client_id: uuid.UUID = Field(foreign_key="client.id")
     date_received: date

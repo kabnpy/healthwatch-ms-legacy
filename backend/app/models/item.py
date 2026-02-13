@@ -2,13 +2,14 @@ import uuid
 from typing import TYPE_CHECKING
 
 from sqlmodel import Field, Relationship, SQLModel
+from .mixins import AuditMixin
 
 if TYPE_CHECKING:
     from .user import User
 
 
 # Shared properties
-class ItemBase(SQLModel):
+class ItemBase(AuditMixin, SQLModel):
     title: str = Field(min_length=1, max_length=255)
     description: str | None = Field(default=None, max_length=255)
 
@@ -29,7 +30,9 @@ class Item(ItemBase, table=True):
     owner_id: uuid.UUID = Field(
         foreign_key="user.id", nullable=False, ondelete="CASCADE"
     )
-    owner: "User" = Relationship(back_populates="items")
+    owner: "User" = Relationship(
+        back_populates="items", sa_relationship_kwargs={"foreign_keys": "[Item.owner_id]"}
+    )
 
 
 # Properties to return via API, id is always required

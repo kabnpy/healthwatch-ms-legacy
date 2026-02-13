@@ -57,6 +57,7 @@ def get_policy(session: Session, *, id: uuid.UUID) -> Policy | None:
     statement = (
         select(Policy)
         .where(Policy.id == id)
+        .where(Policy.deleted_at == None)
         .options(
             selectinload(cast(Any, Policy.product)),
         )
@@ -67,7 +68,7 @@ def get_policy(session: Session, *, id: uuid.UUID) -> Policy | None:
 def get_policy_by_policy_number(
     session: Session, *, policy_number: str
 ) -> Policy | None:
-    statement = select(Policy).where(Policy.policy_number == policy_number)
+    statement = select(Policy).where(Policy.policy_number == policy_number).where(Policy.deleted_at == None)
     return session.exec(statement).first()
 
 
@@ -77,6 +78,7 @@ def get_policies_by_client_id(
     statement = (
         select(Policy)
         .where(Policy.client_id == client_id)
+        .where(Policy.deleted_at == None)
         .options(
             selectinload(cast(Any, Policy.product)),
         )
@@ -151,7 +153,7 @@ def get_policies(
     limit: int = 100,
     client_id: uuid.UUID | None = None,
 ) -> list[Policy]:
-    statement = select(Policy).options(selectinload(cast(Any, Policy.product)))
+    statement = select(Policy).where(Policy.deleted_at == None).options(selectinload(cast(Any, Policy.product)))
     if client_id:
         statement = statement.where(Policy.client_id == client_id)
     statement = statement.offset(skip).limit(limit)
@@ -161,7 +163,7 @@ def get_policies(
 def count_policies(session: Session, *, client_id: uuid.UUID | None = None) -> int:
     from sqlmodel import func
 
-    statement = select(Policy)
+    statement = select(Policy).where(Policy.deleted_at == None)
     if client_id:
         statement = statement.where(Policy.client_id == client_id)
     count_statement = select(func.count()).select_from(statement.subquery())
@@ -169,7 +171,8 @@ def count_policies(session: Session, *, client_id: uuid.UUID | None = None) -> i
 
 
 def delete_policy(session: Session, *, db_policy: Policy) -> None:
-    session.delete(db_policy)
+    db_policy.deleted_at = datetime.now()
+    session.add(db_policy)
     session.commit()
 
 
@@ -181,7 +184,7 @@ def get_claims(
     policy_id: uuid.UUID | None = None,
     client_id: uuid.UUID | None = None,
 ) -> list[Claim]:
-    statement = select(Claim)
+    statement = select(Claim).where(Claim.deleted_at == None)
     if policy_id:
         statement = statement.where(Claim.policy_id == policy_id)
     if client_id:
@@ -198,7 +201,7 @@ def count_claims(
 ) -> int:
     from sqlmodel import func
 
-    statement = select(Claim)
+    statement = select(Claim).where(Claim.deleted_at == None)
     if policy_id:
         statement = statement.where(Claim.policy_id == policy_id)
     if client_id:
@@ -208,7 +211,8 @@ def count_claims(
 
 
 def delete_claim(session: Session, *, db_claim: Claim) -> None:
-    session.delete(db_claim)
+    db_claim.deleted_at = datetime.now()
+    session.add(db_claim)
     session.commit()
 
 
@@ -221,7 +225,7 @@ def get_risk_notes(
     client_id: uuid.UUID | None = None,
     uninvoiced_only: bool = False,
 ) -> list[RiskNote]:
-    statement = select(RiskNote)
+    statement = select(RiskNote).where(RiskNote.deleted_at == None)
     if policy_id:
         statement = statement.where(RiskNote.policy_id == policy_id)
     if client_id:
@@ -230,7 +234,7 @@ def get_risk_notes(
         # A risk note is uninvoiced if it has no invoice_line_items
         # Or more simply, if invoice_number is null (though line items are more robust)
         statement = statement.where(RiskNote.invoice_number is None)
-        # Filters out drafts as well since we only want to invoice finalized notes
+        # Filters out drafts as well since we want to invoice finalized notes
         statement = statement.where(RiskNote.status != "Draft")
 
     statement = statement.offset(skip).limit(limit)
@@ -246,7 +250,7 @@ def count_risk_notes(
 ) -> int:
     from sqlmodel import func
 
-    statement = select(RiskNote)
+    statement = select(RiskNote).where(RiskNote.deleted_at == None)
     if policy_id:
         statement = statement.where(RiskNote.policy_id == policy_id)
     if client_id:
@@ -260,7 +264,8 @@ def count_risk_notes(
 
 
 def delete_risk_note(session: Session, *, db_risk_note: RiskNote) -> None:
-    session.delete(db_risk_note)
+    db_risk_note.deleted_at = datetime.now()
+    session.add(db_risk_note)
     session.commit()
 
 

@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Any, Optional
 
 from sqlalchemy import JSON
 from sqlmodel import Field, Relationship, SQLModel
+from ..mixins import AuditMixin
 
 if TYPE_CHECKING:
     from .policy import Policy
@@ -21,7 +22,7 @@ class PricingStrategy(str, Enum):
 # ==========================================
 
 
-class InsurerBase(SQLModel):
+class InsurerBase(AuditMixin, SQLModel):
     name: str = Field(unique=True, index=True)
     email: str | None = None
     phone: str | None = None
@@ -56,7 +57,7 @@ class InsurersPublic(SQLModel):
 # ==========================================
 
 
-class ProductBase(SQLModel):
+class ProductBase(AuditMixin, SQLModel):
     insurer_id: uuid.UUID = Field(foreign_key="insurer.id")
     name: str
     class_of_insurance: str  # "Motor Private", "Fire"

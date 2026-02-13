@@ -9,13 +9,14 @@ if TYPE_CHECKING:
     from .policy import Policy
 
 from sqlalchemy import JSON
+from ..mixins import AuditMixin
 
 # ==========================================
 # Client Models
 # ==========================================
 
 
-class ClientBase(SQLModel):
+class ClientBase(AuditMixin, SQLModel):
     client_type: str = Field(default="Individual")  # "Individual" or "Corporate"
     name: str = Field(index=True)
     kra_pin: str = Field(unique=True, index=True)
@@ -69,7 +70,7 @@ class ClientsPublic(SQLModel):
 # ==========================================
 
 
-class CorrespondenceBase(SQLModel):
+class CorrespondenceBase(AuditMixin, SQLModel):
     client_id: uuid.UUID = Field(foreign_key="client.id")
     subject: str
     summary: str | None = None  # For Search

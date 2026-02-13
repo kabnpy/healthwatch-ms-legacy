@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 from decimal import Decimal
 from typing import Any, cast
 
@@ -83,6 +84,7 @@ def get_invoice(session: Session, *, id: uuid.UUID) -> Invoice | None:
     statement = (
         select(Invoice)
         .where(Invoice.id == id)
+        .where(Invoice.deleted_at == None)
         .options(
             selectinload(cast(Any, Invoice.allocations)),
             selectinload(cast(Any, Invoice.line_items))
@@ -102,7 +104,7 @@ def get_invoices(
     limit: int = 100,
     client_id: uuid.UUID | None = None,
 ) -> list[Invoice]:
-    statement = select(Invoice).options(
+    statement = select(Invoice).where(Invoice.deleted_at == None).options(
         selectinload(cast(Any, Invoice.allocations)),
         selectinload(cast(Any, Invoice.line_items))
         .joinedload(cast(Any, InvoiceLineItem.risk_note))
@@ -145,6 +147,7 @@ def get_receipt(session: Session, *, id: uuid.UUID) -> Receipt | None:
     statement = (
         select(Receipt)
         .where(Receipt.id == id)
+        .where(Receipt.deleted_at == None)
         .options(selectinload(cast(Any, Receipt.allocations)))
     )
     return session.exec(statement).first()
@@ -157,7 +160,7 @@ def get_receipts(
     limit: int = 100,
     client_id: uuid.UUID | None = None,
 ) -> list[Receipt]:
-    statement = select(Receipt).options(selectinload(cast(Any, Receipt.allocations)))
+    statement = select(Receipt).where(Receipt.deleted_at == None).options(selectinload(cast(Any, Receipt.allocations)))
     if client_id:
         statement = statement.where(Receipt.client_id == client_id)
     statement = statement.offset(skip).limit(limit)
@@ -180,11 +183,18 @@ def void_receipt(*, session: Session, db_receipt: Receipt) -> Receipt:
 
     # 2. Mark receipt as voided
     db_receipt.status = "Voided"
-    db_receipt.unallocated_amount = 0
+    db_receipt.unallocated_amount = Decimal("0.0")
+    db_receipt.deleted_at = datetime.now()
     session.add(db_receipt)
     session.commit()
     session.refresh(db_receipt)
     return db_receipt
+
+
+def delete_invoice(session: Session, *, db_invoice: Invoice) -> None:
+    db_invoice.deleted_at = datetime.now()
+    session.add(db_invoice)
+    session.commit()
 
 
 # ==========================================

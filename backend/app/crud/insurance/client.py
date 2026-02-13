@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 
 from sqlmodel import Session, select
 
@@ -22,12 +23,12 @@ def create_client(*, session: Session, client_in: ClientCreate) -> Client:
 
 
 def get_client_by_kra_pin(session: Session, *, kra_pin: str) -> Client | None:
-    statement = select(Client).where(Client.kra_pin == kra_pin)
+    statement = select(Client).where(Client.kra_pin == kra_pin).where(Client.deleted_at == None)
     return session.exec(statement).first()
 
 
 def get_client_by_email(session: Session, *, email: str) -> Client | None:
-    statement = select(Client).where(Client.email == email)
+    statement = select(Client).where(Client.email == email).where(Client.deleted_at == None)
     return session.exec(statement).first()
 
 
@@ -67,19 +68,20 @@ def update_correspondence(
 
 
 def get_clients(session: Session, *, skip: int = 0, limit: int = 100) -> list[Client]:
-    statement = select(Client).offset(skip).limit(limit)
+    statement = select(Client).where(Client.deleted_at == None).offset(skip).limit(limit)
     return list(session.exec(statement).all())
 
 
 def count_clients(session: Session) -> int:
     from sqlmodel import func
 
-    statement = select(func.count()).select_from(Client)
+    statement = select(func.count()).select_from(Client).where(Client.deleted_at == None)
     return session.exec(statement).one()
 
 
 def delete_client(session: Session, *, db_client: Client) -> None:
-    session.delete(db_client)
+    db_client.deleted_at = datetime.now()
+    session.add(db_client)
     session.commit()
 
 
@@ -90,7 +92,7 @@ def get_correspondences(
     limit: int = 100,
     client_id: uuid.UUID | None = None,
 ) -> list[Correspondence]:
-    statement = select(Correspondence)
+    statement = select(Correspondence).where(Correspondence.deleted_at == None)
     if client_id:
         statement = statement.where(Correspondence.client_id == client_id)
     statement = statement.offset(skip).limit(limit)
@@ -102,7 +104,7 @@ def count_correspondences(
 ) -> int:
     from sqlmodel import func
 
-    statement = select(Correspondence)
+    statement = select(Correspondence).where(Correspondence.deleted_at == None)
     if client_id:
         statement = statement.where(Correspondence.client_id == client_id)
     count_statement = select(func.count()).select_from(statement.subquery())
@@ -112,5 +114,6 @@ def count_correspondences(
 def delete_correspondence(
     session: Session, *, db_correspondence: Correspondence
 ) -> None:
-    session.delete(db_correspondence)
+    db_correspondence.deleted_at = datetime.now()
+    session.add(db_correspondence)
     session.commit()

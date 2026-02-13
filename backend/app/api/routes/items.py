@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
@@ -19,20 +20,22 @@ def read_items(
     """
 
     if current_user.is_superuser:
-        count_statement = select(func.count()).select_from(Item)
+        count_statement = select(func.count()).select_from(Item).where(Item.deleted_at == None)
         count = session.exec(count_statement).one()
-        statement = select(Item).offset(skip).limit(limit)
+        statement = select(Item).where(Item.deleted_at == None).offset(skip).limit(limit)
         items = session.exec(statement).all()
     else:
         count_statement = (
             select(func.count())
             .select_from(Item)
             .where(Item.owner_id == current_user.id)
+            .where(Item.deleted_at == None)
         )
         count = session.exec(count_statement).one()
         statement = (
             select(Item)
             .where(Item.owner_id == current_user.id)
+            .where(Item.deleted_at == None)
             .offset(skip)
             .limit(limit)
         )
@@ -47,7 +50,7 @@ def read_item(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -> 
     Get item by ID.
     """
     item = session.get(Item, id)
-    if not item:
+    if not item or item.deleted_at:
         raise HTTPException(status_code=404, detail="Item not found")
     if not current_user.is_superuser and (item.owner_id != current_user.id):
         raise HTTPException(status_code=400, detail="Not enough permissions")
@@ -80,7 +83,7 @@ def update_item(
     Update an item.
     """
     item = session.get(Item, id)
-    if not item:
+    if not item or item.deleted_at:
         raise HTTPException(status_code=404, detail="Item not found")
     if not current_user.is_superuser and (item.owner_id != current_user.id):
         raise HTTPException(status_code=400, detail="Not enough permissions")
@@ -100,10 +103,12 @@ def delete_item(
     Delete an item.
     """
     item = session.get(Item, id)
-    if not item:
+    if not item or item.deleted_at:
         raise HTTPException(status_code=404, detail="Item not found")
     if not current_user.is_superuser and (item.owner_id != current_user.id):
         raise HTTPException(status_code=400, detail="Not enough permissions")
-    session.delete(item)
+    item.deleted_at = datetime.now()
+    item.deleted_by_id = current_user.id
+    session.add(item)
     session.commit()
     return Message(message="Item deleted successfully")
