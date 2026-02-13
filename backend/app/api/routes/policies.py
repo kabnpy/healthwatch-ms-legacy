@@ -19,6 +19,7 @@ from app.crud.insurance.policy import (
 from app.crud.insurance.policy import (
     update_policy as crud_update_policy,
 )
+from app.services.policy import policy_service
 from app.models import (
     Message,
     PoliciesPublic,
@@ -77,7 +78,7 @@ def create_policy(
             detail="The policy with this number already exists in the system.",
         )
 
-    policy = crud_create_policy(session=session, policy_in=policy_in)
+    policy = policy_service.create_policy(session=session, policy_in=policy_in)
     return policy
 
 

@@ -54,7 +54,8 @@ def test_create_policy(
     data = {
         "policy_number": random_lower_string(),
         "client_id": str(db_client.id),
-        "product_id": str(product.id)
+        "product_id": str(product.id),
+        "risk_details": {"info": "some generic info"}
     }
     response = client.post(
         f"{settings.API_V1_STR}/policies/",

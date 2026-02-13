@@ -1,18 +1,44 @@
 import uuid
 from datetime import date
+from typing import Any
 from sqlmodel import Session
+from fastapi import HTTPException
 
 from app import crud
 from app.models import (
+    Policy,
+    PolicyCreate,
     RiskNote, 
     RiskNoteCreate, 
     InvoiceCreate, 
     InvoiceLineItemCreate,
     InvoiceStatus,
-    RiskNoteStatus
+    RiskNoteStatus,
+    Product
 )
+from app.schemas.insurance import MotorPrivateRiskDetails
 
 class PolicyService:
+    @staticmethod
+    def create_policy(*, session: Session, policy_in: PolicyCreate) -> Policy:
+        """
+        Create a Policy with product-specific validation.
+        """
+        # 1. Product specific validation
+        if policy_in.product_id:
+            product = session.get(Product, policy_in.product_id)
+            if product and "motor private" in product.class_of_insurance.lower():
+                try:
+                    # Validate risk_details against motor schema
+                    MotorPrivateRiskDetails(**policy_in.risk_details)
+                except Exception as e:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Invalid risk details for Motor Private: {str(e)}"
+                    )
+        
+        return crud.create_policy(session=session, policy_in=policy_in)
+
     @staticmethod
     def create_risk_note_with_invoice(
         *, session: Session, risk_note_in: RiskNoteCreate, created_by_id: uuid.UUID | None = None
