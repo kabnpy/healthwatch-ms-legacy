@@ -7,7 +7,7 @@ This plan outlines the steps to implement financial precision, architectural sep
     - [ ] Write Tests: Verify floating point errors in existing models
     - [ ] Implement: Update models (Policy, Invoice, Receipt, RiskNote) to use Decimal and Numeric(15, 2)
     - [ ] Implement: Update all dependent calculations and seed data
-- [ ] Task: Implement Soft Delete and Audit Trail
+- [x] Task: Implement Soft Delete and Audit Trail [bda61e6]
     - [ ] Write Tests: Verify soft delete behavior and audit metadata
     - [ ] Implement: Create AuditMixin and apply to primary models
     - [ ] Implement: Update CRUD to respect deleted_at flag
