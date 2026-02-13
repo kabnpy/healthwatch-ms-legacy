@@ -22,12 +22,12 @@ This plan outlines the steps to implement financial precision, architectural sep
     - [ ] Write Tests: Verify access denial for VIEWER on mutation routes
     - [ ] Implement: Create @require_role decorator
     - [ ] Implement: Apply to API endpoints
-- [ ] Task: Add Database Indexes for Foreign Keys
+- [x] Task: Add Database Indexes for Foreign Keys [375748a]
     - [ ] Implement: Add indexes to all FKs in models and generate migrations
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Security' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Security' (Protocol in workflow.md)
 
 ## Phase 3: Architectural Separation
-- [ ] Task: Establish Service Layer
+- [x] Task: Establish Service Layer [a265467]
     - [ ] Implement: Create `backend/app/services/` directory
     - [ ] Implement: Move Risk Note + Invoice atomic logic to PolicyService
 - [ ] Task: Refactor Document Model with PostgreSQL Inheritance
