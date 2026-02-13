@@ -9,7 +9,7 @@ Establish the new schema by removing duplicated fields from `Policy` and ensurin
 - [x] Task: **Database Reset and Migration**: Perform a destructive reset of the local database and generate a fresh Alembic migration. (879c037)
 - [ ] Task: **Conductor - User Manual Verification 'Phase 1: Database and Model Refactoring' (Protocol in workflow.md)**
 
-## Phase 2: Service and CRUD Layer Refactoring
+## Phase 2: Service and CRUD Layer Refactoring [checkpoint: f0e6d1a]
 Refactor the backend logic to handle the atomic creation of policies and risk notes.
 
 - [x] Task: **Write Tests for PolicyService**: Define tests for atomic policy creation and endorsement flows using the new pattern. (e3f0b3f)

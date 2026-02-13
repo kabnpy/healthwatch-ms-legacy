@@ -2,12 +2,15 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   type ClientCreate,
   ClientsService,
+  type ClientUpdate,
   FinancialsService,
   PoliciesService,
-  type PolicyCreate,
+  type PolicyCreateExtended,
+  type PolicyUpdate,
   ProductsService,
   type RiskNoteCreate,
   RiskNotesService,
+  type RiskNoteUpdate,
 } from "../client"
 
 // 1. CLIENTS
@@ -40,7 +43,7 @@ export const useCreateClient = () => {
 export const useUpdateClient = () => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) =>
+    mutationFn: ({ id, data }: { id: string; data: ClientUpdate }) =>
       ClientsService.updateClient({ id, requestBody: data }),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["clients"] })
@@ -78,7 +81,7 @@ export const usePolicy = (id: string) => {
 export const useCreatePolicy = () => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (data: PolicyCreate) =>
+    mutationFn: (data: PolicyCreateExtended) =>
       PoliciesService.createPolicy({ requestBody: data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["policies"] })
@@ -89,7 +92,7 @@ export const useCreatePolicy = () => {
 export const useUpdatePolicy = () => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) =>
+    mutationFn: ({ id, data }: { id: string; data: PolicyUpdate }) =>
       PoliciesService.updatePolicy({ id, requestBody: data }),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["policies"] })
@@ -107,7 +110,10 @@ export const useRiskNotes = (
   uninvoicedOnly?: boolean,
 ) => {
   return useQuery({
-    queryKey: ["risk-notes", { policyId, skip, limit, clientId, uninvoicedOnly }],
+    queryKey: [
+      "risk-notes",
+      { policyId, skip, limit, clientId, uninvoicedOnly },
+    ],
     queryFn: () =>
       RiskNotesService.readRiskNotes({
         policyId,
@@ -142,7 +148,7 @@ export const useCreateRiskNote = () => {
 export const useUpdateRiskNote = () => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) =>
+    mutationFn: ({ id, data }: { id: string; data: RiskNoteUpdate }) =>
       RiskNotesService.updateRiskNote({ id, requestBody: data }),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["risk-notes"] })
@@ -164,14 +170,22 @@ export const usePolicyDashboard = (policyId: string) => {
   const policyQuery = usePolicy(policyId)
   const riskNotesQuery = useRiskNotes(policyId)
 
-  // Helper to find latest risk note (most recent start date)
-  const latestRiskNote = riskNotesQuery.data?.data?.sort(
-    (a, b) =>
-      new Date(b.start_date).getTime() - new Date(a.start_date).getTime(),
-  )[0]
+  // API now returns prepared PolicyPublic, but let's ensure 
+  // local consistency if we have both loaded.
+  const latestRiskNote = riskNotesQuery.data?.data?.[0]
+  const policy = policyQuery.data
+
+  // Simple local enhancement if the relationship wasn't loaded in the main query
+  const enhancedPolicy = policy ? {
+    ...policy,
+    current_risk_details: policy.current_risk_details || latestRiskNote?.policy_snapshot?.risk_details || {},
+    total_premium: policy.total_premium || latestRiskNote?.total_amount || 0,
+    start_date: policy.start_date || latestRiskNote?.coverage_start || (latestRiskNote as any)?.start_date,
+    end_date: policy.end_date || latestRiskNote?.coverage_end || (latestRiskNote as any)?.end_date,
+  } : undefined
 
   return {
-    policy: policyQuery.data,
+    policy: enhancedPolicy,
     latestRiskNote,
     riskNotes: riskNotesQuery.data?.data || [],
     isLoading: policyQuery.isLoading || riskNotesQuery.isLoading,

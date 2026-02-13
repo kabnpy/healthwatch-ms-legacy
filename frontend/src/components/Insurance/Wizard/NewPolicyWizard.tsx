@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react"
-import { RiskNotesService } from "@/client"
 import {
   Dialog,
   DialogContent,
@@ -9,17 +8,15 @@ import {
 import useCustomToast from "@/hooks/useCustomToast"
 import {
   useCreatePolicy,
-  useCreateRiskNote,
-  useUpdateRiskNote,
   useProducts,
 } from "@/hooks/useInsurance"
+import { cn } from "@/lib/utils"
+import type { EnhancedProduct, WizardState } from "@/types/insurance"
+import { injectWizardData } from "@/utils/documentData"
 import { StepAsset } from "./StepAsset"
 import { StepBlueprint } from "./StepBlueprint"
 import { StepFinancials } from "./StepFinancials"
 import { StepReview } from "./StepReview"
-import { cn } from "@/lib/utils"
-import { injectWizardData } from "@/utils/documentData"
-import type { WizardState, EnhancedProduct } from "@/types/insurance"
 
 const steps = ["Product", "Details", "Financials", "Review"]
 
@@ -41,8 +38,6 @@ export function NewPolicyWizard({
   const { data: productsData } = useProducts()
 
   const createPolicy = useCreatePolicy()
-  const createRiskNote = useCreateRiskNote()
-  const updateRiskNote = useUpdateRiskNote()
 
   const [state, setState] = useState<WizardState>({
     product_id: "",
@@ -62,7 +57,9 @@ export function NewPolicyWizard({
   })
 
   const selectedProduct = useMemo(() => {
-    return productsData?.data.find((p) => p.id === state.product_id) as EnhancedProduct | undefined
+    return productsData?.data.find((p) => p.id === state.product_id) as
+      | EnhancedProduct
+      | undefined
   }, [state.product_id, productsData])
 
   const handleNext = (data: any) => {
@@ -74,7 +71,8 @@ export function NewPolicyWizard({
         if (!obj || typeof obj !== "object") return 0
         for (const [k, v] of Object.entries(obj)) {
           if (/value|sum insured/i.test(k) && typeof v !== "object") {
-            const cleanVal = typeof v === "string" ? v.replace(/[^0-9.]/g, "") : v
+            const cleanVal =
+              typeof v === "string" ? v.replace(/[^0-9.]/g, "") : v
             return Number(cleanVal) || 0
           }
           if (typeof v === "object") {
@@ -92,7 +90,8 @@ export function NewPolicyWizard({
         details: data,
         financials: {
           ...prev.financials,
-          sumInsured: extractedValue > 0 ? extractedValue : prev.financials.sumInsured,
+          sumInsured:
+            extractedValue > 0 ? extractedValue : prev.financials.sumInsured,
         },
       }))
     } else {
@@ -109,92 +108,31 @@ export function NewPolicyWizard({
     try {
       if (!selectedProduct) throw new Error("No product selected")
 
-      // 1. Calculate Financials
-      const { calculatePremium } = await import("@/lib/calculator")
-      const calc = calculatePremium({
-        sumInsured: state.financials?.sumInsured || 0,
-        rate: state.financials?.rate || 0,
-        hasPVT: state.extensions?.pvt || false,
-        hasExcessProtector: state.extensions?.excessProtector || false,
-      })
-
-      const startDate = state.financials?.startDate || new Date().toISOString().split("T")[0]
+      const startDate =
+        state.financials?.startDate || new Date().toISOString().split("T")[0]
       const endDate = new Date(
-        new Date(startDate).setFullYear(
-          new Date(startDate).getFullYear() + 1,
-        ),
-      ).toISOString().split("T")[0]
+        new Date(startDate).setFullYear(new Date(startDate).getFullYear() + 1),
+      )
+        .toISOString()
+        .split("T")[0]
 
       // Structure the risk details using the product blueprint
-      const structuredRiskDetails = injectWizardData(selectedProduct.product_details, state.details)
+      const structuredRiskDetails = injectWizardData(
+        selectedProduct.product_details,
+        state.details,
+      )
 
-      // 2. Create Policy with all details (This auto-creates a Draft Risk Note in backend)
-      console.log("Creating policy with data:", {
+      // Create Policy atomically (This also creates the issued Risk Note and Invoice in backend)
+      await createPolicy.mutateAsync({
         policy_number: `P/${Math.floor(Math.random() * 1000000)}`,
         client_id: clientId,
         product_id: state.product_id,
         status: "Active",
-        start_date: startDate,
-        end_date: endDate,
-        description: state.details?.description || selectedProduct.name,
-        total_premium: calc.breakdown.total,
-        premium_breakdown: calc.breakdown as any,
+        inception_date: startDate,
         risk_details: structuredRiskDetails,
-      })
-      const policy = await createPolicy.mutateAsync({
-        policy_number: `P/${Math.floor(Math.random() * 1000000)}`,
-        client_id: clientId,
-        product_id: state.product_id,
-        status: "Active",
-        start_date: startDate,
-        end_date: endDate,
-        description: state.details?.description || selectedProduct.name,
-        total_premium: calc.breakdown.total,
-        premium_breakdown: calc.breakdown as any,
-        risk_details: structuredRiskDetails,
-      })
-      console.log("Policy created successfully:", policy)
-
-      // 3. Finalize Risk Note
-      // FIND THE AUTO-CREATED DRAFT RISK NOTE
-      console.log("Fetching draft risk note for policy:", policy.id)
-      const riskNotesResponse = await RiskNotesService.readRiskNotes({ policyId: policy.id })
-      console.log("Risk notes found:", riskNotesResponse.data)
-      const draftRiskNote = riskNotesResponse.data.find(rn => rn.status === "Draft")
-
-      if (draftRiskNote) {
-        console.log("Updating draft risk note:", draftRiskNote.id)
-        await updateRiskNote.mutateAsync({
-          id: draftRiskNote.id,
-          data: {
-            transaction_type: "New Business",
-            start_date: startDate,
-            end_date: endDate,
-            net_premium: calc.breakdown.basic + (calc.breakdown.extensions?.reduce((acc: number, curr: any) => acc + curr.amount, 0) || 0),
-            taxes: calc.breakdown.levies as any,
-            commission_amount: calc.breakdown.basic * ((selectedProduct.default_commission_rate || 10.0) / 100),
-            total_amount: calc.breakdown.total,
-            status: "Active",
-            policy_snapshot: {
-                id: policy.id,
-                policy_number: policy.policy_number,
-                client_id: policy.client_id,
-                product_id: policy.product_id,
-                status: policy.status,
-                start_date: policy.start_date,
-                end_date: policy.end_date,
-                description: policy.description,
-                total_premium: policy.total_premium,
-                risk_details: policy.risk_details,
-                premium_breakdown: policy.premium_breakdown,
-            },
-            special_clauses: [],
-          }
-        })
-        console.log("Risk note updated successfully")
-      } else {
-        console.warn("No draft risk note found to update")
-      }
+        coverage_start: startDate,
+        coverage_end: endDate,
+      } as any)
 
       showSuccessToast("Policy Issued Successfully!")
       onSuccess?.()
@@ -203,7 +141,10 @@ export function NewPolicyWizard({
       console.error("Policy Issuance Error:", err)
       let message = "Failed to issue policy"
       if (err.body?.detail) {
-        message = typeof err.body.detail === 'string' ? err.body.detail : JSON.stringify(err.body.detail)
+        message =
+          typeof err.body.detail === "string"
+            ? err.body.detail
+            : JSON.stringify(err.body.detail)
       }
       showErrorToast(message)
     }
@@ -226,7 +167,14 @@ export function NewPolicyWizard({
                 >
                   {i + 1}
                 </div>
-                <span className={cn("text-[10px] mt-1 font-bold uppercase tracking-wider", i <= step ? "text-primary" : "text-muted-foreground")}>{s}</span>
+                <span
+                  className={cn(
+                    "text-[10px] mt-1 font-bold uppercase tracking-wider",
+                    i <= step ? "text-primary" : "text-muted-foreground",
+                  )}
+                >
+                  {s}
+                </span>
               </div>
             ))}
           </div>
@@ -261,10 +209,7 @@ export function NewPolicyWizard({
               state={state}
               onIssue={handleIssuePolicy}
               onBack={handleBack}
-              isSubmitting={
-                createPolicy.isPending ||
-                createRiskNote.isPending
-              }
+              isSubmitting={createPolicy.isPending}
             />
           )}
         </div>

@@ -1,5 +1,5 @@
 import { RefreshCcw, Save } from "lucide-react"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import type { ClientPublic } from "@/client"
 import { Button } from "@/components/ui/button"
 import type {
@@ -8,6 +8,7 @@ import type {
   RiskNoteContentValue,
   RiskNoteSection,
 } from "@/types/insurance"
+import { formatCurrency } from "@/utils"
 import { BaseDocument } from "../BaseDocument"
 import { RiskNoteTable } from "./RiskNote/RiskNoteTable"
 
@@ -36,13 +37,6 @@ export const RiskNoteTemplate = ({
       setLocalSnapshot(riskNote.policy_snapshot || {})
     }
   }, [riskNote.policy_snapshot, isEditable])
-
-  const formatCurrency = useCallback((amount: number) => {
-    return new Intl.NumberFormat("en-KE", {
-      style: "currency",
-      currency: "KSH",
-    }).format(amount)
-  }, [])
 
   const handleSave = () => {
     onSave?.(localSnapshot)
@@ -97,26 +91,29 @@ export const RiskNoteTemplate = ({
     })
 
     // 3. PERIOD
+    const startDate = (riskNote as any).coverage_start || riskNote.start_date
+    const endDate = (riskNote as any).coverage_end || riskNote.end_date
+
     sections.push({
       name: "PERIOD",
       content: (
         <div className="flex items-center gap-12 text-black font-bold uppercase tracking-tight">
           <span>
-            {new Date(riskNote.start_date).toLocaleDateString("en-GB", {
+            {startDate ? new Date(startDate).toLocaleDateString("en-GB", {
               day: "numeric",
               month: "long",
               year: "numeric",
-            })}
+            }) : "N/A"}
           </span>
           <span className="text-slate-400 normal-case font-normal italic">
             To
           </span>
           <span>
-            {new Date(riskNote.end_date).toLocaleDateString("en-GB", {
+            {endDate ? new Date(endDate).toLocaleDateString("en-GB", {
               day: "numeric",
               month: "long",
               year: "numeric",
-            })}
+            }) : "N/A"}
           </span>
         </div>
       ),
@@ -202,7 +199,9 @@ export const RiskNoteTemplate = ({
     // 6. ANNUAL PREMIUM
     const taxRows: Record<string, RiskNoteContentValue> = {}
     Object.entries(riskNote.taxes || {}).forEach(([name, amt]) => {
-      taxRows[name.replace(/([A-Z])/g, " $1")] = formatCurrency(amt as number)
+      taxRows[name.replace(/([A-Z])/g, " $1")] = formatCurrency(
+        amt as string | number,
+      )
     })
 
     sections.push({
@@ -231,7 +230,7 @@ export const RiskNoteTemplate = ({
     })
 
     return sections
-  }, [client, policy, riskNote, localSnapshot.risk_details, formatCurrency])
+  }, [client, policy, riskNote, localSnapshot.risk_details])
 
   const handleUpdateSection = (sectionName: string, updatedContent: any) => {
     setLocalSnapshot({

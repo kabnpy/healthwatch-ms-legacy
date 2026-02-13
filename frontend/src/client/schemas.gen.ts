@@ -88,6 +88,40 @@ export const Body_login_login_access_tokenSchema = {
 
 export const ClaimCreateSchema = {
     properties: {
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        },
+        deleted_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted At'
+        },
+        deleted_by_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted By Id'
+        },
         claim_number: {
             type: 'string',
             title: 'Claim Number'
@@ -112,14 +146,21 @@ export const ClaimCreateSchema = {
             title: 'Description'
         },
         status: {
-            type: 'string',
-            title: 'Status',
+            '$ref': '#/components/schemas/ClaimStatus',
             default: 'Reported'
         },
         reserve_amount: {
-            type: 'number',
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
+                }
+            ],
             title: 'Reserve Amount',
-            default: 0
+            default: '0.0'
         }
     },
     type: 'object',
@@ -129,6 +170,40 @@ export const ClaimCreateSchema = {
 
 export const ClaimPublicSchema = {
     properties: {
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        },
+        deleted_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted At'
+        },
+        deleted_by_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted By Id'
+        },
         claim_number: {
             type: 'string',
             title: 'Claim Number'
@@ -153,14 +228,14 @@ export const ClaimPublicSchema = {
             title: 'Description'
         },
         status: {
-            type: 'string',
-            title: 'Status',
+            '$ref': '#/components/schemas/ClaimStatus',
             default: 'Reported'
         },
         reserve_amount: {
-            type: 'number',
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$',
             title: 'Reserve Amount',
-            default: 0
+            default: '0.0'
         },
         id: {
             type: 'string',
@@ -171,6 +246,12 @@ export const ClaimPublicSchema = {
     type: 'object',
     required: ['claim_number', 'policy_id', 'date_of_loss', 'description', 'id'],
     title: 'ClaimPublic'
+} as const;
+
+export const ClaimStatusSchema = {
+    type: 'string',
+    enum: ['Reported', 'Assessed', 'Paid', 'Rejected', 'Closed'],
+    title: 'ClaimStatus'
 } as const;
 
 export const ClaimUpdateSchema = {
@@ -236,18 +317,21 @@ export const ClaimUpdateSchema = {
         status: {
             anyOf: [
                 {
-                    type: 'string'
+                    '$ref': '#/components/schemas/ClaimStatus'
                 },
                 {
                     type: 'null'
                 }
-            ],
-            title: 'Status'
+            ]
         },
         reserve_amount: {
             anyOf: [
                 {
                     type: 'number'
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
                 },
                 {
                     type: 'null'
@@ -281,6 +365,40 @@ export const ClaimsPublicSchema = {
 
 export const ClientCreateSchema = {
     properties: {
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        },
+        deleted_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted At'
+        },
+        deleted_by_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted By Id'
+        },
         client_type: {
             type: 'string',
             title: 'Client Type',
@@ -358,6 +476,40 @@ export const ClientCreateSchema = {
 
 export const ClientPublicSchema = {
     properties: {
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        },
+        deleted_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted At'
+        },
+        deleted_by_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted By Id'
+        },
         client_type: {
             type: 'string',
             title: 'Client Type',
@@ -569,6 +721,40 @@ export const ClientsPublicSchema = {
 
 export const CorrespondenceCreateSchema = {
     properties: {
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        },
+        deleted_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted At'
+        },
+        deleted_by_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted By Id'
+        },
         client_id: {
             type: 'string',
             format: 'uuid',
@@ -606,6 +792,40 @@ export const CorrespondenceCreateSchema = {
 
 export const CorrespondencePublicSchema = {
     properties: {
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        },
+        deleted_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted At'
+        },
+        deleted_by_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted By Id'
+        },
         client_id: {
             type: 'string',
             format: 'uuid',
@@ -665,20 +885,16 @@ export const CorrespondencesPublicSchema = {
     title: 'CorrespondencesPublic'
 } as const;
 
+export const DocumentEntityTypeSchema = {
+    type: 'string',
+    enum: ['Client', 'Policy', 'Claim', 'User', 'RiskNote'],
+    title: 'DocumentEntityType'
+} as const;
+
 export const DocumentPublicSchema = {
     properties: {
-        entity_type: {
-            type: 'string',
-            title: 'Entity Type'
-        },
-        entity_id: {
-            type: 'string',
-            format: 'uuid',
-            title: 'Entity Id'
-        },
         document_type: {
-            type: 'string',
-            title: 'Document Type'
+            '$ref': '#/components/schemas/DocumentType'
         },
         file_path: {
             type: 'string',
@@ -695,11 +911,6 @@ export const DocumentPublicSchema = {
             ],
             title: 'Mime Type'
         },
-        doc_metadata: {
-            additionalProperties: true,
-            type: 'object',
-            title: 'Doc Metadata'
-        },
         uploaded_at: {
             type: 'string',
             format: 'date-time',
@@ -709,11 +920,30 @@ export const DocumentPublicSchema = {
             type: 'string',
             format: 'uuid',
             title: 'Id'
+        },
+        entity_type: {
+            '$ref': '#/components/schemas/DocumentEntityType'
+        },
+        entity_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Entity Id'
+        },
+        doc_metadata: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Doc Metadata'
         }
     },
     type: 'object',
-    required: ['entity_type', 'entity_id', 'document_type', 'file_path', 'id'],
+    required: ['document_type', 'file_path', 'id', 'entity_type', 'entity_id'],
     title: 'DocumentPublic'
+} as const;
+
+export const DocumentTypeSchema = {
+    type: 'string',
+    enum: ['Logbook', 'ID', 'Valuation', 'PoliceAbstract', 'Receipt', 'Other'],
+    title: 'DocumentType'
 } as const;
 
 export const DocumentsPublicSchema = {
@@ -735,6 +965,24 @@ export const DocumentsPublicSchema = {
     title: 'DocumentsPublic'
 } as const;
 
+export const EndorsementCreateSchema = {
+    properties: {
+        updated_risk_details: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Updated Risk Details'
+        },
+        change_description: {
+            type: 'string',
+            title: 'Change Description'
+        }
+    },
+    type: 'object',
+    required: ['updated_risk_details', 'change_description'],
+    title: 'EndorsementCreate',
+    description: 'Model for creating an endorsement'
+} as const;
+
 export const HTTPValidationErrorSchema = {
     properties: {
         detail: {
@@ -751,6 +999,40 @@ export const HTTPValidationErrorSchema = {
 
 export const InsurerCreateSchema = {
     properties: {
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        },
+        deleted_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted At'
+        },
+        deleted_by_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted By Id'
+        },
         name: {
             type: 'string',
             title: 'Name'
@@ -785,6 +1067,40 @@ export const InsurerCreateSchema = {
 
 export const InsurerPublicSchema = {
     properties: {
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        },
+        deleted_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted At'
+        },
+        deleted_by_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted By Id'
+        },
         name: {
             type: 'string',
             title: 'Name'
@@ -920,6 +1236,40 @@ export const InvoiceBulkCreateSchema = {
 
 export const InvoiceCreateSchema = {
     properties: {
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        },
+        deleted_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted At'
+        },
+        deleted_by_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted By Id'
+        },
         invoice_number: {
             type: 'string',
             title: 'Invoice Number'
@@ -947,19 +1297,34 @@ export const InvoiceCreateSchema = {
             title: 'Due Date'
         },
         status: {
-            type: 'string',
-            title: 'Status',
+            '$ref': '#/components/schemas/InvoiceStatus',
             default: 'Unpaid'
         },
         total_amount: {
-            type: 'number',
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
+                }
+            ],
             title: 'Total Amount',
-            default: 0
+            default: '0.0'
         },
         balance_due: {
-            type: 'number',
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
+                }
+            ],
             title: 'Balance Due',
-            default: 0
+            default: '0.0'
         },
         notes: {
             anyOf: [
@@ -991,7 +1356,8 @@ export const InvoiceLineItemPublicSchema = {
             title: 'Risk Note Id'
         },
         amount: {
-            type: 'number',
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$',
             title: 'Amount'
         },
         description: {
@@ -1028,6 +1394,40 @@ export const InvoiceLineItemPublicSchema = {
 
 export const InvoicePublicSchema = {
     properties: {
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        },
+        deleted_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted At'
+        },
+        deleted_by_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted By Id'
+        },
         invoice_number: {
             type: 'string',
             title: 'Invoice Number'
@@ -1055,19 +1455,20 @@ export const InvoicePublicSchema = {
             title: 'Due Date'
         },
         status: {
-            type: 'string',
-            title: 'Status',
+            '$ref': '#/components/schemas/InvoiceStatus',
             default: 'Unpaid'
         },
         total_amount: {
-            type: 'number',
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$',
             title: 'Total Amount',
-            default: 0
+            default: '0.0'
         },
         balance_due: {
-            type: 'number',
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$',
             title: 'Balance Due',
-            default: 0
+            default: '0.0'
         },
         notes: {
             anyOf: [
@@ -1107,6 +1508,12 @@ export const InvoicePublicSchema = {
     title: 'InvoicePublic'
 } as const;
 
+export const InvoiceStatusSchema = {
+    type: 'string',
+    enum: ['Unpaid', 'Partial', 'Paid', 'Cancelled'],
+    title: 'InvoiceStatus'
+} as const;
+
 export const InvoicesPublicSchema = {
     properties: {
         data: {
@@ -1128,6 +1535,40 @@ export const InvoicesPublicSchema = {
 
 export const ItemCreateSchema = {
     properties: {
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        },
+        deleted_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted At'
+        },
+        deleted_by_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted By Id'
+        },
         title: {
             type: 'string',
             maxLength: 255,
@@ -1154,6 +1595,40 @@ export const ItemCreateSchema = {
 
 export const ItemPublicSchema = {
     properties: {
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        },
+        deleted_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted At'
+        },
+        deleted_by_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted By Id'
+        },
         title: {
             type: 'string',
             maxLength: 255,
@@ -1190,6 +1665,40 @@ export const ItemPublicSchema = {
 
 export const ItemUpdateSchema = {
     properties: {
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        },
+        deleted_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted At'
+        },
+        deleted_by_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted By Id'
+        },
         title: {
             anyOf: [
                 {
@@ -1288,8 +1797,42 @@ export const PoliciesPublicSchema = {
     title: 'PoliciesPublic'
 } as const;
 
-export const PolicyCreateSchema = {
+export const PolicyCreateExtendedSchema = {
     properties: {
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        },
+        deleted_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted At'
+        },
+        deleted_by_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted By Id'
+        },
         policy_number: {
             type: 'string',
             title: 'Policy Number'
@@ -1312,16 +1855,10 @@ export const PolicyCreateSchema = {
             title: 'Product Id'
         },
         status: {
-            type: 'string',
-            title: 'Status',
+            '$ref': '#/components/schemas/PolicyStatus',
             default: 'Active'
         },
-        created_at: {
-            type: 'string',
-            format: 'date-time',
-            title: 'Created At'
-        },
-        start_date: {
+        inception_date: {
             anyOf: [
                 {
                     type: 'string',
@@ -1331,54 +1868,66 @@ export const PolicyCreateSchema = {
                     type: 'null'
                 }
             ],
-            title: 'Start Date'
-        },
-        end_date: {
-            anyOf: [
-                {
-                    type: 'string',
-                    format: 'date'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'End Date'
-        },
-        description: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Description'
-        },
-        total_premium: {
-            type: 'number',
-            title: 'Total Premium',
-            default: 0
-        },
-        premium_breakdown: {
-            additionalProperties: true,
-            type: 'object',
-            title: 'Premium Breakdown'
+            title: 'Inception Date'
         },
         risk_details: {
             additionalProperties: true,
             type: 'object',
             title: 'Risk Details'
+        },
+        coverage_start: {
+            type: 'string',
+            format: 'date',
+            title: 'Coverage Start'
+        },
+        coverage_end: {
+            type: 'string',
+            format: 'date',
+            title: 'Coverage End'
         }
     },
     type: 'object',
-    required: ['policy_number', 'client_id'],
-    title: 'PolicyCreate'
+    required: ['policy_number', 'client_id', 'coverage_end'],
+    title: 'PolicyCreateExtended',
+    description: 'Extended model for atomic creation via Service layer'
 } as const;
 
 export const PolicyPublicSchema = {
     properties: {
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        },
+        deleted_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted At'
+        },
+        deleted_by_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted By Id'
+        },
         policy_number: {
             type: 'string',
             title: 'Policy Number'
@@ -1401,16 +1950,10 @@ export const PolicyPublicSchema = {
             title: 'Product Id'
         },
         status: {
-            type: 'string',
-            title: 'Status',
+            '$ref': '#/components/schemas/PolicyStatus',
             default: 'Active'
         },
-        created_at: {
-            type: 'string',
-            format: 'date-time',
-            title: 'Created At'
-        },
-        start_date: {
+        inception_date: {
             anyOf: [
                 {
                     type: 'string',
@@ -1420,45 +1963,7 @@ export const PolicyPublicSchema = {
                     type: 'null'
                 }
             ],
-            title: 'Start Date'
-        },
-        end_date: {
-            anyOf: [
-                {
-                    type: 'string',
-                    format: 'date'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'End Date'
-        },
-        description: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Description'
-        },
-        total_premium: {
-            type: 'number',
-            title: 'Total Premium',
-            default: 0
-        },
-        premium_breakdown: {
-            additionalProperties: true,
-            type: 'object',
-            title: 'Premium Breakdown'
-        },
-        risk_details: {
-            additionalProperties: true,
-            type: 'object',
-            title: 'Risk Details'
+            title: 'Inception Date'
         },
         id: {
             type: 'string',
@@ -1475,6 +1980,48 @@ export const PolicyPublicSchema = {
                 }
             ]
         },
+        current_risk_details: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Current Risk Details',
+            description: 'Get current coverage details from latest risk note',
+            readOnly: true
+        },
+        total_premium: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$',
+            title: 'Total Premium',
+            description: 'Get current total premium from latest risk note',
+            readOnly: true
+        },
+        start_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Start Date',
+            description: 'Backward compatibility for start_date',
+            readOnly: true
+        },
+        end_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'End Date',
+            description: 'Backward compatibility for end_date',
+            readOnly: true
+        },
         display_name: {
             type: 'string',
             title: 'Display Name',
@@ -1482,8 +2029,14 @@ export const PolicyPublicSchema = {
         }
     },
     type: 'object',
-    required: ['policy_number', 'client_id', 'id', 'display_name'],
+    required: ['policy_number', 'client_id', 'id', 'current_risk_details', 'total_premium', 'start_date', 'end_date', 'display_name'],
     title: 'PolicyPublic'
+} as const;
+
+export const PolicyStatusSchema = {
+    type: 'string',
+    enum: ['Active', 'Expired', 'Cancelled', 'Lapsed'],
+    title: 'PolicyStatus'
 } as const;
 
 export const PolicyUpdateSchema = {
@@ -1526,15 +2079,14 @@ export const PolicyUpdateSchema = {
         status: {
             anyOf: [
                 {
-                    type: 'string'
+                    '$ref': '#/components/schemas/PolicyStatus'
                 },
                 {
                     type: 'null'
                 }
-            ],
-            title: 'Status'
+            ]
         },
-        start_date: {
+        inception_date: {
             anyOf: [
                 {
                     type: 'string',
@@ -1544,65 +2096,7 @@ export const PolicyUpdateSchema = {
                     type: 'null'
                 }
             ],
-            title: 'Start Date'
-        },
-        end_date: {
-            anyOf: [
-                {
-                    type: 'string',
-                    format: 'date'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'End Date'
-        },
-        description: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Description'
-        },
-        total_premium: {
-            anyOf: [
-                {
-                    type: 'number'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Total Premium'
-        },
-        premium_breakdown: {
-            anyOf: [
-                {
-                    additionalProperties: true,
-                    type: 'object'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Premium Breakdown'
-        },
-        risk_details: {
-            anyOf: [
-                {
-                    additionalProperties: true,
-                    type: 'object'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Risk Details'
+            title: 'Inception Date'
         }
     },
     type: 'object',
@@ -1636,6 +2130,40 @@ export const PrivateUserCreateSchema = {
 
 export const ProductCreateSchema = {
     properties: {
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        },
+        deleted_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted At'
+        },
+        deleted_by_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted By Id'
+        },
         insurer_id: {
             type: 'string',
             format: 'uuid',
@@ -1667,6 +2195,40 @@ export const ProductCreateSchema = {
 
 export const ProductPublicSchema = {
     properties: {
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        },
+        deleted_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted At'
+        },
+        deleted_by_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted By Id'
+        },
         insurer_id: {
             type: 'string',
             format: 'uuid',
@@ -1819,7 +2381,8 @@ export const ReceiptAllocationBaseSchema = {
             title: 'Risk Note Id'
         },
         amount_allocated: {
-            type: 'number',
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$',
             title: 'Amount Allocated'
         }
     },
@@ -1853,7 +2416,15 @@ export const ReceiptAllocationCreateSchema = {
             title: 'Risk Note Id'
         },
         amount_allocated: {
-            type: 'number',
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
+                }
+            ],
             title: 'Amount Allocated'
         }
     },
@@ -1864,6 +2435,40 @@ export const ReceiptAllocationCreateSchema = {
 
 export const ReceiptCreateSchema = {
     properties: {
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        },
+        deleted_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted At'
+        },
+        deleted_by_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted By Id'
+        },
         receipt_number: {
             type: 'string',
             title: 'Receipt Number'
@@ -1879,13 +2484,29 @@ export const ReceiptCreateSchema = {
             title: 'Date Received'
         },
         amount: {
-            type: 'number',
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
+                }
+            ],
             title: 'Amount'
         },
         unallocated_amount: {
-            type: 'number',
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
+                }
+            ],
             title: 'Unallocated Amount',
-            default: 0
+            default: '0.0'
         },
         mode: {
             type: 'string',
@@ -1907,8 +2528,7 @@ export const ReceiptCreateSchema = {
             title: 'Notes'
         },
         status: {
-            type: 'string',
-            title: 'Status',
+            '$ref': '#/components/schemas/ReceiptStatus',
             default: 'Active'
         },
         created_by_id: {
@@ -1931,6 +2551,40 @@ export const ReceiptCreateSchema = {
 
 export const ReceiptPublicSchema = {
     properties: {
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        },
+        deleted_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted At'
+        },
+        deleted_by_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted By Id'
+        },
         receipt_number: {
             type: 'string',
             title: 'Receipt Number'
@@ -1946,13 +2600,15 @@ export const ReceiptPublicSchema = {
             title: 'Date Received'
         },
         amount: {
-            type: 'number',
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$',
             title: 'Amount'
         },
         unallocated_amount: {
-            type: 'number',
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$',
             title: 'Unallocated Amount',
-            default: 0
+            default: '0.0'
         },
         mode: {
             type: 'string',
@@ -1974,8 +2630,7 @@ export const ReceiptPublicSchema = {
             title: 'Notes'
         },
         status: {
-            type: 'string',
-            title: 'Status',
+            '$ref': '#/components/schemas/ReceiptStatus',
             default: 'Active'
         },
         created_by_id: {
@@ -2009,6 +2664,12 @@ export const ReceiptPublicSchema = {
     title: 'ReceiptPublic'
 } as const;
 
+export const ReceiptStatusSchema = {
+    type: 'string',
+    enum: ['Active', 'Voided'],
+    title: 'ReceiptStatus'
+} as const;
+
 export const ReceiptsPublicSchema = {
     properties: {
         data: {
@@ -2030,22 +2691,61 @@ export const ReceiptsPublicSchema = {
 
 export const RiskNoteCreateSchema = {
     properties: {
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        },
+        deleted_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted At'
+        },
+        deleted_by_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted By Id'
+        },
         policy_id: {
             type: 'string',
             format: 'uuid',
             title: 'Policy Id'
         },
         risk_note_number: {
-            type: 'string',
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
             title: 'Risk Note Number'
         },
         transaction_type: {
-            type: 'string',
-            title: 'Transaction Type'
+            '$ref': '#/components/schemas/TransactionType'
         },
         status: {
-            type: 'string',
-            title: 'Status',
+            '$ref': '#/components/schemas/RiskNoteStatus',
             default: 'Draft'
         },
         previous_risk_note_id: {
@@ -2088,32 +2788,61 @@ export const RiskNoteCreateSchema = {
             title: 'Payment Status',
             default: 'Unpaid'
         },
-        start_date: {
+        effective_date: {
             type: 'string',
             format: 'date',
-            title: 'Start Date'
+            title: 'Effective Date'
         },
-        end_date: {
+        coverage_start: {
             type: 'string',
             format: 'date',
-            title: 'End Date'
+            title: 'Coverage Start'
+        },
+        coverage_end: {
+            type: 'string',
+            format: 'date',
+            title: 'Coverage End'
         },
         net_premium: {
-            type: 'number',
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
+                }
+            ],
             title: 'Net Premium'
+        },
+        commission_amount: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
+                }
+            ],
+            title: 'Commission Amount'
+        },
+        total_amount: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
+                }
+            ],
+            title: 'Total Amount'
         },
         taxes: {
             additionalProperties: true,
             type: 'object',
             title: 'Taxes'
-        },
-        commission_amount: {
-            type: 'number',
-            title: 'Commission Amount'
-        },
-        total_amount: {
-            type: 'number',
-            title: 'Total Amount'
         },
         policy_snapshot: {
             additionalProperties: true,
@@ -2129,28 +2858,67 @@ export const RiskNoteCreateSchema = {
         }
     },
     type: 'object',
-    required: ['policy_id', 'risk_note_number', 'transaction_type', 'start_date', 'end_date', 'net_premium', 'commission_amount', 'total_amount'],
+    required: ['policy_id', 'transaction_type', 'coverage_start', 'coverage_end', 'net_premium', 'commission_amount', 'total_amount'],
     title: 'RiskNoteCreate'
 } as const;
 
 export const RiskNotePublicSchema = {
     properties: {
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        },
+        deleted_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted At'
+        },
+        deleted_by_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deleted By Id'
+        },
         policy_id: {
             type: 'string',
             format: 'uuid',
             title: 'Policy Id'
         },
         risk_note_number: {
-            type: 'string',
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
             title: 'Risk Note Number'
         },
         transaction_type: {
-            type: 'string',
-            title: 'Transaction Type'
+            '$ref': '#/components/schemas/TransactionType'
         },
         status: {
-            type: 'string',
-            title: 'Status',
+            '$ref': '#/components/schemas/RiskNoteStatus',
             default: 'Draft'
         },
         previous_risk_note_id: {
@@ -2193,44 +2961,35 @@ export const RiskNotePublicSchema = {
             title: 'Payment Status',
             default: 'Unpaid'
         },
-        start_date: {
+        effective_date: {
             type: 'string',
             format: 'date',
-            title: 'Start Date'
+            title: 'Effective Date'
         },
-        end_date: {
+        coverage_start: {
             type: 'string',
             format: 'date',
-            title: 'End Date'
+            title: 'Coverage Start'
+        },
+        coverage_end: {
+            type: 'string',
+            format: 'date',
+            title: 'Coverage End'
         },
         net_premium: {
-            type: 'number',
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$',
             title: 'Net Premium'
         },
-        taxes: {
-            additionalProperties: true,
-            type: 'object',
-            title: 'Taxes'
-        },
         commission_amount: {
-            type: 'number',
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$',
             title: 'Commission Amount'
         },
         total_amount: {
-            type: 'number',
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$',
             title: 'Total Amount'
-        },
-        policy_snapshot: {
-            additionalProperties: true,
-            type: 'object',
-            title: 'Policy Snapshot'
-        },
-        special_clauses: {
-            items: {
-                type: 'string'
-            },
-            type: 'array',
-            title: 'Special Clauses'
         },
         id: {
             type: 'string',
@@ -2246,11 +3005,34 @@ export const RiskNotePublicSchema = {
                     type: 'null'
                 }
             ]
+        },
+        taxes: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Taxes'
+        },
+        policy_snapshot: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Policy Snapshot'
+        },
+        special_clauses: {
+            items: {
+                type: 'string'
+            },
+            type: 'array',
+            title: 'Special Clauses'
         }
     },
     type: 'object',
-    required: ['policy_id', 'risk_note_number', 'transaction_type', 'start_date', 'end_date', 'net_premium', 'commission_amount', 'total_amount', 'id'],
+    required: ['policy_id', 'transaction_type', 'coverage_start', 'coverage_end', 'net_premium', 'commission_amount', 'total_amount', 'id'],
     title: 'RiskNotePublic'
+} as const;
+
+export const RiskNoteStatusSchema = {
+    type: 'string',
+    enum: ['Draft', 'Issued', 'Replaced', 'Cancelled', 'Issued'],
+    title: 'RiskNoteStatus'
 } as const;
 
 export const RiskNoteUpdateSchema = {
@@ -2258,13 +3040,12 @@ export const RiskNoteUpdateSchema = {
         transaction_type: {
             anyOf: [
                 {
-                    type: 'string'
+                    '$ref': '#/components/schemas/TransactionType'
                 },
                 {
                     type: 'null'
                 }
-            ],
-            title: 'Transaction Type'
+            ]
         },
         risk_note_number: {
             anyOf: [
@@ -2280,13 +3061,12 @@ export const RiskNoteUpdateSchema = {
         status: {
             anyOf: [
                 {
-                    type: 'string'
+                    '$ref': '#/components/schemas/RiskNoteStatus'
                 },
                 {
                     type: 'null'
                 }
-            ],
-            title: 'Status'
+            ]
         },
         previous_risk_note_id: {
             anyOf: [
@@ -2322,7 +3102,7 @@ export const RiskNoteUpdateSchema = {
             ],
             title: 'Payment Status'
         },
-        start_date: {
+        effective_date: {
             anyOf: [
                 {
                     type: 'string',
@@ -2332,9 +3112,9 @@ export const RiskNoteUpdateSchema = {
                     type: 'null'
                 }
             ],
-            title: 'Start Date'
+            title: 'Effective Date'
         },
-        end_date: {
+        coverage_start: {
             anyOf: [
                 {
                     type: 'string',
@@ -2344,12 +3124,28 @@ export const RiskNoteUpdateSchema = {
                     type: 'null'
                 }
             ],
-            title: 'End Date'
+            title: 'Coverage Start'
+        },
+        coverage_end: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Coverage End'
         },
         net_premium: {
             anyOf: [
                 {
                     type: 'number'
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
                 },
                 {
                     type: 'null'
@@ -2375,6 +3171,10 @@ export const RiskNoteUpdateSchema = {
                     type: 'number'
                 },
                 {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
+                },
+                {
                     type: 'null'
                 }
             ],
@@ -2384,6 +3184,10 @@ export const RiskNoteUpdateSchema = {
             anyOf: [
                 {
                     type: 'number'
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
                 },
                 {
                     type: 'null'
@@ -2456,6 +3260,12 @@ export const TokenSchema = {
     type: 'object',
     required: ['access_token'],
     title: 'Token'
+} as const;
+
+export const TransactionTypeSchema = {
+    type: 'string',
+    enum: ['New Business', 'Renewal', 'Endorsement', 'Cancellation'],
+    title: 'TransactionType'
 } as const;
 
 export const UpdatePasswordSchema = {
