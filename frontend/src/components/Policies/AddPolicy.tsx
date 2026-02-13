@@ -4,7 +4,7 @@ import { useState } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
 import { z } from "zod"
 
-import type { ApiError, PolicyCreate } from "@/client"
+import type { ApiError, PolicyCreate, PolicyStatus } from "@/client"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -69,6 +69,7 @@ export const AddPolicy = ({ clientId }: AddPolicyProps) => {
   const onSubmit: SubmitHandler<FormData> = (data) => {
     const policyData: PolicyCreate = {
       ...data,
+      status: data.status as PolicyStatus,
       client_id: clientId,
     }
     createPolicy.mutate(policyData, {

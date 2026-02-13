@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useEffect } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
 import { z } from "zod"
-import type { ApiError } from "@/client"
+import type { ApiError, RiskNoteStatus } from "@/client"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -83,20 +83,24 @@ export const RiskNoteForm = ({
         start_date: existingRiskNote.start_date,
         end_date: existingRiskNote.end_date,
         status: existingRN.status || "Draft",
-        net_premium: existingRiskNote.net_premium,
-        commission_amount: existingRiskNote.commission_amount,
+        net_premium: Number(existingRiskNote.net_premium),
+        commission_amount: Number(existingRiskNote.commission_amount),
         details: policySnapshot.risk_details || policy?.risk_details || {},
       })
     } else if (policy) {
-        form.reset({
-            transaction_type: "New Business",
-            start_date: policy.start_date || new Date().toISOString().split("T")[0],
-            end_date: policy.end_date || new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split("T")[0],
-            status: "Draft",
-            net_premium: policy.total_premium || 0,
-            commission_amount: (policy.total_premium || 0) * 0.1,
-            details: policy.risk_details || {},
-        })
+      form.reset({
+        transaction_type: "New Business",
+        start_date: policy.start_date || new Date().toISOString().split("T")[0],
+        end_date:
+          policy.end_date ||
+          new Date(new Date().setFullYear(new Date().getFullYear() + 1))
+            .toISOString()
+            .split("T")[0],
+        status: "Draft",
+        net_premium: Number(policy.total_premium || 0),
+        commission_amount: Number(policy.total_premium || 0) * 0.1,
+        details: policy.risk_details || {},
+      })
     }
   }, [existingRiskNote, policy, form])
 
@@ -105,11 +109,11 @@ export const RiskNoteForm = ({
 
     // Preparing the snapshot of the policy
     const policy_snapshot = {
-        ...(policy || {}),
-        risk_details: data.details,
-        start_date: data.start_date,
-        end_date: data.end_date,
-        total_premium: data.net_premium,
+      ...(policy || {}),
+      risk_details: data.details,
+      start_date: data.start_date,
+      end_date: data.end_date,
+      total_premium: data.net_premium,
     }
 
     // Basic tax calculation for now (matching seeding logic)
@@ -119,6 +123,7 @@ export const RiskNoteForm = ({
 
     const payload = {
       ...data,
+      status: data.status as RiskNoteStatus,
       policy_snapshot,
       taxes: { trainingLevy, phcf },
       total_amount,

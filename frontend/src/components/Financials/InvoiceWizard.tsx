@@ -1,8 +1,8 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { useMemo, useState } from "react"
-import { Checkbox } from "@/components/ui/checkbox"
 import { DataTable } from "@/components/Common/DataTable"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Dialog,
   DialogContent,
@@ -11,8 +11,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { useRiskNotes } from "@/hooks/useInsurance"
 import { useCreateBulkInvoice } from "@/hooks/useFinancials"
+import { useRiskNotes } from "@/hooks/useInsurance"
 import { getPolicyDisplayName } from "@/utils"
 
 interface InvoiceWizardProps {
@@ -49,7 +49,7 @@ export function InvoiceWizard({
   const totalAmount = useMemo(() => {
     return pendingNotes
       .filter((n) => selectedIds[n.id])
-      .reduce((sum, n) => sum + (n.total_amount || 0), 0)
+      .reduce((sum, n) => sum + Number(n.total_amount || 0), 0)
   }, [pendingNotes, selectedIds])
 
   const handleGenerate = async () => {
@@ -67,7 +67,7 @@ export function InvoiceWizard({
       })
       onClose()
       setSelectedIds({})
-    } catch (error) {
+    } catch (_error) {
       // Error handled by hook
     }
   }
@@ -122,15 +122,17 @@ export function InvoiceWizard({
             <p className="text-center py-8">Loading pending items...</p>
           ) : pendingNotes.length === 0 ? (
             <div className="text-center py-8 border rounded-md bg-muted/20">
-              <p className="text-muted-foreground">No pending items to invoice for this client.</p>
+              <p className="text-muted-foreground">
+                No pending items to invoice for this client.
+              </p>
             </div>
           ) : (
             <div className="max-h-[400px] overflow-auto">
-                <DataTable 
-                    columns={columns} 
-                    data={pendingNotes} 
-                    searchPlaceholder="Search pending items..." 
-                />
+              <DataTable
+                columns={columns}
+                data={pendingNotes}
+                searchPlaceholder="Search pending items..."
+              />
             </div>
           )}
         </div>
@@ -141,18 +143,22 @@ export function InvoiceWizard({
             <span className="font-bold">{selectedCount} items</span>
             <span className="mx-2 text-muted-foreground">|</span>
             <span className="text-muted-foreground font-medium">Total:</span>{" "}
-            <span className="font-bold text-primary">KES {totalAmount.toLocaleString()}</span>
+            <span className="font-bold text-primary">
+              KES {totalAmount.toLocaleString()}
+            </span>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button 
-                onClick={handleGenerate} 
-                disabled={selectedCount === 0 || createBulkInvoice.isPending}
-                className="min-w-[120px]"
+            <Button
+              onClick={handleGenerate}
+              disabled={selectedCount === 0 || createBulkInvoice.isPending}
+              className="min-w-[120px]"
             >
-              {createBulkInvoice.isPending ? "Generating..." : "Generate Invoice"}
+              {createBulkInvoice.isPending
+                ? "Generating..."
+                : "Generate Invoice"}
             </Button>
           </div>
         </DialogFooter>

@@ -34,7 +34,7 @@ export function CoverageCard({ riskNote, onViewBreakdown }: CoverageCardProps) {
           <div>
             <div className="text-2xl font-bold">
               KES{" "}
-              {riskNote.total_amount.toLocaleString(undefined, {
+              {Number(riskNote.total_amount).toLocaleString(undefined, {
                 minimumFractionDigits: 2,
               })}
             </div>

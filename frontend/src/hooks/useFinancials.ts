@@ -100,11 +100,11 @@ export const useFinancialSummary = (clientId?: string) => {
 
   const invoices = invoicesQuery.data?.data || []
   const totalInvoiced = invoices.reduce(
-    (sum, inv) => sum + (inv.total_amount || 0),
+    (sum, inv) => sum + Number(inv.total_amount || 0),
     0,
   )
   const totalDue = invoices.reduce(
-    (sum, inv) => sum + (inv.balance_due || 0),
+    (sum, inv) => sum + Number(inv.balance_due || 0),
     0,
   )
   const totalPaid = totalInvoiced - totalDue

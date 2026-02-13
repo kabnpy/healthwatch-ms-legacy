@@ -62,7 +62,7 @@ export const getColumns = (
     cell: ({ row }) => (
       <span className="font-bold">
         KES{" "}
-        {(row.original.total_amount || 0).toLocaleString(undefined, {
+        {Number(row.original.total_amount || 0).toLocaleString(undefined, {
           minimumFractionDigits: 2,
         })}
       </span>
@@ -72,7 +72,7 @@ export const getColumns = (
     accessorKey: "balance_due",
     header: "Balance Due",
     cell: ({ row }) => {
-      const balance = row.original.balance_due || 0
+      const balance = Number(row.original.balance_due || 0)
       return (
         <span
           className={

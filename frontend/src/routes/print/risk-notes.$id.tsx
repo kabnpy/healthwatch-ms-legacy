@@ -7,7 +7,7 @@ import { z } from "zod"
 import { ClientsService, PoliciesService, RiskNotesService } from "@/client"
 import PendingItems from "@/components/Pending/PendingItems"
 import { Button } from "@/components/ui/button"
-import type { EnhancedRiskNote, EnhancedPolicy } from "@/types/insurance"
+import type { EnhancedPolicy, EnhancedRiskNote } from "@/types/insurance"
 
 const searchSchema = z.object({
   mode: z.enum(["invoice", "certificate"]).default("invoice").optional(),
@@ -62,10 +62,10 @@ function RiskNotePrintContent({ id }: { id: string }) {
   if (isInvoice) {
     return (
       <div className="max-w-[800px] mx-auto bg-white shadow-lg print:shadow-none min-h-screen relative">
-        <RiskNoteTemplate 
-            riskNote={riskNote as EnhancedRiskNote} 
-            client={client} 
-            policy={policy as EnhancedPolicy} 
+        <RiskNoteTemplate
+          riskNote={riskNote as EnhancedRiskNote}
+          client={client}
+          policy={policy as EnhancedPolicy}
         />
 
         <div className="fixed bottom-8 right-8 print:hidden flex flex-col gap-2">
@@ -115,7 +115,9 @@ function RiskNotePrintContent({ id }: { id: string }) {
         </div>
         <div className="text-right">
           <p className="font-mono text-xl font-bold">
-            {isInvoice ? (riskNote.invoice_number || "Draft") : (riskNote.risk_note_number || "Draft")}
+            {isInvoice
+              ? riskNote.invoice_number || "Draft"
+              : riskNote.risk_note_number || "Draft"}
           </p>
           <p className="text-sm mt-1">
             Date: {new Date().toLocaleDateString()}
@@ -136,7 +138,9 @@ function RiskNotePrintContent({ id }: { id: string }) {
           </h2>
           <p className="font-bold text-lg">{client.name}</p>
           <p className="text-sm whitespace-pre-line">
-            {client.postal_number ? `P.O. Box ${client.postal_number}` : "No postal address provided"}
+            {client.postal_number
+              ? `P.O. Box ${client.postal_number}`
+              : "No postal address provided"}
             {client.postal_code && ` - ${client.postal_code}`}
             {client.town && `, ${client.town}`}
           </p>
@@ -232,7 +236,7 @@ function RiskNotePrintContent({ id }: { id: string }) {
               <tr>
                 <td className="py-2 pl-2">Net Premium</td>
                 <td className="py-2 pr-2 text-right font-mono">
-                  {riskNote.net_premium.toLocaleString(undefined, {
+                  {Number(riskNote.net_premium).toLocaleString(undefined, {
                     minimumFractionDigits: 2,
                   })}
                 </td>
@@ -247,7 +251,7 @@ function RiskNotePrintContent({ id }: { id: string }) {
                         {key.replace(/([A-Z])/g, " $1").trim()}
                       </td>
                       <td className="py-2 pr-2 text-right font-mono text-gray-600">
-                        {val.toLocaleString(undefined, {
+                        {Number(val).toLocaleString(undefined, {
                           minimumFractionDigits: 2,
                         })}
                       </td>
@@ -259,7 +263,7 @@ function RiskNotePrintContent({ id }: { id: string }) {
               <tr className="bg-gray-100 font-bold text-lg">
                 <td className="py-3 pl-2">TOTAL PREMIUM PAYABLE</td>
                 <td className="py-3 pr-2 text-right font-mono">
-                  {riskNote.total_amount.toLocaleString(undefined, {
+                  {Number(riskNote.total_amount).toLocaleString(undefined, {
                     minimumFractionDigits: 2,
                   })}
                 </td>
@@ -271,7 +275,11 @@ function RiskNotePrintContent({ id }: { id: string }) {
             <p className="font-bold text-black mb-1">Payment Instructions:</p>
             <p>
               Please pay via MPESA Paybill: <strong>555000</strong>, Account:{" "}
-              <strong>{isInvoice ? (riskNote.invoice_number || "Draft") : (riskNote.risk_note_number || "Draft")}</strong>
+              <strong>
+                {isInvoice
+                  ? riskNote.invoice_number || "Draft"
+                  : riskNote.risk_note_number || "Draft"}
+              </strong>
             </p>
             <p>
               Cheques payable to: <strong>HealthWatch Insurance Agency</strong>
