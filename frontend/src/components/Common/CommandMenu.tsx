@@ -178,13 +178,17 @@ export function CommandMenu() {
               <span>Browse All Clients</span>
             </CommandItem>
             <CommandItem
-              onSelect={() => runCommand(() => navigate({ to: "/catalog/products" }))}
+              onSelect={() =>
+                runCommand(() => navigate({ to: "/catalog/products" }))
+              }
             >
               <Shield className="mr-2 h-4 w-4" />
               <span>Product Catalog</span>
             </CommandItem>
             <CommandItem
-              onSelect={() => runCommand(() => navigate({ to: "/catalog/insurers" }))}
+              onSelect={() =>
+                runCommand(() => navigate({ to: "/catalog/insurers" }))
+              }
             >
               <Library className="mr-2 h-4 w-4" />
               <span>Insurance Carriers</span>

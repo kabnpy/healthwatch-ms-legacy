@@ -1,6 +1,6 @@
+import { Link } from "@tanstack/react-router"
 import { EllipsisVertical, Eye } from "lucide-react"
 import { useState } from "react"
-import { Link } from "@tanstack/react-router"
 
 import type { InsurerPublic } from "@/client"
 import { Button } from "@/components/ui/button"
@@ -30,10 +30,13 @@ export const InsurerActionsMenu = ({ insurer }: InsurerActionsMenuProps) => {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem asChild>
-            <Link to="/catalog/insurers/$insurerId" params={{ insurerId: insurer.id }}>
-                <Eye className="mr-2 h-4 w-4" />
-                View Details
-            </Link>
+          <Link
+            to="/catalog/insurers/$insurerId"
+            params={{ insurerId: insurer.id }}
+          >
+            <Eye className="mr-2 h-4 w-4" />
+            View Details
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <EditInsurer insurer={insurer} onSuccess={() => setOpen(false)} />

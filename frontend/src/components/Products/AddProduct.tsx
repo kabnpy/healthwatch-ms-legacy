@@ -11,13 +11,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import useCustomToast from "@/hooks/useCustomToast"
 import { useCreateProduct } from "@/hooks/useCatalog"
+import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
 import { ProductForm } from "./ProductForm"
 
 interface AddProductProps {
-    fixedInsurerId?: string
+  fixedInsurerId?: string
 }
 
 export const AddProduct = ({ fixedInsurerId }: AddProductProps) => {

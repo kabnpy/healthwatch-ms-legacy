@@ -1,11 +1,11 @@
-import type { 
-  PolicyPublic, 
-  RiskNotePublic, 
-  ProductPublic, 
+import type React from "react"
+import type {
   ClientPublic,
-  InsurerPublic 
+  InsurerPublic,
+  PolicyPublic,
+  ProductPublic,
+  RiskNotePublic,
 } from "@/client"
-import React from "react"
 
 /**
  * Enhanced versions of the auto-generated types with better metadata and relationships
@@ -28,11 +28,11 @@ export interface EnhancedRiskNote extends RiskNotePublic {
  * Types for the Document Rendering Engine
  */
 
-export type RiskNoteContentValue = 
-  | string 
-  | number 
-  | boolean 
-  | null 
+export type RiskNoteContentValue =
+  | string
+  | number
+  | boolean
+  | null
   | undefined
   | React.ReactNode
   | RiskNoteContentValue[]

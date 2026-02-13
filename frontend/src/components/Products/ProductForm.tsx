@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button"
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { LoadingButton } from "@/components/ui/loading-button"
@@ -57,7 +57,7 @@ export const ProductForm = ({
 
   // If useContext is true, we expect to be wrapped in a FormProvider
   const context = useFormContext<FormData>()
-  
+
   const localForm = useForm<FormData>({
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
@@ -80,12 +80,11 @@ export const ProductForm = ({
       onSubmit={(form as any).handleSubmit(handleFormSubmit as any)}
       className="space-y-4"
     >
-              {!fixedInsurerId && (
-                <FormField
-                  control={(form as any).control}
-                  name="insurer_id"
-                  render={({ field }) => (
-      
+      {!fixedInsurerId && (
+        <FormField
+          control={(form as any).control}
+          name="insurer_id"
+          render={({ field }) => (
             <FormItem>
               <FormLabel>Insurer</FormLabel>
               <Select
@@ -136,10 +135,7 @@ export const ProductForm = ({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Class of Insurance</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-              >
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select class" />
@@ -147,10 +143,16 @@ export const ProductForm = ({
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="Motor Private">Motor Private</SelectItem>
-                  <SelectItem value="Motor Commercial">Motor Commercial</SelectItem>
+                  <SelectItem value="Motor Commercial">
+                    Motor Commercial
+                  </SelectItem>
                   <SelectItem value="Fire">Fire</SelectItem>
-                  <SelectItem value="Domestic Package">Domestic Package</SelectItem>
-                  <SelectItem value="Personal Accident">Personal Accident</SelectItem>
+                  <SelectItem value="Domestic Package">
+                    Domestic Package
+                  </SelectItem>
+                  <SelectItem value="Personal Accident">
+                    Personal Accident
+                  </SelectItem>
                   <SelectItem value="Marine">Marine</SelectItem>
                   <SelectItem value="Medical">Medical</SelectItem>
                 </SelectContent>

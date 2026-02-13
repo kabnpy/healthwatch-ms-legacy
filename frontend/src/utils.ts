@@ -50,7 +50,9 @@ export const recursiveSearch = (obj: any, targetKeys: string[]): any => {
 
   // 1. Try immediate keys (case-insensitive)
   for (const [key, value] of Object.entries(obj)) {
-    if (targetKeys.some(tk => tk.toLowerCase() === key.toLowerCase().trim())) {
+    if (
+      targetKeys.some((tk) => tk.toLowerCase() === key.toLowerCase().trim())
+    ) {
       if (value && typeof value === "string" && !value.includes("<<")) {
         return value
       }
@@ -70,12 +72,13 @@ export const recursiveSearch = (obj: any, targetKeys: string[]): any => {
 
 export const getPolicyDisplayName = (riskNote: any): string => {
   const policySnapshot = riskNote?.policy_snapshot || {}
-  const riskDetails = policySnapshot?.risk_details || riskNote?.policy?.risk_details || {}
-  
+  const riskDetails =
+    policySnapshot?.risk_details || riskNote?.policy?.risk_details || {}
+
   // 1. Determine Base Class Name
-  const className = 
-    policySnapshot?.product?.class_of_insurance || 
-    riskNote?.policy?.product?.class_of_insurance || 
+  const className =
+    policySnapshot?.product?.class_of_insurance ||
+    riskNote?.policy?.product?.class_of_insurance ||
     policySnapshot?.product?.name ||
     riskNote?.policy?.product?.name ||
     "Insurance Policy"
@@ -84,20 +87,46 @@ export const getPolicyDisplayName = (riskNote: any): string => {
 
   // 2. Robust Extraction for Motor Private
   if (trimmedClass.toLowerCase().includes("motor private")) {
-    const regNo = recursiveSearch(riskDetails, ["reg_no", "Reg No", "Reg. No", "Registration"])
+    const regNo = recursiveSearch(riskDetails, [
+      "reg_no",
+      "Reg No",
+      "Reg. No",
+      "Registration",
+    ])
     if (regNo) {
       return `${trimmedClass} - ${regNo.trim()}`
     }
   }
 
   // 3. General Redundancy Check for Description
-  const description = policySnapshot?.description || riskNote?.policy?.description
+  const description =
+    policySnapshot?.description || riskNote?.policy?.description
   if (description) {
     const trimmedDesc = description.trim()
-    if (trimmedDesc && trimmedDesc.toLowerCase() !== trimmedClass.toLowerCase()) {
+    if (
+      trimmedDesc &&
+      trimmedDesc.toLowerCase() !== trimmedClass.toLowerCase()
+    ) {
       return `${trimmedClass} - ${trimmedDesc}`
     }
   }
 
   return trimmedClass
+}
+
+export const formatCurrency = (
+  amount: number | string | undefined | null,
+): string => {
+  if (amount === undefined || amount === null) return "Kshs. 0.00"
+  const numericAmount =
+    typeof amount === "string" ? Number.parseFloat(amount) : amount
+  if (Number.isNaN(numericAmount)) return "Kshs. 0.00"
+
+  return new Intl.NumberFormat("en-KE", {
+    style: "currency",
+    currency: "KES",
+    minimumFractionDigits: 2,
+  })
+    .format(numericAmount)
+    .replace("KES", "Kshs.")
 }

@@ -1,5 +1,5 @@
-import { Skeleton } from "@/components/ui/skeleton"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export function PolicyDashboardSkeleton() {
   return (
@@ -31,35 +31,41 @@ export function PolicyDashboardSkeleton() {
       {/* Content Skeleton */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start pt-6">
         <div className="lg:col-span-3 space-y-6">
-           {/* Template Skeleton */}
-           <div className="border rounded-lg shadow-xl overflow-hidden bg-white">
-              <div className="p-1 border-b"><Skeleton className="h-3 w-32 mx-auto" /></div>
-              <div className="p-8 space-y-8">
-                <div className="flex justify-between">
-                  <Skeleton className="h-16 w-32" />
-                  <Skeleton className="h-16 w-32" />
-                </div>
-                <div className="space-y-4">
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-2/3" />
-                </div>
-                <div className="grid grid-cols-2 gap-8">
-                  <Skeleton className="h-32 w-full" />
-                  <Skeleton className="h-32 w-full" />
-                </div>
+          {/* Template Skeleton */}
+          <div className="border rounded-lg shadow-xl overflow-hidden bg-white">
+            <div className="p-1 border-b">
+              <Skeleton className="h-3 w-32 mx-auto" />
+            </div>
+            <div className="p-8 space-y-8">
+              <div className="flex justify-between">
+                <Skeleton className="h-16 w-32" />
+                <Skeleton className="h-16 w-32" />
               </div>
-           </div>
+              <div className="space-y-4">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-2/3" />
+              </div>
+              <div className="grid grid-cols-2 gap-8">
+                <Skeleton className="h-32 w-full" />
+                <Skeleton className="h-32 w-full" />
+              </div>
+            </div>
+          </div>
         </div>
         <div className="lg:col-span-1 space-y-6">
           <Card>
-            <CardHeader><Skeleton className="h-4 w-24" /></CardHeader>
-            <CardContent><Skeleton className="h-12 w-16" /></CardContent>
+            <CardHeader>
+              <Skeleton className="h-4 w-24" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-12 w-16" />
+            </CardContent>
           </Card>
           <div className="space-y-2">
-             <Skeleton className="h-4 w-20" />
-             <Skeleton className="h-10 w-full" />
-             <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
           </div>
         </div>
       </div>

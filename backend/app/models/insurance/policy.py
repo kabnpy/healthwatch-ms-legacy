@@ -11,6 +11,7 @@ from .catalog import ProductPublic
 from ..mixins import AuditMixin
 from ..enums import (
     PolicyStatus,
+    TransactionType,
     RiskNoteStatus,
     ClaimStatus,
     ClaimEventType,
@@ -41,6 +42,19 @@ class PolicyCreate(PolicyBase):
     pass
 
 
+class PolicyCreateExtended(PolicyCreate):
+    """Extended model for atomic creation via Service layer"""
+    risk_details: Dict[str, Any] = Field(default_factory=dict)
+    coverage_start: date = Field(default_factory=date.today)
+    coverage_end: date
+
+
+class EndorsementCreate(SQLModel):
+    """Model for creating an endorsement"""
+    updated_risk_details: Dict[str, Any]
+    change_description: str
+
+
 class PolicyUpdate(SQLModel):
     policy_number: str | None = None
     client_id: uuid.UUID | None = None
@@ -57,9 +71,11 @@ class PolicyPublic(PolicyBase):
     @property
     def current_risk_details(self) -> Dict[str, Any]:
         """Get current coverage details from latest risk note"""
+        if not hasattr(self, "risk_notes") or not self.risk_notes:
+            return {}
         active_notes = [
             rn for rn in self.risk_notes 
-            if rn.status in [RiskNoteStatus.ISSUED, RiskNoteStatus.REPLACED, RiskNoteStatus.ACTIVE]
+            if rn.status in [RiskNoteStatus.ISSUED, RiskNoteStatus.ACTIVE]
         ]
         if not active_notes:
             return {}
@@ -67,11 +83,25 @@ class PolicyPublic(PolicyBase):
 
     @computed_field  # type: ignore
     @property
-    def start_date(self) -> Optional[date]:
-        """Backward compatibility for start_date"""
+    def total_premium(self) -> Decimal:
+        """Get current total premium from latest risk note"""
+        if not hasattr(self, "risk_notes") or not self.risk_notes:
+            return Decimal("0")
         active_notes = [
             rn for rn in self.risk_notes 
-            if rn.status in [RiskNoteStatus.ISSUED, RiskNoteStatus.REPLACED, RiskNoteStatus.ACTIVE]
+            if rn.status in [RiskNoteStatus.ISSUED, RiskNoteStatus.ACTIVE]
+        ]
+        return active_notes[0].total_amount if active_notes else Decimal("0")
+
+    @computed_field  # type: ignore
+    @property
+    def start_date(self) -> Optional[date]:
+        """Backward compatibility for start_date"""
+        if not hasattr(self, "risk_notes") or not self.risk_notes:
+            return None
+        active_notes = [
+            rn for rn in self.risk_notes 
+            if rn.status in [RiskNoteStatus.ISSUED, RiskNoteStatus.ACTIVE]
         ]
         return active_notes[0].coverage_start if active_notes else None
 
@@ -79,9 +109,11 @@ class PolicyPublic(PolicyBase):
     @property
     def end_date(self) -> Optional[date]:
         """Backward compatibility for end_date"""
+        if not hasattr(self, "risk_notes") or not self.risk_notes:
+            return None
         active_notes = [
             rn for rn in self.risk_notes 
-            if rn.status in [RiskNoteStatus.ISSUED, RiskNoteStatus.REPLACED, RiskNoteStatus.ACTIVE]
+            if rn.status in [RiskNoteStatus.ISSUED, RiskNoteStatus.ACTIVE]
         ]
         return active_notes[0].coverage_end if active_notes else None
 
@@ -128,7 +160,7 @@ class Policy(PolicyBase, table=True):
     risk_notes: list["RiskNote"] = Relationship(
         back_populates="policy",
         sa_relationship_kwargs={
-            "order_by": "RiskNote.effective_date.desc()",
+            "order_by": "RiskNote.effective_date.desc(), RiskNote.created_at.desc()",
             "lazy": "selectin"
         }
     )
@@ -137,9 +169,10 @@ class Policy(PolicyBase, table=True):
     @property
     def current_risk_note(self) -> Optional["RiskNote"]:
         """Get most recent risk note (current state)"""
+        # Sorted by effective_date DESC in relationship
         active_notes = [
             rn for rn in self.risk_notes 
-            if rn.status in [RiskNoteStatus.ISSUED, RiskNoteStatus.REPLACED, RiskNoteStatus.ACTIVE]
+            if rn.status in [RiskNoteStatus.ISSUED, RiskNoteStatus.ACTIVE]
         ]
         return active_notes[0] if active_notes else None
     
@@ -153,7 +186,7 @@ class Policy(PolicyBase, table=True):
     def current_premium(self) -> Decimal:
         """Get current total premium from latest risk note"""
         rn = self.current_risk_note
-        return rn.total_premium if rn else Decimal("0")
+        return rn.total_amount if rn else Decimal("0")
     
     @property
     def current_term_start(self) -> Optional[date]:
@@ -181,7 +214,7 @@ class PoliciesPublic(SQLModel):
 class RiskNoteBase(AuditMixin, SQLModel):
     policy_id: uuid.UUID = Field(foreign_key="policy.id", index=True)
     risk_note_number: str | None = Field(default=None, unique=True, index=True)
-    transaction_type: str  # "New Business", "Renewal", "Endorsement", "Cancellation"
+    transaction_type: TransactionType
     status: RiskNoteStatus = Field(default=RiskNoteStatus.DRAFT)
     previous_risk_note_id: uuid.UUID | None = Field(
         default=None, foreign_key="risknote.id", index=True
@@ -207,7 +240,7 @@ class RiskNoteCreate(RiskNoteBase):
 
 
 class RiskNoteUpdate(SQLModel):
-    transaction_type: str | None = None
+    transaction_type: TransactionType | None = None
     risk_note_number: str | None = None
     status: RiskNoteStatus | None = None
     previous_risk_note_id: uuid.UUID | None = None

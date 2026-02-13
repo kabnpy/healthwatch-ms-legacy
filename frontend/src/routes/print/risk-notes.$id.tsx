@@ -182,24 +182,26 @@ function RiskNotePrintContent({ id }: { id: string }) {
               <tr className="border-b">
                 <td className="py-2 font-bold">Sum Insured</td>
                 <td className="py-2 text-right font-mono font-bold">
-                  KES{" "}
-                  {riskDetails.sum_insured?.toLocaleString() ||
-                    "Refer to Schedule"}
+                  {riskDetails.sum_insured
+                    ? `KES ${Number(riskDetails.sum_insured).toLocaleString()}`
+                    : "Refer to Schedule"}
                 </td>
               </tr>
-              {/* Placeholder for real benefits snapshot */}
-              <tr className="border-b">
-                <td className="py-2">Windscreen</td>
-                <td className="py-2 text-right">KES 50,000.00</td>
-              </tr>
-              <tr className="border-b">
-                <td className="py-2">Towing & Recovery</td>
-                <td className="py-2 text-right">KES 30,000.00</td>
-              </tr>
-              <tr className="border-b">
-                <td className="py-2">Authorized Passenger Liability</td>
-                <td className="py-2 text-right">KES 200,000.00</td>
-              </tr>
+              {Object.entries(riskDetails)
+                .filter(
+                  ([k]) =>
+                    !["sum_insured", "description"].includes(k.toLowerCase()),
+                )
+                .map(([k, v]) => (
+                  <tr key={k} className="border-b">
+                    <td className="py-2 capitalize">{k.replace(/_/g, " ")}</td>
+                    <td className="py-2 text-right">
+                      {typeof v === "number"
+                        ? `KES ${v.toLocaleString()}`
+                        : String(v)}
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
 

@@ -1,4 +1,9 @@
-import { useQuery, useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query"
 import { AlertCircle, FileText, Loader2 } from "lucide-react"
 import { Suspense } from "react"
 
@@ -15,11 +20,11 @@ import {
   type RiskNotePublic,
   RiskNotesService,
 } from "@/client"
+import useCustomToast from "@/hooks/useCustomToast"
+import type { EnhancedPolicy, EnhancedRiskNote } from "@/types/insurance"
+import { handleError } from "@/utils"
 import { InvoiceTemplate } from "./templates/InvoiceTemplate"
 import { RiskNoteTemplate } from "./templates/RiskNoteTemplate"
-import useCustomToast from "@/hooks/useCustomToast"
-import { handleError } from "@/utils"
-import type { EnhancedRiskNote, EnhancedPolicy } from "@/types/insurance"
 
 // --- Types ---
 
@@ -106,22 +111,25 @@ function RiskNoteLoader({ id }: { id: string }) {
   }) as { data: ClientPublic }
 
   const mutation = useMutation({
-    mutationFn: (updatedSnapshot: any) => 
-        RiskNotesService.updateRiskNote({ id, requestBody: { policy_snapshot: updatedSnapshot } }),
+    mutationFn: (updatedSnapshot: any) =>
+      RiskNotesService.updateRiskNote({
+        id,
+        requestBody: { policy_snapshot: updatedSnapshot },
+      }),
     onSuccess: () => {
-        showSuccessToast("Risk Note draft updated successfully")
-        qClient.invalidateQueries({ queryKey: ["risk-notes", id] })
+      showSuccessToast("Risk Note draft updated successfully")
+      qClient.invalidateQueries({ queryKey: ["risk-notes", id] })
     },
-    onError: (err: any) => handleError.bind(showErrorToast)(err)
+    onError: (err: any) => handleError.bind(showErrorToast)(err),
   })
 
   return (
-    <RiskNoteTemplate 
-        riskNote={riskNote as EnhancedRiskNote} 
-        client={client} 
-        policy={policy as EnhancedPolicy} 
-        isEditable={riskNote.status === "Draft"}
-        onSave={(snap) => mutation.mutate(snap)}
+    <RiskNoteTemplate
+      riskNote={riskNote as EnhancedRiskNote}
+      client={client}
+      policy={policy as EnhancedPolicy}
+      isEditable={riskNote.status === "Draft"}
+      onSave={(snap) => mutation.mutate(snap)}
     />
   )
 }

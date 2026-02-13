@@ -4,14 +4,14 @@ import { ArrowLeft, Mail, Phone, Shield } from "lucide-react"
 import { Suspense } from "react"
 
 import { InsurersService } from "@/client"
-import { queryClient } from "@/queryClient"
+import { DataTable } from "@/components/Common/DataTable"
 import PendingItems from "@/components/Pending/PendingItems"
+import { AddProduct } from "@/components/Products/AddProduct"
+import { columns as productColumns } from "@/components/Products/columns"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useProducts } from "@/hooks/useCatalog"
-import { DataTable } from "@/components/Common/DataTable"
-import { columns as productColumns } from "@/components/Products/columns"
-import { AddProduct } from "@/components/Products/AddProduct"
+import { queryClient } from "@/queryClient"
 
 // --- Query Options ---
 
@@ -52,13 +52,15 @@ function InsurerProducts({ insurerId }: { insurerId: string }) {
         <h3 className="text-lg font-semibold">Insurance Products</h3>
         <AddProduct fixedInsurerId={insurerId} />
       </div>
-      
+
       {products.length === 0 ? (
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-10 text-center">
             <Shield className="h-10 w-10 text-muted-foreground mb-2" />
             <p className="font-medium">No products for this insurer</p>
-            <p className="text-sm text-muted-foreground">Add products to start issuing policies for this carrier.</p>
+            <p className="text-sm text-muted-foreground">
+              Add products to start issuing policies for this carrier.
+            </p>
           </CardContent>
         </Card>
       ) : (
@@ -74,21 +76,27 @@ function InsurerDetailContent({ insurerId }: { insurerId: string }) {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <Button variant="ghost" asChild className="mb-4 -ml-2 h-8 px-2 text-muted-foreground">
+        <Button
+          variant="ghost"
+          asChild
+          className="mb-4 -ml-2 h-8 px-2 text-muted-foreground"
+        >
           <Link to="/catalog/insurers">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Insurers
           </Link>
         </Button>
         <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold tracking-tight">{insurer.name}</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{insurer.name}</h1>
         </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
         <Card className="md:col-span-1">
           <CardHeader>
-            <CardTitle className="text-sm font-medium">Contact Information</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Contact Information
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-2 text-sm">
@@ -108,7 +116,8 @@ function InsurerDetailContent({ insurerId }: { insurerId: string }) {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-                Management view for insurance carrier details and associated products.
+              Management view for insurance carrier details and associated
+              products.
             </p>
           </CardContent>
         </Card>

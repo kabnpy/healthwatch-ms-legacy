@@ -1,6 +1,8 @@
 # Project Status (Session End: 2026-02-06)
 
 ## Finished (Key Milestones)
+- **Motor Private Validation & Schema Refinement**: Removed the "Model" field from Motor Private schema, blueprints, and seed data. Improved `injectWizardData` in the frontend to resiliently handle both nested and flat input structures, ensuring proper mapping of wizard data to document blueprints.
+- **Motor Private Validation Fix**: Resolved policy creation failure by correcting `injectWizardData` in the frontend to handle nested blueprint structures. Updated the backend `MotorPrivateRiskDetails` schema and `PolicyService` to support flexible type coercion and nested data extraction.
 - **Risk Note & Invoice Refinement**: Significant enhancements to Risk Note generation, invoicing workflow, layout standardization, and dynamic cover display.
 - **Standardized Wizard Layout**: Improved user experience and responsiveness for the New Policy Wizard.
 - **Motor Private Premium Calculator**: Implemented complex premium calculation logic for Motor Private policies.

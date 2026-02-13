@@ -44,13 +44,19 @@ export const columns: ColumnDef<ProductPublic>[] = [
   {
     accessorKey: "class_of_insurance",
     header: "Class",
-    cell: ({ row }) => <span className="text-muted-foreground">{row.original.class_of_insurance}</span>,
+    cell: ({ row }) => (
+      <span className="text-muted-foreground">
+        {row.original.class_of_insurance}
+      </span>
+    ),
   },
   {
     accessorKey: "default_commission_rate",
     header: "Comm. %",
     cell: ({ row }) => (
-      <span className="text-muted-foreground">{row.original.default_commission_rate}%</span>
+      <span className="text-muted-foreground">
+        {row.original.default_commission_rate}%
+      </span>
     ),
   },
   {

@@ -37,7 +37,9 @@ function InsurersTableContent() {
           <Search className="h-8 w-8 text-muted-foreground" />
         </div>
         <h3 className="text-lg font-semibold">No insurers found</h3>
-        <p className="text-muted-foreground">Add a new insurance carrier to get started</p>
+        <p className="text-muted-foreground">
+          Add a new insurance carrier to get started
+        </p>
       </div>
     )
   }
@@ -58,8 +60,12 @@ function Insurers() {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold tracking-tight">Insurance Carriers</h2>
-          <p className="text-sm text-muted-foreground">List of all registered insurers in the system.</p>
+          <h2 className="text-xl font-bold tracking-tight">
+            Insurance Carriers
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            List of all registered insurers in the system.
+          </p>
         </div>
         <AddInsurer />
       </div>

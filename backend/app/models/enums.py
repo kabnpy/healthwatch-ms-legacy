@@ -6,6 +6,12 @@ class PolicyStatus(str, Enum):
     CANCELLED = "Cancelled"
     LAPSED = "Lapsed"
 
+class TransactionType(str, Enum):
+    NEW_BUSINESS = "New Business"
+    RENEWAL = "Renewal"
+    ENDORSEMENT = "Endorsement"
+    CANCELLATION = "Cancellation"
+
 class RiskNoteStatus(str, Enum):
     DRAFT = "Draft"
     ISSUED = "Issued"

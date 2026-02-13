@@ -61,7 +61,11 @@ class PolicyService:
             raise HTTPException(status_code=404, detail="Product not found")
             
         # 1. Validate and price
-        validated_risk = product.validate_risk_details(risk_details)
+        try:
+            validated_risk = product.validate_risk_details(risk_details)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Invalid risk details for Motor Private: {str(e)}")
+        
         net_premium = product.calculate_premium(validated_risk)
         
         # 2. Create Policy (container)
@@ -117,7 +121,11 @@ class PolicyService:
             raise HTTPException(status_code=400, detail="Cannot endorse policy without active risk note")
             
         # 1. Validate and price NEW state
-        validated_risk = product.validate_risk_details(updated_risk_details)
+        try:
+            validated_risk = product.validate_risk_details(updated_risk_details)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Invalid risk details for Motor Private: {str(e)}")
+            
         new_net_total = product.calculate_premium(validated_risk)
         
         # 2. Calculate delta (pro-rata logic could be added here, for now it's just delta of full term)

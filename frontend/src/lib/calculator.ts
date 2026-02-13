@@ -34,7 +34,9 @@ export function calculatePremium(input: CalculationInput): CalculationResult {
   let rate = input.rate
 
   if (input.isMotorPrivate) {
-    const tier = MOTOR_PRIVATE_TIERS.find((t) => input.sumInsured < t.max) || MOTOR_PRIVATE_TIERS[MOTOR_PRIVATE_TIERS.length - 1]
+    const tier =
+      MOTOR_PRIVATE_TIERS.find((t) => input.sumInsured < t.max) ||
+      MOTOR_PRIVATE_TIERS[MOTOR_PRIVATE_TIERS.length - 1]
     rate = tier.rate
     basic = Math.max(input.sumInsured * (rate / 100), tier.min)
   } else {
@@ -42,24 +44,38 @@ export function calculatePremium(input: CalculationInput): CalculationResult {
   }
 
   // Extensions (Benefits)
-  const extensions: Array<{ name: string; amount: number; included?: boolean }> = []
-  
+  const extensions: Array<{
+    name: string
+    amount: number
+    included?: boolean
+  }> = []
+
   // High-End Logic: Sum Insured >= 3M (All Inclusive)
   const isHighEnd = input.isMotorPrivate && input.sumInsured >= 3000000
 
   if (input.hasPVT) {
     if (isHighEnd) {
-        extensions.push({ name: "Political Violence & Terrorism", amount: 0, included: true })
+      extensions.push({
+        name: "Political Violence & Terrorism",
+        amount: 0,
+        included: true,
+      })
     } else {
-        extensions.push({ name: "Political Violence & Terrorism", amount: input.sumInsured * 0.0025 })
+      extensions.push({
+        name: "Political Violence & Terrorism",
+        amount: input.sumInsured * 0.0025,
+      })
     }
   }
 
   if (input.hasExcessProtector) {
     if (isHighEnd) {
-        extensions.push({ name: "Excess Protector", amount: 0, included: true })
+      extensions.push({ name: "Excess Protector", amount: 0, included: true })
     } else {
-        extensions.push({ name: "Excess Protector", amount: input.sumInsured * 0.0025 })
+      extensions.push({
+        name: "Excess Protector",
+        amount: input.sumInsured * 0.0025,
+      })
     }
   }
 

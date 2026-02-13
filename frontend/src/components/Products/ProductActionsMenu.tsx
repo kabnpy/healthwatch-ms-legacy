@@ -1,8 +1,9 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { Link } from "@tanstack/react-router"
 import { EllipsisVertical, Eye, Trash2 } from "lucide-react"
 import { useState } from "react"
-import { Link } from "@tanstack/react-router"
-
 import type { ProductPublic } from "@/client"
+import { ProductsService } from "@/client"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -11,8 +12,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { ProductsService } from "@/client"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
 
@@ -43,23 +42,28 @@ export const ProductActionsMenu = ({ product }: ProductActionsMenuProps) => {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem asChild>
-            <Link to="/catalog/products/$productId" params={{ productId: product.id }}>
-                <Eye className="mr-2 h-4 w-4" />
-                Edit & Schema
-            </Link>
+          <Link
+            to="/catalog/products/$productId"
+            params={{ productId: product.id }}
+          >
+            <Eye className="mr-2 h-4 w-4" />
+            Edit & Schema
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem 
-            className="text-destructive"
-            onClick={() => {
-                if (window.confirm("Are you sure you want to delete this product?")) {
-                    deleteMutation.mutate()
-                }
-            }}
-            disabled={deleteMutation.isPending}
+        <DropdownMenuItem
+          className="text-destructive"
+          onClick={() => {
+            if (
+              window.confirm("Are you sure you want to delete this product?")
+            ) {
+              deleteMutation.mutate()
+            }
+          }}
+          disabled={deleteMutation.isPending}
         >
-            <Trash2 className="mr-2 h-4 w-4" />
-            Delete Product
+          <Trash2 className="mr-2 h-4 w-4" />
+          Delete Product
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

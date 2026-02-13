@@ -57,7 +57,9 @@ export const getReceiptColumns = (
         </span>
         <span className="text-[10px] text-muted-foreground uppercase tracking-tighter">
           Unallocated: KES{" "}
-          {Number((row.original as any).unallocated_amount || 0).toLocaleString()}
+          {Number(
+            (row.original as any).unallocated_amount || 0,
+          ).toLocaleString()}
         </span>
       </div>
     ),
