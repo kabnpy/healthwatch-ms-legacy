@@ -8,8 +8,10 @@ class PolicyStatus(str, Enum):
 
 class RiskNoteStatus(str, Enum):
     DRAFT = "Draft"
-    ACTIVE = "Active"
+    ISSUED = "Issued"
+    REPLACED = "Replaced"
     CANCELLED = "Cancelled"
+    ACTIVE = "Issued"  # Alias for backward compatibility
 
 class InvoiceStatus(str, Enum):
     UNPAID = "Unpaid"

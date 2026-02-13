@@ -34,19 +34,11 @@ class PolicyBase(AuditMixin, SQLModel):
     client_id: uuid.UUID = Field(foreign_key="client.id", index=True)
     product_id: uuid.UUID | None = Field(default=None, foreign_key="product.id", index=True)
     status: PolicyStatus = Field(default=PolicyStatus.ACTIVE)
-
-    # Cover Details (Merged from RiskItem)
-    start_date: date | None = None
-    end_date: date | None = None
-    description: str | None = None
-    total_premium: Decimal = Field(
-        default=Decimal("0.0"), sa_type=Numeric(precision=15, scale=2)
-    )
+    inception_date: date | None = Field(default_factory=date.today)
 
 
 class PolicyCreate(PolicyBase):
-    premium_breakdown: Dict[str, Any] = Field(default_factory=dict)
-    risk_details: Dict[str, Any] = Field(default_factory=dict)
+    pass
 
 
 class PolicyUpdate(SQLModel):
@@ -54,19 +46,44 @@ class PolicyUpdate(SQLModel):
     client_id: uuid.UUID | None = None
     product_id: uuid.UUID | None = None
     status: PolicyStatus | None = None
-    start_date: date | None = None
-    end_date: date | None = None
-    description: str | None = None
-    total_premium: Decimal | None = None
-    premium_breakdown: Dict[str, Any] | None = None
-    risk_details: Dict[str, Any] | None = None
+    inception_date: date | None = None
 
 
 class PolicyPublic(PolicyBase):
     id: uuid.UUID
     product: ProductPublic | None = None
-    premium_breakdown: Dict[str, Any] = Field(default_factory=dict)
-    risk_details: Dict[str, Any] = Field(default_factory=dict)
+    
+    @computed_field  # type: ignore
+    @property
+    def current_risk_details(self) -> Dict[str, Any]:
+        """Get current coverage details from latest risk note"""
+        active_notes = [
+            rn for rn in self.risk_notes 
+            if rn.status in [RiskNoteStatus.ISSUED, RiskNoteStatus.REPLACED, RiskNoteStatus.ACTIVE]
+        ]
+        if not active_notes:
+            return {}
+        return active_notes[0].policy_snapshot.get("risk_details", {})
+
+    @computed_field  # type: ignore
+    @property
+    def start_date(self) -> Optional[date]:
+        """Backward compatibility for start_date"""
+        active_notes = [
+            rn for rn in self.risk_notes 
+            if rn.status in [RiskNoteStatus.ISSUED, RiskNoteStatus.REPLACED, RiskNoteStatus.ACTIVE]
+        ]
+        return active_notes[0].coverage_start if active_notes else None
+
+    @computed_field  # type: ignore
+    @property
+    def end_date(self) -> Optional[date]:
+        """Backward compatibility for end_date"""
+        active_notes = [
+            rn for rn in self.risk_notes 
+            if rn.status in [RiskNoteStatus.ISSUED, RiskNoteStatus.REPLACED, RiskNoteStatus.ACTIVE]
+        ]
+        return active_notes[0].coverage_end if active_notes else None
 
     @computed_field  # type: ignore
     @property
@@ -90,18 +107,13 @@ class PolicyPublic(PolicyBase):
             base_name = self.product.class_of_insurance or self.product.name
 
             # Refinement for Motor Private: Add Reg No if available
+            risk_details = self.current_risk_details
             if "motor private" in base_name.lower():
                 reg_no = recursive_search(
-                    self.risk_details, ["reg_no", "Reg No", "Reg. No", "Registration"]
+                    risk_details, ["reg_no", "Reg No", "Reg. No", "Registration"]
                 )
                 if reg_no:
                     return f"{base_name} - {reg_no}"
-
-            if self.description:
-                trimmed_desc = self.description.strip()
-                trimmed_base = base_name.strip()
-                if trimmed_desc.lower() != trimmed_base.lower() and trimmed_desc:
-                    return f"{base_name} - {trimmed_desc}"
 
             return base_name
         return self.policy_number
@@ -109,16 +121,51 @@ class PolicyPublic(PolicyBase):
 
 class Policy(PolicyBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    premium_breakdown: Dict[str, Any] = Field(
-        default_factory=dict, sa_column=Column(JSON)
-    )
-    risk_details: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
 
     client: "Client" = Relationship(back_populates="policies")
     product: Optional["Product"] = Relationship(back_populates="policies")
 
-    risk_notes: list["RiskNote"] = Relationship(back_populates="policy")
+    risk_notes: list["RiskNote"] = Relationship(
+        back_populates="policy",
+        sa_relationship_kwargs={
+            "order_by": "RiskNote.effective_date.desc()",
+            "lazy": "selectin"
+        }
+    )
     claims: list["Claim"] = Relationship(back_populates="policy")
+
+    @property
+    def current_risk_note(self) -> Optional["RiskNote"]:
+        """Get most recent risk note (current state)"""
+        active_notes = [
+            rn for rn in self.risk_notes 
+            if rn.status in [RiskNoteStatus.ISSUED, RiskNoteStatus.REPLACED, RiskNoteStatus.ACTIVE]
+        ]
+        return active_notes[0] if active_notes else None
+    
+    @property
+    def current_risk_details(self) -> Dict[str, Any]:
+        """Get current coverage details from latest risk note"""
+        rn = self.current_risk_note
+        return rn.policy_snapshot.get("risk_details", {}) if rn else {}
+    
+    @property
+    def current_premium(self) -> Decimal:
+        """Get current total premium from latest risk note"""
+        rn = self.current_risk_note
+        return rn.total_premium if rn else Decimal("0")
+    
+    @property
+    def current_term_start(self) -> Optional[date]:
+        """Get current coverage period start"""
+        rn = self.current_risk_note
+        return rn.coverage_start if rn else None
+    
+    @property
+    def current_term_end(self) -> Optional[date]:
+        """Get current coverage period end"""
+        rn = self.current_risk_note
+        return rn.coverage_end if rn else None
 
 
 class PoliciesPublic(SQLModel):
@@ -143,8 +190,9 @@ class RiskNoteBase(AuditMixin, SQLModel):
     created_by_id: uuid.UUID | None = Field(default=None, foreign_key="user.id", index=True)
     payment_status: str = Field(default="Unpaid")
 
-    start_date: date
-    end_date: date
+    effective_date: date = Field(default_factory=date.today, index=True)
+    coverage_start: date
+    coverage_end: date
 
     # Invoice Totals
     net_premium: Decimal = Field(sa_type=Numeric(precision=15, scale=2))
@@ -165,8 +213,9 @@ class RiskNoteUpdate(SQLModel):
     previous_risk_note_id: uuid.UUID | None = None
     invoice_number: str | None = None
     payment_status: str | None = None
-    start_date: date | None = None
-    end_date: date | None = None
+    effective_date: date | None = None
+    coverage_start: date | None = None
+    coverage_end: date | None = None
     net_premium: Decimal | None = None
     taxes: Dict[str, Any] | None = None
     commission_amount: Decimal | None = None

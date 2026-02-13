@@ -3,10 +3,10 @@
 ## Phase 1: Database and Model Refactoring
 Establish the new schema by removing duplicated fields from `Policy` and ensuring `RiskNote` contains the full state.
 
-- [ ] Task: **Write Tests for Updated Models**: Create tests that verify the new schema constraints and the immutability of issued `RiskNotes`.
-- [ ] Task: **Update backend/app/models/insurance/policy.py**: Remove `risk_details`, `total_premium`, etc., and implement computed properties to read from `risk_notes`.
-- [ ] Task: **Update backend/app/models/insurance/risk_note.py**: Ensure `policy_snapshot` JSON field is correctly typed and indexed.
-- [ ] Task: **Database Reset and Migration**: Perform a destructive reset of the local database and generate a fresh Alembic migration.
+- [x] Task: **Write Tests for Updated Models**: Create tests that verify the new schema constraints and the immutability of issued `RiskNotes`. (879c037)
+- [x] Task: **Update backend/app/models/insurance/policy.py**: Remove `risk_details`, `total_premium`, etc., and implement computed properties to read from `risk_notes`. (879c037)
+- [x] Task: **Update backend/app/models/insurance/risk_note.py**: Ensure `policy_snapshot` JSON field is correctly typed and indexed. (879c037)
+- [x] Task: **Database Reset and Migration**: Perform a destructive reset of the local database and generate a fresh Alembic migration. (879c037)
 - [ ] Task: **Conductor - User Manual Verification 'Phase 1: Database and Model Refactoring' (Protocol in workflow.md)**
 
 ## Phase 2: Service and CRUD Layer Refactoring
