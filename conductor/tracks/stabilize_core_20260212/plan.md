@@ -3,10 +3,10 @@
 This plan outlines the steps to stabilize and polish the HealthWatch MS core functionality.
 
 ## Phase 1: Type Stabilization & Build Integrity
-- [ ] Task: Audit and Resolve Critical Frontend TypeScript Errors
-    - [ ] Resolve errors in auto-generated client types.
-    - [ ] Fix type mismatches in `frontend/src/types/insurance.ts` and related components.
-    - [ ] Ensure `npm run build` passes in the frontend.
+- [x] Task: Audit and Resolve Critical Frontend TypeScript Errors (14c0dad)
+    - [x] Resolve errors in auto-generated client types.
+    - [x] Fix type mismatches in `frontend/src/types/insurance.ts` and related components.
+    - [x] Ensure `npm run build` passes in the frontend.
 - [ ] Task: Backend Schema and Migration Verification
     - [ ] Verify `risk_note_number` migration is consistent with the latest models.
     - [ ] Run backend tests to ensure 1:1 Policy/RiskItem refactor is stable.
