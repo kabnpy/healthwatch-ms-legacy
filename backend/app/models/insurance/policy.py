@@ -3,12 +3,20 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import TYPE_CHECKING, Any, Optional
 
-from pydantic import computed_field
+from pydantic import computed_field, ConfigDict
 from sqlalchemy import JSON, Numeric
 from sqlmodel import Field, Relationship, SQLModel
 
 from .catalog import ProductPublic
 from ..mixins import AuditMixin
+from ..enums import (
+    PolicyStatus,
+    RiskNoteStatus,
+    ClaimStatus,
+    ClaimEventType,
+    DocumentEntityType,
+    DocumentType,
+)
 
 if TYPE_CHECKING:
     from .catalog import Product
@@ -21,10 +29,11 @@ if TYPE_CHECKING:
 
 
 class PolicyBase(AuditMixin, SQLModel):
+    model_config = ConfigDict(validate_assignment=True)
     policy_number: str = Field(unique=True, index=True)
     client_id: uuid.UUID = Field(foreign_key="client.id")
     product_id: uuid.UUID | None = Field(default=None, foreign_key="product.id")
-    status: str = "Active"
+    status: PolicyStatus = Field(default=PolicyStatus.ACTIVE)
 
     # Cover Details (Merged from RiskItem)
     start_date: date | None = None
@@ -45,7 +54,7 @@ class PolicyUpdate(SQLModel):
     policy_number: str | None = None
     client_id: uuid.UUID | None = None
     product_id: uuid.UUID | None = None
-    status: str | None = None
+    status: PolicyStatus | None = None
     start_date: date | None = None
     end_date: date | None = None
     description: str | None = None
@@ -121,7 +130,7 @@ class RiskNoteBase(AuditMixin, SQLModel):
     policy_id: uuid.UUID = Field(foreign_key="policy.id")
     risk_note_number: str | None = Field(default=None, unique=True, index=True)
     transaction_type: str  # "New Business", "Renewal", "Endorsement", "Cancellation"
-    status: str = Field(default="Draft")  # "Draft", "Active", "Cancelled"
+    status: RiskNoteStatus = Field(default=RiskNoteStatus.DRAFT)
     previous_risk_note_id: uuid.UUID | None = Field(
         default=None, foreign_key="risknote.id"
     )
@@ -153,7 +162,7 @@ class RiskNoteCreate(RiskNoteBase):
 class RiskNoteUpdate(SQLModel):
     transaction_type: str | None = None
     risk_note_number: str | None = None
-    status: str | None = None
+    status: RiskNoteStatus | None = None
     previous_risk_note_id: uuid.UUID | None = None
     invoice_number: str | None = None
     payment_status: str | None = None
@@ -199,7 +208,7 @@ class ClaimBase(AuditMixin, SQLModel):
     date_of_loss: date
     date_reported: date = Field(default_factory=date.today)
     description: str
-    status: str = "Reported"
+    status: ClaimStatus = Field(default=ClaimStatus.REPORTED)
     reserve_amount: Decimal = Field(
         default=Decimal("0.0"), sa_type=Numeric(precision=15, scale=2)
     )
@@ -215,7 +224,7 @@ class ClaimUpdate(SQLModel):
     date_of_loss: date | None = None
     date_reported: date | None = None
     description: str | None = None
-    status: str | None = None
+    status: ClaimStatus | None = None
     reserve_amount: Decimal | None = None
 
 
@@ -242,7 +251,7 @@ class ClaimsPublic(SQLModel):
 
 class ClaimEventBase(SQLModel):
     claim_id: uuid.UUID = Field(foreign_key="claim.id")
-    event_type: str  # "Notification", "Assessment", "Correspondence", "Payment"
+    event_type: ClaimEventType
     description: str
     created_by_id: uuid.UUID | None = Field(default=None, foreign_key="user.id")
     created_at: datetime = Field(default_factory=datetime.now)
@@ -272,9 +281,9 @@ class ClaimEventsPublic(SQLModel):
 
 
 class DocumentBase(SQLModel):
-    entity_type: str  # "Client", "Policy", "Claim", "User", "RiskNote"
+    entity_type: DocumentEntityType
     entity_id: uuid.UUID
-    document_type: str  # "Logbook", "ID", "Valuation", "PoliceAbstract", "Receipt"
+    document_type: DocumentType
     file_path: str
     mime_type: str | None = None
     doc_metadata: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
@@ -286,9 +295,9 @@ class DocumentCreate(DocumentBase):
 
 
 class DocumentUpdate(SQLModel):
-    entity_type: str | None = None
+    entity_type: DocumentEntityType | None = None
     entity_id: uuid.UUID | None = None
-    document_type: str | None = None
+    document_type: DocumentType | None = None
     file_path: str | None = None
     mime_type: str | None = None
     doc_metadata: dict[str, Any] | None = None

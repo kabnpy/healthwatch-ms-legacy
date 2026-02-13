@@ -1,6 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING, Any, Optional
 
+from pydantic import ConfigDict
 from sqlalchemy import JSON
 from sqlmodel import Field, Relationship, SQLModel
 from ..mixins import AuditMixin
@@ -23,6 +24,7 @@ class PricingStrategy(str, Enum):
 
 
 class InsurerBase(AuditMixin, SQLModel):
+    model_config = ConfigDict(validate_assignment=True)
     name: str = Field(unique=True, index=True)
     email: str | None = None
     phone: str | None = None

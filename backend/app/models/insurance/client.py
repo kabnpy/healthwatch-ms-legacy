@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
+from pydantic import ConfigDict
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
@@ -17,6 +18,7 @@ from ..mixins import AuditMixin
 
 
 class ClientBase(AuditMixin, SQLModel):
+    model_config = ConfigDict(validate_assignment=True)
     client_type: str = Field(default="Individual")  # "Individual" or "Corporate"
     name: str = Field(index=True)
     kra_pin: str = Field(unique=True, index=True)
