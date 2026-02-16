@@ -68,7 +68,9 @@ export const AddPolicy = ({ clientId }: AddPolicyProps) => {
       product_id: "",
       status: "Active",
       coverage_start: new Date().toISOString().split("T")[0],
-      coverage_end: new Date(new Date().setFullYear(new Date().getFullYear() + 1))
+      coverage_end: new Date(
+        new Date().setFullYear(new Date().getFullYear() + 1),
+      )
         .toISOString()
         .split("T")[0],
     },
@@ -223,7 +225,11 @@ export const AddPolicy = ({ clientId }: AddPolicyProps) => {
               >
                 Cancel
               </Button>
-              <LoadingButton type="submit" loading={createPolicy.isPending} className="font-bold">
+              <LoadingButton
+                type="submit"
+                loading={createPolicy.isPending}
+                className="font-bold"
+              >
                 Create Policy
               </LoadingButton>
             </div>

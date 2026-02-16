@@ -4,16 +4,16 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 
 from app.api.deps import CurrentUser, SessionDep, StaffUser
-from app.crud.insurance.policy import (
+from app.crud.policy import (
     count_policies,
     get_policies,
     get_policy,
     get_policy_by_policy_number,
 )
-from app.crud.insurance.policy import (
+from app.crud.policy import (
     delete_policy as crud_delete_policy,
 )
-from app.crud.insurance.policy import (
+from app.crud.policy import (
     update_policy as crud_update_policy,
 )
 from app.services.policy import policy_service
@@ -152,7 +152,7 @@ def read_policy_risk_notes(
     """
     Get risk notes for a policy.
     """
-    from app.crud.insurance.policy import count_risk_notes, get_risk_notes
+    from app.crud.policy import count_risk_notes, get_risk_notes
 
     count = count_risk_notes(session=session, policy_id=id)
     risk_notes = get_risk_notes(session=session, policy_id=id)

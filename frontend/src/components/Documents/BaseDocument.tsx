@@ -15,12 +15,8 @@ export const BaseDocument = ({ children }: BaseDocumentProps) => {
 
       {/* Universal Footer */}
       <div className="mt-16 pt-10 border-t border-slate-100 flex justify-between items-center text-[9px] text-gray-400 uppercase tracking-widest font-bold">
-        <p>
-          Computer generated &bull; Valid without signature
-        </p>
-        <p>
-          HealthWatch MS &bull; {new Date().toLocaleDateString('en-GB')}
-        </p>
+        <p>Computer generated &bull; Valid without signature</p>
+        <p>HealthWatch MS &bull; {new Date().toLocaleDateString("en-GB")}</p>
       </div>
     </div>
   )

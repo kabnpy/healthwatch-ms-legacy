@@ -114,10 +114,7 @@ export const RiskNoteTable = ({
         <table className="w-full border-collapse">
           <tbody>
             {Object.entries(value).map(([k, v]) => (
-              <tr
-                key={k}
-                className="group/row"
-              >
+              <tr key={k} className="group/row">
                 <td className="py-1.5 pr-4 w-1/3 align-top">
                   <span className="text-[10px] uppercase font-bold text-muted-foreground/60 tracking-wider">
                     {k.replace(/_/g, " ")}
@@ -195,10 +192,7 @@ export const RiskNoteTable = ({
               key={section.name}
               className="border-b border-black/10 group/section"
             >
-              <th
-                scope="row"
-                className="py-4 px-0 w-[20%] align-top text-left"
-              >
+              <th scope="row" className="py-4 px-0 w-[20%] align-top text-left">
                 <div className="flex flex-col gap-2">
                   <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/70">
                     {section.name}

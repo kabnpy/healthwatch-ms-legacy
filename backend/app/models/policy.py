@@ -8,8 +8,8 @@ from sqlalchemy import JSON, Numeric, Column
 from sqlmodel import Field, Relationship, SQLModel
 
 from .catalog import ProductPublic
-from ..mixins import AuditMixin
-from ..enums import (
+from .mixins import AuditMixin
+from .enums import (
     PolicyStatus,
     TransactionType,
     RiskNoteStatus,

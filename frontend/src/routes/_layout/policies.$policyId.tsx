@@ -7,6 +7,7 @@ import { DocumentManager } from "@/components/Common/DocumentManager"
 import { DocumentViewerModal } from "@/components/Common/DocumentViewerModal"
 import ErrorComponent from "@/components/Common/ErrorComponent"
 import { DocumentViewer } from "@/components/Documents/DocumentViewer"
+import { RiskNoteTemplate } from "@/components/Documents/templates/RiskNoteTemplate"
 import { RiskNoteForm } from "@/components/Insurance/RiskNoteForm"
 import PendingItems from "@/components/Pending/PendingItems"
 import { PolicyDashboardSkeleton } from "@/components/Policies/Dashboard/PolicyDashboardSkeleton"
@@ -24,7 +25,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useClient, usePolicyDashboard } from "@/hooks/useInsurance"
 import { queryClient } from "@/queryClient"
 import type { EnhancedPolicy, EnhancedRiskNote } from "@/types/insurance"
-import { RiskNoteTemplate } from "@/components/Documents/templates/RiskNoteTemplate"
 
 // --- Route Definition ---
 
@@ -109,7 +109,10 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
 
   const daysToExpiry = latestRiskNote
     ? Math.ceil(
-        (new Date(latestRiskNote.coverage_end || (latestRiskNote as any).end_date).getTime() - Date.now()) /
+        (new Date(
+          latestRiskNote.coverage_end || (latestRiskNote as any).end_date,
+        ).getTime() -
+          Date.now()) /
           (1000 * 60 * 60 * 24),
       )
     : 0
@@ -144,9 +147,13 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
                     Coverage Status
                   </p>
                   <div className="flex items-center gap-2">
-                    <div className="text-3xl font-bold tracking-tight">{daysToExpiry}</div>
+                    <div className="text-3xl font-bold tracking-tight">
+                      {daysToExpiry}
+                    </div>
                     <div className="text-[10px] text-muted-foreground uppercase leading-tight font-semibold">
-                      Days until<br />Expiry
+                      Days until
+                      <br />
+                      Expiry
                     </div>
                   </div>
                 </div>

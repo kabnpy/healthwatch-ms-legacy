@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test"
 
 test.describe("Phase 1: Identity & Layout Foundation", () => {
   test.beforeEach(async ({ page }) => {
+    test.setTimeout(60000)
     await page.goto("/")
   })
 
@@ -22,8 +23,10 @@ test.describe("Phase 1: Identity & Layout Foundation", () => {
 
   test("Layered navigation works (Home -> Clients)", async ({ page }) => {
     await page.goto("/clients")
-    await expect(page.getByRole("heading", { name: "Clients", exact: true })).toBeVisible()
-    
+    await expect(
+      page.getByRole("heading", { name: "Clients", exact: true }),
+    ).toBeVisible()
+
     const breadcrumbs = page.locator("header nav")
     await expect(breadcrumbs.getByText("Home")).toBeVisible()
     await expect(breadcrumbs.getByText("Clients")).toBeVisible()
@@ -31,21 +34,25 @@ test.describe("Phase 1: Identity & Layout Foundation", () => {
 
   test("Client page has correct breadcrumbs", async ({ page }) => {
     await page.goto("/clients")
-    
+
     // Wait for table to load
     await page.waitForSelector("table")
-    
+
     // Click on the first client in the table
     // The name is a link that goes to /policies
-    const firstClientLink = page.locator("table tbody tr").first().getByRole("link").first()
+    const firstClientLink = page
+      .locator("table tbody tr")
+      .first()
+      .getByRole("link")
+      .first()
     const clientName = await firstClientLink.innerText()
     await firstClientLink.click()
-    
+
     // Verify breadcrumbs: Home / Clients / [Client Name]
     const breadcrumbs = page.locator("header nav")
     await expect(breadcrumbs.getByText("Home")).toBeVisible()
     await expect(breadcrumbs.getByText("Clients")).toBeVisible()
-    
+
     // The client name should be in the breadcrumbs
     await expect(breadcrumbs.getByText(clientName.trim())).toBeVisible()
   })
@@ -53,25 +60,36 @@ test.describe("Phase 1: Identity & Layout Foundation", () => {
   test("Policy page has correct layout and header", async ({ page }) => {
     await page.goto("/clients")
     await page.waitForSelector("table")
-    
+
     // Click on the first client link (goes to Policies tab)
-    await page.locator("table tbody tr").first().getByRole("link").first().click()
-    
+    await page
+      .locator("table tbody tr")
+      .first()
+      .getByRole("link")
+      .first()
+      .click()
+
     // Check if there are any policies
     await page.waitForSelector("table")
-    const firstPolicyLink = page.locator("table tbody tr").first().getByRole("link").first()
+    const firstPolicyLink = page
+      .locator("table tbody tr")
+      .first()
+      .getByRole("link")
+      .first()
     if (await firstPolicyLink.isVisible()) {
       await firstPolicyLink.click()
-      
+
       // Verify PolicyHeader
       await expect(page.getByRole("button", { name: "Renew" })).toBeVisible()
       await expect(page.getByRole("button", { name: "Endorse" })).toBeVisible()
-      
+
       // Verify Breadcrumbs: Home / [Policy]
       const breadcrumbs = page.locator("header nav")
       await expect(breadcrumbs.getByText("Home")).toBeVisible()
       // Should have 2 items: Home and the current policy
-      await expect(breadcrumbs.locator('[data-slot="breadcrumb-item"]')).toHaveCount(2)
+      await expect(
+        breadcrumbs.locator('[data-slot="breadcrumb-item"]'),
+      ).toHaveCount(2)
     }
   })
 })

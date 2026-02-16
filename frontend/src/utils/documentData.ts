@@ -47,7 +47,7 @@ export function extractWizardFields(
 export function injectWizardData(
   blueprint: any,
   inputs: any,
-  fullPath: string[] = []
+  fullPath: string[] = [],
 ): any {
   if (typeof blueprint !== "object" || blueprint === null) {
     return blueprint
@@ -72,19 +72,21 @@ export function injectWizardData(
         result[key] = inputs[dotPath]
       }
       // 2. Try to find it by nested key (if inputs were partially navigated)
-      else if (inputs && inputs[key] !== undefined && typeof inputs[key] !== "object") {
+      else if (
+        inputs &&
+        inputs[key] !== undefined &&
+        typeof inputs[key] !== "object"
+      ) {
         result[key] = inputs[key]
-      }
-      else {
+      } else {
         result[key] = "[ EMPTY ]"
       }
     } else if (typeof value === "object" && value !== null) {
       // Recurse, passing the same root inputs but extending the path
       // Also pass the sub-object if it exists for traditional nesting
-      const nextInputs = (inputs && inputs[key] && typeof inputs[key] === "object") 
-        ? inputs[key] 
-        : inputs
-      
+      const nextInputs =
+        inputs?.[key] && typeof inputs[key] === "object" ? inputs[key] : inputs
+
       result[key] = injectWizardData(value, nextInputs, currentPath)
     } else {
       result[key] = value

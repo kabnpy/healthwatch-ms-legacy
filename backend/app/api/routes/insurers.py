@@ -4,18 +4,18 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 
 from app.api.deps import CurrentUser, SessionDep, StaffUser
-from app.crud.insurance.catalog import (
+from app.crud.catalog import (
     count_insurers,
     get_insurer_by_name,
     get_insurers,
 )
-from app.crud.insurance.catalog import (
+from app.crud.catalog import (
     create_insurer as crud_create_insurer,
 )
-from app.crud.insurance.catalog import (
+from app.crud.catalog import (
     delete_insurer as crud_delete_insurer,
 )
-from app.crud.insurance.catalog import (
+from app.crud.catalog import (
     update_insurer as crud_update_insurer,
 )
 from app.models import (

@@ -4,7 +4,7 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 
 from app.api.deps import CurrentUser, SessionDep, StaffUser
-from app.crud.insurance import (
+from app.crud import (
     create_invoice,
     create_invoice_bulk,
     create_receipt,

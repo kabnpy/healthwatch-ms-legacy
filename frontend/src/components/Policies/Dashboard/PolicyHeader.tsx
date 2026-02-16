@@ -37,11 +37,20 @@ export function PolicyHeader({
       </div>
 
       <div className="flex items-center gap-2">
-        <Button variant="outline" size="sm" className="gap-2 h-9 px-4 font-semibold" onClick={onRenew}>
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-2 h-9 px-4 font-semibold"
+          onClick={onRenew}
+        >
           <RefreshCw className="size-4" />
           Renew
         </Button>
-        <Button size="sm" className="gap-2 h-9 px-4 font-semibold" onClick={onEndorse}>
+        <Button
+          size="sm"
+          className="gap-2 h-9 px-4 font-semibold"
+          onClick={onEndorse}
+        >
           <PlusCircle className="size-4" />
           Endorse
         </Button>

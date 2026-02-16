@@ -6,7 +6,7 @@ from typing import Any, cast
 from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
 
-from app.models.insurance.policy import (
+from app.models.policy import (
     Claim,
     ClaimCreate,
     ClaimEvent,

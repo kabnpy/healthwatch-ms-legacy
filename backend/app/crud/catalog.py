@@ -3,7 +3,7 @@ from datetime import datetime
 
 from sqlmodel import Session, select
 
-from app.models.insurance.catalog import (
+from app.models.catalog import (
     Insurer,
     InsurerCreate,
     InsurerUpdate,

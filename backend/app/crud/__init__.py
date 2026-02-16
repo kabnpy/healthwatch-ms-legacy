@@ -1,4 +1,4 @@
-from .insurance.catalog import (
+from .catalog import (
     count_insurers,
     count_products,
     create_insurer,
@@ -12,7 +12,7 @@ from .insurance.catalog import (
     update_insurer,
     update_product,
 )
-from .insurance.client import (
+from .client import (
     count_clients,
     count_correspondences,
     create_client,
@@ -26,7 +26,7 @@ from .insurance.client import (
     update_client,
     update_correspondence,
 )
-from .insurance.financial import (
+from .financial import (
     create_invoice,
     create_invoice_line_item,
     create_receipt,
@@ -38,7 +38,7 @@ from .insurance.financial import (
     update_invoice,
     void_receipt,
 )
-from .insurance.policy import (
+from .policy import (
     count_claims,
     count_documents,
     count_policies,
@@ -64,11 +64,9 @@ from .insurance.policy import (
     update_policy,
     update_risk_note,
 )
-from .item import create_item
 from .user import authenticate, create_user, get_user_by_email, update_user
 
 __all__ = [
-    "create_item",
     "authenticate",
     "create_user",
     "get_user_by_email",

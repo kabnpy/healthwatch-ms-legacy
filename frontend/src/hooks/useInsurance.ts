@@ -170,19 +170,25 @@ export const usePolicyDashboard = (policyId: string) => {
   const policyQuery = usePolicy(policyId)
   const riskNotesQuery = useRiskNotes(policyId)
 
-  // API now returns prepared PolicyPublic, but let's ensure 
+  // API now returns prepared PolicyPublic, but let's ensure
   // local consistency if we have both loaded.
   const latestRiskNote = riskNotesQuery.data?.data?.[0]
   const policy = policyQuery.data
 
   // Simple local enhancement if the relationship wasn't loaded in the main query
-  const enhancedPolicy = policy ? {
-    ...policy,
-    current_risk_details: policy.current_risk_details || latestRiskNote?.policy_snapshot?.risk_details || {},
-    total_premium: policy.total_premium || latestRiskNote?.total_amount || 0,
-    coverage_start: policy.start_date || latestRiskNote?.coverage_start,
-    coverage_end: policy.end_date || latestRiskNote?.coverage_end,
-  } : undefined
+  const enhancedPolicy = policy
+    ? {
+        ...policy,
+        current_risk_details:
+          policy.current_risk_details ||
+          latestRiskNote?.policy_snapshot?.risk_details ||
+          {},
+        total_premium:
+          policy.total_premium || latestRiskNote?.total_amount || 0,
+        coverage_start: policy.start_date || latestRiskNote?.coverage_start,
+        coverage_end: policy.end_date || latestRiskNote?.coverage_end,
+      }
+    : undefined
 
   return {
     policy: enhancedPolicy,

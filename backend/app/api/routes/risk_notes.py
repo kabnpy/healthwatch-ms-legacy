@@ -4,17 +4,17 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 
 from app.api.deps import CurrentUser, SessionDep, StaffUser
-from app.crud.insurance.policy import (
+from app.crud.policy import (
     count_risk_notes,
     get_risk_notes,
 )
-from app.crud.insurance.policy import (
+from app.crud.policy import (
     create_risk_note as crud_create_risk_note,
 )
-from app.crud.insurance.policy import (
+from app.crud.policy import (
     delete_risk_note as crud_delete_risk_note,
 )
-from app.crud.insurance.policy import (
+from app.crud.policy import (
     update_risk_note as crud_update_risk_note,
 )
 from app.services.policy import policy_service

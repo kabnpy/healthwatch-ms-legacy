@@ -62,7 +62,9 @@ export const RiskNoteForm = ({
     defaultValues: {
       transaction_type: "New Business",
       coverage_start: new Date().toISOString().split("T")[0],
-      coverage_end: new Date(new Date().setFullYear(new Date().getFullYear() + 1))
+      coverage_end: new Date(
+        new Date().setFullYear(new Date().getFullYear() + 1),
+      )
         .toISOString()
         .split("T")[0],
       status: "Draft",
@@ -80,18 +82,25 @@ export const RiskNoteForm = ({
 
       form.reset({
         transaction_type: existingRiskNote.transaction_type,
-        coverage_start: existingRiskNote.coverage_start || (existingRiskNote as any).start_date,
-        coverage_end: existingRiskNote.coverage_end || (existingRiskNote as any).end_date,
+        coverage_start:
+          existingRiskNote.coverage_start ||
+          (existingRiskNote as any).start_date,
+        coverage_end:
+          existingRiskNote.coverage_end || (existingRiskNote as any).end_date,
         status: existingRN.status || "Draft",
         net_premium: Number(existingRiskNote.net_premium),
         commission_amount: Number(existingRiskNote.commission_amount),
-        details: policySnapshot.risk_details || (policy as any)?.current_risk_details || {},
+        details:
+          policySnapshot.risk_details ||
+          (policy as any)?.current_risk_details ||
+          {},
       })
     } else if (policy) {
       const latestRN = (policy as any).latest_risk_note
       form.reset({
         transaction_type: "New Business",
-        coverage_start: latestRN?.coverage_start || new Date().toISOString().split("T")[0],
+        coverage_start:
+          latestRN?.coverage_start || new Date().toISOString().split("T")[0],
         coverage_end:
           latestRN?.coverage_end ||
           new Date(new Date().setFullYear(new Date().getFullYear() + 1))

@@ -3,7 +3,7 @@ from datetime import datetime
 
 from sqlmodel import Session, select
 
-from app.models.insurance.client import (
+from app.models.client import (
     Client,
     ClientCreate,
     ClientUpdate,

@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING, Optional
 from pydantic import ConfigDict
 from sqlalchemy import Numeric
 from sqlmodel import Field, Relationship, SQLModel
-from ..mixins import AuditMixin
-from ..enums import InvoiceStatus, ReceiptStatus
+from .mixins import AuditMixin
+from .enums import InvoiceStatus, ReceiptStatus
 
 if TYPE_CHECKING:
     from .client import Client

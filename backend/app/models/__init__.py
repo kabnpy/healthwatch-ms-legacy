@@ -1,4 +1,5 @@
-from .insurance.catalog import (
+import uuid
+from .catalog import (
     Insurer,
     InsurerBase,
     InsurerCreate,
@@ -12,7 +13,7 @@ from .insurance.catalog import (
     ProductsPublic,
     ProductUpdate,
 )
-from .insurance.client import (
+from .client import (
     Client,
     ClientBase,
     ClientCreate,
@@ -26,7 +27,7 @@ from .insurance.client import (
     CorrespondencesPublic,
     CorrespondenceUpdate,
 )
-from .insurance.financial import (
+from .financial import (
     Invoice,
     InvoiceBase,
     InvoiceBulkCreate,
@@ -49,7 +50,7 @@ from .insurance.financial import (
     ReceiptsPublic,
     ReceiptUpdate,
 )
-from .insurance.policy import (
+from .policy import (
     Claim,
     ClaimBase,
     ClaimCreate,
@@ -93,7 +94,6 @@ from .enums import (
     DocumentEntityType,
     DocumentType,
 )
-from .item import Item, ItemBase, ItemCreate, ItemPublic, ItemsPublic, ItemUpdate
 from .message import Message
 from .token import Token, TokenPayload
 from .user import (
@@ -111,12 +111,6 @@ from .user import (
 )
 
 __all__ = [
-    "Item",
-    "ItemBase",
-    "ItemCreate",
-    "ItemPublic",
-    "ItemsPublic",
-    "ItemUpdate",
     "Message",
     "Token",
     "TokenPayload",

@@ -2,10 +2,7 @@ import uuid
 from typing import TYPE_CHECKING
 
 from pydantic import EmailStr
-from sqlmodel import Field, Relationship, SQLModel
-
-if TYPE_CHECKING:
-    from .item import Item
+from sqlmodel import Field, SQLModel
 
 
 from enum import Enum
@@ -58,11 +55,6 @@ class UpdatePassword(SQLModel):
 class User(UserBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hashed_password: str
-    items: list["Item"] = Relationship(
-        back_populates="owner",
-        cascade_delete=True,
-        sa_relationship_kwargs={"foreign_keys": "[Item.owner_id]"},
-    )
 
 
 # Properties to return via API, id is always required

@@ -49,7 +49,9 @@ export const InvoiceTemplate = ({
             </div>
           </div>
           <div className="text-right flex flex-col items-end">
-            <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-1">Financial Year</p>
+            <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-1">
+              Financial Year
+            </p>
             <p className="text-xl font-black uppercase tracking-tighter text-black bg-black text-white px-3 py-1">
               {yearRange}
             </p>

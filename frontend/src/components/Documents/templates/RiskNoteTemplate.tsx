@@ -99,21 +99,25 @@ export const RiskNoteTemplate = ({
       content: (
         <div className="flex items-center gap-12 text-black font-bold uppercase tracking-tight">
           <span>
-            {startDate ? new Date(startDate).toLocaleDateString("en-GB", {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            }) : "N/A"}
+            {startDate
+              ? new Date(startDate).toLocaleDateString("en-GB", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })
+              : "N/A"}
           </span>
           <span className="text-slate-400 normal-case font-normal italic">
             To
           </span>
           <span>
-            {endDate ? new Date(endDate).toLocaleDateString("en-GB", {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            }) : "N/A"}
+            {endDate
+              ? new Date(endDate).toLocaleDateString("en-GB", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })
+              : "N/A"}
           </span>
         </div>
       ),
@@ -285,7 +289,9 @@ export const RiskNoteTemplate = ({
               </div>
             </div>
             <div className="text-right flex flex-col items-end">
-              <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-1">Transaction Type</p>
+              <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-1">
+                Transaction Type
+              </p>
               <p className="text-xl font-black uppercase tracking-tighter text-black bg-black text-white px-3 py-1">
                 {riskNote.transaction_type}
               </p>

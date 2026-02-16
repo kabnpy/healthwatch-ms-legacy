@@ -9,5 +9,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Backend Hardening & Navigation Refactor**
+- [~] **Track: Backend Hardening & Navigation Refactor**
 *Link: [./tracks/backend_hardening_refactor_20260216/](./tracks/backend_hardening_refactor_20260216/)*

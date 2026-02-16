@@ -6,8 +6,8 @@ from typing import Any, cast
 from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
 
-from app.models.insurance.catalog import Product
-from app.models.insurance.financial import (
+from app.models.catalog import Product
+from app.models.financial import (
     Invoice,
     InvoiceBulkCreate,
     InvoiceCreate,
@@ -19,7 +19,7 @@ from app.models.insurance.financial import (
     ReceiptAllocationCreate,
     ReceiptCreate,
 )
-from app.models.insurance.policy import Policy, RiskNote
+from app.models.policy import Policy, RiskNote
 
 # ==========================================
 # Invoice CRUD

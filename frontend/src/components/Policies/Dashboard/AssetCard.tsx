@@ -20,7 +20,7 @@ export function AssetCard({ policy }: AssetCardProps) {
 
   // Assuming details is a generic dict
   const riskDetails = (policy.current_risk_details as Record<string, any>) || {}
-  
+
   // Flatten details for display
   const flattenDetails = (obj: any): Record<string, any> => {
     let result: Record<string, any> = {}
@@ -35,7 +35,7 @@ export function AssetCard({ policy }: AssetCardProps) {
   }
 
   const details = flattenDetails(riskDetails)
-  const insuredValue = details["Value Kshs."] || details["sum_insured"] || 0
+  const insuredValue = details["Value Kshs."] || details.sum_insured || 0
 
   return (
     <Card className="h-full shadow-sm">
