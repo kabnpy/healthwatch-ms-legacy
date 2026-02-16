@@ -2,7 +2,7 @@ import uuid
 from datetime import date, timedelta
 from decimal import Decimal
 from sqlmodel import Session, select
-from app.models import Policy, RiskNote, PolicyStatus, RiskNoteStatus, PolicyCreate
+from app.models import Policy, RiskNote, PolicyStatus, RiskNoteStatus, PolicyCreate, TransactionType
 from app.services.policy import policy_service
 from tests.utils.utils import random_lower_string
 from tests.utils.client import create_random_client
@@ -39,7 +39,7 @@ def test_atomic_policy_creation(db: Session) -> None:
     assert policy.policy_number == policy_number
     assert len(policy.risk_notes) == 1
     rn = policy.risk_notes[0]
-    assert rn.transaction_type == "New Business"
+    assert rn.transaction_type == TransactionType.NEW_BUSINESS
     assert rn.policy_snapshot["risk_details"] == risk_details
     assert rn.coverage_start == start_date
     assert rn.coverage_end == end_date
@@ -85,5 +85,5 @@ def test_endorsement_creation(db: Session) -> None:
     
     assert policy.current_risk_note.id == endorsement_rn.id
     assert policy.current_risk_details == new_risk_details
-    assert endorsement_rn.transaction_type == "Endorsement"
+    assert endorsement_rn.transaction_type == TransactionType.ENDORSEMENT
     assert endorsement_rn.policy_snapshot["changes"]["description"] == "Increased vehicle value"

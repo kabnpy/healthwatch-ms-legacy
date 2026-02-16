@@ -31,9 +31,9 @@ def calculate_levies(net_premium: Decimal) -> dict[str, Any]:
     stamp_duty = Decimal("40.00")
     
     return {
-        "training_levy": float(training_levy),
-        "phcf": float(phcf),
-        "stamp_duty": float(stamp_duty)
+        "training_levy": training_levy,
+        "phcf": phcf,
+        "stamp_duty": stamp_duty
     }
 
 def calculate_commission(net_premium: Decimal, product: Product) -> Decimal:
