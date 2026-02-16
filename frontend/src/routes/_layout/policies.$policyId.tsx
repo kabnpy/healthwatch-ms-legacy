@@ -136,9 +136,53 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
 
         {/* TAB 1: OVERVIEW (The Digital File) */}
         <TabsContent value="overview" className="pt-6">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
-            {/* Main Column: The Document */}
-            <div className="lg:col-span-3 space-y-6">
+          <div className="flex flex-col gap-8 max-w-5xl mx-auto">
+            {/* Top Info & Actions Row */}
+            <div className="flex flex-col md:flex-row justify-between items-start gap-6 bg-muted/30 p-6 rounded-xl border border-border/50">
+              <div className="flex items-center gap-6">
+                <div>
+                  <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest mb-1">
+                    Coverage Status
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <div className="text-3xl font-bold tracking-tighter">{daysToExpiry}</div>
+                    <div className="text-[10px] text-muted-foreground uppercase leading-tight font-semibold">
+                      Days until<br />Expiry
+                    </div>
+                  </div>
+                </div>
+                <div className="w-32 h-1.5 bg-muted rounded-full overflow-hidden">
+                  <div
+                    className={`h-full ${daysToExpiry < 30 ? "bg-destructive" : "bg-blue-500"}`}
+                    style={{
+                      width: `${Math.min(100, (daysToExpiry / 365) * 100)}%`,
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 h-9 shadow-sm"
+                >
+                  <FileDown className="size-4" />
+                  Download PDF
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 h-9 shadow-sm"
+                >
+                  <Mail className="size-4" />
+                  Email to Client
+                </Button>
+              </div>
+            </div>
+
+            {/* Main Content: The Document */}
+            <div className="space-y-6">
               {(latestRiskNote as any)?.status === "Draft" && (
                 <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg flex items-center justify-between shadow-sm">
                   <div className="flex items-center gap-3">
@@ -166,7 +210,7 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
               )}
 
               {latestRiskNote ? (
-                <div className="border rounded-lg shadow-xl overflow-hidden bg-white dark:bg-zinc-950">
+                <div className="border rounded-lg shadow-2xl overflow-hidden bg-white dark:bg-zinc-950">
                   <div className="p-1 bg-muted/20 border-b text-[10px] uppercase tracking-widest text-center text-muted-foreground font-semibold">
                     Current Master Risk Note
                   </div>
@@ -183,56 +227,6 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
                   </p>
                 </div>
               )}
-            </div>
-
-            {/* Sidebar: Live Data & Quick Actions */}
-            <div className="lg:col-span-1 space-y-6">
-              {/* Live Expiry Sidebar Card */}
-              <Card className="border-l-4 border-l-blue-500 shadow-sm">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-xs font-bold uppercase text-muted-foreground flex items-center gap-2">
-                    <Clock className="size-3" />
-                    Status Tracker
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <div className="text-2xl font-bold">{daysToExpiry}</div>
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-tighter">
-                      Days until Expiry
-                    </p>
-                  </div>
-                  <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-                    <div
-                      className={`h-full ${daysToExpiry < 30 ? "bg-destructive" : "bg-blue-500"}`}
-                      style={{
-                        width: `${Math.min(100, (daysToExpiry / 365) * 100)}%`,
-                      }}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Document Quick Actions */}
-              <div className="space-y-2">
-                <h4 className="text-[10px] font-bold uppercase text-muted-foreground px-1 tracking-widest">
-                  Print / Export
-                </h4>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start gap-3 h-10 shadow-sm group"
-                >
-                  <FileDown className="size-4 text-muted-foreground group-hover:text-primary" />
-                  <span className="text-xs">Download PDF</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start gap-3 h-10 shadow-sm group"
-                >
-                  <Mail className="size-4 text-muted-foreground group-hover:text-primary" />
-                  <span className="text-xs">Email to Client</span>
-                </Button>
-              </div>
             </div>
           </div>
         </TabsContent>
