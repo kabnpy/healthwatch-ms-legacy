@@ -5,7 +5,7 @@ This plan details the steps to simplify the backend architecture, harden securit
 ## Phase 1: Backend Structural Refactor & Cleanup
 Flatten the backend directory structure and remove the unused `Item` module.
 
-- [~] Task: Remove `Item` database model and generate a cleanup migration.
+- [x] Task: Remove `Item` database model and generate a cleanup migration. (c104e99)
 - [ ] Task: Flatten `backend/app/models/` into a simpler structure.
 - [ ] Task: Flatten `backend/app/schemas/` into a simpler structure.
 - [ ] Task: Flatten `backend/app/crud/` into a simpler structure.
