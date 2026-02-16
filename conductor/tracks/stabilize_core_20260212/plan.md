@@ -28,4 +28,7 @@ This plan outlines the steps to stabilize and polish the HealthWatch MS core fun
 - [x] Task: Final Quality Audit (verified)
     - [x] Run full test suite (Pytest & Playwright).
     - [x] Execute final linting check (`ruff` and `biome`).
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Workflow Hardening' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'Phase 3: Workflow Hardening' (Protocol in workflow.md)
+
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions (c1cb4f4)
