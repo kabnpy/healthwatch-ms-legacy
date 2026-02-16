@@ -28,6 +28,7 @@ from .client import (
 )
 from .financial import (
     create_invoice,
+    create_invoice_bulk,
     create_invoice_line_item,
     create_receipt,
     create_receipt_allocation,

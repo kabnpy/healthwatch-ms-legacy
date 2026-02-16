@@ -28,7 +28,9 @@ import type { EnhancedPolicy, EnhancedRiskNote } from "@/types/insurance"
 
 // --- Route Definition ---
 
-export const Route = createFileRoute("/_layout/policies/$policyId")({
+export const Route = createFileRoute(
+  "/_layout/clients/$clientId/policies/$policyId",
+)({
   component: PolicyDashboard,
   errorComponent: ErrorComponent,
   loader: ({ params }) =>

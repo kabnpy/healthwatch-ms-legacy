@@ -1,15 +1,17 @@
-from fastapi.testclient import TestClient
-from sqlmodel import Session
 from datetime import date, timedelta
 
+from fastapi.testclient import TestClient
+from sqlmodel import Session
+
 from app.core.config import settings
+from tests.utils.client import create_random_client
 from tests.utils.insurance import (
     create_random_insurer,
-    create_random_product,
     create_random_policy,
+    create_random_product,
 )
-from tests.utils.client import create_random_client
 from tests.utils.utils import random_email, random_lower_string
+
 
 def test_create_insurer(
     client: TestClient, superuser_token_headers: dict[str, str]

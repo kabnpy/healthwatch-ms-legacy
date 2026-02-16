@@ -1,17 +1,19 @@
-import uuid
 from datetime import date, timedelta
 from decimal import Decimal
+
 from sqlmodel import Session
-from app.models import Policy, RiskNote, PolicyStatus, RiskNoteStatus
-from tests.utils.utils import random_lower_string
+
+from app.models import Policy, PolicyStatus, RiskNote, RiskNoteStatus
 from tests.utils.client import create_random_client
 from tests.utils.insurance import create_random_product
+from tests.utils.utils import random_lower_string
+
 
 def test_policy_computed_properties(db: Session) -> None:
     # 1. Setup base entities
     client = create_random_client(db)
     product = create_random_product(db)
-    
+
     # 2. Create Policy container
     policy = Policy(
         policy_number=random_lower_string(),
@@ -22,7 +24,7 @@ def test_policy_computed_properties(db: Session) -> None:
     db.add(policy)
     db.commit()
     db.refresh(policy)
-    
+
     # 3. Create historical RiskNote
     old_date = date.today() - timedelta(days=365)
     rn_old = RiskNote(
@@ -37,12 +39,12 @@ def test_policy_computed_properties(db: Session) -> None:
             "risk_details": {"vehicle": {"value": 1000000}}
         },
         net_premium=Decimal("10000.00"),
-        levies={},
+        taxes={},
         commission_amount=Decimal("1000.00"),
         total_amount=Decimal("10500.00"),
     )
     db.add(rn_old)
-    
+
     # 4. Create latest RiskNote
     new_date = date.today()
     rn_new = RiskNote(
@@ -57,14 +59,14 @@ def test_policy_computed_properties(db: Session) -> None:
             "risk_details": {"vehicle": {"value": 1200000}}
         },
         net_premium=Decimal("2000.00"),
-        levies={},
+        taxes={},
         commission_amount=Decimal("200.00"),
         total_amount=Decimal("2100.00"),
     )
     db.add(rn_new)
     db.commit()
     db.refresh(policy)
-    
+
     # 5. Verify computed properties
     assert policy.current_risk_note.id == rn_new.id
     assert policy.current_risk_details["vehicle"]["value"] == 1200000
@@ -79,7 +81,7 @@ def test_policy_has_no_duplicated_data(db: Session) -> None:
         client_id=client.id,
         status=PolicyStatus.ACTIVE,
     )
-    
+
     # These should NOT be in the __dict__ (which represents loaded columns)
     assert "risk_details" not in policy.__dict__
     assert "total_premium" not in policy.__dict__

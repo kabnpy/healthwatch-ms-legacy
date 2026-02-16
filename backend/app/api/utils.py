@@ -1,5 +1,6 @@
 from app.models import Policy, PolicyPublic
 
+
 def prepare_policy_public(policy: Policy) -> PolicyPublic:
     """
     Populate PolicyPublic with computed data from latest Risk Note.

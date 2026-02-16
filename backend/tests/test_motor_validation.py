@@ -1,12 +1,14 @@
-from sqlmodel import Session
-from app.models import Product
-from app import crud
-from tests.utils.utils import random_lower_string
-from tests.utils.client import create_random_client
 from datetime import date, timedelta
 
 from fastapi.testclient import TestClient
+from sqlmodel import Session
+
+from app import crud
 from app.core.config import settings
+from app.models import Product
+from tests.utils.client import create_random_client
+from tests.utils.utils import random_lower_string
+
 
 def test_motor_private_validation_fails_with_missing_fields(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
@@ -22,9 +24,9 @@ def test_motor_private_validation_fails_with_missing_fields(
     db.add(product)
     db.commit()
     db.refresh(product)
-    
+
     db_client = create_random_client(db)
-    
+
     # 2. Try to create policy with missing fields via API
     data = {
         "policy_number": random_lower_string(),
@@ -33,13 +35,13 @@ def test_motor_private_validation_fails_with_missing_fields(
         "coverage_end": str(date.today() + timedelta(days=365)),
         "risk_details": {"something": "irrelevant"} # Missing Reg No, Make, etc.
     }
-    
+
     response = client.post(
         f"{settings.API_V1_STR}/policies/",
         headers=superuser_token_headers,
         json=data,
     )
-    
+
     assert response.status_code == 400
     assert "Invalid risk details for Motor Private" in response.json()["detail"]
 
@@ -57,9 +59,9 @@ def test_motor_private_validation_passes_with_correct_fields(
     db.add(product)
     db.commit()
     db.refresh(product)
-    
+
     db_client = create_random_client(db)
-    
+
     # 2. Try to create policy with correct fields via API
     data = {
         "policy_number": random_lower_string(),
@@ -73,11 +75,11 @@ def test_motor_private_validation_passes_with_correct_fields(
             "Value Kshs.": 5000000.0
         }
     }
-    
+
     response = client.post(
         f"{settings.API_V1_STR}/policies/",
         headers=superuser_token_headers,
         json=data,
     )
-    
+
     assert response.status_code == 200

@@ -1,5 +1,5 @@
-import uuid
 from .catalog import (
+
     Insurer,
     InsurerBase,
     InsurerCreate,
@@ -27,6 +27,17 @@ from .client import (
     CorrespondencesPublic,
     CorrespondenceUpdate,
 )
+from .enums import (
+    ClaimEventType,
+    ClaimStatus,
+    DocumentEntityType,
+    DocumentType,
+    InvoiceStatus,
+    PolicyStatus,
+    ReceiptStatus,
+    RiskNoteStatus,
+    TransactionType,
+)
 from .financial import (
     Invoice,
     InvoiceBase,
@@ -50,6 +61,7 @@ from .financial import (
     ReceiptsPublic,
     ReceiptUpdate,
 )
+from .message import Message
 from .policy import (
     Claim,
     ClaimBase,
@@ -68,12 +80,12 @@ from .policy import (
     DocumentPublic,
     DocumentsPublic,
     DocumentUpdate,
+    EndorsementCreate,
     PoliciesPublic,
     Policy,
     PolicyBase,
     PolicyCreate,
     PolicyCreateExtended,
-    EndorsementCreate,
     PolicyPublic,
     PolicyUpdate,
     RiskNote,
@@ -83,18 +95,6 @@ from .policy import (
     RiskNotesPublic,
     RiskNoteUpdate,
 )
-from .enums import (
-    PolicyStatus,
-    TransactionType,
-    RiskNoteStatus,
-    InvoiceStatus,
-    ReceiptStatus,
-    ClaimStatus,
-    ClaimEventType,
-    DocumentEntityType,
-    DocumentType,
-)
-from .message import Message
 from .token import Token, TokenPayload
 from .user import (
     NewPassword,
@@ -211,3 +211,22 @@ __all__ = [
     "DocumentEntityType",
     "DocumentType",
 ]
+
+# Handle Late Binding for Pydantic/SQLModel
+# These must be called after all models are defined to resolve circular references
+
+InvoiceLineItemPublic.model_rebuild()
+InvoicePublic.model_rebuild()
+InvoicesPublic.model_rebuild()
+ReceiptPublic.model_rebuild()
+ReceiptsPublic.model_rebuild()
+PolicyPublic.model_rebuild()
+PoliciesPublic.model_rebuild()
+RiskNotePublic.model_rebuild()
+RiskNotesPublic.model_rebuild()
+ClaimPublic.model_rebuild()
+ClaimsPublic.model_rebuild()
+ClaimEventPublic.model_rebuild()
+ClaimEventsPublic.model_rebuild()
+DocumentPublic.model_rebuild()
+DocumentsPublic.model_rebuild()

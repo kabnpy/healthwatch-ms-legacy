@@ -1,20 +1,27 @@
 import uuid
 from datetime import date, timedelta
+
 from sqlmodel import Session
 
 from app import crud
 from app.models import (
-    Insurer, InsurerCreate,
-    Product, ProductCreate,
-    Policy, PolicyCreateExtended,
-    RiskNote, RiskNoteCreate,
-    Receipt, ReceiptCreate,
-    Invoice, InvoiceCreate,
-    Claim, ClaimCreate
+    Claim,
+    ClaimCreate,
+    Insurer,
+    InsurerCreate,
+    Invoice,
+    InvoiceCreate,
+    Policy,
+    PolicyCreateExtended,
+    Product,
+    ProductCreate,
+    Receipt,
+    ReceiptCreate,
 )
 from app.services.policy import policy_service
-from tests.utils.utils import random_email, random_lower_string
 from tests.utils.client import create_random_client
+from tests.utils.utils import random_email, random_lower_string
+
 
 def create_random_insurer(db: Session) -> Insurer:
     name = random_lower_string()
@@ -41,7 +48,7 @@ def create_random_policy(db: Session, client_id: uuid.UUID | None = None, produc
     if not product_id:
         product = create_random_product(db)
         product_id = product.id
-    
+
     policy_number = random_lower_string()
     policy_in = PolicyCreateExtended(
         policy_number=policy_number,
@@ -52,7 +59,7 @@ def create_random_policy(db: Session, client_id: uuid.UUID | None = None, produc
         risk_details={"info": "random details"}
     )
     return policy_service.create_policy(
-        session=db, 
+        session=db,
         policy_in=policy_in,
         risk_details=policy_in.risk_details,
         coverage_start=policy_in.coverage_start,
@@ -93,7 +100,7 @@ def create_random_claim(db: Session, policy_id: uuid.UUID | None = None) -> Clai
     if not policy_id:
         policy = create_random_policy(db)
         policy_id = policy.id
-    
+
     claim_number = random_lower_string()
     claim_in = ClaimCreate(
         claim_number=claim_number,

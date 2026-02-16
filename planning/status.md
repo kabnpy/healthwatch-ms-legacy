@@ -1,6 +1,11 @@
 # Project Status (Session End: 2026-02-06)
 
 ## Finished (Key Milestones)
+- **Policy Issuance Error Fix**: Resolved "Internal Server Error" (500) during policy creation. Fixed three root causes:
+    1. Added Pydantic validators to `MotorPrivateRiskDetails` to handle numeric strings with commas (e.g., "1,500,000").
+    2. Converted Decimal values to floats in `calculate_levies` to ensure JSON serializability for database storage.
+    3. Corrected field mapping in `PolicyService` from `levies` to `taxes` to align with the `RiskNote` model and database schema.
+    4. Wrapped premium calculation in `PolicyService` within a try-except block to return 400 Bad Request instead of 500 Internal Server Error for calculation failures.
 - **Motor Private Validation & Schema Refinement**: Removed the "Model" field from Motor Private schema, blueprints, and seed data. Improved `injectWizardData` in the frontend to resiliently handle both nested and flat input structures, ensuring proper mapping of wizard data to document blueprints.
 - **Motor Private Validation Fix**: Resolved policy creation failure by correcting `injectWizardData` in the frontend to handle nested blueprint structures. Updated the backend `MotorPrivateRiskDetails` schema and `PolicyService` to support flexible type coercion and nested data extraction.
 - **Risk Note & Invoice Refinement**: Significant enhancements to Risk Note generation, invoicing workflow, layout standardization, and dynamic cover display.

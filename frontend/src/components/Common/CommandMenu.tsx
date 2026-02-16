@@ -1,7 +1,6 @@
 import { useNavigate } from "@tanstack/react-router"
 import {
   CreditCard,
-  FileText,
   Library,
   Receipt as ReceiptIcon,
   Search,
@@ -102,8 +101,11 @@ export function CommandMenu() {
                 onSelect={() => {
                   runCommand(() =>
                     navigate({
-                      to: "/policies/$policyId",
-                      params: { policyId: policy.id },
+                      to: "/clients/$clientId/policies/$policyId",
+                      params: {
+                        clientId: policy.client_id,
+                        policyId: policy.id,
+                      },
                     }),
                   )
                 }}
@@ -192,12 +194,6 @@ export function CommandMenu() {
             >
               <Library className="mr-2 h-4 w-4" />
               <span>Insurance Carriers</span>
-            </CommandItem>
-            <CommandItem
-              onSelect={() => runCommand(() => navigate({ to: "/items" }))}
-            >
-              <FileText className="mr-2 h-4 w-4" />
-              <span>Risk Items</span>
             </CommandItem>
             <CommandItem
               onSelect={() => runCommand(() => navigate({ to: "/settings" }))}

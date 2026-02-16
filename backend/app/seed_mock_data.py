@@ -1,6 +1,5 @@
 import logging
-from datetime import date, timedelta
-from decimal import Decimal
+from datetime import date
 from typing import Any
 
 from sqlmodel import Session, select
@@ -10,9 +9,8 @@ from app.models import (
     Client,
     Insurer,
     Policy,
-    Product,
-    RiskNote,
     PolicyCreateExtended,
+    Product,
 )
 from app.services.policy import policy_service
 
@@ -129,7 +127,7 @@ def create_mock_data() -> None:
         policy = session.exec(
             select(Policy).where(Policy.policy_number == "010/070/1/012473/2017")
         ).first()
-        
+
         if not policy:
             start_date = date(2025, 8, 2)
             end_date = date(2026, 8, 1)
@@ -141,7 +139,7 @@ def create_mock_data() -> None:
                     "Value Kshs.": 4700000.0,
                 }
             }
-            
+
             policy_in = PolicyCreateExtended(
                 policy_number="010/070/1/012473/2017",
                 client_id=client.id,
@@ -152,7 +150,7 @@ def create_mock_data() -> None:
                 coverage_end=end_date,
                 risk_details=risk_details
             )
-            
+
             policy = policy_service.create_policy(
                 session=session,
                 policy_in=policy_in,
@@ -160,9 +158,9 @@ def create_mock_data() -> None:
                 coverage_start=start_date,
                 coverage_end=end_date
             )
-            
+
             logger.info(f"Created atomic policy and initial RiskNote: {policy.policy_number}")
-            
+
             # 4. ADD AN ENDORSEMENT
             # Increase value 3 months later
             new_risk_details = {
@@ -173,7 +171,7 @@ def create_mock_data() -> None:
                     "Value Kshs.": 5000000.0,
                 }
             }
-            
+
             endorsement_rn = policy_service.create_endorsement(
                 session=session,
                 policy_id=policy.id,

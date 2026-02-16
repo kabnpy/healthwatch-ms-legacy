@@ -9,15 +9,11 @@ from app.crud.policy import (
     get_risk_notes,
 )
 from app.crud.policy import (
-    create_risk_note as crud_create_risk_note,
-)
-from app.crud.policy import (
     delete_risk_note as crud_delete_risk_note,
 )
 from app.crud.policy import (
     update_risk_note as crud_update_risk_note,
 )
-from app.services.policy import policy_service
 from app.models import (
     Message,
     RiskNote,
@@ -26,6 +22,7 @@ from app.models import (
     RiskNotesPublic,
     RiskNoteUpdate,
 )
+from app.services.policy import policy_service
 
 router = APIRouter()
 

@@ -1,17 +1,18 @@
+from datetime import date
+
 from sqlmodel import Session
 
 from app import crud
 from app.models import (
-    InsurerCreate,
-    ProductCreate,
     ClientCreate,
+    InsurerCreate,
     PolicyCreate,
-    RiskNoteCreate,
-    ReceiptCreate,
+    ProductCreate,
     ReceiptAllocationCreate,
+    ReceiptCreate,
+    RiskNoteCreate,
 )
-from tests.utils.utils import random_lower_string, random_email
-from datetime import date
+from tests.utils.utils import random_email, random_lower_string
 
 
 def test_create_insurer(db: Session) -> None:
@@ -25,7 +26,7 @@ def test_create_insurer(db: Session) -> None:
 def test_create_product(db: Session) -> None:
     insurer_in = InsurerCreate(name=random_lower_string(), email=random_email())
     insurer = crud.create_insurer(session=db, insurer_in=insurer_in)
-    
+
     product_in = ProductCreate(
         insurer_id=insurer.id,
         name=random_lower_string(),
@@ -56,7 +57,7 @@ def test_create_policy(db: Session) -> None:
         phone=random_lower_string(),
     )
     client = crud.create_client(session=db, client_in=client_in)
-    
+
     policy_in = PolicyCreate(
         policy_number=random_lower_string(),
         client_id=client.id,
@@ -74,13 +75,13 @@ def test_create_risk_note(db: Session) -> None:
         phone=random_lower_string(),
     )
     client = crud.create_client(session=db, client_in=client_in)
-    
+
     policy_in = PolicyCreate(
         policy_number=random_lower_string(),
         client_id=client.id,
     )
     policy = crud.create_policy(session=db, policy_in=policy_in)
-    
+
     risk_note_in = RiskNoteCreate(
         risk_note_number=random_lower_string(),
         policy_id=policy.id,
@@ -88,7 +89,7 @@ def test_create_risk_note(db: Session) -> None:
         coverage_start=date(2024, 1, 1),
         coverage_end=date(2024, 12, 31),
         net_premium=1000.0,
-        levies={},
+        taxes={},
         commission_amount=100.0,
         total_amount=1100.0,
     )
@@ -127,13 +128,13 @@ def test_create_receipt_allocation(db: Session) -> None:
         phone=random_lower_string(),
     )
     client = crud.create_client(session=db, client_in=client_in)
-    
+
     policy_in = PolicyCreate(
         policy_number=random_lower_string(),
         client_id=client.id,
     )
     policy = crud.create_policy(session=db, policy_in=policy_in)
-    
+
     risk_note_in = RiskNoteCreate(
         risk_note_number=random_lower_string(),
         policy_id=policy.id,
@@ -141,12 +142,12 @@ def test_create_receipt_allocation(db: Session) -> None:
         coverage_start=date(2024, 1, 1),
         coverage_end=date(2024, 12, 31),
         net_premium=1000.0,
-        levies={},
+        taxes={},
         commission_amount=100.0,
         total_amount=1100.0,
     )
     risk_note = crud.create_risk_note(session=db, risk_note_in=risk_note_in)
-    
+
     receipt_in = ReceiptCreate(
         receipt_number=random_lower_string(),
         client_id=client.id,
@@ -156,10 +157,10 @@ def test_create_receipt_allocation(db: Session) -> None:
         reference=random_lower_string(),
     )
     receipt = crud.create_receipt(session=db, receipt_in=receipt_in)
-    
+
     # We need an invoice for the allocation
     from app.models.financial import Invoice
-    
+
     invoice = Invoice(
         invoice_number=random_lower_string(),
         client_id=client.id,

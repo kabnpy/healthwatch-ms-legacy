@@ -6,7 +6,7 @@ from typing import Any
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 
-from app.api.deps import CurrentUser, SessionDep, StaffUser
+from app.api.deps import SessionDep, StaffUser
 from app.core.storage import storage
 from app.crud.policy import (
     count_documents,

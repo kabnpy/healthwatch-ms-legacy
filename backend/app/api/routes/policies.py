@@ -4,6 +4,7 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 
 from app.api.deps import CurrentUser, SessionDep, StaffUser
+from app.api.utils import prepare_policy_public
 from app.crud.policy import (
     count_policies,
     get_policies,
@@ -16,19 +17,18 @@ from app.crud.policy import (
 from app.crud.policy import (
     update_policy as crud_update_policy,
 )
-from app.services.policy import policy_service
 from app.models import (
+    EndorsementCreate,
     Message,
     PoliciesPublic,
     Policy,
     PolicyCreateExtended,
     PolicyPublic,
     PolicyUpdate,
-    RiskNotesPublic,
     RiskNotePublic,
-    EndorsementCreate
+    RiskNotesPublic,
 )
-from app.api.utils import prepare_policy_public
+from app.services.policy import policy_service
 
 router = APIRouter()
 
@@ -49,7 +49,7 @@ def read_policies(
         session=session, skip=skip, limit=limit, client_id=client_id
     )
     return PoliciesPublic(
-        data=[prepare_policy_public(p) for p in policies], 
+        data=[prepare_policy_public(p) for p in policies],
         count=count
     )
 
@@ -82,7 +82,7 @@ def create_policy(
         )
 
     policy = policy_service.create_policy(
-        session=session, 
+        session=session,
         policy_in=policy_in,
         risk_details=policy_in.risk_details,
         coverage_start=policy_in.coverage_start,
@@ -94,9 +94,9 @@ def create_policy(
 
 @router.post("/{id}/endorsements", response_model=RiskNotePublic)
 def create_endorsement(
-    *, 
-    session: SessionDep, 
-    current_user: StaffUser, 
+    *,
+    session: SessionDep,
+    current_user: StaffUser,
     id: uuid.UUID,
     endorsement_in: EndorsementCreate
 ) -> Any:

@@ -1,11 +1,8 @@
 import uuid
-from typing import TYPE_CHECKING
+from enum import Enum
 
 from pydantic import EmailStr
 from sqlmodel import Field, SQLModel
-
-
-from enum import Enum
 
 
 class UserRole(str, Enum):

@@ -10,7 +10,8 @@ if TYPE_CHECKING:
     from .policy import Policy
 
 from sqlalchemy import JSON
-from ..mixins import AuditMixin
+
+from .mixins import AuditMixin
 
 # ==========================================
 # Client Models

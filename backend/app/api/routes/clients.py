@@ -1,9 +1,9 @@
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException
 
-from app.api.deps import CurrentUser, SessionDep, require_role, StaffUser
+from app.api.deps import CurrentUser, SessionDep, StaffUser
 from app.crud.client import (
     count_clients,
     get_client_by_kra_pin,
@@ -28,7 +28,6 @@ from app.models import (
     CorrespondencePublic,
     CorrespondencesPublic,
     Message,
-    UserRole,
 )
 
 router = APIRouter()

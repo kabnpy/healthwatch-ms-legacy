@@ -1,23 +1,23 @@
 import uuid
 from datetime import date, datetime
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, Optional, Dict, List
+from typing import TYPE_CHECKING, Any, Optional
 
-from pydantic import computed_field, ConfigDict
-from sqlalchemy import JSON, Numeric, Column
+from pydantic import ConfigDict, computed_field
+from sqlalchemy import JSON, Column, Numeric
 from sqlmodel import Field, Relationship, SQLModel
 
 from .catalog import ProductPublic
-from .mixins import AuditMixin
 from .enums import (
-    PolicyStatus,
-    TransactionType,
-    RiskNoteStatus,
-    ClaimStatus,
     ClaimEventType,
+    ClaimStatus,
     DocumentEntityType,
     DocumentType,
+    PolicyStatus,
+    RiskNoteStatus,
+    TransactionType,
 )
+from .mixins import AuditMixin
 
 if TYPE_CHECKING:
     from .catalog import Product
@@ -44,14 +44,14 @@ class PolicyCreate(PolicyBase):
 
 class PolicyCreateExtended(PolicyCreate):
     """Extended model for atomic creation via Service layer"""
-    risk_details: Dict[str, Any] = Field(default_factory=dict)
+    risk_details: dict[str, Any] = Field(default_factory=dict)
     coverage_start: date = Field(default_factory=date.today)
     coverage_end: date
 
 
 class EndorsementCreate(SQLModel):
     """Model for creating an endorsement"""
-    updated_risk_details: Dict[str, Any]
+    updated_risk_details: dict[str, Any]
     change_description: str
 
 
@@ -83,31 +83,31 @@ class Policy(PolicyBase, table=True):
         """Get most recent risk note (current state)"""
         # Sorted by effective_date DESC in relationship
         active_notes = [
-            rn for rn in self.risk_notes 
+            rn for rn in self.risk_notes
             if rn.status in [RiskNoteStatus.ISSUED, RiskNoteStatus.ACTIVE]
         ]
         return active_notes[0] if active_notes else None
-    
+
     @property
-    def current_risk_details(self) -> Dict[str, Any]:
+    def current_risk_details(self) -> dict[str, Any]:
         """Get current coverage details from latest risk note"""
         rn = self.current_risk_note
         return rn.policy_snapshot.get("risk_details", {}) if rn else {}
-    
+
     @property
     def current_premium(self) -> Decimal:
         """Get current total premium from latest risk note"""
         rn = self.current_risk_note
         return rn.total_amount if rn else Decimal("0")
-    
+
     @property
-    def current_term_start(self) -> Optional[date]:
+    def current_term_start(self) -> date | None:
         """Get current coverage period start"""
         rn = self.current_risk_note
         return rn.coverage_start if rn else None
-    
+
     @property
-    def current_term_end(self) -> Optional[date]:
+    def current_term_end(self) -> date | None:
         """Get current coverage period end"""
         rn = self.current_risk_note
         return rn.coverage_end if rn else None
@@ -116,15 +116,15 @@ class Policy(PolicyBase, table=True):
 class PolicyPublic(PolicyBase):
     id: uuid.UUID
     product: ProductPublic | None = None
-    
+
     @computed_field  # type: ignore
     @property
-    def current_risk_details(self) -> Dict[str, Any]:
+    def current_risk_details(self) -> dict[str, Any]:
         """Get current coverage details from latest risk note"""
         if not hasattr(self, "risk_notes") or not self.risk_notes:
             return {}
         active_notes = [
-            rn for rn in self.risk_notes 
+            rn for rn in self.risk_notes
             if rn.status in [RiskNoteStatus.ISSUED, RiskNoteStatus.ACTIVE]
         ]
         if not active_notes:
@@ -138,31 +138,31 @@ class PolicyPublic(PolicyBase):
         if not hasattr(self, "risk_notes") or not self.risk_notes:
             return Decimal("0")
         active_notes = [
-            rn for rn in self.risk_notes 
+            rn for rn in self.risk_notes
             if rn.status in [RiskNoteStatus.ISSUED, RiskNoteStatus.ACTIVE]
         ]
         return active_notes[0].total_amount if active_notes else Decimal("0")
 
     @computed_field  # type: ignore
     @property
-    def start_date(self) -> Optional[date]:
+    def start_date(self) -> date | None:
         """Backward compatibility for start_date"""
         if not hasattr(self, "risk_notes") or not self.risk_notes:
             return None
         active_notes = [
-            rn for rn in self.risk_notes 
+            rn for rn in self.risk_notes
             if rn.status in [RiskNoteStatus.ISSUED, RiskNoteStatus.ACTIVE]
         ]
         return active_notes[0].coverage_start if active_notes else None
 
     @computed_field  # type: ignore
     @property
-    def end_date(self) -> Optional[date]:
+    def end_date(self) -> date | None:
         """Backward compatibility for end_date"""
         if not hasattr(self, "risk_notes") or not self.risk_notes:
             return None
         active_notes = [
-            rn for rn in self.risk_notes 
+            rn for rn in self.risk_notes
             if rn.status in [RiskNoteStatus.ISSUED, RiskNoteStatus.ACTIVE]
         ]
         return active_notes[0].coverage_end if active_notes else None
@@ -235,9 +235,9 @@ class RiskNoteBase(AuditMixin, SQLModel):
 
 
 class RiskNoteCreate(RiskNoteBase):
-    taxes: Dict[str, Any] = Field(default_factory=dict)
-    policy_snapshot: Dict[str, Any] = Field(default_factory=dict)
-    special_clauses: List[str] = Field(default_factory=list)
+    taxes: dict[str, Any] = Field(default_factory=dict)
+    policy_snapshot: dict[str, Any] = Field(default_factory=dict)
+    special_clauses: list[str] = Field(default_factory=list)
 
 
 class RiskNoteUpdate(SQLModel):
@@ -251,19 +251,19 @@ class RiskNoteUpdate(SQLModel):
     coverage_start: date | None = None
     coverage_end: date | None = None
     net_premium: Decimal | None = None
-    taxes: Dict[str, Any] | None = None
+    taxes: dict[str, Any] | None = None
     commission_amount: Decimal | None = None
     total_amount: Decimal | None = None
-    policy_snapshot: Dict[str, Any] | None = None
-    special_clauses: List[str] | None = None
+    policy_snapshot: dict[str, Any] | None = None
+    special_clauses: list[str] | None = None
 
 
 class RiskNotePublic(RiskNoteBase):
     id: uuid.UUID
-    policy: Optional[PolicyPublic] = None
-    taxes: Dict[str, Any] = Field(default_factory=dict)
-    policy_snapshot: Dict[str, Any] = Field(default_factory=dict)
-    special_clauses: List[str] = Field(default_factory=list)
+    policy: PolicyPublic | None = None
+    taxes: dict[str, Any] = Field(default_factory=dict)
+    policy_snapshot: dict[str, Any] = Field(default_factory=dict)
+    special_clauses: list[str] = Field(default_factory=list)
 
 
 class RiskNote(RiskNoteBase, table=True):
@@ -273,11 +273,11 @@ class RiskNote(RiskNoteBase, table=True):
     invoice_line_items: list["InvoiceLineItem"] = Relationship(back_populates="risk_note")
     allocations: list["ReceiptAllocation"] = Relationship(back_populates="risk_note")
 
-    taxes: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    policy_snapshot: Dict[str, Any] = Field(
+    taxes: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    policy_snapshot: dict[str, Any] = Field(
         default_factory=dict, sa_column=Column(JSON)
     )
-    special_clauses: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    special_clauses: list[str] = Field(default_factory=list, sa_column=Column(JSON))
 
 
 class RiskNotesPublic(SQLModel):
@@ -379,28 +379,28 @@ class DocumentBase(SQLModel):
 class DocumentCreate(DocumentBase):
     entity_type: DocumentEntityType
     entity_id: uuid.UUID
-    doc_metadata: Dict[str, Any] = Field(default_factory=dict)
+    doc_metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class DocumentUpdate(SQLModel):
     document_type: DocumentType | None = None
     file_path: str | None = None
     mime_type: str | None = None
-    doc_metadata: Dict[str, Any] | None = None
+    doc_metadata: dict[str, Any] | None = None
 
 
 class DocumentPublic(DocumentBase):
     id: uuid.UUID
     entity_type: DocumentEntityType
     entity_id: uuid.UUID
-    doc_metadata: Dict[str, Any] = Field(default_factory=dict)
+    doc_metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class Document(DocumentBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     entity_type: DocumentEntityType
     entity_id: uuid.UUID
-    doc_metadata: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    doc_metadata: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
 
 
 class DocumentsPublic(SQLModel):

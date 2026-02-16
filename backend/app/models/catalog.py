@@ -1,11 +1,12 @@
 import uuid
-from typing import TYPE_CHECKING, Any, Optional
 from decimal import Decimal
+from typing import TYPE_CHECKING, Any, Optional
 
 from pydantic import ConfigDict
 from sqlalchemy import JSON
 from sqlmodel import Field, Relationship, SQLModel
-from ..mixins import AuditMixin
+
+from .mixins import AuditMixin
 
 if TYPE_CHECKING:
     from .policy import Policy
@@ -105,13 +106,13 @@ class Product(ProductBase, table=True):
             risk_data = risk_details
             if "VEHICLE DETAILS" in risk_details:
                 risk_data = risk_details["VEHICLE DETAILS"]
-            
+
             # This will raise ValidationError if invalid
             validated = MotorPrivateRiskDetails(**risk_data)
             return {"VEHICLE DETAILS": validated.model_dump(by_alias=True)}
-        
+
         return risk_details
-        
+
     def calculate_premium(self, risk_details: dict[str, Any]) -> Decimal:
         """
         Calculate premium based on product pricing rules and risk details.
@@ -121,11 +122,11 @@ class Product(ProductBase, table=True):
             # Get value from nested or flat
             risk_data = risk_details.get("VEHICLE DETAILS", risk_details)
             value = float(risk_data.get("Value Kshs.", 0))
-            
+
             # Simple 3.25% with 15,000 minimum
             premium = max(15000.0, value * 0.0325)
             return Decimal(str(premium)).quantize(Decimal("0.01"))
-            
+
         return Decimal("0.00")
 
 

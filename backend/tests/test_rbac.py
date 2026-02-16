@@ -1,8 +1,8 @@
-import pytest
 from fastapi.testclient import TestClient
+
 from app.core.config import settings
-from tests.utils.utils import random_lower_string, random_email
-from app.models import UserRole
+from tests.utils.utils import random_email, random_lower_string
+
 
 def test_viewer_cannot_create_client(
     client: TestClient, normal_user_token_headers: dict[str, str]
@@ -37,7 +37,7 @@ def test_viewer_cannot_delete_client(
         json=data,
     )
     client_id = r.json()["id"]
-    
+
     # Delete as VIEWER
     response = client.delete(
         f"{settings.API_V1_STR}/clients/{client_id}",
