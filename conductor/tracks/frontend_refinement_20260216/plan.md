@@ -24,7 +24,7 @@ Enforce visual consistency and refine interface communication.
 
 - [x] Task: Audit and update action labels (buttons/links) in `NewBusinessWizard` and `EndorsementFlow`. (ba64dd9)
 - [x] Task: Refine feedback messages and toasts for a "Direct & Clear" tone across all modules. (5e48900)
-- [ ] Task: Audit Shadcn/UI component usage (Cards, Tables, Dialogs) for consistent background and border treatments.
+- [x] Task: Audit Shadcn/UI component usage (Cards, Tables, Dialogs) for consistent background and border treatments. (e6ea629)
 - [ ] Task: Standardize spacing and typographic hierarchy in the `Client Hub` and `Insurance Dashboard`.
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Component & Copy Audit' (Protocol in workflow.md)
 
