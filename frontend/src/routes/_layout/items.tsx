@@ -55,11 +55,13 @@ function ItemsTable() {
 
 function Items() {
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col gap-8">
+      <div className="flex items-center justify-between border-b pb-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Items</h1>
-          <p className="text-muted-foreground">Create and manage your items</p>
+          <h1 className="text-4xl font-black tracking-tighter">Items</h1>
+          <p className="text-sm text-muted-foreground uppercase tracking-widest font-bold">
+            Asset Inventory Management
+          </p>
         </div>
         <AddItem />
       </div>
