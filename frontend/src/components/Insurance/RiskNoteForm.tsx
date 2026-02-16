@@ -323,10 +323,11 @@ export const RiskNoteForm = ({
             type="submit"
             loading={updateRiskNote.isPending}
             disabled={!riskNoteId}
+            className="font-bold"
           >
             {form.watch("status") === "Active"
-              ? "Finalize & Issue"
-              : "Save Changes"}
+              ? "Issue Risk Note"
+              : "Save Draft Changes"}
           </LoadingButton>
         </div>
       </form>

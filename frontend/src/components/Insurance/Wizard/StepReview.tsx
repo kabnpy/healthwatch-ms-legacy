@@ -146,9 +146,9 @@ export function StepReview({
         <LoadingButton
           onClick={onIssue}
           loading={isSubmitting}
-          className="bg-blue-700 hover:bg-blue-800"
+          className="bg-blue-700 hover:bg-blue-800 h-10 px-8 font-bold"
         >
-          Confirm & Issue Policy
+          Issue Policy
         </LoadingButton>
       </div>
     </div>
