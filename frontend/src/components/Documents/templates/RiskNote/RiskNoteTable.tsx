@@ -116,14 +116,14 @@ export const RiskNoteTable = ({
             {Object.entries(value).map(([k, v]) => (
               <tr
                 key={k}
-                className="border-b border-black/5 last:border-0 group/row"
+                className="group/row"
               >
-                <td className="py-1 pr-4 w-1/3 align-top">
-                  <span className="text-[11px] uppercase font-bold text-slate-500">
-                    {k.replace(/_/g, " ")}:
+                <td className="py-1.5 pr-4 w-1/3 align-top">
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground/60 tracking-wider">
+                    {k.replace(/_/g, " ")}
                   </span>
                 </td>
-                <td className="py-1 align-top">
+                <td className="py-1.5 align-top">
                   <div className="flex items-center gap-2">
                     <div className="flex-1">
                       {isEditable ? (
@@ -137,10 +137,10 @@ export const RiskNoteTable = ({
                           onChange={(e) =>
                             handleValueChange(section.name, k, e.target.value)
                           }
-                          className="w-full bg-transparent border-none text-[11px] focus:ring-1 focus:ring-primary rounded px-1 -ml-1 h-7"
+                          className="w-full bg-slate-50 border-none text-[11px] focus:ring-1 focus:ring-primary rounded px-2 h-7 font-medium"
                         />
                       ) : (
-                        <div className="text-[11px] text-black leading-tight font-medium">
+                        <div className="text-[11px] text-black leading-tight font-bold tracking-tight">
                           {renderValue(v)}
                         </div>
                       )}
@@ -188,19 +188,19 @@ export const RiskNoteTable = ({
 
   return (
     <div className="w-full">
-      <table className="w-full border-collapse border-x border-t border-black">
+      <table className="w-full border-collapse border-t-2 border-black">
         <tbody>
           {sections.map((section) => (
             <tr
               key={section.name}
-              className="border-b border-black group/section"
+              className="border-b border-black/10 group/section"
             >
               <th
                 scope="row"
-                className="py-3 px-4 w-[20%] align-top border-r border-black text-left"
+                className="py-4 px-0 w-[20%] align-top text-left"
               >
                 <div className="flex flex-col gap-2">
-                  <span className="text-[11px] font-black uppercase tracking-[0.15em] text-black">
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/70">
                     {section.name}
                   </span>
                   {isEditable && onRemoveSection && (
@@ -215,7 +215,7 @@ export const RiskNoteTable = ({
                   )}
                 </div>
               </th>
-              <td className="py-3 px-4 align-top">
+              <td className="py-4 px-6 align-top border-l border-black/5">
                 {renderContentCell(section)}
               </td>
             </tr>

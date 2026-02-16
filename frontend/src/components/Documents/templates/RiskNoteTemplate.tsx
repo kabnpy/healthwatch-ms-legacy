@@ -205,12 +205,12 @@ export const RiskNoteTemplate = ({
     })
 
     sections.push({
-      name: "ANNUAL PREMIUM",
+      name: "FINANCIAL SUMMARY",
       content: {
-        Premium: formatCurrency(riskNote.net_premium),
+        "Net Premium": formatCurrency(riskNote.net_premium),
         ...taxRows,
         "Total Amount Payable": (
-          <span className="text-[13px] font-black text-black">
+          <span className="text-xl font-black text-black tracking-tighter">
             {formatCurrency(riskNote.total_amount)}
           </span>
         ),
@@ -262,32 +262,38 @@ export const RiskNoteTemplate = ({
       )}
 
       <BaseDocument>
-        <div className="space-y-4">
+        <div className="space-y-8">
           {/* Document Header Info */}
-          <div className="flex justify-between items-start border-b-2 border-black pb-4">
+          <div className="flex justify-between items-start">
             <div>
-              <h1 className="text-2xl font-black uppercase tracking-tighter text-black">
+              <h1 className="text-5xl font-black uppercase tracking-tighter text-black">
                 Risk Note
               </h1>
-              <p className="text-[10px] text-slate-500 font-mono uppercase">
-                Ref: {riskNote.risk_note_number || "DRAFT"}
-              </p>
-            </div>
-            <div className="text-right">
-              <div
-                className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded border ${
-                  riskNote.status === "Draft"
-                    ? "bg-amber-100 text-amber-800 border-amber-200"
-                    : "bg-emerald-100 text-emerald-800 border-emerald-200"
-                }`}
-              >
-                {riskNote.status}
+              <div className="flex items-center gap-3 mt-2">
+                <p className="text-[11px] text-slate-500 font-mono uppercase bg-slate-100 px-2 py-0.5 rounded">
+                  Ref: {riskNote.risk_note_number || "DRAFT"}
+                </p>
+                <div
+                  className={`px-2 py-0.5 text-[9px] font-black uppercase tracking-widest rounded-full border ${
+                    riskNote.status === "Draft"
+                      ? "bg-amber-50 text-amber-700 border-amber-200"
+                      : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                  }`}
+                >
+                  {riskNote.status}
+                </div>
               </div>
+            </div>
+            <div className="text-right flex flex-col items-end">
+              <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-1">Transaction Type</p>
+              <p className="text-xl font-black uppercase tracking-tighter text-black bg-black text-white px-3 py-1">
+                {riskNote.transaction_type}
+              </p>
             </div>
           </div>
 
           {/* UNIFIED TABLE BODY */}
-          <div className="mt-2">
+          <div className="mt-4">
             <RiskNoteTable
               sections={tableSections}
               isEditable={isEditable}
