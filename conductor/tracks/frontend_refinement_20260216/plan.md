@@ -2,7 +2,7 @@
 
 This plan details the steps to transition the HealthWatch MS interface to a "Modern and Minimal" identity, focusing on typography, whitespace, and structural consistency.
 
-## Phase 1: Identity & Layout Foundation
+## Phase 1: Identity & Layout Foundation [checkpoint: 5e9e545]
 Establish the new design language and core structural changes.
 
 - [x] Task: Update `conductor/product-guidelines.md` to codify "Modern and Minimal" principles. (586b8ff)
