@@ -61,7 +61,7 @@ function Clients() {
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between border-b pb-6">
         <div>
-          <h1 className="text-4xl font-black tracking-tighter">Clients</h1>
+          <h1 className="text-4xl font-bold tracking-tight">Clients</h1>
           <p className="text-sm text-muted-foreground font-medium uppercase tracking-wider">
             Client Portfolio Management
           </p>

@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { Clock, FileDown, Mail } from "lucide-react"
+import { FileDown, Mail } from "lucide-react"
 import { Suspense, useCallback, useState } from "react"
 import { PoliciesService } from "@/client"
 import { DataTable } from "@/components/Common/DataTable"
@@ -7,14 +7,12 @@ import { DocumentManager } from "@/components/Common/DocumentManager"
 import { DocumentViewerModal } from "@/components/Common/DocumentViewerModal"
 import ErrorComponent from "@/components/Common/ErrorComponent"
 import { DocumentViewer } from "@/components/Documents/DocumentViewer"
-import { RiskNoteTemplate } from "@/components/Documents/templates/RiskNoteTemplate"
 import { RiskNoteForm } from "@/components/Insurance/RiskNoteForm"
 import PendingItems from "@/components/Pending/PendingItems"
 import { PolicyDashboardSkeleton } from "@/components/Policies/Dashboard/PolicyDashboardSkeleton"
 import { PolicyHeader } from "@/components/Policies/Dashboard/PolicyHeader"
 import { getColumns as getRiskNoteColumns } from "@/components/RiskNotes/columns"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Dialog,
   DialogContent,
@@ -26,6 +24,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useClient, usePolicyDashboard } from "@/hooks/useInsurance"
 import { queryClient } from "@/queryClient"
 import type { EnhancedPolicy, EnhancedRiskNote } from "@/types/insurance"
+import { RiskNoteTemplate } from "@/components/Documents/templates/RiskNoteTemplate"
 
 // --- Route Definition ---
 
@@ -145,7 +144,7 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
                     Coverage Status
                   </p>
                   <div className="flex items-center gap-2">
-                    <div className="text-3xl font-bold tracking-tighter">{daysToExpiry}</div>
+                    <div className="text-3xl font-bold tracking-tight">{daysToExpiry}</div>
                     <div className="text-[10px] text-muted-foreground uppercase leading-tight font-semibold">
                       Days until<br />Expiry
                     </div>

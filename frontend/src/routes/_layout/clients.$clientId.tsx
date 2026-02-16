@@ -50,7 +50,7 @@ function ClientHubContent({ clientId }: { clientId: string }) {
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between border-b pb-6">
         <div>
-          <h1 className="text-4xl font-black tracking-tighter">{client.name}</h1>
+          <h1 className="text-4xl font-bold tracking-tight">{client.name}</h1>
           <p className="text-sm text-muted-foreground uppercase tracking-widest font-bold">
             {client.client_type} &bull; Client Hub
           </p>
