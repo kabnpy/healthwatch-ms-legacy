@@ -223,8 +223,8 @@ export const AddPolicy = ({ clientId }: AddPolicyProps) => {
               >
                 Cancel
               </Button>
-              <LoadingButton type="submit" loading={createPolicy.isPending}>
-                Save Policy
+              <LoadingButton type="submit" loading={createPolicy.isPending} className="font-bold">
+                Create Policy
               </LoadingButton>
             </div>
           </form>
