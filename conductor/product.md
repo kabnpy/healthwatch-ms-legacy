@@ -18,5 +18,5 @@ HealthWatch MS is a high-performance Insurance Management System designed for mi
 - **Integrated Invoicing:** The Risk Note doubles as a Debit Note, providing valid tax invoice generation directly from policy data. Access to these financial mutations is restricted via **Simplified RBAC** (Staff vs. Viewer).
 
 ## 4. Immediate Roadmap Focus
-1. **Stabilization & Refinement:** Hardening the base functionality and resolving UI/Type inconsistencies to reach a "shippable" state.
-2. **Endorsement Flow:** Implementing mid-term policy modifications, including delta calculations and pro-rata adjustments.
+1. **Endorsement Flow:** Implementing mid-term policy modifications, including automated premium delta calculation and historical state tracking.
+2. **Renewals & Cancellations:** Extending the transactional engine to handle policy lifecycle events beyond new business.ng delta calculations and pro-rata adjustments.
