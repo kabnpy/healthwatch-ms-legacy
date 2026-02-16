@@ -32,3 +32,4 @@ This plan outlines the steps to stabilize and polish the HealthWatch MS core fun
 
 ## Phase: Review Fixes
 - [x] Task: Apply review suggestions (c1cb4f4)
+- [x] Task: Fix broken migrations and sync schema (b49aa86)
