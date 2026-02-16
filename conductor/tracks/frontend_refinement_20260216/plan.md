@@ -11,7 +11,7 @@ Establish the new design language and core structural changes.
 - [x] Task: Implement a global `Breadcrumbs` component to support layered navigation. (verified)
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Identity & Layout Foundation' (verified)
 
-## Phase 2: Professional Document Redesign
+## Phase 2: Professional Document Redesign [checkpoint: 030d206]
 Standardize and polish the output templates for Risk Notes and Invoices.
 
 - [x] Task: Redesign `frontend/src/components/Documents/templates/RiskNoteTemplate.tsx` using a professional grid-based layout. (1820219)
@@ -19,7 +19,7 @@ Standardize and polish the output templates for Risk Notes and Invoices.
 - [x] Task: Audit and standardize border, divider, and typography styles across all document templates. (1820219)
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Professional Document Redesign' (verified)
 
-## Phase 3: Component & Copy Audit
+## Phase 3: Component & Copy Audit [checkpoint: 030d206]
 Enforce visual consistency and refine interface communication.
 
 - [x] Task: Audit and update action labels (buttons/links) in `NewBusinessWizard` and `EndorsementFlow`. (ba64dd9)
