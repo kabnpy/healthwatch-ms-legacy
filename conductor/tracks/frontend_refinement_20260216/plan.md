@@ -14,9 +14,9 @@ Establish the new design language and core structural changes.
 ## Phase 2: Professional Document Redesign
 Standardize and polish the output templates for Risk Notes and Invoices.
 
-- [ ] Task: Redesign `frontend/src/components/Documents/templates/RiskNoteTemplate.tsx` using a professional grid-based layout.
-- [ ] Task: Redesign `frontend/src/components/Documents/templates/InvoiceTemplate.tsx` to align with the Risk Note aesthetic.
-- [ ] Task: Audit and standardize border, divider, and typography styles across all document templates.
+- [x] Task: Redesign `frontend/src/components/Documents/templates/RiskNoteTemplate.tsx` using a professional grid-based layout. (1820219)
+- [x] Task: Redesign `frontend/src/components/Documents/templates/InvoiceTemplate.tsx` to align with the Risk Note aesthetic. (1820219)
+- [x] Task: Audit and standardize border, divider, and typography styles across all document templates. (1820219)
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Professional Document Redesign' (Protocol in workflow.md)
 
 ## Phase 3: Component & Copy Audit
