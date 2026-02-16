@@ -138,7 +138,7 @@ export const RiskNoteForm = ({
       { id: riskNoteId, data: payload as any },
       {
         onSuccess: () => {
-          showSuccessToast("Risk Note updated successfully")
+          showSuccessToast("Risk Note Updated")
           onSuccess?.()
         },
         onError: (err: Error) => {

@@ -84,7 +84,7 @@ export const AddPolicy = ({ clientId }: AddPolicyProps) => {
     }
     createPolicy.mutate(policyData as any, {
       onSuccess: () => {
-        showSuccessToast("Policy created successfully")
+        showSuccessToast("Policy Created")
         form.reset()
         setIsOpen(false)
       },

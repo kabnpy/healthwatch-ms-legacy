@@ -67,7 +67,7 @@ const EditInsurer = ({ insurer, onSuccess }: EditInsurerProps) => {
     mutationFn: (data: FormData) =>
       InsurersService.updateInsurer({ id: insurer.id, requestBody: data }),
     onSuccess: () => {
-      showSuccessToast("Insurer updated successfully")
+      showSuccessToast("Insurer Updated")
       setIsOpen(false)
       onSuccess()
     },

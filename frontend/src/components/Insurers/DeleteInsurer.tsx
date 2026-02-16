@@ -33,7 +33,7 @@ const DeleteInsurer = ({ id, onSuccess }: DeleteInsurerProps) => {
   const mutation = useMutation({
     mutationFn: () => InsurersService.deleteInsurer({ id: id }),
     onSuccess: () => {
-      showSuccessToast("The insurer was deleted successfully")
+      showSuccessToast("Insurer Removed")
       setIsOpen(false)
       onSuccess()
     },

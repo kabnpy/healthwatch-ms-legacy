@@ -62,7 +62,7 @@ const AddInsurer = () => {
     mutationFn: (data: InsurerCreate) =>
       InsurersService.createInsurer({ requestBody: data }),
     onSuccess: () => {
-      showSuccessToast("Insurer created successfully")
+      showSuccessToast("Insurer Created")
       setIsOpen(false)
       form.reset()
     },

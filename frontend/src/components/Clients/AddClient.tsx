@@ -24,7 +24,7 @@ export const AddClient = () => {
   const onSubmit = (data: ClientCreate) => {
     createClient.mutate(data, {
       onSuccess: () => {
-        showSuccessToast("Client created successfully")
+        showSuccessToast("Client Created")
         setIsOpen(false)
       },
       onError: (err: Error) => {

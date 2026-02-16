@@ -134,7 +134,7 @@ export function NewPolicyWizard({
         coverage_end: endDate,
       } as any)
 
-      showSuccessToast("Policy Issued Successfully!")
+      showSuccessToast("Policy Issued")
       onSuccess?.()
       onClose()
     } catch (err: any) {
