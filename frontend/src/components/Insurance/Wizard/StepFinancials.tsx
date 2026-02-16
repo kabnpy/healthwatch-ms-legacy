@@ -148,7 +148,7 @@ export function StepFinancials({
         <div className="space-y-8">
           {/* Inputs Section */}
           <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-4">
               {!isPA && (
                 <FormField
                   control={form.control as any}
@@ -192,7 +192,7 @@ export function StepFinancials({
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 border-t pt-4">
               <FormField
                 control={form.control as any}
                 name="financials.startDate"
@@ -238,7 +238,7 @@ export function StepFinancials({
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border rounded-md p-4 bg-muted/10">
+                <div className="space-y-3 border rounded-md p-4 bg-muted/10">
                   <FormField
                     control={form.control as any}
                     name="extensions.pvt"
@@ -320,7 +320,7 @@ export function StepFinancials({
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-6">
               <div className="space-y-3">
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-slate-400">
@@ -369,7 +369,7 @@ export function StepFinancials({
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-4 border-t border-slate-800 pt-4">
                 <div className="bg-slate-800/50 p-3 rounded space-y-2">
                   <div className="flex justify-between text-xs">
                     <span className="text-slate-400">Training Levy (0.2%)</span>

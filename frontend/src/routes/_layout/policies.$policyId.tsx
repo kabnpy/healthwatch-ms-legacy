@@ -272,7 +272,7 @@ function PolicyDashboardContent({ policyId }: { policyId: string }) {
 
       {/* Risk Note Form Dialog (Renewals/Endorsements) */}
       <Dialog open={riskNoteFormOpen} onOpenChange={setRiskNoteFormOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {transactionType} for Policy {policy.policy_number}

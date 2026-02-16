@@ -158,7 +158,7 @@ export const RiskNoteForm = ({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit as any)} className="space-y-6">
-        <div className="grid grid-cols-2 gap-4 bg-muted/30 p-4 rounded-lg">
+        <div className="space-y-4 bg-muted/30 p-4 rounded-lg">
           <FormField
             control={form.control as any}
             name="transaction_type"
@@ -245,7 +245,7 @@ export const RiskNoteForm = ({
           <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground border-b pb-1">
             Risk Details ({policy?.product?.class_of_insurance})
           </h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             {productDetails
               .filter(
                 (f: any) =>
@@ -285,7 +285,7 @@ export const RiskNoteForm = ({
           <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground border-b pb-1">
             Financials
           </h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-4">
             <FormField
               control={form.control as any}
               name="net_premium"

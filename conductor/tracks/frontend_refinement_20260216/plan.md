@@ -17,7 +17,7 @@ Standardize and polish the output templates for Risk Notes and Invoices.
 - [x] Task: Redesign `frontend/src/components/Documents/templates/RiskNoteTemplate.tsx` using a professional grid-based layout. (1820219)
 - [x] Task: Redesign `frontend/src/components/Documents/templates/InvoiceTemplate.tsx` to align with the Risk Note aesthetic. (1820219)
 - [x] Task: Audit and standardize border, divider, and typography styles across all document templates. (1820219)
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Professional Document Redesign' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Professional Document Redesign' (verified)
 
 ## Phase 3: Component & Copy Audit
 Enforce visual consistency and refine interface communication.
@@ -26,7 +26,7 @@ Enforce visual consistency and refine interface communication.
 - [x] Task: Refine feedback messages and toasts for a "Direct & Clear" tone across all modules. (5e48900)
 - [x] Task: Audit Shadcn/UI component usage (Cards, Tables, Dialogs) for consistent background and border treatments. (e6ea629)
 - [x] Task: Standardize spacing and typographic hierarchy in the `Client Hub` and `Insurance Dashboard`. (bb9c631)
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Component & Copy Audit' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Component & Copy Audit' (verified)
 
 ## Phase 4: Final Verification & Quality Gate
 Ensure the entire system adheres to the new standards without regressions.

@@ -96,45 +96,44 @@ export const ClientForm = ({
         onSubmit={form.handleSubmit(handleFormSubmit)}
         className="space-y-4"
       >
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="client_type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Client Type</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="Individual">Individual</SelectItem>
-                    <SelectItem value="Corporate">Corporate</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="kra_pin"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>KRA PIN</FormLabel>
+        <FormField
+          control={form.control}
+          name="client_type"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Client Type</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+              >
                 <FormControl>
-                  <Input placeholder="A00..." {...field} />
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
                 </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+                <SelectContent>
+                  <SelectItem value="Individual">Individual</SelectItem>
+                  <SelectItem value="Corporate">Corporate</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="kra_pin"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>KRA PIN</FormLabel>
+              <FormControl>
+                <Input placeholder="A00..." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}
@@ -150,40 +149,39 @@ export const ClientForm = ({
           )}
         />
 
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input
-                    type="email"
-                    placeholder="client@example.com"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="phone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Phone Number</FormLabel>
-                <FormControl>
-                  <Input placeholder="07..." {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input
+                  type="email"
+                  placeholder="client@example.com"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-        <div className="grid grid-cols-3 gap-4">
+        <FormField
+          control={form.control}
+          name="phone"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Phone Number</FormLabel>
+              <FormControl>
+                <Input placeholder="07..." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="grid grid-cols-3 gap-4 border-t pt-4">
           <FormField
             control={form.control}
             name="postal_number"
