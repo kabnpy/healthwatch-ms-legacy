@@ -22,7 +22,7 @@ Standardize and polish the output templates for Risk Notes and Invoices.
 ## Phase 3: Component & Copy Audit
 Enforce visual consistency and refine interface communication.
 
-- [ ] Task: Audit and update action labels (buttons/links) in `NewBusinessWizard` and `EndorsementFlow`.
+- [x] Task: Audit and update action labels (buttons/links) in `NewBusinessWizard` and `EndorsementFlow`. (ba64dd9)
 - [ ] Task: Refine feedback messages and toasts for a "Direct & Clear" tone across all modules.
 - [ ] Task: Audit Shadcn/UI component usage (Cards, Tables, Dialogs) for consistent background and border treatments.
 - [ ] Task: Standardize spacing and typographic hierarchy in the `Client Hub` and `Insurance Dashboard`.
