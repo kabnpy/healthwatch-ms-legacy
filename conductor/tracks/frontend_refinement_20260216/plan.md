@@ -9,7 +9,7 @@ Establish the new design language and core structural changes.
 - [x] Task: Refactor `frontend/src/components/Common/AppSidebar.tsx` to use the `inset` variant. (23829a0)
 - [x] Task: Update main layout containers to remove 3-column constraints and implement a clean, single-content area. (9bf48b0)
 - [x] Task: Implement a global `Breadcrumbs` component to support layered navigation. (verified)
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Identity & Layout Foundation' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Identity & Layout Foundation' (verified)
 
 ## Phase 2: Professional Document Redesign
 Standardize and polish the output templates for Risk Notes and Invoices.
