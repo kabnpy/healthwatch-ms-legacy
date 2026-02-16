@@ -6,7 +6,7 @@ This plan details the steps to transition the HealthWatch MS interface to a "Mod
 Establish the new design language and core structural changes.
 
 - [x] Task: Update `conductor/product-guidelines.md` to codify "Modern and Minimal" principles. (586b8ff)
-- [ ] Task: Refactor `frontend/src/components/Common/AppSidebar.tsx` to use the `inset` variant.
+- [x] Task: Refactor `frontend/src/components/Common/AppSidebar.tsx` to use the `inset` variant. (23829a0)
 - [ ] Task: Update main layout containers to remove 3-column constraints and implement a clean, single-content area.
 - [ ] Task: Implement a global `Breadcrumbs` component to support layered navigation.
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Identity & Layout Foundation' (Protocol in workflow.md)
