@@ -22,7 +22,7 @@ Resolve the 401 Unauthorized errors and improve the testing strategy.
 - [x] Task: Verify 80%+ coverage for all modified security and policy modules. (b1757b2)
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Security Hardening & Bug Fixes' (b1757b2) (Protocol in workflow.md)
 
-## Phase 3: Frontend Route & Navigation Refactor
+## Phase 3: Frontend Route & Navigation Refactor [checkpoint: a312de2]
 Nest the policy dashboard and remove `Item` references from the UI.
 
 - [x] Task: Refactor frontend routing to nest Policy views under Client routes (`/clients/$clientId/policies/$policyId`). (3e92202)
