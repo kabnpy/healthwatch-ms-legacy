@@ -25,10 +25,10 @@ Resolve the 401 Unauthorized errors and improve the testing strategy.
 ## Phase 3: Frontend Route & Navigation Refactor
 Nest the policy dashboard and remove `Item` references from the UI.
 
-- [ ] Task: Refactor frontend routing to nest Policy views under Client routes (`/clients/$clientId/policies/$policyId`).
-- [ ] Task: Update the `AppSidebar` to remove the "Items" link and improve navigation labels.
-- [ ] Task: Delete all `Item` specific components, hooks, and pages.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Frontend Route & Navigation Refactor' (Protocol in workflow.md)
+- [x] Task: Refactor frontend routing to nest Policy views under Client routes (`/clients/$clientId/policies/$policyId`). (3e92202)
+- [x] Task: Update the `AppSidebar` to remove the "Items" link and improve navigation labels. (3e92202)
+- [x] Task: Delete all `Item` specific components, hooks, and pages. (0388720)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Frontend Route & Navigation Refactor' (0388720) (Protocol in workflow.md)
 
 ## Phase 4: Integration & Final Polish
 Regenerate the API client and resolve discrepancies.
