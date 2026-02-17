@@ -12,7 +12,7 @@ Flatten the backend directory structure and remove the unused `Item` module.
 - [x] Task: Remove `Item` CRUD logic and API routes. (bd500d8)
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Backend Structural Refactor & Cleanup' (905840e) (Protocol in workflow.md)
 
-## Phase 2: Security Hardening & Bug Fixes
+## Phase 2: Security Hardening & Bug Fixes [checkpoint: ea9a799]
 Resolve the 401 Unauthorized errors and improve the testing strategy.
 
 - [x] Task: Audit all API endpoints for consistent `SecurityDep` usage. (b1757b2)
