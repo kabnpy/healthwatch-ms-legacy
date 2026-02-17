@@ -4,18 +4,18 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 
 from app.api.deps import CurrentUser, SessionDep, StaffUser
-from app.crud.client import (
+from app.crud import (
     count_clients,
     get_client_by_kra_pin,
     get_clients,
 )
-from app.crud.client import (
+from app.crud import (
     create_client as crud_create_client,
 )
-from app.crud.client import (
+from app.crud import (
     delete_client as crud_delete_client,
 )
-from app.crud.client import (
+from app.crud import (
     update_client as crud_update_client,
 )
 from app.models import (
@@ -112,7 +112,7 @@ def read_client_correspondences(
     """
     Get correspondences for a client.
     """
-    from app.crud.client import count_correspondences, get_correspondences
+    from app.crud import count_correspondences, get_correspondences
 
     count = count_correspondences(session=session, client_id=id)
     correspondences = get_correspondences(session=session, client_id=id)
@@ -130,7 +130,7 @@ def create_client_correspondence(
     """
     Create new correspondence for a client.
     """
-    from app.crud.client import create_correspondence
+    from app.crud import create_correspondence
 
     correspondence_in.client_id = id
     correspondence = create_correspondence(

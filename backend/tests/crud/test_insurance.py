@@ -159,7 +159,7 @@ def test_create_receipt_allocation(db: Session) -> None:
     receipt = crud.create_receipt(session=db, receipt_in=receipt_in)
 
     # We need an invoice for the allocation
-    from app.models.financial import Invoice
+    from app.models import Invoice
 
     invoice = Invoice(
         invoice_number=random_lower_string(),

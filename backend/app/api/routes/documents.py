@@ -8,13 +8,13 @@ from fastapi.responses import FileResponse
 
 from app.api.deps import SessionDep, StaffUser
 from app.core.storage import storage
-from app.crud.policy import (
+from app.crud import (
     count_documents,
     create_document,
     delete_document,
     get_documents,
 )
-from app.models.policy import (
+from app.models import (
     DocumentCreate,
     DocumentPublic,
     DocumentsPublic,
@@ -104,7 +104,7 @@ def read_document_by_id(
     """
     Get document by ID.
     """
-    from app.models.policy import Document
+    from app.models import Document
 
     document = session.get(Document, id)
     if not document:
@@ -122,7 +122,7 @@ def remove_document(
     """
     Delete a document.
     """
-    from app.models.policy import Document
+    from app.models import Document
 
     document = session.get(Document, id)
     if not document:
@@ -145,7 +145,7 @@ def download_document(
     """
     Download/View a document.
     """
-    from app.models.policy import Document
+    from app.models import Document
 
     document = session.get(Document, id)
     if not document:

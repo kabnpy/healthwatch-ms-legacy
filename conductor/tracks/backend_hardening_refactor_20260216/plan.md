@@ -7,9 +7,9 @@ Flatten the backend directory structure and remove the unused `Item` module.
 
 - [x] Task: Remove `Item` database model and generate a cleanup migration. (c104e99)
 - [ ] Task: Flatten `backend/app/models/` into a simpler structure.
-- [ ] Task: Flatten `backend/app/schemas/` into a simpler structure.
-- [ ] Task: Flatten `backend/app/crud/` into a simpler structure.
-- [ ] Task: Remove `Item` CRUD logic and API routes.
+- [x] Task: Flatten `backend/app/schemas/` into a simpler structure. (9152534)
+- [x] Task: Flatten `backend/app/crud/` into a simpler structure. (9152534)
+- [x] Task: Remove `Item` CRUD logic and API routes. (9152534)
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Backend Structural Refactor & Cleanup' (Protocol in workflow.md)
 
 ## Phase 2: Security Hardening & Bug Fixes

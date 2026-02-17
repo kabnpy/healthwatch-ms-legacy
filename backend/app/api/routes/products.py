@@ -4,18 +4,18 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 
 from app.api.deps import CurrentUser, SessionDep, StaffUser
-from app.crud.catalog import (
+from app.crud import (
     count_products,
     get_product_by_name,
     get_products,
 )
-from app.crud.catalog import (
+from app.crud import (
     create_product as crud_create_product,
 )
-from app.crud.catalog import (
+from app.crud import (
     delete_product as crud_delete_product,
 )
-from app.crud.catalog import (
+from app.crud import (
     update_product as crud_update_product,
 )
 from app.models import (
