@@ -2,7 +2,7 @@
 
 This plan details the steps to simplify the backend architecture, harden security, and refactor the frontend navigation to be client-centric.
 
-## Phase 1: Backend Structural Refactor & Cleanup
+## Phase 1: Backend Structural Refactor & Cleanup [checkpoint: 905840e]
 Flatten the backend directory structure and remove the unused `Item` module.
 
 - [x] Task: Remove `Item` database model and generate a cleanup migration. (c104e99)
@@ -10,7 +10,7 @@ Flatten the backend directory structure and remove the unused `Item` module.
 - [x] Task: Flatten `backend/app/schemas/` into a simpler structure. (bd500d8)
 - [x] Task: Flatten `backend/app/crud/` into a simpler structure. (bd500d8)
 - [x] Task: Remove `Item` CRUD logic and API routes. (bd500d8)
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Backend Structural Refactor & Cleanup' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Backend Structural Refactor & Cleanup' (905840e) (Protocol in workflow.md)
 
 ## Phase 2: Security Hardening & Bug Fixes
 Resolve the 401 Unauthorized errors and improve the testing strategy.
