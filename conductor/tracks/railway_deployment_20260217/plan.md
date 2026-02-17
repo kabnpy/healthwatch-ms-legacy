@@ -31,7 +31,7 @@ Deploying and hardening the API service.
 Deploying and connecting the UI service.
 
 - [x] Task: Update the `VITE_API_URL` environment variable to point to the newly deployed backend public URL. (manual)
-- [~] Task: Push configuration changes to GitHub to trigger Railway frontend deployment.
+- [x] Task: Push configuration changes to GitHub to trigger Railway frontend deployment. (manual)
 - [ ] Task: Verify the frontend accessibility and successful API connection on the public Railway URL.
 - [ ] Task: Conductor - User Manual Verification 'Phase 4: Frontend Deployment & Verification' (Protocol in workflow.md)
 
