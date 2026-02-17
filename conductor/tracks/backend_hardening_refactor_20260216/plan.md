@@ -6,7 +6,7 @@ This plan details the steps to simplify the backend architecture, harden securit
 Flatten the backend directory structure and remove the unused `Item` module.
 
 - [x] Task: Remove `Item` database model and generate a cleanup migration. (c104e99)
-- [ ] Task: Flatten `backend/app/models/` into a simpler structure.
+- [x] Task: Flatten `backend/app/models/` into a simpler structure. (bd500d8)
 - [x] Task: Flatten `backend/app/schemas/` into a simpler structure. (bd500d8)
 - [x] Task: Flatten `backend/app/crud/` into a simpler structure. (bd500d8)
 - [x] Task: Remove `Item` CRUD logic and API routes. (bd500d8)
@@ -33,7 +33,7 @@ Nest the policy dashboard and remove `Item` references from the UI.
 ## Phase 4: Integration & Final Polish
 Regenerate the API client and resolve discrepancies.
 
-- [ ] Task: Regenerate the frontend API client (`npm run generate-client`).
+- [x] Task: Regenerate the frontend API client (`npm run generate-client`). (3e92202)
 - [ ] Task: Fix all TypeScript discrepancies across the frontend caused by backend structural changes.
 - [ ] Task: Execute final build check (`npm run build`) and linting for both stack layers.
 - [ ] Task: Conductor - User Manual Verification 'Phase 4: Integration & Final Polish' (Protocol in workflow.md)
