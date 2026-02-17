@@ -5,9 +5,9 @@ This plan details the steps to deploy the HealthWatch MS full-stack application 
 ## Phase 1: Project Setup & CLI Configuration [checkpoint: ]
 Initial setup and linking the local environment to Railway.
 
-- [ ] Task: Install and authenticate the Railway CLI on the development machine.
-- [ ] Task: Create a new Railway project using the Railway CLI.
-- [ ] Task: Link the local repository to the newly created Railway project.
+- [x] Task: Install and authenticate the Railway CLI on the development machine. (manual)
+- [x] Task: Create a new Railway project using the Railway CLI. (manual)
+- [x] Task: Link the local repository to the newly created Railway project. (manual)
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Project Setup & CLI Configuration' (Protocol in workflow.md)
 
 ## Phase 2: Database Provisioning & Configuration [checkpoint: ]

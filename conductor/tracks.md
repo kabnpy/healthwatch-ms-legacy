@@ -4,5 +4,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: railway_deployment_20260217**
+- [~] **Track: railway_deployment_20260217**
 *Link: [./tracks/railway_deployment_20260217/](./tracks/railway_deployment_20260217/)*
