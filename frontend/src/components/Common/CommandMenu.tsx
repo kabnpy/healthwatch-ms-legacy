@@ -1,7 +1,6 @@
 import { useNavigate } from "@tanstack/react-router"
 import {
   CreditCard,
-  FileText,
   Library,
   Receipt as ReceiptIcon,
   Search,
@@ -98,18 +97,26 @@ export function CommandMenu() {
             {policiesData?.data.map((policy) => (
               <CommandItem
                 key={policy.id}
-                value={policy.policy_number}
+                value={`${policy.policy_number} ${policy.display_name}`}
                 onSelect={() => {
                   runCommand(() =>
                     navigate({
-                      to: "/policies/$policyId",
-                      params: { policyId: policy.id },
+                      to: "/clients/$clientId/policies/$policyId",
+                      params: {
+                        clientId: policy.client_id,
+                        policyId: policy.id,
+                      },
                     }),
                   )
                 }}
               >
                 <Shield className="mr-2 h-4 w-4" />
-                <span>{policy.policy_number}</span>
+                <div className="flex flex-col">
+                  <span>{policy.display_name}</span>
+                  <span className="text-[10px] text-muted-foreground">
+                    {policy.policy_number}
+                  </span>
+                </div>
                 <CommandShortcut>{policy.status}</CommandShortcut>
               </CommandItem>
             ))}
@@ -173,22 +180,20 @@ export function CommandMenu() {
               <span>Browse All Clients</span>
             </CommandItem>
             <CommandItem
-              onSelect={() => runCommand(() => navigate({ to: "/catalog/products" }))}
+              onSelect={() =>
+                runCommand(() => navigate({ to: "/catalog/products" }))
+              }
             >
               <Shield className="mr-2 h-4 w-4" />
               <span>Product Catalog</span>
             </CommandItem>
             <CommandItem
-              onSelect={() => runCommand(() => navigate({ to: "/catalog/insurers" }))}
+              onSelect={() =>
+                runCommand(() => navigate({ to: "/catalog/insurers" }))
+              }
             >
               <Library className="mr-2 h-4 w-4" />
               <span>Insurance Carriers</span>
-            </CommandItem>
-            <CommandItem
-              onSelect={() => runCommand(() => navigate({ to: "/items" }))}
-            >
-              <FileText className="mr-2 h-4 w-4" />
-              <span>Risk Items</span>
             </CommandItem>
             <CommandItem
               onSelect={() => runCommand(() => navigate({ to: "/settings" }))}

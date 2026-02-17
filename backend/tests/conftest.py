@@ -8,21 +8,19 @@ from app.core.config import settings
 from app.core.db import engine, init_db
 from app.main import app
 from app.models import (
-    Item,
-    User,
-    Insurer,
-    Product,
+    Claim,
     Client,
     Correspondence,
+    Document,
+    Insurer,
     Invoice,
     InvoiceLineItem,
+    Policy,
+    Product,
     Receipt,
     ReceiptAllocation,
-    Policy,
-    RiskItem,
     RiskNote,
-    Claim,
-    PolicyDocument,
+    User,
 )
 from tests.utils.user import authentication_token_from_email
 from tests.utils.utils import get_superuser_token_headers
@@ -31,11 +29,12 @@ from tests.utils.utils import get_superuser_token_headers
 @pytest.fixture(scope="session", autouse=True)
 def db() -> Generator[Session, None, None]:
     with Session(engine) as session:
+        SQLModel.metadata.drop_all(engine)
         SQLModel.metadata.create_all(engine)
         init_db(session)
         yield session
         # Delete records in correct order to avoid foreign key constraint violations
-        statement = delete(PolicyDocument)
+        statement = delete(Document)
         session.execute(statement)
         statement = delete(Claim)
         session.execute(statement)
@@ -46,8 +45,6 @@ def db() -> Generator[Session, None, None]:
         statement = delete(Receipt)
         session.execute(statement)
         statement = delete(Invoice)
-        session.execute(statement)
-        statement = delete(RiskItem)
         session.execute(statement)
         statement = delete(RiskNote)
         session.execute(statement)
@@ -60,8 +57,6 @@ def db() -> Generator[Session, None, None]:
         statement = delete(Client)
         session.execute(statement)
         statement = delete(Insurer)
-        session.execute(statement)
-        statement = delete(Item)
         session.execute(statement)
         statement = delete(User)
         session.execute(statement)

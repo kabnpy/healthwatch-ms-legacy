@@ -3,19 +3,19 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException
 
-from app.api.deps import CurrentUser, SessionDep
-from app.crud.insurance.catalog import (
+from app.api.deps import CurrentUser, SessionDep, StaffUser
+from app.crud import (
     count_products,
     get_product_by_name,
     get_products,
 )
-from app.crud.insurance.catalog import (
+from app.crud import (
     create_product as crud_create_product,
 )
-from app.crud.insurance.catalog import (
+from app.crud import (
     delete_product as crud_delete_product,
 )
-from app.crud.insurance.catalog import (
+from app.crud import (
     update_product as crud_update_product,
 )
 from app.models import (
@@ -61,7 +61,7 @@ def read_product(session: SessionDep, _current_user: CurrentUser, id: uuid.UUID)
 
 @router.post("/", response_model=ProductPublic)
 def create_product(
-    *, session: SessionDep, _current_user: CurrentUser, product_in: ProductCreate
+    *, session: SessionDep, _current_user: StaffUser, product_in: ProductCreate
 ) -> Any:
     """
     Create new product.
@@ -83,7 +83,7 @@ def create_product(
 def update_product(
     *,
     session: SessionDep,
-    _current_user: CurrentUser,
+    _current_user: StaffUser,
     id: uuid.UUID,
     product_in: ProductUpdate,
 ) -> Any:
@@ -101,9 +101,7 @@ def update_product(
 
 
 @router.delete("/{id}", response_model=Message)
-def delete_product(
-    session: SessionDep, _current_user: CurrentUser, id: uuid.UUID
-) -> Any:
+def delete_product(session: SessionDep, _current_user: StaffUser, id: uuid.UUID) -> Any:
     """
     Delete a product.
     """

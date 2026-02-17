@@ -16,7 +16,6 @@ const routeConfig: Record<string, string> = {
   policies: "Policies",
   "risk-notes": "Risk Notes",
   documents: "Documents",
-  items: "Items",
 }
 
 export const useBreadcrumbs = () => {

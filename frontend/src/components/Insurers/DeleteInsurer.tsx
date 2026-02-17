@@ -33,17 +33,19 @@ const DeleteInsurer = ({ id, onSuccess }: DeleteInsurerProps) => {
   const mutation = useMutation({
     mutationFn: () => InsurersService.deleteInsurer({ id: id }),
     onSuccess: () => {
-      showSuccessToast("The insurer was deleted successfully")
+      showSuccessToast("Insurer Removed")
       setIsOpen(false)
       onSuccess()
     },
     onError: (err: any) => {
-        // Handle specific error if insurer has products
-        if (err.body?.detail?.includes("ForeignKeyConstraint")) {
-            showErrorToast("Cannot delete insurer because it has products associated with it.")
-        } else {
-            handleError.bind(showErrorToast)(err)
-        }
+      // Handle specific error if insurer has products
+      if (err.body?.detail?.includes("ForeignKeyConstraint")) {
+        showErrorToast(
+          "Cannot delete insurer because it has products associated with it.",
+        )
+      } else {
+        handleError.bind(showErrorToast)(err)
+      }
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["insurers"] })
@@ -69,8 +71,8 @@ const DeleteInsurer = ({ id, onSuccess }: DeleteInsurerProps) => {
           <DialogHeader>
             <DialogTitle>Delete Insurer</DialogTitle>
             <DialogDescription>
-              This insurer will be permanently deleted. Are you sure? You will not
-              be able to undo this action.
+              This insurer will be permanently deleted. Are you sure? You will
+              not be able to undo this action.
             </DialogDescription>
           </DialogHeader>
 

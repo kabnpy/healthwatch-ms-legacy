@@ -31,11 +31,13 @@ export function AllocationDialog({
     Record<string, number>
   >({})
 
-  const unallocated = (receipt as any).unallocated_amount ?? receipt.amount
+  const unallocated = Number(
+    (receipt as any).unallocated_amount ?? receipt.amount,
+  )
 
   // Filter only unpaid or partial invoices
   const pendingInvoices =
-    invoicesData?.data.filter((inv) => (inv.balance_due || 0) > 0) || []
+    invoicesData?.data.filter((inv) => Number(inv.balance_due || 0) > 0) || []
 
   const handleAllocate = async (invoiceId: string) => {
     const amount = allocationAmounts[invoiceId]
@@ -77,7 +79,7 @@ export function AllocationDialog({
       header: "Balance Due",
       cell: ({ row }) => (
         <span className="font-mono text-destructive">
-          KES {(row.original.balance_due || 0).toLocaleString()}
+          KES {Number(row.original.balance_due || 0).toLocaleString()}
         </span>
       ),
     },
@@ -91,7 +93,7 @@ export function AllocationDialog({
             className="w-24 h-8"
             placeholder="Amount"
             value={allocationAmounts[row.original.id] || ""}
-            max={Math.min(unallocated, row.original.balance_due || 0)}
+            max={Math.min(unallocated, Number(row.original.balance_due || 0))}
             onChange={(e) =>
               setAllocationAmounts((prev) => ({
                 ...prev,
@@ -121,7 +123,7 @@ export function AllocationDialog({
             <span>
               Receipt Total:{" "}
               <span className="font-bold text-foreground">
-                KES {receipt.amount.toLocaleString()}
+                KES {Number(receipt.amount).toLocaleString()}
               </span>
             </span>
             <span

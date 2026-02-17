@@ -39,22 +39,9 @@ export const columns: ColumnDef<ClientPublic>[] = [
   {
     accessorKey: "client_type",
     header: "Type",
-    cell: ({ row }) => {
-      const type = row.original.client_type
-      return (
-        <Badge variant={type === "Corporate" ? "default" : "secondary"}>
-          {type}
-        </Badge>
-      )
-    },
-  },
-  {
-    accessorKey: "contacts",
-    header: "Primary Contact",
-    cell: ({ row }) => {
-      const contacts = row.original.contacts as any[]
-      return contacts?.[0]?.name || "-"
-    },
+    cell: ({ row }) => (
+      <Badge variant="secondary">{row.original.client_type}</Badge>
+    ),
   },
   {
     accessorKey: "kra_pin",

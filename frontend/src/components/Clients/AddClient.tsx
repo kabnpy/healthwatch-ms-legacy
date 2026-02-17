@@ -24,7 +24,7 @@ export const AddClient = () => {
   const onSubmit = (data: ClientCreate) => {
     createClient.mutate(data, {
       onSuccess: () => {
-        showSuccessToast("Client created successfully")
+        showSuccessToast("Client Created")
         setIsOpen(false)
       },
       onError: (err: Error) => {
@@ -41,7 +41,7 @@ export const AddClient = () => {
           Add Client
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add New Client</DialogTitle>
           <DialogDescription>

@@ -1,20 +1,24 @@
-import { useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { zodResolver } from "@hookform/resolvers/zod"
+import {
+  useMutation,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { ArrowLeft, Save, Shield } from "lucide-react"
 import { Suspense } from "react"
-import { useForm, FormProvider } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
+import { FormProvider, useForm } from "react-hook-form"
 import { z } from "zod"
 
 import { ProductsService } from "@/client"
-import { queryClient } from "@/queryClient"
 import PendingItems from "@/components/Pending/PendingItems"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ProductForm } from "@/components/Products/ProductForm"
 import { SchemaBuilder } from "@/components/Products/SchemaBuilder"
-import useCustomToast from "@/hooks/useCustomToast"
+import { Button } from "@/components/ui/button"
 import { LoadingButton } from "@/components/ui/loading-button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import useCustomToast from "@/hooks/useCustomToast"
+import { queryClient } from "@/queryClient"
 import { handleError } from "@/utils"
 
 // --- Schema ---
@@ -73,7 +77,10 @@ function ProductDetailContent({ productId }: { productId: string }) {
 
   const mutation = useMutation({
     mutationFn: (data: ProductFormData) =>
-      ProductsService.updateProduct({ id: productId, requestBody: data as any }),
+      ProductsService.updateProduct({
+        id: productId,
+        requestBody: data as any,
+      }),
     onSuccess: () => {
       showSuccessToast("Product updated successfully")
       qClient.invalidateQueries({ queryKey: ["products"] })
@@ -89,58 +96,67 @@ function ProductDetailContent({ productId }: { productId: string }) {
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-4">
-        <Button variant="ghost" asChild className="mb-4 -ml-2 h-8 w-fit px-2 text-muted-foreground">
+        <Button
+          variant="ghost"
+          asChild
+          className="mb-4 -ml-2 h-8 w-fit px-2 text-muted-foreground"
+        >
           <Link to="/catalog/products">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Products
           </Link>
         </Button>
         <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-                <div className="bg-primary/10 p-2 rounded-lg">
-                    <Shield className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">{product.name}</h1>
-                    <p className="text-muted-foreground text-sm">
-                        {product.class_of_insurance} &bull; {product.insurer?.name || "No Insurer"}
-                    </p>
-                </div>
+          <div className="flex items-center gap-3">
+            <div className="bg-primary/10 p-2 rounded-lg">
+              <Shield className="h-6 w-6 text-primary" />
             </div>
-            <LoadingButton 
-                onClick={methods.handleSubmit(onSubmit as any)} 
-                loading={mutation.isPending}
-                className="gap-2"
-            >
-                <Save className="h-4 w-4" />
-                Save Changes
-            </LoadingButton>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">
+                {product.name}
+              </h1>
+              <p className="text-muted-foreground text-sm">
+                {product.class_of_insurance} &bull;{" "}
+                {product.insurer?.name || "No Insurer"}
+              </p>
+            </div>
+          </div>
+          <LoadingButton
+            onClick={methods.handleSubmit(onSubmit as any)}
+            loading={mutation.isPending}
+            className="gap-2"
+          >
+            <Save className="h-4 w-4" />
+            Save Changes
+          </LoadingButton>
         </div>
       </div>
 
       <FormProvider {...methods}>
         <Tabs defaultValue="general" className="w-full">
-            <TabsList>
-                <TabsTrigger value="general">General Settings</TabsTrigger>
-                <TabsTrigger value="schema">Form Schema</TabsTrigger>
-                <TabsTrigger value="pricing" disabled>Pricing Rules</TabsTrigger>
-            </TabsList>
-            <div className="mt-6">
-                <TabsContent value="general">
-                    <div className="max-w-2xl bg-white p-6 rounded-lg border">
-                        <ProductForm 
-                            onSubmit={onSubmit as any} 
-                            initialData={product}
-                            isLoading={mutation.isPending}
-                            onCancel={() => methods.reset()}
-                            useContext={true}
-                        />
-                    </div>
-                </TabsContent>
-                <TabsContent value="schema">
-                    <SchemaBuilder />
-                </TabsContent>
-            </div>
+          <TabsList>
+            <TabsTrigger value="general">General Settings</TabsTrigger>
+            <TabsTrigger value="schema">Form Schema</TabsTrigger>
+            <TabsTrigger value="pricing" disabled>
+              Pricing Rules
+            </TabsTrigger>
+          </TabsList>
+          <div className="mt-6">
+            <TabsContent value="general">
+              <div className="max-w-2xl bg-white p-6 rounded-lg border">
+                <ProductForm
+                  onSubmit={onSubmit as any}
+                  initialData={product}
+                  isLoading={mutation.isPending}
+                  onCancel={() => methods.reset()}
+                  useContext={true}
+                />
+              </div>
+            </TabsContent>
+            <TabsContent value="schema">
+              <SchemaBuilder />
+            </TabsContent>
+          </div>
         </Tabs>
       </FormProvider>
     </div>

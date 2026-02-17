@@ -12,20 +12,30 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { getPolicyDisplayName } from "@/utils"
 
 export const getColumns = (
   onView: (riskNote: RiskNotePublic) => void,
 ): ColumnDef<RiskNotePublic>[] => [
   {
-    accessorKey: "invoice_number",
-    header: "Ref / Invoice #",
+    accessorKey: "display_name",
+    header: "Policy / Cover",
+    cell: ({ row }) => (
+      <span className="font-medium text-foreground">
+        {getPolicyDisplayName(row.original)}
+      </span>
+    ),
+  },
+  {
+    accessorKey: "risk_note_number",
+    header: "Risk Note #",
     cell: ({ row }) => (
       <button
         type="button"
         onClick={() => onView(row.original)}
         className="font-mono font-medium text-primary hover:underline"
       >
-        {row.original.invoice_number || "Draft"}
+        {row.original.risk_note_number || "Draft"}
       </button>
     ),
   },
@@ -45,7 +55,7 @@ export const getColumns = (
         <div className="flex flex-col">
           <span className="font-bold">
             KES{" "}
-            {row.original.total_amount.toLocaleString(undefined, {
+            {Number(row.original.total_amount).toLocaleString(undefined, {
               minimumFractionDigits: 2,
             })}
           </span>

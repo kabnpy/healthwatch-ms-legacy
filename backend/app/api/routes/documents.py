@@ -6,15 +6,15 @@ from typing import Any
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 
-from app.api.deps import CurrentUser, SessionDep
+from app.api.deps import SecurityDep, SessionDep, StaffUser
 from app.core.storage import storage
-from app.crud.insurance.policy import (
+from app.crud import (
     count_documents,
     create_document,
     delete_document,
     get_documents,
 )
-from app.models.insurance.policy import (
+from app.models import (
     DocumentCreate,
     DocumentPublic,
     DocumentsPublic,
@@ -26,6 +26,7 @@ router = APIRouter()
 @router.get("/", response_model=DocumentsPublic)
 def read_documents(
     session: SessionDep,
+    _current_user: SecurityDep,
     skip: int = 0,
     limit: int = 100,
     entity_id: uuid.UUID | None = None,
@@ -51,7 +52,7 @@ def read_documents(
 async def upload_document(
     *,
     session: SessionDep,
-    _current_user: CurrentUser,
+    _current_user: StaffUser,
     file: UploadFile = File(...),
     entity_type: str = Form(...),
     entity_id: uuid.UUID = Form(...),
@@ -99,12 +100,13 @@ async def upload_document(
 def read_document_by_id(
     *,
     session: SessionDep,
+    _current_user: SecurityDep,
     id: uuid.UUID,
 ) -> Any:
     """
     Get document by ID.
     """
-    from app.models.insurance.policy import Document
+    from app.models import Document
 
     document = session.get(Document, id)
     if not document:
@@ -116,13 +118,13 @@ def read_document_by_id(
 def remove_document(
     *,
     session: SessionDep,
-    _current_user: CurrentUser,
+    _current_user: StaffUser,
     id: uuid.UUID,
 ) -> Any:
     """
     Delete a document.
     """
-    from app.models.insurance.policy import Document
+    from app.models import Document
 
     document = session.get(Document, id)
     if not document:
@@ -140,12 +142,13 @@ def remove_document(
 def download_document(
     *,
     session: SessionDep,
+    _current_user: SecurityDep,
     id: uuid.UUID,
 ) -> Any:
     """
     Download/View a document.
     """
-    from app.models.insurance.policy import Document
+    from app.models import Document
 
     document = session.get(Document, id)
     if not document:

@@ -18,23 +18,31 @@ export type Body_login_login_access_token = {
 };
 
 export type ClaimCreate = {
+    created_at?: string;
+    updated_at?: string;
+    deleted_at?: (string | null);
+    deleted_by_id?: (string | null);
     claim_number: string;
     policy_id: string;
     date_of_loss: string;
     date_reported?: string;
     description: string;
-    status?: string;
-    reserve_amount?: number;
+    status?: ClaimStatus;
+    reserve_amount?: (number | string);
 };
 
 export type ClaimPublic = {
+    created_at?: string;
+    updated_at?: string;
+    deleted_at?: (string | null);
+    deleted_by_id?: (string | null);
     claim_number: string;
     policy_id: string;
     date_of_loss: string;
     date_reported?: string;
     description: string;
-    status?: string;
-    reserve_amount?: number;
+    status?: ClaimStatus;
+    reserve_amount?: string;
     id: string;
 };
 
@@ -43,35 +51,49 @@ export type ClaimsPublic = {
     count: number;
 };
 
+export type ClaimStatus = 'Reported' | 'Assessed' | 'Paid' | 'Rejected' | 'Closed';
+
 export type ClaimUpdate = {
     claim_number?: (string | null);
     policy_id?: (string | null);
     date_of_loss?: (string | null);
     date_reported?: (string | null);
     description?: (string | null);
-    status?: (string | null);
-    reserve_amount?: (number | null);
+    status?: (ClaimStatus | null);
+    reserve_amount?: (number | string | null);
 };
 
 export type ClientCreate = {
+    created_at?: string;
+    updated_at?: string;
+    deleted_at?: (string | null);
+    deleted_by_id?: (string | null);
     client_type?: string;
     name: string;
     kra_pin: string;
     email?: (string | null);
     phone: string;
-    postal_address?: (string | null);
+    postal_number?: (string | null);
+    postal_code?: (string | null);
+    town?: (string | null);
     contacts?: Array<{
         [key: string]: unknown;
     }>;
 };
 
 export type ClientPublic = {
+    created_at?: string;
+    updated_at?: string;
+    deleted_at?: (string | null);
+    deleted_by_id?: (string | null);
     client_type?: string;
     name: string;
     kra_pin: string;
     email?: (string | null);
     phone: string;
-    postal_address?: (string | null);
+    postal_number?: (string | null);
+    postal_code?: (string | null);
+    town?: (string | null);
     contacts?: Array<{
         [key: string]: unknown;
     }>;
@@ -89,13 +111,19 @@ export type ClientUpdate = {
     kra_pin?: (string | null);
     email?: (string | null);
     phone?: (string | null);
-    postal_address?: (string | null);
+    postal_number?: (string | null);
+    postal_code?: (string | null);
+    town?: (string | null);
     contacts?: (Array<{
     [key: string]: unknown;
 }> | null);
 };
 
 export type CorrespondenceCreate = {
+    created_at?: string;
+    updated_at?: string;
+    deleted_at?: (string | null);
+    deleted_by_id?: (string | null);
     client_id: string;
     subject: string;
     summary?: (string | null);
@@ -104,6 +132,10 @@ export type CorrespondenceCreate = {
 };
 
 export type CorrespondencePublic = {
+    created_at?: string;
+    updated_at?: string;
+    deleted_at?: (string | null);
+    deleted_by_id?: (string | null);
     client_id: string;
     subject: string;
     summary?: (string | null);
@@ -117,17 +149,19 @@ export type CorrespondencesPublic = {
     count: number;
 };
 
+export type DocumentEntityType = 'Client' | 'Policy' | 'Claim' | 'User' | 'RiskNote';
+
 export type DocumentPublic = {
-    entity_type: string;
-    entity_id: string;
-    document_type: string;
+    document_type: DocumentType;
     file_path: string;
     mime_type?: (string | null);
+    uploaded_at?: string;
+    id: string;
+    entity_type: DocumentEntityType;
+    entity_id: string;
     doc_metadata?: {
         [key: string]: unknown;
     };
-    uploaded_at?: string;
-    id: string;
 };
 
 export type DocumentsPublic = {
@@ -135,17 +169,34 @@ export type DocumentsPublic = {
     count: number;
 };
 
+export type DocumentType = 'Logbook' | 'ID' | 'Valuation' | 'PoliceAbstract' | 'Receipt' | 'Other';
+
+export type EndorsementCreate = {
+    updated_risk_details: {
+        [key: string]: unknown;
+    };
+    change_description: string;
+};
+
 export type HTTPValidationError = {
     detail?: Array<ValidationError>;
 };
 
 export type InsurerCreate = {
+    created_at?: string;
+    updated_at?: string;
+    deleted_at?: (string | null);
+    deleted_by_id?: (string | null);
     name: string;
     email?: (string | null);
     phone?: (string | null);
 };
 
 export type InsurerPublic = {
+    created_at?: string;
+    updated_at?: string;
+    deleted_at?: (string | null);
+    deleted_by_id?: (string | null);
     name: string;
     email?: (string | null);
     phone?: (string | null);
@@ -163,34 +214,49 @@ export type InsurerUpdate = {
     phone?: (string | null);
 };
 
+export type InvoiceBulkCreate = {
+    client_id: string;
+    risk_note_ids: Array<(string)>;
+    date_issued?: string;
+    notes?: (string | null);
+};
+
 export type InvoiceCreate = {
+    created_at?: string;
+    updated_at?: string;
+    deleted_at?: (string | null);
+    deleted_by_id?: (string | null);
     invoice_number: string;
     client_id: string;
     date_issued?: string;
     due_date?: (string | null);
-    status?: string;
-    total_amount?: number;
-    balance_due?: number;
+    status?: InvoiceStatus;
+    total_amount?: (number | string);
+    balance_due?: (number | string);
     notes?: (string | null);
 };
 
 export type InvoiceLineItemPublic = {
     invoice_id: string;
     risk_note_id: string;
-    amount: number;
+    amount: string;
     description?: (string | null);
     id: string;
     risk_note?: (RiskNotePublic | null);
 };
 
 export type InvoicePublic = {
+    created_at?: string;
+    updated_at?: string;
+    deleted_at?: (string | null);
+    deleted_by_id?: (string | null);
     invoice_number: string;
     client_id: string;
     date_issued?: string;
     due_date?: (string | null);
-    status?: string;
-    total_amount?: number;
-    balance_due?: number;
+    status?: InvoiceStatus;
+    total_amount?: string;
+    balance_due?: string;
     notes?: (string | null);
     id: string;
     line_items?: Array<InvoiceLineItemPublic>;
@@ -202,27 +268,7 @@ export type InvoicesPublic = {
     count: number;
 };
 
-export type ItemCreate = {
-    title: string;
-    description?: (string | null);
-};
-
-export type ItemPublic = {
-    title: string;
-    description?: (string | null);
-    id: string;
-    owner_id: string;
-};
-
-export type ItemsPublic = {
-    data: Array<ItemPublic>;
-    count: number;
-};
-
-export type ItemUpdate = {
-    title?: (string | null);
-    description?: (string | null);
-};
+export type InvoiceStatus = 'Unpaid' | 'Partial' | 'Paid' | 'Cancelled';
 
 export type Message = {
     message: string;
@@ -238,60 +284,52 @@ export type PoliciesPublic = {
     count: number;
 };
 
-export type PolicyCreate = {
+export type PolicyCreateExtended = {
+    created_at?: string;
+    updated_at?: string;
+    deleted_at?: (string | null);
+    deleted_by_id?: (string | null);
     policy_number: string;
     client_id: string;
     product_id?: (string | null);
-    status?: string;
-    created_at?: string;
-    start_date?: (string | null);
-    end_date?: (string | null);
-    description?: (string | null);
-    total_premium?: number;
-    premium_breakdown?: {
-        [key: string]: unknown;
-    };
+    status?: PolicyStatus;
+    inception_date?: (string | null);
     risk_details?: {
         [key: string]: unknown;
     };
+    coverage_start?: string;
+    coverage_end: string;
 };
 
 export type PolicyPublic = {
+    created_at?: string;
+    updated_at?: string;
+    deleted_at?: (string | null);
+    deleted_by_id?: (string | null);
     policy_number: string;
     client_id: string;
     product_id?: (string | null);
-    status?: string;
-    created_at?: string;
-    start_date?: (string | null);
-    end_date?: (string | null);
-    description?: (string | null);
-    total_premium?: number;
-    premium_breakdown?: {
-        [key: string]: unknown;
-    };
-    risk_details?: {
-        [key: string]: unknown;
-    };
+    status?: PolicyStatus;
+    inception_date?: (string | null);
     id: string;
     product?: (ProductPublic | null);
+    readonly current_risk_details: {
+        [key: string]: unknown;
+    };
+    readonly total_premium: string;
+    readonly start_date: (string | null);
+    readonly end_date: (string | null);
     readonly display_name: string;
 };
+
+export type PolicyStatus = 'Active' | 'Expired' | 'Cancelled' | 'Lapsed';
 
 export type PolicyUpdate = {
     policy_number?: (string | null);
     client_id?: (string | null);
     product_id?: (string | null);
-    status?: (string | null);
-    start_date?: (string | null);
-    end_date?: (string | null);
-    description?: (string | null);
-    total_premium?: (number | null);
-    premium_breakdown?: ({
-    [key: string]: unknown;
-} | null);
-    risk_details?: ({
-    [key: string]: unknown;
-} | null);
+    status?: (PolicyStatus | null);
+    inception_date?: (string | null);
 };
 
 export type PrivateUserCreate = {
@@ -302,6 +340,10 @@ export type PrivateUserCreate = {
 };
 
 export type ProductCreate = {
+    created_at?: string;
+    updated_at?: string;
+    deleted_at?: (string | null);
+    deleted_by_id?: (string | null);
     insurer_id: string;
     name: string;
     class_of_insurance: string;
@@ -312,6 +354,10 @@ export type ProductCreate = {
 };
 
 export type ProductPublic = {
+    created_at?: string;
+    updated_at?: string;
+    deleted_at?: (string | null);
+    deleted_by_id?: (string | null);
     insurer_id: string;
     name: string;
     class_of_insurance: string;
@@ -342,39 +388,47 @@ export type ReceiptAllocationBase = {
     receipt_id: string;
     invoice_id: string;
     risk_note_id?: (string | null);
-    amount_allocated: number;
+    amount_allocated: string;
 };
 
 export type ReceiptAllocationCreate = {
     receipt_id: string;
     invoice_id: string;
     risk_note_id?: (string | null);
-    amount_allocated: number;
+    amount_allocated: (number | string);
 };
 
 export type ReceiptCreate = {
+    created_at?: string;
+    updated_at?: string;
+    deleted_at?: (string | null);
+    deleted_by_id?: (string | null);
     receipt_number: string;
     client_id: string;
     date_received: string;
-    amount: number;
-    unallocated_amount?: number;
+    amount: (number | string);
+    unallocated_amount?: (number | string);
     mode: string;
     reference: string;
     notes?: (string | null);
-    status?: string;
+    status?: ReceiptStatus;
     created_by_id?: (string | null);
 };
 
 export type ReceiptPublic = {
+    created_at?: string;
+    updated_at?: string;
+    deleted_at?: (string | null);
+    deleted_by_id?: (string | null);
     receipt_number: string;
     client_id: string;
     date_received: string;
-    amount: number;
-    unallocated_amount?: number;
+    amount: string;
+    unallocated_amount?: string;
     mode: string;
     reference: string;
     notes?: (string | null);
-    status?: string;
+    status?: ReceiptStatus;
     created_by_id?: (string | null);
     id: string;
     allocations?: Array<ReceiptAllocationBase>;
@@ -385,22 +439,30 @@ export type ReceiptsPublic = {
     count: number;
 };
 
+export type ReceiptStatus = 'Active' | 'Voided';
+
 export type RiskNoteCreate = {
+    created_at?: string;
+    updated_at?: string;
+    deleted_at?: (string | null);
+    deleted_by_id?: (string | null);
     policy_id: string;
-    transaction_type: string;
-    status?: string;
+    risk_note_number?: (string | null);
+    transaction_type: TransactionType;
+    status?: RiskNoteStatus;
     previous_risk_note_id?: (string | null);
     invoice_number?: (string | null);
     created_by_id?: (string | null);
     payment_status?: string;
-    start_date: string;
-    end_date: string;
-    net_premium: number;
+    effective_date?: string;
+    coverage_start: string;
+    coverage_end: string;
+    net_premium: (number | string);
+    commission_amount: (number | string);
+    total_amount: (number | string);
     taxes?: {
         [key: string]: unknown;
     };
-    commission_amount: number;
-    total_amount: number;
     policy_snapshot?: {
         [key: string]: unknown;
     };
@@ -408,27 +470,33 @@ export type RiskNoteCreate = {
 };
 
 export type RiskNotePublic = {
+    created_at?: string;
+    updated_at?: string;
+    deleted_at?: (string | null);
+    deleted_by_id?: (string | null);
     policy_id: string;
-    transaction_type: string;
-    status?: string;
+    risk_note_number?: (string | null);
+    transaction_type: TransactionType;
+    status?: RiskNoteStatus;
     previous_risk_note_id?: (string | null);
     invoice_number?: (string | null);
     created_by_id?: (string | null);
     payment_status?: string;
-    start_date: string;
-    end_date: string;
-    net_premium: number;
+    effective_date?: string;
+    coverage_start: string;
+    coverage_end: string;
+    net_premium: string;
+    commission_amount: string;
+    total_amount: string;
+    id: string;
+    policy?: (PolicyPublic | null);
     taxes?: {
         [key: string]: unknown;
     };
-    commission_amount: number;
-    total_amount: number;
     policy_snapshot?: {
         [key: string]: unknown;
     };
     special_clauses?: Array<(string)>;
-    id: string;
-    policy?: (PolicyPublic | null);
 };
 
 export type RiskNotesPublic = {
@@ -436,20 +504,24 @@ export type RiskNotesPublic = {
     count: number;
 };
 
+export type RiskNoteStatus = 'Draft' | 'Issued' | 'Replaced' | 'Cancelled';
+
 export type RiskNoteUpdate = {
-    transaction_type?: (string | null);
-    status?: (string | null);
+    transaction_type?: (TransactionType | null);
+    risk_note_number?: (string | null);
+    status?: (RiskNoteStatus | null);
     previous_risk_note_id?: (string | null);
     invoice_number?: (string | null);
     payment_status?: (string | null);
-    start_date?: (string | null);
-    end_date?: (string | null);
-    net_premium?: (number | null);
+    effective_date?: (string | null);
+    coverage_start?: (string | null);
+    coverage_end?: (string | null);
+    net_premium?: (number | string | null);
     taxes?: ({
     [key: string]: unknown;
 } | null);
-    commission_amount?: (number | null);
-    total_amount?: (number | null);
+    commission_amount?: (number | string | null);
+    total_amount?: (number | string | null);
     policy_snapshot?: ({
     [key: string]: unknown;
 } | null);
@@ -460,6 +532,8 @@ export type Token = {
     access_token: string;
     token_type?: string;
 };
+
+export type TransactionType = 'New Business' | 'Renewal' | 'Endorsement' | 'Cancellation';
 
 export type UpdatePassword = {
     current_password: string;
@@ -648,6 +722,12 @@ export type FinancialsReadInvoiceData = {
 
 export type FinancialsReadInvoiceResponse = (InvoicePublic);
 
+export type FinancialsCreateBulkInvoiceData = {
+    requestBody: InvoiceBulkCreate;
+};
+
+export type FinancialsCreateBulkInvoiceResponse = (InvoicePublic);
+
 export type FinancialsReadReceiptsData = {
     clientId?: (string | null);
     limit?: number;
@@ -713,38 +793,6 @@ export type InsurersDeleteInsurerData = {
 
 export type InsurersDeleteInsurerResponse = (Message);
 
-export type ItemsReadItemsData = {
-    limit?: number;
-    skip?: number;
-};
-
-export type ItemsReadItemsResponse = (ItemsPublic);
-
-export type ItemsCreateItemData = {
-    requestBody: ItemCreate;
-};
-
-export type ItemsCreateItemResponse = (ItemPublic);
-
-export type ItemsReadItemData = {
-    id: string;
-};
-
-export type ItemsReadItemResponse = (ItemPublic);
-
-export type ItemsUpdateItemData = {
-    id: string;
-    requestBody: ItemUpdate;
-};
-
-export type ItemsUpdateItemResponse = (ItemPublic);
-
-export type ItemsDeleteItemData = {
-    id: string;
-};
-
-export type ItemsDeleteItemResponse = (Message);
-
 export type LoginLoginAccessTokenData = {
     formData: Body_login_login_access_token;
 };
@@ -780,7 +828,7 @@ export type PoliciesReadPoliciesData = {
 export type PoliciesReadPoliciesResponse = (PoliciesPublic);
 
 export type PoliciesCreatePolicyData = {
-    requestBody: PolicyCreate;
+    requestBody: PolicyCreateExtended;
 };
 
 export type PoliciesCreatePolicyResponse = (PolicyPublic);
@@ -803,6 +851,13 @@ export type PoliciesDeletePolicyData = {
 };
 
 export type PoliciesDeletePolicyResponse = (Message);
+
+export type PoliciesCreateEndorsementData = {
+    id: string;
+    requestBody: EndorsementCreate;
+};
+
+export type PoliciesCreateEndorsementResponse = (RiskNotePublic);
 
 export type PoliciesReadPolicyRiskNotesData = {
     id: string;
@@ -850,9 +905,11 @@ export type ProductsDeleteProductData = {
 export type ProductsDeleteProductResponse = (Message);
 
 export type RiskNotesReadRiskNotesData = {
+    clientId?: (string | null);
     limit?: number;
     policyId?: (string | null);
     skip?: number;
+    uninvoicedOnly?: boolean;
 };
 
 export type RiskNotesReadRiskNotesResponse = (RiskNotesPublic);

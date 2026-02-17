@@ -32,7 +32,11 @@ import { handleError } from "@/utils"
 
 const formSchema = z.object({
   name: z.string().min(1, { message: "Name is required" }),
-  email: z.string().email({ message: "Invalid email" }).optional().or(z.literal("")),
+  email: z
+    .string()
+    .email({ message: "Invalid email" })
+    .optional()
+    .or(z.literal("")),
   phone: z.string().optional(),
 })
 
@@ -58,7 +62,7 @@ const AddInsurer = () => {
     mutationFn: (data: InsurerCreate) =>
       InsurersService.createInsurer({ requestBody: data }),
     onSuccess: () => {
-      showSuccessToast("Insurer created successfully")
+      showSuccessToast("Insurer Created")
       setIsOpen(false)
       form.reset()
     },
@@ -99,7 +103,11 @@ const AddInsurer = () => {
                       Name <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="Insurer Name" type="text" {...field} />
+                      <Input
+                        placeholder="Insurer Name"
+                        type="text"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -113,7 +121,11 @@ const AddInsurer = () => {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="email@example.com" type="email" {...field} />
+                      <Input
+                        placeholder="email@example.com"
+                        type="email"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

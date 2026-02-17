@@ -3,18 +3,15 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException
 
-from app.api.deps import CurrentUser, SessionDep
-from app.crud.insurance.policy import (
+from app.api.deps import CurrentUser, SessionDep, StaffUser
+from app.crud import (
     count_risk_notes,
     get_risk_notes,
 )
-from app.crud.insurance.policy import (
-    create_risk_note as crud_create_risk_note,
-)
-from app.crud.insurance.policy import (
+from app.crud import (
     delete_risk_note as crud_delete_risk_note,
 )
-from app.crud.insurance.policy import (
+from app.crud import (
     update_risk_note as crud_update_risk_note,
 )
 from app.models import (
@@ -25,6 +22,7 @@ from app.models import (
     RiskNotesPublic,
     RiskNoteUpdate,
 )
+from app.services.policy import policy_service
 
 router = APIRouter()
 
@@ -36,13 +34,25 @@ def read_risk_notes(
     skip: int = 0,
     limit: int = 100,
     policy_id: uuid.UUID | None = None,
+    client_id: uuid.UUID | None = None,
+    uninvoiced_only: bool = False,
 ) -> Any:
     """
     Retrieve risk notes.
     """
-    count = count_risk_notes(session=session, policy_id=policy_id)
+    count = count_risk_notes(
+        session=session,
+        policy_id=policy_id,
+        client_id=client_id,
+        uninvoiced_only=uninvoiced_only,
+    )
     risk_notes = get_risk_notes(
-        session=session, skip=skip, limit=limit, policy_id=policy_id
+        session=session,
+        skip=skip,
+        limit=limit,
+        policy_id=policy_id,
+        client_id=client_id,
+        uninvoiced_only=uninvoiced_only,
     )
     return RiskNotesPublic(data=risk_notes, count=count)
 
@@ -62,12 +72,14 @@ def read_risk_note(
 
 @router.post("/", response_model=RiskNotePublic)
 def create_risk_note(
-    *, session: SessionDep, _current_user: CurrentUser, risk_note_in: RiskNoteCreate
+    *, session: SessionDep, _current_user: StaffUser, risk_note_in: RiskNoteCreate
 ) -> Any:
     """
     Create new risk note.
     """
-    risk_note = crud_create_risk_note(session=session, risk_note_in=risk_note_in)
+    risk_note = policy_service.create_risk_note_with_invoice(
+        session=session, risk_note_in=risk_note_in, created_by_id=_current_user.id
+    )
     return risk_note
 
 
@@ -75,7 +87,7 @@ def create_risk_note(
 def update_risk_note(
     *,
     session: SessionDep,
-    _current_user: CurrentUser,
+    _current_user: StaffUser,
     id: uuid.UUID,
     risk_note_in: RiskNoteUpdate,
 ) -> Any:
@@ -94,7 +106,7 @@ def update_risk_note(
 
 @router.delete("/{id}", response_model=Message)
 def delete_risk_note(
-    session: SessionDep, _current_user: CurrentUser, id: uuid.UUID
+    session: SessionDep, _current_user: StaffUser, id: uuid.UUID
 ) -> Any:
     """
     Delete a risk note.

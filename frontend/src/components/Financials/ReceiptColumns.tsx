@@ -51,13 +51,15 @@ export const getReceiptColumns = (
       <div className="flex flex-col">
         <span className="font-bold text-sm">
           KES{" "}
-          {row.original.amount.toLocaleString(undefined, {
+          {Number(row.original.amount).toLocaleString(undefined, {
             minimumFractionDigits: 2,
           })}
         </span>
         <span className="text-[10px] text-muted-foreground uppercase tracking-tighter">
           Unallocated: KES{" "}
-          {(row.original as any).unallocated_amount?.toLocaleString()}
+          {Number(
+            (row.original as any).unallocated_amount || 0,
+          ).toLocaleString()}
         </span>
       </div>
     ),

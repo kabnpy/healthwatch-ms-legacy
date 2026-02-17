@@ -19,7 +19,23 @@ export function AssetCard({ policy }: AssetCardProps) {
   }
 
   // Assuming details is a generic dict
-  const details = (policy.risk_details as Record<string, any>) || {}
+  const riskDetails = (policy.current_risk_details as Record<string, any>) || {}
+
+  // Flatten details for display
+  const flattenDetails = (obj: any): Record<string, any> => {
+    let result: Record<string, any> = {}
+    for (const [key, value] of Object.entries(obj)) {
+      if (typeof value === "object" && value !== null) {
+        result = { ...result, ...flattenDetails(value) }
+      } else {
+        result[key] = value
+      }
+    }
+    return result
+  }
+
+  const details = flattenDetails(riskDetails)
+  const insuredValue = details["Value Kshs."] || details.sum_insured || 0
 
   return (
     <Card className="h-full shadow-sm">
@@ -32,7 +48,9 @@ export function AssetCard({ policy }: AssetCardProps) {
       <CardContent>
         <div className="flex flex-col gap-4">
           <div>
-            <div className="text-xl font-bold truncate">{policy.description}</div>
+            <div className="text-xl font-bold truncate">
+              {policy.display_name}
+            </div>
             <p className="text-sm text-muted-foreground">
               {policy.product?.class_of_insurance || "Insurance"} cover
             </p>
@@ -42,10 +60,11 @@ export function AssetCard({ policy }: AssetCardProps) {
             <div className="flex justify-between border-b pb-1">
               <span className="text-muted-foreground">Insured Value</span>
               <span className="font-mono font-semibold">
-                KES {(details.sum_insured || 0).toLocaleString()}
+                KES {Number(insuredValue).toLocaleString()}
               </span>
             </div>
             {Object.entries(details)
+              .filter(([key]) => !key.toLowerCase().includes("value"))
               .slice(0, 3)
               .map(([key, value]) => (
                 <div

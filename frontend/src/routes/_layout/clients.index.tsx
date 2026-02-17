@@ -58,11 +58,13 @@ function ClientsTable() {
 
 function Clients() {
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col gap-8">
+      <div className="flex items-center justify-between border-b pb-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Clients</h1>
-          <p className="text-muted-foreground">Manage your insurance clients</p>
+          <h1 className="text-4xl font-bold tracking-tight">Clients</h1>
+          <p className="text-sm text-muted-foreground font-medium uppercase tracking-wider">
+            Client Portfolio Management
+          </p>
         </div>
         <AddClient />
       </div>

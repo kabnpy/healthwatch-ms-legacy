@@ -18,8 +18,8 @@ import {
 import { useProducts } from "@/hooks/useInsurance"
 
 interface StepAssetProps {
-  defaultValues: any
-  onNext: (data: any) => void
+  defaultValues: { product_id: string }
+  onNext: (data: { product_id: string }) => void
 }
 
 export function StepAsset({ defaultValues, onNext }: StepAssetProps) {
@@ -34,11 +34,15 @@ export function StepAsset({ defaultValues, onNext }: StepAssetProps) {
   const selectedProductId = form.watch("product_id")
 
   return (
-    <Form {...form}>
+    <Form {...(form as any)}>
       <form onSubmit={form.handleSubmit(onNext)} className="space-y-6">
         <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 mb-6">
-            <p className="text-sm text-blue-700 font-medium">Step 1: Select Insurance Product</p>
-            <p className="text-xs text-blue-600 mt-1">Choose the baseline product for this policy.</p>
+          <p className="text-sm text-blue-700 font-medium">
+            Step 1: Select Insurance Product
+          </p>
+          <p className="text-xs text-blue-600 mt-1">
+            Choose the baseline product for this policy.
+          </p>
         </div>
 
         <FormField
@@ -67,7 +71,12 @@ export function StepAsset({ defaultValues, onNext }: StepAssetProps) {
         />
 
         <div className="flex justify-end pt-8">
-          <Button type="submit" disabled={!selectedProductId} size="lg" className="px-10">
+          <Button
+            type="submit"
+            disabled={!selectedProductId}
+            size="lg"
+            className="px-10"
+          >
             Next: Product Details
           </Button>
         </div>

@@ -3,19 +3,19 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException
 
-from app.api.deps import CurrentUser, SessionDep
-from app.crud.insurance.client import (
+from app.api.deps import CurrentUser, SessionDep, StaffUser
+from app.crud import (
     count_clients,
     get_client_by_kra_pin,
     get_clients,
 )
-from app.crud.insurance.client import (
+from app.crud import (
     create_client as crud_create_client,
 )
-from app.crud.insurance.client import (
+from app.crud import (
     delete_client as crud_delete_client,
 )
-from app.crud.insurance.client import (
+from app.crud import (
     update_client as crud_update_client,
 )
 from app.models import (
@@ -58,7 +58,7 @@ def read_client(session: SessionDep, _current_user: CurrentUser, id: uuid.UUID) 
 
 @router.post("/", response_model=ClientPublic)
 def create_client(
-    *, session: SessionDep, _current_user: CurrentUser, client_in: ClientCreate
+    *, session: SessionDep, _current_user: StaffUser, client_in: ClientCreate
 ) -> Any:
     """
     Create new client.
@@ -78,7 +78,7 @@ def create_client(
 def update_client(
     *,
     session: SessionDep,
-    _current_user: CurrentUser,
+    _current_user: StaffUser,
     id: uuid.UUID,
     client_in: ClientUpdate,
 ) -> Any:
@@ -94,9 +94,7 @@ def update_client(
 
 
 @router.delete("/{id}", response_model=Message)
-def delete_client(
-    session: SessionDep, _current_user: CurrentUser, id: uuid.UUID
-) -> Any:
+def delete_client(session: SessionDep, _current_user: StaffUser, id: uuid.UUID) -> Any:
     """
     Delete a client.
     """
@@ -114,7 +112,7 @@ def read_client_correspondences(
     """
     Get correspondences for a client.
     """
-    from app.crud.insurance.client import count_correspondences, get_correspondences
+    from app.crud import count_correspondences, get_correspondences
 
     count = count_correspondences(session=session, client_id=id)
     correspondences = get_correspondences(session=session, client_id=id)
@@ -125,14 +123,14 @@ def read_client_correspondences(
 def create_client_correspondence(
     *,
     session: SessionDep,
-    _current_user: CurrentUser,
+    _current_user: StaffUser,
     id: uuid.UUID,
     correspondence_in: CorrespondenceCreate,
 ) -> Any:
     """
     Create new correspondence for a client.
     """
-    from app.crud.insurance.client import create_correspondence
+    from app.crud import create_correspondence
 
     correspondence_in.client_id = id
     correspondence = create_correspondence(

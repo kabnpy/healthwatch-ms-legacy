@@ -5,9 +5,9 @@ import { Suspense } from "react"
 
 import { ProductsService } from "@/client"
 import { DataTable } from "@/components/Common/DataTable"
+import PendingItems from "@/components/Pending/PendingItems"
 import { AddProduct } from "@/components/Products/AddProduct"
 import { columns } from "@/components/Products/columns"
-import PendingItems from "@/components/Pending/PendingItems"
 
 function getProductsQueryOptions() {
   return {
@@ -37,7 +37,9 @@ function ProductsTableContent() {
           <Search className="h-8 w-8 text-muted-foreground" />
         </div>
         <h3 className="text-lg font-semibold">No products found</h3>
-        <p className="text-muted-foreground">Define a new insurance product to get started</p>
+        <p className="text-muted-foreground">
+          Define a new insurance product to get started
+        </p>
       </div>
     )
   }
@@ -58,8 +60,12 @@ function Products() {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold tracking-tight">Insurance Products</h2>
-          <p className="text-sm text-muted-foreground">Master list of all products across all carriers.</p>
+          <h2 className="text-xl font-bold tracking-tight">
+            Insurance Products
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Master list of all products across all carriers.
+          </p>
         </div>
         <AddProduct />
       </div>

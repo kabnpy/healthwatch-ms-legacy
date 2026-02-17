@@ -3,31 +3,32 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException
 
-from app.api.deps import CurrentUser, SessionDep
-from app.crud.insurance.policy import (
+from app.api.deps import CurrentUser, SessionDep, StaffUser
+from app.api.utils import prepare_policy_public
+from app.crud import (
     count_policies,
     get_policies,
     get_policy,
     get_policy_by_policy_number,
 )
-from app.crud.insurance.policy import (
-    create_policy as crud_create_policy,
-)
-from app.crud.insurance.policy import (
+from app.crud import (
     delete_policy as crud_delete_policy,
 )
-from app.crud.insurance.policy import (
+from app.crud import (
     update_policy as crud_update_policy,
 )
 from app.models import (
+    EndorsementCreate,
     Message,
     PoliciesPublic,
     Policy,
-    PolicyCreate,
+    PolicyCreateExtended,
     PolicyPublic,
     PolicyUpdate,
+    RiskNotePublic,
     RiskNotesPublic,
 )
+from app.services.policy import policy_service
 
 router = APIRouter()
 
@@ -47,7 +48,9 @@ def read_policies(
     policies = get_policies(
         session=session, skip=skip, limit=limit, client_id=client_id
     )
-    return PoliciesPublic(data=policies, count=count)
+    return PoliciesPublic(
+        data=[prepare_policy_public(p) for p in policies], count=count
+    )
 
 
 @router.get("/{id}", response_model=PolicyPublic)
@@ -58,15 +61,15 @@ def read_policy(session: SessionDep, _current_user: CurrentUser, id: uuid.UUID) 
     policy = get_policy(session=session, id=id)
     if not policy:
         raise HTTPException(status_code=404, detail="Policy not found")
-    return policy
+    return prepare_policy_public(policy)
 
 
 @router.post("/", response_model=PolicyPublic)
 def create_policy(
-    *, session: SessionDep, _current_user: CurrentUser, policy_in: PolicyCreate
+    *, session: SessionDep, current_user: StaffUser, policy_in: PolicyCreateExtended
 ) -> Any:
     """
-    Create new policy.
+    Create new policy with initial risk note.
     """
     existing_policy = get_policy_by_policy_number(
         session=session, policy_number=policy_in.policy_number
@@ -77,33 +80,58 @@ def create_policy(
             detail="The policy with this number already exists in the system.",
         )
 
-    policy = crud_create_policy(session=session, policy_in=policy_in)
-    return policy
+    policy = policy_service.create_policy(
+        session=session,
+        policy_in=policy_in,
+        risk_details=policy_in.risk_details,
+        coverage_start=policy_in.coverage_start,
+        coverage_end=policy_in.coverage_end,
+        current_user_id=current_user.id,
+    )
+    return prepare_policy_public(policy)
+
+
+@router.post("/{id}/endorsements", response_model=RiskNotePublic)
+def create_endorsement(
+    *,
+    session: SessionDep,
+    current_user: StaffUser,
+    id: uuid.UUID,
+    endorsement_in: EndorsementCreate,
+) -> Any:
+    """
+    Create a policy endorsement.
+    """
+    return policy_service.create_endorsement(
+        session=session,
+        policy_id=id,
+        updated_risk_details=endorsement_in.updated_risk_details,
+        change_description=endorsement_in.change_description,
+        current_user_id=current_user.id,
+    )
 
 
 @router.put("/{id}", response_model=PolicyPublic)
 def update_policy(
     *,
     session: SessionDep,
-    _current_user: CurrentUser,
+    _current_user: StaffUser,
     id: uuid.UUID,
     policy_in: PolicyUpdate,
 ) -> Any:
     """
-    Update a policy.
+    Update a policy container.
     """
     policy = session.get(Policy, id)
     if not policy:
         raise HTTPException(status_code=404, detail="Policy not found")
 
     policy = crud_update_policy(session=session, db_policy=policy, policy_in=policy_in)
-    return policy
+    return prepare_policy_public(policy)
 
 
 @router.delete("/{id}", response_model=Message)
-def delete_policy(
-    session: SessionDep, _current_user: CurrentUser, id: uuid.UUID
-) -> Any:
+def delete_policy(session: SessionDep, _current_user: StaffUser, id: uuid.UUID) -> Any:
     """
     Delete a policy.
     """
@@ -121,7 +149,7 @@ def read_policy_risk_notes(
     """
     Get risk notes for a policy.
     """
-    from app.crud.insurance.policy import count_risk_notes, get_risk_notes
+    from app.crud import count_risk_notes, get_risk_notes
 
     count = count_risk_notes(session=session, policy_id=id)
     risk_notes = get_risk_notes(session=session, policy_id=id)

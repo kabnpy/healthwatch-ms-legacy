@@ -1,15 +1,17 @@
 import uuid
+from decimal import Decimal
+
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 
 from app.core.config import settings
+from tests.utils.client import create_random_client
 from tests.utils.insurance import (
     create_random_invoice,
     create_random_receipt,
-    create_random_policy,
 )
-from tests.utils.client import create_random_client
 from tests.utils.utils import random_lower_string
+
 
 def test_read_invoices(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
@@ -76,8 +78,7 @@ def test_create_receipt(
     assert response.status_code == 200
     content = response.json()
     assert content["receipt_number"] == data["receipt_number"]
-    assert content["amount"] == 500.0
-
+    assert Decimal(content["amount"]) == Decimal("500.0")
 def test_allocate_receipt(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:

@@ -7,8 +7,8 @@ import {
 } from "@tanstack/react-router"
 import { Suspense } from "react"
 import { ClientsService } from "@/client"
+import { ClientHubSkeleton } from "@/components/Clients/ClientHubSkeleton"
 import ErrorComponent from "@/components/Common/ErrorComponent"
-import PendingItems from "@/components/Pending/PendingItems"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { queryClient } from "@/queryClient"
 
@@ -44,14 +44,20 @@ function ClientHubContent({ clientId }: { clientId: string }) {
   const location = useLocation()
 
   // Determine active tab based on path
-  const activeTab = location.pathname.split("/").pop() || "overview"
+  const path = location.pathname
+  let activeTab = "overview"
+  if (path.includes("/overview")) activeTab = "overview"
+  else if (path.includes("/policies")) activeTab = "policies"
+  else if (path.includes("/invoices")) activeTab = "invoices"
+  else if (path.includes("/documents")) activeTab = "documents"
+  else if (path.includes("/settings")) activeTab = "settings"
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col gap-8">
+      <div className="flex items-center justify-between border-b pb-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{client.name}</h1>
-          <p className="text-sm text-muted-foreground uppercase tracking-wider font-semibold">
+          <h1 className="text-4xl font-bold tracking-tight">{client.name}</h1>
+          <p className="text-sm text-muted-foreground uppercase tracking-widest font-bold">
             {client.client_type} &bull; Client Hub
           </p>
         </div>
@@ -99,7 +105,7 @@ function ClientHubLayout() {
   const { clientId } = Route.useParams()
 
   return (
-    <Suspense fallback={<PendingItems />}>
+    <Suspense fallback={<ClientHubSkeleton />}>
       <ClientHubContent clientId={clientId} />
     </Suspense>
   )

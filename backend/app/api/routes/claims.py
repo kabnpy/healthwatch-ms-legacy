@@ -3,18 +3,18 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException
 
-from app.api.deps import CurrentUser, SessionDep
-from app.crud.insurance.policy import (
+from app.api.deps import CurrentUser, SessionDep, StaffUser
+from app.crud import (
     count_claims,
     get_claims,
 )
-from app.crud.insurance.policy import (
+from app.crud import (
     create_claim as crud_create_claim,
 )
-from app.crud.insurance.policy import (
+from app.crud import (
     delete_claim as crud_delete_claim,
 )
-from app.crud.insurance.policy import (
+from app.crud import (
     update_claim as crud_update_claim,
 )
 from app.models import (
@@ -58,7 +58,7 @@ def read_claim(session: SessionDep, _current_user: CurrentUser, id: uuid.UUID) -
 
 @router.post("/", response_model=ClaimPublic)
 def create_claim(
-    *, session: SessionDep, _current_user: CurrentUser, claim_in: ClaimCreate
+    *, session: SessionDep, _current_user: StaffUser, claim_in: ClaimCreate
 ) -> Any:
     """
     Create new claim.
@@ -71,7 +71,7 @@ def create_claim(
 def update_claim(
     *,
     session: SessionDep,
-    _current_user: CurrentUser,
+    _current_user: StaffUser,
     id: uuid.UUID,
     claim_in: ClaimUpdate,
 ) -> Any:
@@ -87,7 +87,7 @@ def update_claim(
 
 
 @router.delete("/{id}", response_model=Message)
-def delete_claim(session: SessionDep, _current_user: CurrentUser, id: uuid.UUID) -> Any:
+def delete_claim(session: SessionDep, _current_user: StaffUser, id: uuid.UUID) -> Any:
     """
     Delete a claim.
     """

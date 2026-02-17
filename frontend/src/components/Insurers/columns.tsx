@@ -45,14 +45,18 @@ export const columns: ColumnDef<InsurerPublic>[] = [
     accessorKey: "email",
     header: "Email",
     cell: ({ row }) => (
-      <span className="text-muted-foreground">{row.original.email || "N/A"}</span>
+      <span className="text-muted-foreground">
+        {row.original.email || "N/A"}
+      </span>
     ),
   },
   {
     accessorKey: "phone",
     header: "Phone",
     cell: ({ row }) => (
-      <span className="text-muted-foreground">{row.original.phone || "N/A"}</span>
+      <span className="text-muted-foreground">
+        {row.original.phone || "N/A"}
+      </span>
     ),
   },
   {

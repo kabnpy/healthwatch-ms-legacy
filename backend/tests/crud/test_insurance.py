@@ -1,18 +1,18 @@
+from datetime import date
+
 from sqlmodel import Session
 
 from app import crud
 from app.models import (
-    InsurerCreate,
-    ProductCreate,
     ClientCreate,
+    InsurerCreate,
     PolicyCreate,
-    RiskNoteCreate,
-    ReceiptCreate,
+    ProductCreate,
     ReceiptAllocationCreate,
+    ReceiptCreate,
+    RiskNoteCreate,
 )
-from tests.utils.utils import random_lower_string, random_email
-import uuid
-from datetime import date
+from tests.utils.utils import random_email, random_lower_string
 
 
 def test_create_insurer(db: Session) -> None:
@@ -26,7 +26,7 @@ def test_create_insurer(db: Session) -> None:
 def test_create_product(db: Session) -> None:
     insurer_in = InsurerCreate(name=random_lower_string(), email=random_email())
     insurer = crud.create_insurer(session=db, insurer_in=insurer_in)
-    
+
     product_in = ProductCreate(
         insurer_id=insurer.id,
         name=random_lower_string(),
@@ -57,7 +57,7 @@ def test_create_policy(db: Session) -> None:
         phone=random_lower_string(),
     )
     client = crud.create_client(session=db, client_in=client_in)
-    
+
     policy_in = PolicyCreate(
         policy_number=random_lower_string(),
         client_id=client.id,
@@ -75,21 +75,23 @@ def test_create_risk_note(db: Session) -> None:
         phone=random_lower_string(),
     )
     client = crud.create_client(session=db, client_in=client_in)
-    
+
     policy_in = PolicyCreate(
         policy_number=random_lower_string(),
         client_id=client.id,
     )
     policy = crud.create_policy(session=db, policy_in=policy_in)
-    
+
     risk_note_in = RiskNoteCreate(
         risk_note_number=random_lower_string(),
         policy_id=policy.id,
         transaction_type="New Business",
-        start_date=date(2024, 1, 1),
-        end_date=date(2024, 12, 31),
-        premium_breakdown={"basic": 1000.0, "total": 1100.0},
+        coverage_start=date(2024, 1, 1),
+        coverage_end=date(2024, 12, 31),
+        net_premium=1000.0,
+        taxes={},
         commission_amount=100.0,
+        total_amount=1100.0,
     )
     risk_note = crud.create_risk_note(session=db, risk_note_in=risk_note_in)
     assert risk_note.risk_note_number == risk_note_in.risk_note_number
@@ -126,24 +128,26 @@ def test_create_receipt_allocation(db: Session) -> None:
         phone=random_lower_string(),
     )
     client = crud.create_client(session=db, client_in=client_in)
-    
+
     policy_in = PolicyCreate(
         policy_number=random_lower_string(),
         client_id=client.id,
     )
     policy = crud.create_policy(session=db, policy_in=policy_in)
-    
+
     risk_note_in = RiskNoteCreate(
         risk_note_number=random_lower_string(),
         policy_id=policy.id,
         transaction_type="New Business",
-        start_date=date(2024, 1, 1),
-        end_date=date(2024, 12, 31),
-        premium_breakdown={"basic": 1000.0, "total": 1100.0},
+        coverage_start=date(2024, 1, 1),
+        coverage_end=date(2024, 12, 31),
+        net_premium=1000.0,
+        taxes={},
         commission_amount=100.0,
+        total_amount=1100.0,
     )
     risk_note = crud.create_risk_note(session=db, risk_note_in=risk_note_in)
-    
+
     receipt_in = ReceiptCreate(
         receipt_number=random_lower_string(),
         client_id=client.id,
@@ -153,13 +157,19 @@ def test_create_receipt_allocation(db: Session) -> None:
         reference=random_lower_string(),
     )
     receipt = crud.create_receipt(session=db, receipt_in=receipt_in)
-    
+
     # We need an invoice for the allocation
-    # The risk_note creation already creates an invoice in crud.create_risk_note
-    from app.models.insurance.financial import Invoice
-    from sqlmodel import select
-    invoice = db.exec(select(Invoice).where(Invoice.client_id == client.id)).first()
-    assert invoice is not None
+    from app.models import Invoice
+
+    invoice = Invoice(
+        invoice_number=random_lower_string(),
+        client_id=client.id,
+        total_amount=1100.0,
+        balance_due=1100.0,
+    )
+    db.add(invoice)
+    db.commit()
+    db.refresh(invoice)
 
     allocation_in = ReceiptAllocationCreate(
         receipt_id=receipt.id,

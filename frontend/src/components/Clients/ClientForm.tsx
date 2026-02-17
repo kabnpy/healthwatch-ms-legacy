@@ -36,7 +36,9 @@ const formSchema = z.object({
   kra_pin: z.string().min(11, "KRA PIN must be 11 characters").max(11),
   email: z.string().email("Invalid email").or(z.literal("")),
   phone: z.string().min(10, "Phone number is required"),
-  postal_address: z.string().optional(),
+  postal_number: z.string().optional(),
+  postal_code: z.string().optional(),
+  town: z.string().optional(),
   contacts: z.array(contactSchema).default([]),
 })
 
@@ -65,7 +67,9 @@ export const ClientForm = ({
       kra_pin: initialData?.kra_pin || "",
       email: initialData?.email || "",
       phone: initialData?.phone || "",
-      postal_address: initialData?.postal_address || "",
+      postal_number: (initialData as any)?.postal_number || "",
+      postal_code: (initialData as any)?.postal_code || "",
+      town: (initialData as any)?.town || "",
       contacts: (initialData?.contacts as any) || [],
     },
   })
@@ -79,7 +83,9 @@ export const ClientForm = ({
     const formattedData = {
       ...data,
       email: data.email === "" ? null : data.email,
-      postal_address: data.postal_address || null,
+      postal_number: data.postal_number || null,
+      postal_code: data.postal_code || null,
+      town: data.town || null,
     }
     onSubmit(formattedData as any)
   }
@@ -90,45 +96,41 @@ export const ClientForm = ({
         onSubmit={form.handleSubmit(handleFormSubmit)}
         className="space-y-4"
       >
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="client_type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Client Type</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="Individual">Individual</SelectItem>
-                    <SelectItem value="Corporate">Corporate</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="kra_pin"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>KRA PIN</FormLabel>
+        <FormField
+          control={form.control}
+          name="client_type"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Client Type</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
-                  <Input placeholder="A00..." {...field} />
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
                 </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+                <SelectContent>
+                  <SelectItem value="Individual">Individual</SelectItem>
+                  <SelectItem value="Corporate">Corporate</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="kra_pin"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>KRA PIN</FormLabel>
+              <FormControl>
+                <Input placeholder="A00..." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}
@@ -144,19 +146,47 @@ export const ClientForm = ({
           )}
         />
 
-        <div className="grid grid-cols-2 gap-4">
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input
+                  type="email"
+                  placeholder="client@example.com"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="phone"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Phone Number</FormLabel>
+              <FormControl>
+                <Input placeholder="07..." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="grid grid-cols-3 gap-4 border-t pt-4">
           <FormField
             control={form.control}
-            name="email"
+            name="postal_number"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>P.O. Box</FormLabel>
                 <FormControl>
-                  <Input
-                    type="email"
-                    placeholder="client@example.com"
-                    {...field}
-                  />
+                  <Input placeholder="12345" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -164,32 +194,31 @@ export const ClientForm = ({
           />
           <FormField
             control={form.control}
-            name="phone"
+            name="postal_code"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Phone Number</FormLabel>
+                <FormLabel>Postal Code</FormLabel>
                 <FormControl>
-                  <Input placeholder="07..." {...field} />
+                  <Input placeholder="00100" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="town"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Town</FormLabel>
+                <FormControl>
+                  <Input placeholder="Nairobi" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
-
-        <FormField
-          control={form.control}
-          name="postal_address"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Postal Address</FormLabel>
-              <FormControl>
-                <Input placeholder="P.O. Box 1234, Nairobi" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
         <div className="space-y-4 pt-4">
           <div className="flex items-center justify-between">

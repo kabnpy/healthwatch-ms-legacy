@@ -9,9 +9,10 @@ from app.models import (
     Client,
     Insurer,
     Policy,
+    PolicyCreateExtended,
     Product,
-    RiskNote,
 )
+from app.services.policy import policy_service
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -55,6 +56,8 @@ def create_mock_data() -> None:
                 product.class_of_insurance = class_of_insurance
                 session.add(product)
                 logger.info(f"Updated product: {name}")
+            session.commit()
+            session.refresh(product)
             return product
 
         # PRODUCT: PERSONAL ACCIDENT
@@ -69,20 +72,6 @@ def create_mock_data() -> None:
                 "Artificial appliances (Accidental Loss)": "Kshs. 10,000/-",
                 "Last expense (Accidental Death)": "Kshs. 50,000/-",
             },
-            "SPECIAL CLAUSES": [
-                "24hour cover including Piloting and Aircrew duties",
-                "Duty or pleasure",
-                "Worldwide limits",
-                "Disappearance clause",
-                "Age limits 16-65 years",
-            ],
-            "EXCLUDED RISKS": [
-                "Racing Risks",
-                "Winter sports",
-                "Suicide or attempted suicide",
-                "War and kindred risks",
-                "Influence of intoxicating Liquor or drugs",
-            ],
         }
         upsert_product("Maxpac Personal Accident", "Personal Accident", pa_details)
 
@@ -94,24 +83,11 @@ def create_mock_data() -> None:
                 "Year": "<<number>>",
                 "Value Kshs.": "<<number>>",
             },
-            "HIGH-END BENEFITS & LIMITS": {
-                "Third Party Persons": "Kshs. 10,000,000.00",
-                "Third Party Property": "Kshs. 30,000,000.00",
-                "Passengers Legal Liability": "Kshs. 4,000,000 per person and Kshs. 20,000,000.00 per event",
-                "Towing & Recovery": "Kshs. 100,000.00",
-                "Authorized repair limit": "Kshs. 100,000.00",
-                "Windscreen/Window glass": "Fully covered on replacement cost",
-                "Side mirrors & Housing": "Replacement Cost Max Kshs. 100,000.00",
-            },
             "EXCESS": {
                 "Own Damage and Partial": "2.5% of value minimum Kshs. 15,000/- Max Kshs. 100,000.00",
                 "Third Party damage claims": "Kshs. 5,000.00",
                 "Third Party Injury": "Nil",
             },
-            "SPECIAL CLAUSES": [
-                "Including Special Perils",
-                "Including riot, Strike and civil commotion",
-            ],
         }
         motor_product = upsert_product(
             "Motor Private - Comprehensive", "Motor Private", motor_details
@@ -129,8 +105,6 @@ def create_mock_data() -> None:
             "Domestic Package - HomeShield", "Domestic Package", domestic_details
         )
 
-        session.commit()
-
         # 2. CLIENT (Agnes Njoki Mwangi)
         client = session.exec(
             select(Client).where(Client.kra_pin == "A001158997L")
@@ -140,8 +114,9 @@ def create_mock_data() -> None:
                 name="Agnes Njoki Mwangi",
                 kra_pin="A001158997L",
                 phone="0733980566",
-                postal_address="P.O. Box 11908 - 00100",
-                city="Nairobi",
+                postal_number="11908",
+                postal_code="00100",
+                town="Nairobi",
                 email="agnes@example.com",
             )
             session.add(client)
@@ -152,89 +127,62 @@ def create_mock_data() -> None:
         policy = session.exec(
             select(Policy).where(Policy.policy_number == "010/070/1/012473/2017")
         ).first()
+
         if not policy:
-            policy = Policy(
+            start_date = date(2025, 8, 2)
+            end_date = date(2026, 8, 1)
+            risk_details = {
+                "VEHICLE DETAILS": {
+                    "Reg. No": "KCM 780L",
+                    "Make": "Toyota Landcruiser Prado",
+                    "Year": 2016,
+                    "Value Kshs.": 4700000.0,
+                }
+            }
+
+            policy_in = PolicyCreateExtended(
                 policy_number="010/070/1/012473/2017",
                 client_id=client.id,
                 product_id=motor_product.id,
                 status="Active",
-                start_date=date(2025, 8, 2),
-                end_date=date(2026, 8, 1),
-                description="KCM 780L - Toyota Landcruiser Prado",
-                total_premium=153438.0,
-                premium_breakdown={
-                    "basic": 152750.0,
-                    "levies": {"trainingLevy": 306.0, "phcf": 382.0},
-                },
-                risk_details={
-                    "reg_no": "KCM 780L",
-                    "make": "Toyota Landcruiser Prado",
-                    "year": 2016,
-                    "value": 4700000.0,
-                },
+                inception_date=start_date,
+                coverage_start=start_date,
+                coverage_end=end_date,
+                risk_details=risk_details,
             )
-            session.add(policy)
-            session.commit()
-            session.refresh(policy)
-        else:
-            # Update policy details if needed
-            policy.start_date = date(2025, 8, 2)
-            policy.end_date = date(2026, 8, 1)
-            policy.description = "KCM 780L - Toyota Landcruiser Prado"
-            policy.total_premium = 153438.0
-            policy.premium_breakdown = {
-                "basic": 152750.0,
-                "levies": {"trainingLevy": 306.0, "phcf": 382.0},
-            }
-            policy.risk_details = {
-                "reg_no": "KCM 780L",
-                "make": "Toyota Landcruiser Prado",
-                "year": 2016,
-                "value": 4700000.0,
-            }
-            session.add(policy)
-            session.commit()
 
-        # 5. MOTOR RISK NOTE
-        rn = session.exec(
-            select(RiskNote).where(RiskNote.policy_id == policy.id)
-        ).first()
-        
-        # Snapshot helper
-        def get_policy_snapshot(p: Policy):
-            dump = p.model_dump()
-            # Convert dates to strings for JSON
-            if dump.get("start_date"): dump["start_date"] = str(dump["start_date"])
-            if dump.get("end_date"): dump["end_date"] = str(dump["end_date"])
-            if dump.get("created_at"): dump["created_at"] = str(dump["created_at"])
-            # Remove UUIDs if needed, or keep as strings
-            dump["id"] = str(dump["id"])
-            dump["client_id"] = str(dump["client_id"])
-            if dump.get("product_id"): dump["product_id"] = str(dump["product_id"])
-            return dump
+            policy = policy_service.create_policy(
+                session=session,
+                policy_in=policy_in,
+                risk_details=risk_details,
+                coverage_start=start_date,
+                coverage_end=end_date,
+            )
 
-        if not rn:
-            rn = RiskNote(
+            logger.info(
+                f"Created atomic policy and initial RiskNote: {policy.policy_number}"
+            )
+
+            # 4. ADD AN ENDORSEMENT
+            # Increase value 3 months later
+            new_risk_details = {
+                "VEHICLE DETAILS": {
+                    "Reg. No": "KCM 780L",
+                    "Make": "Toyota Landcruiser Prado",
+                    "Year": 2016,
+                    "Value Kshs.": 5000000.0,
+                }
+            }
+
+            endorsement_rn = policy_service.create_endorsement(
+                session=session,
                 policy_id=policy.id,
-                transaction_type="New Business",
-                invoice_number="HW-MOT-001",
-                start_date=date(2025, 8, 2),
-                end_date=date(2026, 8, 1),
-                net_premium=152750.0,
-                taxes={"trainingLevy": 306.0, "phcf": 382.0},
-                commission_amount=15275.0,
-                total_amount=153438.0,
-                status="Active",
-                policy_snapshot=get_policy_snapshot(policy),
-                special_clauses=[],
+                updated_risk_details=new_risk_details,
+                change_description="Increased vehicle value to 5M",
             )
-            session.add(rn)
-            session.commit()
-        else:
-            # IMPORTANT: Update snapshot to reflect latest policy fields
-            rn.policy_snapshot = get_policy_snapshot(policy)
-            session.add(rn)
-            session.commit()
+            logger.info(
+                f"Created endorsement RiskNote: {endorsement_rn.risk_note_number}"
+            )
 
         logger.info("✅ Mock Data Seeded & Synchronized Successfully")
 

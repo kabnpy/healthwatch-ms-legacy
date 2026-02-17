@@ -27,8 +27,11 @@ export const columns: ColumnDef<PolicyPublic>[] = [
     header: "Policy",
     cell: ({ row }) => (
       <Link
-        to="/policies/$policyId"
-        params={{ policyId: row.original.id }}
+        to="/clients/$clientId/policies/$policyId"
+        params={{
+          clientId: row.original.client_id,
+          policyId: row.original.id,
+        }}
         className="font-medium hover:underline text-primary flex items-center gap-2"
       >
         {row.original.display_name}
@@ -73,15 +76,24 @@ export const columns: ColumnDef<PolicyPublic>[] = [
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link to="/policies/$policyId" params={{ policyId: policy.id }}>
+              <Link
+                to="/clients/$clientId/policies/$policyId"
+                params={{
+                  clientId: policy.client_id,
+                  policyId: policy.id,
+                }}
+              >
                 <ExternalLink className="mr-2 h-4 w-4" />
                 View Dashboard
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link
-                to="/policies/$policyId"
-                params={{ policyId: policy.id }}
+                to="/clients/$clientId/policies/$policyId"
+                params={{
+                  clientId: policy.client_id,
+                  policyId: policy.id,
+                }}
                 hash="risk-notes"
               >
                 <ReceiptText className="mr-2 h-4 w-4" />
@@ -90,8 +102,11 @@ export const columns: ColumnDef<PolicyPublic>[] = [
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link
-                to="/policies/$policyId"
-                params={{ policyId: policy.id }}
+                to="/clients/$clientId/policies/$policyId"
+                params={{
+                  clientId: policy.client_id,
+                  policyId: policy.id,
+                }}
                 hash="certificates"
               >
                 <ShieldCheck className="mr-2 h-4 w-4" />

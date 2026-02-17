@@ -3,9 +3,10 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException
 
-from app.api.deps import CurrentUser, SessionDep
-from app.crud.insurance import (
+from app.api.deps import CurrentUser, SessionDep, StaffUser
+from app.crud import (
     create_invoice,
+    create_invoice_bulk,
     create_receipt,
     create_receipt_allocation,
     get_invoice,
@@ -15,6 +16,7 @@ from app.crud.insurance import (
     void_receipt,
 )
 from app.models import (
+    InvoiceBulkCreate,
     InvoiceCreate,
     InvoicePublic,
     InvoicesPublic,
@@ -69,12 +71,22 @@ def read_invoice(session: SessionDep, _current_user: CurrentUser, id: uuid.UUID)
 
 @router.post("/invoices/", response_model=InvoicePublic)
 def create_new_invoice(
-    *, session: SessionDep, _current_user: CurrentUser, invoice_in: InvoiceCreate
+    *, session: SessionDep, _current_user: StaffUser, invoice_in: InvoiceCreate
 ) -> Any:
     """
     Create new invoice.
     """
     return create_invoice(session=session, invoice_in=invoice_in)
+
+
+@router.post("/bulk-invoices/", response_model=InvoicePublic)
+def create_bulk_invoice(
+    *, session: SessionDep, _current_user: StaffUser, bulk_in: InvoiceBulkCreate
+) -> Any:
+    """
+    Create an invoice from multiple Risk Notes.
+    """
+    return create_invoice_bulk(session=session, bulk_in=bulk_in)
 
 
 # ==========================================
@@ -121,7 +133,7 @@ def read_receipt_by_id(
 
 @router.post("/receipts/", response_model=ReceiptPublic)
 def create_new_receipt(
-    *, session: SessionDep, _current_user: CurrentUser, receipt_in: ReceiptCreate
+    *, session: SessionDep, _current_user: StaffUser, receipt_in: ReceiptCreate
 ) -> Any:
     """
     Create new receipt.
@@ -133,7 +145,7 @@ def create_new_receipt(
 def allocate_receipt(
     *,
     session: SessionDep,
-    _current_user: CurrentUser,
+    _current_user: StaffUser,
     id: uuid.UUID,
     allocation_in: ReceiptAllocationCreate,
 ) -> Any:
@@ -150,7 +162,7 @@ def allocate_receipt(
 
 @router.delete("/receipts/{id}", response_model=ReceiptPublic)
 def delete_receipt(
-    *, session: SessionDep, _current_user: CurrentUser, id: uuid.UUID
+    *, session: SessionDep, _current_user: StaffUser, id: uuid.UUID
 ) -> Any:
     """
     Void a receipt.

@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import {
   FinancialsService,
+  type InvoiceBulkCreate,
   type ReceiptAllocationCreate,
   type ReceiptCreate,
 } from "../client"
@@ -19,6 +20,22 @@ export const useInvoice = (id: string) => {
     queryKey: ["invoices", id],
     queryFn: () => FinancialsService.readInvoice({ id }),
     enabled: !!id,
+  })
+}
+
+export const useCreateBulkInvoice = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (data: InvoiceBulkCreate) =>
+      FinancialsService.createBulkInvoice({ requestBody: data }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["invoices"] })
+      queryClient.invalidateQueries({ queryKey: ["risk-notes"] })
+      toast.success("Invoice generated successfully")
+    },
+    onError: (error: any) => {
+      toast.error(error.detail || "Failed to generate invoice")
+    },
   })
 }
 
@@ -83,11 +100,11 @@ export const useFinancialSummary = (clientId?: string) => {
 
   const invoices = invoicesQuery.data?.data || []
   const totalInvoiced = invoices.reduce(
-    (sum, inv) => sum + (inv.total_amount || 0),
+    (sum, inv) => sum + Number(inv.total_amount || 0),
     0,
   )
   const totalDue = invoices.reduce(
-    (sum, inv) => sum + (inv.balance_due || 0),
+    (sum, inv) => sum + Number(inv.balance_due || 0),
     0,
   )
   const totalPaid = totalInvoiced - totalDue
