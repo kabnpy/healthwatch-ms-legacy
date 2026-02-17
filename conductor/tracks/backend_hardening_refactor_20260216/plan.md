@@ -15,12 +15,12 @@ Flatten the backend directory structure and remove the unused `Item` module.
 ## Phase 2: Security Hardening & Bug Fixes
 Resolve the 401 Unauthorized errors and improve the testing strategy.
 
-- [ ] Task: Audit all API endpoints for consistent `SecurityDep` usage.
-- [ ] Task: Implement a centralized `MockAuth` helper for the backend test suite.
-- [ ] Task: Write failing integration tests for the Policy Wizard flow (Red Phase).
-- [ ] Task: Fix the 401 error in the Policy creation endpoint (Green Phase).
-- [ ] Task: Verify 80%+ coverage for all modified security and policy modules.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Security Hardening & Bug Fixes' (Protocol in workflow.md)
+- [x] Task: Audit all API endpoints for consistent `SecurityDep` usage. (b1757b2)
+- [x] Task: Implement a centralized `MockAuth` helper for the backend test suite. (b1757b2)
+- [x] Task: Write failing integration tests for the Policy Wizard flow (Red Phase). (b1757b2)
+- [x] Task: Fix the 401 error in the Policy creation endpoint (Green Phase). (b1757b2)
+- [x] Task: Verify 80%+ coverage for all modified security and policy modules. (b1757b2)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Security Hardening & Bug Fixes' (b1757b2) (Protocol in workflow.md)
 
 ## Phase 3: Frontend Route & Navigation Refactor
 Nest the policy dashboard and remove `Item` references from the UI.

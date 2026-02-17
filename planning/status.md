@@ -1,6 +1,7 @@
-# Project Status (Session End: 2026-02-06)
+# Project Status (Session End: 2026-02-17)
 
 ## Finished (Key Milestones)
+- **Client Regeneration**: Successfully regenerated the TypeScript client from the backend OpenAPI schema and verified type integrity with `tsc`.
 - **Policy Issuance Error Fix**: Resolved "Internal Server Error" (500) during policy creation. Fixed three root causes:
     1. Added Pydantic validators to `MotorPrivateRiskDetails` to handle numeric strings with commas (e.g., "1,500,000").
     2. Converted Decimal values to floats in `calculate_levies` to ensure JSON serializability for database storage.
