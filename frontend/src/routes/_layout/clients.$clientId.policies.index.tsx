@@ -17,7 +17,7 @@ function getPoliciesQueryOptions(clientId: string) {
   }
 }
 
-export const Route = createFileRoute("/_layout/clients/$clientId/policies")({
+export const Route = createFileRoute("/_layout/clients/$clientId/policies/")({
   component: ClientPolicies,
 })
 

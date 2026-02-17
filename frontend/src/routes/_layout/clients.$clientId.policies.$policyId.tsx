@@ -35,7 +35,7 @@ export const Route = createFileRoute(
   errorComponent: ErrorComponent,
   loader: ({ params }) =>
     queryClient.ensureQueryData({
-      queryKey: ["policy", params.policyId],
+      queryKey: ["policies", params.policyId],
       queryFn: () => PoliciesService.readPolicy({ id: params.policyId }),
     }),
 })
@@ -43,23 +43,29 @@ export const Route = createFileRoute(
 // --- Main Page Component ---
 
 function PolicyDashboard() {
-  const { policyId } = Route.useParams()
+  const { clientId, policyId } = Route.useParams()
 
   return (
     <Suspense fallback={<PolicyDashboardSkeleton />}>
-      <PolicyDashboardContent policyId={policyId} />
+      <PolicyDashboardContent clientId={clientId} policyId={policyId} />
     </Suspense>
   )
 }
 
 // --- Component Content (Suspended) ---
 
-function PolicyDashboardContent({ policyId }: { policyId: string }) {
+function PolicyDashboardContent({
+  clientId,
+  policyId,
+}: {
+  clientId: string
+  policyId: string
+}) {
   const { policy, latestRiskNote, riskNotes, isLoading } =
     usePolicyDashboard(policyId)
 
   // We need client name for breadcrumbs
-  const { data: client } = useClient(policy?.client_id || "")
+  const { data: client } = useClient(clientId)
 
   // State for Document Viewer
   const [viewerOpen, setViewerOpen] = useState(false)

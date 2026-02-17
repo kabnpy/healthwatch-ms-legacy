@@ -1,6 +1,9 @@
 # Project Status (Session End: 2026-02-17)
 
 ## Finished (Key Milestones)
+- **Frontend Routing & Policy View Refinement**: Resolved a routing conflict by converting `clients.$clientId.policies.tsx` to an index route (`clients.$clientId.policies.index.tsx`). Previously, it was acting as a layout for sub-routes but lacked an `<Outlet />`, which blocked specific policy views. Also fixed a `queryKey` mismatch, optimized client data fetching, and improved the `activeTab` detection logic.
+- **CRUD Layer Hardening**: Fixed a widespread bug where SQLAlchemy `where` clauses used `is None` instead of `== None`, which caused incorrect SQL generation and failed to retrieve records with NULL values. This resolved the `404: Policy not found` errors during mock data seeding.
+- **Prestart Service Stabilization**: The `prestart` service now successfully completes database migrations and mock data seeding.
 - **Client Regeneration**: Successfully regenerated the TypeScript client from the backend OpenAPI schema and verified type integrity with `tsc`.
 - **Policy Issuance Error Fix**: Resolved "Internal Server Error" (500) during policy creation. Fixed three root causes:
     1. Added Pydantic validators to `MotorPrivateRiskDetails` to handle numeric strings with commas (e.g., "1,500,000").

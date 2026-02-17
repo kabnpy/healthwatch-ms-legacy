@@ -44,7 +44,13 @@ function ClientHubContent({ clientId }: { clientId: string }) {
   const location = useLocation()
 
   // Determine active tab based on path
-  const activeTab = location.pathname.split("/").pop() || "overview"
+  const path = location.pathname
+  let activeTab = "overview"
+  if (path.includes("/overview")) activeTab = "overview"
+  else if (path.includes("/policies")) activeTab = "policies"
+  else if (path.includes("/invoices")) activeTab = "invoices"
+  else if (path.includes("/documents")) activeTab = "documents"
+  else if (path.includes("/settings")) activeTab = "settings"
 
   return (
     <div className="flex flex-col gap-8">
