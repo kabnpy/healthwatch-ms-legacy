@@ -13,9 +13,9 @@ Initial setup and linking the local environment to Railway.
 ## Phase 2: Database Provisioning & Configuration [checkpoint: ]
 Setting up the persistent data layer.
 
-- [ ] Task: Provision a Managed PostgreSQL database service within the Railway project.
-- [ ] Task: Extract the database connection string and verify connectivity from the local environment using the Railway CLI.
-- [ ] Task: Synchronize database environment variables (e.g., `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`) with the Railway project.
+- [x] Task: Provision a Managed PostgreSQL database service within the Railway project. (manual)
+- [x] Task: Extract the database connection string and verify connectivity from the local environment using the Railway CLI. (manual)
+- [x] Task: Synchronize database environment variables (e.g., `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`) with the Railway project. (manual)
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Database Provisioning & Configuration' (Protocol in workflow.md)
 
 ## Phase 3: Backend Deployment & Verification [checkpoint: ]
