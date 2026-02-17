@@ -171,9 +171,6 @@ export type DocumentsPublic = {
 
 export type DocumentType = 'Logbook' | 'ID' | 'Valuation' | 'PoliceAbstract' | 'Receipt' | 'Other';
 
-/**
- * Model for creating an endorsement
- */
 export type EndorsementCreate = {
     updated_risk_details: {
         [key: string]: unknown;
@@ -287,9 +284,6 @@ export type PoliciesPublic = {
     count: number;
 };
 
-/**
- * Extended model for atomic creation via Service layer
- */
 export type PolicyCreateExtended = {
     created_at?: string;
     updated_at?: string;
@@ -319,23 +313,11 @@ export type PolicyPublic = {
     inception_date?: (string | null);
     id: string;
     product?: (ProductPublic | null);
-    /**
-     * Get current coverage details from latest risk note
-     */
     readonly current_risk_details: {
         [key: string]: unknown;
     };
-    /**
-     * Get current total premium from latest risk note
-     */
     readonly total_premium: string;
-    /**
-     * Backward compatibility for start_date
-     */
     readonly start_date: (string | null);
-    /**
-     * Backward compatibility for end_date
-     */
     readonly end_date: (string | null);
     readonly display_name: string;
 };

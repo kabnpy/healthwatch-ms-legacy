@@ -979,8 +979,7 @@ export const EndorsementCreateSchema = {
     },
     type: 'object',
     required: ['updated_risk_details', 'change_description'],
-    title: 'EndorsementCreate',
-    description: 'Model for creating an endorsement'
+    title: 'EndorsementCreate'
 } as const;
 
 export const HTTPValidationErrorSchema = {
@@ -1673,8 +1672,7 @@ export const PolicyCreateExtendedSchema = {
     },
     type: 'object',
     required: ['policy_number', 'client_id', 'coverage_end'],
-    title: 'PolicyCreateExtended',
-    description: 'Extended model for atomic creation via Service layer'
+    title: 'PolicyCreateExtended'
 } as const;
 
 export const PolicyPublicSchema = {
@@ -1769,14 +1767,12 @@ export const PolicyPublicSchema = {
             additionalProperties: true,
             type: 'object',
             title: 'Current Risk Details',
-            description: 'Get current coverage details from latest risk note',
             readOnly: true
         },
         total_premium: {
             type: 'string',
             pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$',
             title: 'Total Premium',
-            description: 'Get current total premium from latest risk note',
             readOnly: true
         },
         start_date: {
@@ -1790,7 +1786,6 @@ export const PolicyPublicSchema = {
                 }
             ],
             title: 'Start Date',
-            description: 'Backward compatibility for start_date',
             readOnly: true
         },
         end_date: {
@@ -1804,7 +1799,6 @@ export const PolicyPublicSchema = {
                 }
             ],
             title: 'End Date',
-            description: 'Backward compatibility for end_date',
             readOnly: true
         },
         display_name: {
