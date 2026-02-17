@@ -10,7 +10,7 @@ Initial setup and linking the local environment to Railway.
 - [x] Task: Link the local repository to the newly created Railway project. (manual)
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Project Setup & CLI Configuration' (Protocol in workflow.md)
 
-## Phase 2: Database Provisioning & Configuration [checkpoint: ]
+## Phase 2: Database Provisioning & Configuration [checkpoint: 03fae9b]
 Setting up the persistent data layer.
 
 - [x] Task: Provision a Managed PostgreSQL database service within the Railway project. (manual)
