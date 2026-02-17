@@ -30,7 +30,7 @@ Nest the policy dashboard and remove `Item` references from the UI.
 - [x] Task: Delete all `Item` specific components, hooks, and pages. (0388720)
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Frontend Route & Navigation Refactor' (0388720) (Protocol in workflow.md)
 
-## Phase 4: Integration & Final Polish
+## Phase 4: Integration & Final Polish [checkpoint: abcee60]
 Regenerate the API client and resolve discrepancies.
 
 - [x] Task: Regenerate the frontend API client (`npm run generate-client`). (3e92202)
