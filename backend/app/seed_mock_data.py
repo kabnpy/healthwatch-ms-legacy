@@ -148,7 +148,7 @@ def create_mock_data() -> None:
                 inception_date=start_date,
                 coverage_start=start_date,
                 coverage_end=end_date,
-                risk_details=risk_details
+                risk_details=risk_details,
             )
 
             policy = policy_service.create_policy(
@@ -156,10 +156,12 @@ def create_mock_data() -> None:
                 policy_in=policy_in,
                 risk_details=risk_details,
                 coverage_start=start_date,
-                coverage_end=end_date
+                coverage_end=end_date,
             )
 
-            logger.info(f"Created atomic policy and initial RiskNote: {policy.policy_number}")
+            logger.info(
+                f"Created atomic policy and initial RiskNote: {policy.policy_number}"
+            )
 
             # 4. ADD AN ENDORSEMENT
             # Increase value 3 months later
@@ -176,9 +178,11 @@ def create_mock_data() -> None:
                 session=session,
                 policy_id=policy.id,
                 updated_risk_details=new_risk_details,
-                change_description="Increased vehicle value to 5M"
+                change_description="Increased vehicle value to 5M",
             )
-            logger.info(f"Created endorsement RiskNote: {endorsement_rn.risk_note_number}")
+            logger.info(
+                f"Created endorsement RiskNote: {endorsement_rn.risk_note_number}"
+            )
 
         logger.info("✅ Mock Data Seeded & Synchronized Successfully")
 

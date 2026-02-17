@@ -1,4 +1,4 @@
-from collections.abc import Generator
+from collections.abc import Callable, Generator
 from typing import Annotated
 
 import jwt
@@ -51,7 +51,7 @@ CurrentUser = Annotated[User, Depends(get_current_user)]
 SecurityDep = CurrentUser  # Alias for consistency with audit plan
 
 
-def require_role(allowed_roles: list[UserRole]):
+def require_role(allowed_roles: list[UserRole]) -> Callable[[User], User]:
     def role_dependency(current_user: CurrentUser) -> User:
         if current_user.is_superuser:
             return current_user

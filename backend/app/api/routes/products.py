@@ -101,9 +101,7 @@ def update_product(
 
 
 @router.delete("/{id}", response_model=Message)
-def delete_product(
-    session: SessionDep, _current_user: StaffUser, id: uuid.UUID
-) -> Any:
+def delete_product(session: SessionDep, _current_user: StaffUser, id: uuid.UUID) -> Any:
     """
     Delete a product.
     """

@@ -49,8 +49,7 @@ def read_policies(
         session=session, skip=skip, limit=limit, client_id=client_id
     )
     return PoliciesPublic(
-        data=[prepare_policy_public(p) for p in policies],
-        count=count
+        data=[prepare_policy_public(p) for p in policies], count=count
     )
 
 
@@ -87,7 +86,7 @@ def create_policy(
         risk_details=policy_in.risk_details,
         coverage_start=policy_in.coverage_start,
         coverage_end=policy_in.coverage_end,
-        current_user_id=current_user.id
+        current_user_id=current_user.id,
     )
     return prepare_policy_public(policy)
 
@@ -98,7 +97,7 @@ def create_endorsement(
     session: SessionDep,
     current_user: StaffUser,
     id: uuid.UUID,
-    endorsement_in: EndorsementCreate
+    endorsement_in: EndorsementCreate,
 ) -> Any:
     """
     Create a policy endorsement.
@@ -108,7 +107,7 @@ def create_endorsement(
         policy_id=id,
         updated_risk_details=endorsement_in.updated_risk_details,
         change_description=endorsement_in.change_description,
-        current_user_id=current_user.id
+        current_user_id=current_user.id,
     )
 
 
@@ -132,9 +131,7 @@ def update_policy(
 
 
 @router.delete("/{id}", response_model=Message)
-def delete_policy(
-    session: SessionDep, _current_user: StaffUser, id: uuid.UUID
-) -> Any:
+def delete_policy(session: SessionDep, _current_user: StaffUser, id: uuid.UUID) -> Any:
     """
     Delete a policy.
     """

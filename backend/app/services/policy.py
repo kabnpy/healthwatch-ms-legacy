@@ -35,14 +35,19 @@ def calculate_levies(net_premium: Decimal) -> dict[str, Any]:
     return {
         "training_levy": float(training_levy),
         "phcf": float(phcf),
-        "stamp_duty": float(stamp_duty)
+        "stamp_duty": float(stamp_duty),
     }
 
+
 def calculate_commission(net_premium: Decimal, product: Product) -> Decimal:
-    return (net_premium * Decimal(str(product.default_commission_rate / 100))).quantize(Decimal("0.01"))
+    return (net_premium * Decimal(str(product.default_commission_rate / 100))).quantize(
+        Decimal("0.01")
+    )
+
 
 def generate_risk_note_number() -> str:
     return f"RN-{uuid.uuid4().hex[:8].upper()}"
+
 
 class PolicyService:
     @staticmethod
@@ -53,7 +58,7 @@ class PolicyService:
         risk_details: dict[str, Any],
         coverage_start: date,
         coverage_end: date,
-        current_user_id: uuid.UUID | None = None
+        current_user_id: uuid.UUID | None = None,
     ) -> Policy:
         """
         Create a Policy with an initial Risk Note (New Business).
@@ -67,7 +72,10 @@ class PolicyService:
             validated_risk = product.validate_risk_details(risk_details)
             net_premium = product.calculate_premium(validated_risk)
         except Exception as e:
-            raise HTTPException(status_code=400, detail=f"Invalid risk details for Motor Private: {str(e)}")
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid risk details for Motor Private: {str(e)}",
+            )
 
         # 2. Create Policy (container)
         policy = crud.create_policy(session=session, policy_in=policy_in)
@@ -86,16 +94,18 @@ class PolicyService:
             policy_snapshot={
                 "policy_number": policy.policy_number,
                 "risk_details": validated_risk,
-                "product": product.model_dump(mode="json")
+                "product": product.model_dump(mode="json"),
             },
             net_premium=net_premium,
             taxes=levies,
             commission_amount=calculate_commission(net_premium, product),
             total_amount=net_premium + total_levies,
-            created_by_id=current_user_id
+            created_by_id=current_user_id,
         )
 
-        PolicyService.create_risk_note_with_invoice(session=session, risk_note_in=risk_note_in)
+        PolicyService.create_risk_note_with_invoice(
+            session=session, risk_note_in=risk_note_in
+        )
 
         session.refresh(policy)
         return policy
@@ -107,7 +117,7 @@ class PolicyService:
         policy_id: uuid.UUID,
         updated_risk_details: dict[str, Any],
         change_description: str,
-        current_user_id: uuid.UUID | None = None
+        current_user_id: uuid.UUID | None = None,
     ) -> RiskNote:
         """
         Create a mid-term modification (Endorsement).
@@ -117,16 +127,26 @@ class PolicyService:
             raise HTTPException(status_code=404, detail="Policy not found")
 
         product = policy.product
+        if not product:
+            raise HTTPException(
+                status_code=400, detail="Policy has no product assigned"
+            )
+
         current_rn = policy.current_risk_note
         if not current_rn:
-            raise HTTPException(status_code=400, detail="Cannot endorse policy without active risk note")
+            raise HTTPException(
+                status_code=400, detail="Cannot endorse policy without active risk note"
+            )
 
         # 1. Validate and price NEW state
         try:
             validated_risk = product.validate_risk_details(updated_risk_details)
             new_net_total = product.calculate_premium(validated_risk)
         except Exception as e:
-            raise HTTPException(status_code=400, detail=f"Invalid risk details for Motor Private: {str(e)}")
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid risk details for Motor Private: {str(e)}",
+            )
 
         # 2. Calculate delta (pro-rata logic could be added here, for now it's just delta of full term)
         delta_premium = new_net_total - current_rn.net_premium
@@ -150,26 +170,31 @@ class PolicyService:
                 "changes": {
                     "description": change_description,
                     "from": current_rn.policy_snapshot.get("risk_details"),
-                    "to": validated_risk
-                }
+                    "to": validated_risk,
+                },
             },
             net_premium=delta_premium,
             taxes=levies,
             commission_amount=calculate_commission(delta_premium, product),
             total_amount=delta_premium + total_levies,
             special_clauses=[change_description],
-            created_by_id=current_user_id
+            created_by_id=current_user_id,
         )
 
         # Mark previous as replaced
         current_rn.status = RiskNoteStatus.REPLACED
         session.add(current_rn)
 
-        return PolicyService.create_risk_note_with_invoice(session=session, risk_note_in=risk_note_in)
+        return PolicyService.create_risk_note_with_invoice(
+            session=session, risk_note_in=risk_note_in
+        )
 
     @staticmethod
     def create_risk_note_with_invoice(
-        *, session: Session, risk_note_in: RiskNoteCreate, created_by_id: uuid.UUID | None = None
+        *,
+        session: Session,
+        risk_note_in: RiskNoteCreate,
+        created_by_id: uuid.UUID | None = None,
     ) -> RiskNote:
         """
         Create a Risk Note and automatically generate its Invoice.
@@ -186,7 +211,9 @@ class PolicyService:
         if risk_note.status != RiskNoteStatus.DRAFT:
             policy = crud.get_policy(session=session, id=risk_note.policy_id)
             if not policy:
-                raise HTTPException(status_code=404, detail="Policy not found for invoice generation")
+                raise HTTPException(
+                    status_code=404, detail="Policy not found for invoice generation"
+                )
 
             policy_num = policy.policy_number
             invoice_in = InvoiceCreate(
@@ -195,7 +222,7 @@ class PolicyService:
                 date_issued=date.today(),
                 total_amount=risk_note.total_amount,
                 balance_due=risk_note.total_amount,
-                status=InvoiceStatus.UNPAID
+                status=InvoiceStatus.UNPAID,
             )
             invoice = crud.create_invoice(session=session, invoice_in=invoice_in)
 
@@ -203,7 +230,7 @@ class PolicyService:
                 invoice_id=invoice.id,
                 risk_note_id=risk_note.id,
                 amount=risk_note.total_amount,
-                description=f"{risk_note.transaction_type} - {policy_num}"
+                description=f"{risk_note.transaction_type} - {policy_num}",
             )
             crud.create_invoice_line_item(session=session, line_item_in=line_item_in)
 
@@ -213,5 +240,6 @@ class PolicyService:
             session.refresh(risk_note)
 
         return risk_note
+
 
 policy_service = PolicyService()

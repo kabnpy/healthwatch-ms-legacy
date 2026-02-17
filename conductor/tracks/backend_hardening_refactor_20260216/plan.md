@@ -34,6 +34,6 @@ Nest the policy dashboard and remove `Item` references from the UI.
 Regenerate the API client and resolve discrepancies.
 
 - [x] Task: Regenerate the frontend API client (`npm run generate-client`). (3e92202)
-- [ ] Task: Fix all TypeScript discrepancies across the frontend caused by backend structural changes.
-- [ ] Task: Execute final build check (`npm run build`) and linting for both stack layers.
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Integration & Final Polish' (Protocol in workflow.md)
+- [x] Task: Fix all TypeScript discrepancies across the frontend caused by backend structural changes. (91c3ec0)
+- [x] Task: Execute final build check (`npm run build`) and linting for both stack layers. (91c3ec0)
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Integration & Final Polish' (91c3ec0) (Protocol in workflow.md)

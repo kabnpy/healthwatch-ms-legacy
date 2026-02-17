@@ -174,4 +174,3 @@ def delete_receipt(
         raise HTTPException(status_code=400, detail="Receipt is already voided")
 
     return void_receipt(session=session, db_receipt=receipt)
-
