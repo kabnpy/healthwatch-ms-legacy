@@ -2,7 +2,7 @@
 
 This plan details the steps to deploy the HealthWatch MS full-stack application to Railway.com using separate services for the backend and frontend, and a managed PostgreSQL database.
 
-## Phase 1: Project Setup & CLI Configuration [checkpoint: ]
+## Phase 1: Project Setup & CLI Configuration [checkpoint: 5d9c6b7]
 Initial setup and linking the local environment to Railway.
 
 - [x] Task: Install and authenticate the Railway CLI on the development machine. (manual)
