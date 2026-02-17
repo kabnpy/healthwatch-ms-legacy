@@ -21,8 +21,8 @@ Setting up the persistent data layer.
 ## Phase 3: Backend Deployment & Verification [checkpoint: ]
 Deploying and hardening the API service.
 
-- [ ] Task: Configure all required backend environment variables in Railway (e.g., `SECRET_KEY`, `CORS_ORIGINS`).
-- [ ] Task: Deploy the backend service from the `backend/` directory using `railway up`.
+- [x] Task: Configure all required backend environment variables in Railway (e.g., `SECRET_KEY`, `CORS_ORIGINS`). (manual)
+- [~] Task: Push configuration changes to GitHub to trigger Railway backend deployment.
 - [ ] Task: Execute database migrations against the Railway PostgreSQL instance using the backend service.
 - [ ] Task: Verify the backend health check endpoint on the public Railway URL.
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Backend Deployment & Verification' (Protocol in workflow.md)
@@ -30,9 +30,8 @@ Deploying and hardening the API service.
 ## Phase 4: Frontend Deployment & Verification [checkpoint: ]
 Deploying and connecting the UI service.
 
-- [ ] Task: Update the `VITE_API_URL` environment variable to point to the newly deployed backend public URL.
-- [ ] Task: Configure frontend build and start commands in Railway (using Nixpacks or custom configuration).
-- [ ] Task: Deploy the frontend service from the `frontend/` directory using `railway up`.
+- [x] Task: Update the `VITE_API_URL` environment variable to point to the newly deployed backend public URL. (manual)
+- [~] Task: Push configuration changes to GitHub to trigger Railway frontend deployment.
 - [ ] Task: Verify the frontend accessibility and successful API connection on the public Railway URL.
 - [ ] Task: Conductor - User Manual Verification 'Phase 4: Frontend Deployment & Verification' (Protocol in workflow.md)
 
