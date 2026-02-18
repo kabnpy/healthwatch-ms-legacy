@@ -9,7 +9,7 @@ Establish the core logic and validation models for financial breakdowns.
 - [x] Task: **Write Tests for Financial Schemas**: Define expected structures for `BaseFinancialBreakdown` and `MotorFinancialBreakdown`. (Red Phase Complete)
 - [x] Task: Implement polymorphic Pydantic schemas in `backend/app/schemas.py` using `Annotated` and `Discriminator`. (30bc787)
 - [x] Task: **Write Tests for Rating Service**: Define test cases for Motor Private math (PVT, Excess Protector, etc.) with `Decimal` precision. (Red Phase Complete)
-- [ ] Task: Implement `RatingService` and `MotorPrivateRatingStrategy` in `backend/app/services/rating.py` using the Strategy Pattern.
+- [x] Task: Implement `RatingService` and `MotorPrivateRatingStrategy` in `backend/app/services/rating.py` using the Strategy Pattern. (9f7d7cb)
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Rating Engine & Polymorphic Schemas' (Protocol in workflow.md)
 
 ## Phase 2: Persistence Layer & Migration [checkpoint: ]
