@@ -39,7 +39,14 @@ class MotorPrivateRatingStrategy(RatingStrategy):
         levies = self._calculate_standard_levies(net_premium)
         total_levies = sum(levies.values())
         
-        # 4. Commission
+        # 4. Post-Levy Benefits (e.g., OM Rescue Plus)
+        post_levy_total = Decimal("0.00")
+        if extensions.get("om_rescue_plus") or extensions.get("omRescuePlus"):
+            om_amount = Decimal("1000.00")
+            benefits.append(BenefitLineItem(name="OM Rescue Plus", amount=om_amount))
+            post_levy_total += om_amount
+
+        # 5. Commission
         commission_rate = Decimal(str(product.default_commission_rate / 100))
         commission_amount = (net_premium * commission_rate).quantize(Decimal("0.01"))
         
@@ -48,7 +55,7 @@ class MotorPrivateRatingStrategy(RatingStrategy):
             net_premium=net_premium,
             taxes=levies,
             commission_amount=commission_amount,
-            total_amount=net_premium + total_levies,
+            total_amount=net_premium + total_levies + post_levy_total,
             benefits=benefits
         )
 

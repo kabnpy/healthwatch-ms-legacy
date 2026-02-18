@@ -21,80 +21,63 @@ export interface CalculationResult {
   }
 }
 
-const MOTOR_PRIVATE_TIERS = [
-  { max: 1500000, rate: 5.0, min: 60000 },
-  { max: 2500000, rate: 4.0, min: 75000 },
-  { max: 3000000, rate: 3.5, min: 100000 },
-  { max: 5000000, rate: 3.25, min: 0 },
-  { max: Infinity, rate: 3.0, min: 0 },
-]
-
+/**
+ * Local fallback calculation logic for real-time UI previews.
+ * MUST be kept in sync with backend/app/services/rating.py
+ */
 export function calculatePremium(input: CalculationInput): CalculationResult {
+  const value = input.sumInsured || 0
   let basic = 0
-  let rate = input.rate
-
+  
+  // 1. Basic Premium (Motor Private: 3.25%, min 15,000)
   if (input.isMotorPrivate) {
-    const tier =
-      MOTOR_PRIVATE_TIERS.find((t) => input.sumInsured < t.max) ||
-      MOTOR_PRIVATE_TIERS[MOTOR_PRIVATE_TIERS.length - 1]
-    rate = tier.rate
-    basic = Math.max(input.sumInsured * (rate / 100), tier.min)
+    basic = Math.max(15000, value * 0.0325)
   } else {
-    basic = input.sumInsured * (rate / 100)
+    basic = value * (input.rate / 100)
   }
 
-  // Extensions (Benefits)
+  // 2. Pre-Levy Extensions (Benefits)
   const extensions: Array<{
     name: string
     amount: number
     included?: boolean
   }> = []
 
-  // High-End Logic: Sum Insured >= 3M (All Inclusive)
-  const isHighEnd = input.isMotorPrivate && input.sumInsured >= 3000000
+  let netPremium = basic
 
   if (input.hasPVT) {
-    if (isHighEnd) {
-      extensions.push({
-        name: "Political Violence & Terrorism",
-        amount: 0,
-        included: true,
-      })
-    } else {
-      extensions.push({
-        name: "Political Violence & Terrorism",
-        amount: input.sumInsured * 0.0025,
-      })
-    }
+    const amt = value * 0.0025
+    extensions.push({
+      name: "PVT",
+      amount: amt,
+    })
+    netPremium += amt
   }
 
   if (input.hasExcessProtector) {
-    if (isHighEnd) {
-      extensions.push({ name: "Excess Protector", amount: 0, included: true })
-    } else {
-      extensions.push({
-        name: "Excess Protector",
-        amount: input.sumInsured * 0.0025,
-      })
-    }
+    const amt = value * 0.0025
+    extensions.push({ 
+      name: "Excess Protector", 
+      amount: amt 
+    })
+    netPremium += amt
   }
 
-  if (input.hasPassengerLiability) {
-    extensions.push({ name: "Passenger Liability", amount: 500 })
-  }
-
-  if (input.hasOMRescuePlus) {
-    extensions.push({ name: "OM Rescue Plus", amount: 1000 })
-  }
-
-  const extensionsTotal = extensions.reduce((acc, curr) => acc + curr.amount, 0)
-
-  // Levies (Standard Kenyan Insurance Taxes)
-  const trainingLevy = basic * 0.002 // 0.2%
-  const phcf = basic * 0.0025 // 0.25%
+  // 3. Levies (calculated on Net Premium)
+  const trainingLevy = netPremium * 0.002 // 0.2%
+  const phcf = netPremium * 0.0025 // 0.25%
   const stampDuty = 40 // Fixed
+  const totalLevies = trainingLevy + phcf + stampDuty
 
-  const total = basic + extensionsTotal + trainingLevy + phcf + stampDuty
+  // 4. Post-Levy Benefits (e.g., OM Rescue Plus)
+  let postLevyTotal = 0
+  if (input.hasOMRescuePlus) {
+    const amt = 1000
+    extensions.push({ name: "OM Rescue Plus", amount: amt })
+    postLevyTotal += amt
+  }
+
+  const total = netPremium + totalLevies + postLevyTotal
 
   return {
     breakdown: {
