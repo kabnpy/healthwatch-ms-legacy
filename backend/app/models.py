@@ -598,7 +598,9 @@ class RiskNote(RiskNoteBase, table=True):
         back_populates="risk_note"
     )
     allocations: list["ReceiptAllocation"] = Relationship(back_populates="risk_note")
-    financial_breakdown: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    financial_breakdown: dict[str, Any] = Field(
+        default_factory=dict, sa_column=Column(JSON)
+    )
     policy_snapshot: dict[str, Any] = Field(
         default_factory=dict, sa_column=Column(JSON)
     )

@@ -25,10 +25,13 @@ from app.models import (
     PolicyCreateExtended,
     PolicyPublic,
     PolicyUpdate,
+    Product,
     RiskNotePublic,
     RiskNotesPublic,
 )
+from app.schemas import QuoteRequest, QuoteResponse
 from app.services.policy import policy_service
+from app.services.rating import RatingService
 
 router = APIRouter()
 
@@ -62,6 +65,27 @@ def read_policy(session: SessionDep, _current_user: CurrentUser, id: uuid.UUID) 
     if not policy:
         raise HTTPException(status_code=404, detail="Policy not found")
     return prepare_policy_public(policy)
+
+
+@router.post("/quote", response_model=QuoteResponse)
+def get_policy_quote(
+    *,
+    session: SessionDep,
+    _current_user: CurrentUser,
+    quote_in: QuoteRequest,
+) -> Any:
+    """
+    Get a non-persistent premium quote breakdown.
+    """
+    product = session.get(Product, quote_in.product_id)
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+
+    try:
+        breakdown = RatingService.calculate_breakdown(product, quote_in.risk_details)
+        return QuoteResponse(breakdown=breakdown)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.post("/", response_model=PolicyPublic)

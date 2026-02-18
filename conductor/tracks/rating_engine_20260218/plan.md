@@ -29,11 +29,11 @@ Expose the rating engine via API and integrate it into the policy issuance flow.
 - [x] Task: **Verify Coverage**: Ensure >80% coverage for the new rating and quote logic. (f1293a1)
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Quote API & Service Orchestration' (Protocol in workflow.md) (69a0e0b)
 
-## Phase 4: Frontend Integration & Real-time UI [checkpoint: 52554f6]
-Connect the wizard to the authoritative backend math.
+## Phase 4: Frontend Integration & Single Source of Truth [checkpoint: 57552e5]
+Connect the wizard to the authoritative backend math and remove duplicated logic.
 
-- [x] Task: Regenerate frontend API client (`npm run generate-client`). (52554f6)
-- [x] Task: Implement a debounced `useQuote` hook in `frontend/src/hooks/useInsurance.ts`. (52554f6)
-- [x] Task: Refactor `StepFinancials.tsx` in the New Policy Wizard to display backend-calculated prices. (52554f6)
-- [x] Task: Update the `RiskNoteTemplate.tsx` and Review step to render the detailed breakdown from `financial_breakdown`. (52554f6)
-- [x] Task: Conductor - User Manual Verification 'Phase 4: Frontend Integration & Real-time UI' (Protocol in workflow.md) (52554f6)
+- [x] Task: Remove `frontend/src/lib/calculator.ts` and all local math references. (57552e5)
+- [x] Task: Update `StepFinancials.tsx` to handle loading/error states for the authoritative quote. (57552e5)
+- [x] Task: Ensure `StepReview.tsx` and `RiskNoteTemplate.tsx` use the `financial_breakdown` from the backend exclusively. (57552e5)
+- [x] Task: Regenerate frontend API client to ensure all new schema fields are available. (52554f6)
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Single Source of Truth' (Protocol in workflow.md) (57552e5)

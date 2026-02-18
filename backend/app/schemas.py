@@ -1,6 +1,6 @@
 import uuid
 from decimal import Decimal
-from typing import Any, Annotated, Literal, Union
+from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -26,8 +26,8 @@ class MotorFinancialBreakdown(BaseFinancialBreakdown):
 class FinancialBreakdown(BaseModel):
     product_class: str
     breakdown: Annotated[
-        Union[MotorFinancialBreakdown, BaseFinancialBreakdown],
-        Field(discriminator="type")
+        MotorFinancialBreakdown | BaseFinancialBreakdown,
+        Field(discriminator="type"),
     ]
 
 
@@ -37,7 +37,7 @@ class QuoteRequest(BaseModel):
 
 
 class QuoteResponse(BaseModel):
-    breakdown: Union[MotorFinancialBreakdown, BaseFinancialBreakdown]
+    breakdown: MotorFinancialBreakdown | BaseFinancialBreakdown
 
 
 class MotorPrivateRiskDetails(BaseModel):

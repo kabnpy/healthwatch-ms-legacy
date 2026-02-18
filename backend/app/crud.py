@@ -112,21 +112,21 @@ def create_insurer(*, session: Session, insurer_in: InsurerCreate) -> Insurer:
 
 def get_insurer_by_name(session: Session, *, name: str) -> Insurer | None:
     statement = (
-        select(Insurer).where(Insurer.name == name).where(Insurer.deleted_at == None)
+        select(Insurer).where(Insurer.name == name).where(Insurer.deleted_at is None)
     )
     return session.exec(statement).first()
 
 
 def get_insurers(session: Session, *, skip: int = 0, limit: int = 100) -> list[Insurer]:
     statement = (
-        select(Insurer).where(Insurer.deleted_at == None).offset(skip).limit(limit)
+        select(Insurer).where(Insurer.deleted_at is None).offset(skip).limit(limit)
     )
     return list(session.exec(statement).all())
 
 
 def count_insurers(session: Session) -> int:
     statement = (
-        select(func.count()).select_from(Insurer).where(Insurer.deleted_at == None)
+        select(func.count()).select_from(Insurer).where(Insurer.deleted_at is None)
     )
     return session.exec(statement).one()
 
@@ -158,7 +158,7 @@ def create_product(*, session: Session, product_in: ProductCreate) -> Product:
 
 def get_product_by_name(session: Session, *, name: str) -> Product | None:
     statement = (
-        select(Product).where(Product.name == name).where(Product.deleted_at == None)
+        select(Product).where(Product.name == name).where(Product.deleted_at is None)
     )
     return session.exec(statement).first()
 
@@ -170,7 +170,7 @@ def get_products(
     limit: int = 100,
     insurer_id: uuid.UUID | None = None,
 ) -> list[Product]:
-    statement = select(Product).where(Product.deleted_at == None)
+    statement = select(Product).where(Product.deleted_at is None)
     if insurer_id:
         statement = statement.where(Product.insurer_id == insurer_id)
     statement = statement.offset(skip).limit(limit)
@@ -178,7 +178,7 @@ def get_products(
 
 
 def count_products(session: Session, *, insurer_id: uuid.UUID | None = None) -> int:
-    statement = select(Product).where(Product.deleted_at == None)
+    statement = select(Product).where(Product.deleted_at is None)
     if insurer_id:
         statement = statement.where(Product.insurer_id == insurer_id)
     count_statement = select(func.count()).select_from(statement.subquery())
@@ -217,14 +217,14 @@ def create_client(*, session: Session, client_in: ClientCreate) -> Client:
 
 def get_client_by_kra_pin(session: Session, *, kra_pin: str) -> Client | None:
     statement = (
-        select(Client).where(Client.kra_pin == kra_pin).where(Client.deleted_at == None)
+        select(Client).where(Client.kra_pin == kra_pin).where(Client.deleted_at is None)
     )
     return session.exec(statement).first()
 
 
 def get_client_by_email(session: Session, *, email: str) -> Client | None:
     statement = (
-        select(Client).where(Client.email == email).where(Client.deleted_at == None)
+        select(Client).where(Client.email == email).where(Client.deleted_at is None)
     )
     return session.exec(statement).first()
 
@@ -242,14 +242,14 @@ def update_client(
 
 def get_clients(session: Session, *, skip: int = 0, limit: int = 100) -> list[Client]:
     statement = (
-        select(Client).where(Client.deleted_at == None).offset(skip).limit(limit)
+        select(Client).where(Client.deleted_at is None).offset(skip).limit(limit)
     )
     return list(session.exec(statement).all())
 
 
 def count_clients(session: Session) -> int:
     statement = (
-        select(func.count()).select_from(Client).where(Client.deleted_at == None)
+        select(func.count()).select_from(Client).where(Client.deleted_at is None)
     )
     return session.exec(statement).one()
 
@@ -291,7 +291,7 @@ def get_correspondences(
     limit: int = 100,
     client_id: uuid.UUID | None = None,
 ) -> list[Correspondence]:
-    statement = select(Correspondence).where(Correspondence.deleted_at == None)
+    statement = select(Correspondence).where(Correspondence.deleted_at is None)
     if client_id:
         statement = statement.where(Correspondence.client_id == client_id)
     statement = statement.offset(skip).limit(limit)
@@ -301,7 +301,7 @@ def get_correspondences(
 def count_correspondences(
     session: Session, *, client_id: uuid.UUID | None = None
 ) -> int:
-    statement = select(Correspondence).where(Correspondence.deleted_at == None)
+    statement = select(Correspondence).where(Correspondence.deleted_at is None)
     if client_id:
         statement = statement.where(Correspondence.client_id == client_id)
     count_statement = select(func.count()).select_from(statement.subquery())
@@ -333,7 +333,7 @@ def get_policy(session: Session, *, id: uuid.UUID) -> Policy | None:
     statement = (
         select(Policy)
         .where(Policy.id == id)
-        .where(Policy.deleted_at == None)
+        .where(Policy.deleted_at is None)
         .options(
             selectinload(cast(Any, Policy.product)),
         )
@@ -347,7 +347,7 @@ def get_policy_by_policy_number(
     statement = (
         select(Policy)
         .where(Policy.policy_number == policy_number)
-        .where(Policy.deleted_at == None)
+        .where(Policy.deleted_at is None)
     )
     return session.exec(statement).first()
 
@@ -358,7 +358,7 @@ def get_policies_by_client_id(
     statement = (
         select(Policy)
         .where(Policy.client_id == client_id)
-        .where(Policy.deleted_at == None)
+        .where(Policy.deleted_at is None)
         .options(
             selectinload(cast(Any, Policy.product)),
         )
@@ -386,7 +386,7 @@ def get_policies(
 ) -> list[Policy]:
     statement = (
         select(Policy)
-        .where(Policy.deleted_at == None)
+        .where(Policy.deleted_at is None)
         .options(selectinload(cast(Any, Policy.product)))
     )
     if client_id:
@@ -396,7 +396,7 @@ def get_policies(
 
 
 def count_policies(session: Session, *, client_id: uuid.UUID | None = None) -> int:
-    statement = select(Policy).where(Policy.deleted_at == None)
+    statement = select(Policy).where(Policy.deleted_at is None)
     if client_id:
         statement = statement.where(Policy.client_id == client_id)
     count_statement = select(func.count()).select_from(statement.subquery())
@@ -441,13 +441,13 @@ def get_risk_notes(
     client_id: uuid.UUID | None = None,
     uninvoiced_only: bool = False,
 ) -> list[RiskNote]:
-    statement = select(RiskNote).where(RiskNote.deleted_at == None)
+    statement = select(RiskNote).where(RiskNote.deleted_at is None)
     if policy_id:
         statement = statement.where(RiskNote.policy_id == policy_id)
     if client_id:
         statement = statement.join(Policy).where(Policy.client_id == client_id)
     if uninvoiced_only:
-        statement = statement.where(RiskNote.invoice_number == None)
+        statement = statement.where(RiskNote.invoice_number is None)
         statement = statement.where(RiskNote.status != RiskNoteStatus.DRAFT)
     statement = statement.offset(skip).limit(limit)
     return list(session.exec(statement).all())
@@ -460,13 +460,13 @@ def count_risk_notes(
     client_id: uuid.UUID | None = None,
     uninvoiced_only: bool = False,
 ) -> int:
-    statement = select(RiskNote).where(RiskNote.deleted_at == None)
+    statement = select(RiskNote).where(RiskNote.deleted_at is None)
     if policy_id:
         statement = statement.where(RiskNote.policy_id == policy_id)
     if client_id:
         statement = statement.join(Policy).where(Policy.client_id == client_id)
     if uninvoiced_only:
-        statement = statement.where(RiskNote.invoice_number == None)
+        statement = statement.where(RiskNote.invoice_number is None)
         statement = statement.where(RiskNote.status != RiskNoteStatus.DRAFT)
     count_statement = select(func.count()).select_from(statement.subquery())
     return session.exec(count_statement).one()
@@ -508,7 +508,7 @@ def get_claims(
     policy_id: uuid.UUID | None = None,
     client_id: uuid.UUID | None = None,
 ) -> list[Claim]:
-    statement = select(Claim).where(Claim.deleted_at == None)
+    statement = select(Claim).where(Claim.deleted_at is None)
     if policy_id:
         statement = statement.where(Claim.policy_id == policy_id)
     if client_id:
@@ -523,7 +523,7 @@ def count_claims(
     policy_id: uuid.UUID | None = None,
     client_id: uuid.UUID | None = None,
 ) -> int:
-    statement = select(Claim).where(Claim.deleted_at == None)
+    statement = select(Claim).where(Claim.deleted_at is None)
     if policy_id:
         statement = statement.where(Claim.policy_id == policy_id)
     if client_id:
@@ -565,7 +565,7 @@ def get_invoice(session: Session, *, id: uuid.UUID) -> Invoice | None:
     statement = (
         select(Invoice)
         .where(Invoice.id == id)
-        .where(Invoice.deleted_at == None)
+        .where(Invoice.deleted_at is None)
         .options(
             selectinload(cast(Any, Invoice.allocations)),
             selectinload(cast(Any, Invoice.line_items)),
@@ -583,7 +583,7 @@ def get_invoices(
 ) -> list[Invoice]:
     statement = (
         select(Invoice)
-        .where(Invoice.deleted_at == None)
+        .where(Invoice.deleted_at is None)
         .options(
             selectinload(cast(Any, Invoice.allocations)),
             selectinload(cast(Any, Invoice.line_items)),
@@ -658,7 +658,7 @@ def get_receipt(session: Session, *, id: uuid.UUID) -> Receipt | None:
     statement = (
         select(Receipt)
         .where(Receipt.id == id)
-        .where(Receipt.deleted_at == None)
+        .where(Receipt.deleted_at is None)
         .options(selectinload(cast(Any, Receipt.allocations)))
     )
     return session.exec(statement).first()
@@ -673,7 +673,7 @@ def get_receipts(
 ) -> list[Receipt]:
     statement = (
         select(Receipt)
-        .where(Receipt.deleted_at == None)
+        .where(Receipt.deleted_at is None)
         .options(selectinload(cast(Any, Receipt.allocations)))
     )
     if client_id:

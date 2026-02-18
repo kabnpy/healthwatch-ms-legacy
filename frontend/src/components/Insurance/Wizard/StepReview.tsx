@@ -1,9 +1,9 @@
 import React, { useMemo } from "react"
+import type { MotorFinancialBreakdown } from "@/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { LoadingButton } from "@/components/ui/loading-button"
 import { useProducts, useQuoteQuery } from "@/hooks/useInsurance"
-import type { MotorFinancialBreakdown } from "@/client"
 import type { EnhancedProduct, WizardState } from "@/types/insurance"
 
 interface StepReviewProps {
@@ -46,9 +46,16 @@ export function StepReview({
         },
       },
     }
-  }, [state.product_id, state.financials?.sumInsured, state.extensions, isMotorPrivate])
+  }, [
+    state.product_id,
+    state.financials?.sumInsured,
+    state.extensions,
+    isMotorPrivate,
+  ])
 
-  const { data: quoteData, isLoading: isQuoteLoading } = useQuoteQuery(quoteRequest as any)
+  const { data: quoteData } = useQuoteQuery(
+    quoteRequest as any,
+  )
 
   const breakdown =
     isMotorPrivate && quoteData
@@ -153,7 +160,9 @@ export function StepReview({
                     key={benefit.name}
                     className="flex justify-between text-xs pl-4 italic"
                   >
-                    <span className="text-muted-foreground">{benefit.name}:</span>
+                    <span className="text-muted-foreground">
+                      {benefit.name}:
+                    </span>
                     <span className="font-mono text-slate-600">
                       {Number(benefit.amount).toLocaleString(undefined, {
                         minimumFractionDigits: 2,

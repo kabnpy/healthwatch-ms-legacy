@@ -1,13 +1,11 @@
 import uuid
 from datetime import date
-from decimal import Decimal
 from typing import Any
 
 from fastapi import HTTPException
 from sqlmodel import Session
 
 from app import crud
-from app.services.rating import RatingService
 from app.models import (
     InvoiceCreate,
     InvoiceLineItemCreate,
@@ -20,6 +18,7 @@ from app.models import (
     RiskNoteStatus,
     TransactionType,
 )
+from app.services.rating import RatingService
 
 
 def generate_risk_note_number() -> str:
@@ -115,7 +114,9 @@ class PolicyService:
         # 1. Validate and price NEW state
         try:
             validated_risk = product.validate_risk_details(updated_risk_details)
-            full_breakdown = RatingService.calculate_breakdown(product, updated_risk_details)
+            full_breakdown = RatingService.calculate_breakdown(
+                product, updated_risk_details
+            )
         except Exception as e:
             raise HTTPException(
                 status_code=400,
@@ -147,7 +148,8 @@ class PolicyService:
             },
             net_premium=delta_premium,
             financial_breakdown=full_breakdown.model_dump(mode="json"),
-            commission_amount=full_breakdown.commission_amount - current_rn.commission_amount,
+            commission_amount=full_breakdown.commission_amount
+            - current_rn.commission_amount,
             total_amount=full_breakdown.total_amount - current_rn.total_amount,
             special_clauses=[change_description],
             created_by_id=current_user_id,

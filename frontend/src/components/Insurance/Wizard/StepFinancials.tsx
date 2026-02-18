@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useEffect, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
+import type { MotorFinancialBreakdown } from "@/client"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -14,10 +15,6 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { useProducts, useQuote } from "@/hooks/useInsurance"
-import type {
-  BaseFinancialBreakdown,
-  MotorFinancialBreakdown,
-} from "@/client"
 import type {
   EnhancedProduct,
   WizardExtensions,
@@ -129,6 +126,7 @@ export function StepFinancials({
     extensions.excessProtector,
     extensions.omRescuePlus,
     isMotorPrivate,
+    quoteMutation.mutate,
   ])
 
   // 2. authoritative source of truth
@@ -153,6 +151,7 @@ export function StepFinancials({
     financials.sumInsured,
     financials.rate,
     form.setValue,
+    breakdown,
   ])
 
   // High-End Logic: Auto-select included benefits
@@ -422,23 +421,25 @@ export function StepFinancials({
                   <div className="space-y-4 border-t border-slate-800 pt-4">
                     <div className="bg-slate-800/50 p-3 rounded space-y-2">
                       {breakdown ? (
-                        Object.entries(breakdown.taxes).map(([name, amount]) => (
-                          <div
-                            key={name}
-                            className={`flex justify-between text-xs ${
-                              quoteMutation.isPending ? "opacity-40" : ""
-                            }`}
-                          >
-                            <span className="text-slate-400">
-                              {name.replace("_", " ").toUpperCase()}
-                            </span>
-                            <span className="font-mono text-slate-300">
-                              {Number(amount).toLocaleString(undefined, {
-                                minimumFractionDigits: 2,
-                              })}
-                            </span>
-                          </div>
-                        ))
+                        Object.entries(breakdown.taxes).map(
+                          ([name, amount]) => (
+                            <div
+                              key={name}
+                              className={`flex justify-between text-xs ${
+                                quoteMutation.isPending ? "opacity-40" : ""
+                              }`}
+                            >
+                              <span className="text-slate-400">
+                                {name.replace("_", " ").toUpperCase()}
+                              </span>
+                              <span className="font-mono text-slate-300">
+                                {Number(amount).toLocaleString(undefined, {
+                                  minimumFractionDigits: 2,
+                                })}
+                              </span>
+                            </div>
+                          ),
+                        )
                       ) : (
                         <div className="text-[10px] text-slate-600 italic py-2">
                           Taxes will be calculated on quote
