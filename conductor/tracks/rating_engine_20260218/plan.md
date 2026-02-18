@@ -12,14 +12,14 @@ Establish the core logic and validation models for financial breakdowns.
 - [x] Task: Implement `RatingService` and `MotorPrivateRatingStrategy` in `backend/app/services/rating.py` using the Strategy Pattern. (9f7d7cb)
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Rating Engine & Polymorphic Schemas' (Protocol in workflow.md) (2f35acd)
 
-## Phase 2: Persistence Layer & Migration [checkpoint: ]
+## Phase 2: Persistence Layer & Migration [checkpoint: 0a668f7]
 Update the database schema to store authoritative financial snapshots.
 
 - [x] Task: Update `RiskNote` model in `backend/app/models.py` to rename `taxes` to `financial_breakdown` and update types. (ebaebc1)
 - [x] Task: Generate and verify an Alembic migration for the column rename and data transformation. (05af0e7)
 - [x] Task: Update `crud.py` and `PolicyService` to support the new `financial_breakdown` structure. (1334e77)
 - [x] Task: **Write Integration Tests**: Verify that creating a policy correctly persists the full financial breakdown. (1334e77)
-- [~] Task: Conductor - User Manual Verification 'Phase 2: Persistence Layer & Migration' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Persistence Layer & Migration' (Protocol in workflow.md) (0a668f7)
 
 ## Phase 3: Quote API & Service Orchestration [checkpoint: ]
 Expose the rating engine via API and integrate it into the policy issuance flow.
