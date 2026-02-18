@@ -7,6 +7,7 @@ from fastapi import HTTPException
 from sqlmodel import Session
 
 from app import crud
+from app.services.rating import RatingService
 from app.models import (
     InvoiceCreate,
     InvoiceLineItemCreate,
@@ -19,30 +20,6 @@ from app.models import (
     RiskNoteStatus,
     TransactionType,
 )
-
-
-def calculate_levies(net_premium: Decimal) -> dict[str, Any]:
-    """
-    Kenya insurance levies (as of 2025):
-    - Training Levy: 0.2% of net premium
-    - PHCF (Policyholders Compensation Fund): 0.25% of net premium
-    - Stamp Duty: KES 40 (fixed)
-    """
-    training_levy = (net_premium * Decimal("0.002")).quantize(Decimal("0.01"))
-    phcf = (net_premium * Decimal("0.0025")).quantize(Decimal("0.01"))
-    stamp_duty = Decimal("40.00")
-
-    return {
-        "training_levy": float(training_levy),
-        "phcf": float(phcf),
-        "stamp_duty": float(stamp_duty),
-    }
-
-
-def calculate_commission(net_premium: Decimal, product: Product) -> Decimal:
-    return (net_premium * Decimal(str(product.default_commission_rate / 100))).quantize(
-        Decimal("0.01")
-    )
 
 
 def generate_risk_note_number() -> str:
@@ -70,20 +47,17 @@ class PolicyService:
         # 1. Validate and price
         try:
             validated_risk = product.validate_risk_details(risk_details)
-            net_premium = product.calculate_premium(validated_risk)
+            breakdown = RatingService.calculate_breakdown(product, risk_details)
         except Exception as e:
             raise HTTPException(
                 status_code=400,
-                detail=f"Invalid risk details for Motor Private: {str(e)}",
+                detail=f"Invalid risk details for {product.class_of_insurance}: {str(e)}",
             )
 
         # 2. Create Policy (container)
         policy = crud.create_policy(session=session, policy_in=policy_in)
 
         # 3. Create initial Risk Note
-        levies = calculate_levies(net_premium)
-        total_levies = sum(Decimal(str(v)) for v in levies.values())
-
         risk_note_in = RiskNoteCreate(
             policy_id=policy.id,
             transaction_type=TransactionType.NEW_BUSINESS,
@@ -96,10 +70,10 @@ class PolicyService:
                 "risk_details": validated_risk,
                 "product": product.model_dump(mode="json"),
             },
-            net_premium=net_premium,
-            taxes=levies,
-            commission_amount=calculate_commission(net_premium, product),
-            total_amount=net_premium + total_levies,
+            net_premium=breakdown.net_premium,
+            financial_breakdown=breakdown.model_dump(mode="json"),
+            commission_amount=breakdown.commission_amount,
+            total_amount=breakdown.total_amount,
             created_by_id=current_user_id,
         )
 
@@ -141,19 +115,20 @@ class PolicyService:
         # 1. Validate and price NEW state
         try:
             validated_risk = product.validate_risk_details(updated_risk_details)
-            new_net_total = product.calculate_premium(validated_risk)
+            full_breakdown = RatingService.calculate_breakdown(product, updated_risk_details)
         except Exception as e:
             raise HTTPException(
                 status_code=400,
-                detail=f"Invalid risk details for Motor Private: {str(e)}",
+                detail=f"Invalid risk details for {product.class_of_insurance}: {str(e)}",
             )
 
         # 2. Calculate delta (pro-rata logic could be added here, for now it's just delta of full term)
-        delta_premium = new_net_total - current_rn.net_premium
+        delta_premium = full_breakdown.net_premium - current_rn.net_premium
 
         # 3. Create NEW risk note
-        levies = calculate_levies(delta_premium)
-        total_levies = sum(Decimal(str(v)) for v in levies.values())
+        # We recalculate levies on the DELTA premium
+        delta_levies = RatingService.calculate_levies(delta_premium)
+        total_delta_levies = sum(delta_levies.values())
 
         risk_note_in = RiskNoteCreate(
             policy_id=policy.id,
@@ -174,9 +149,15 @@ class PolicyService:
                 },
             },
             net_premium=delta_premium,
-            taxes=levies,
-            commission_amount=calculate_commission(delta_premium, product),
-            total_amount=delta_premium + total_levies,
+            financial_breakdown={
+                "type": "base", # Endorsements often use a simplified delta breakdown
+                "net_premium": float(delta_premium),
+                "taxes": {k: float(v) for k, v in delta_levies.items()},
+                "total_amount": float(delta_premium + total_delta_levies),
+                "commission_amount": float((full_breakdown.commission_amount - current_rn.commission_amount))
+            },
+            commission_amount=full_breakdown.commission_amount - current_rn.commission_amount,
+            total_amount=delta_premium + total_delta_levies,
             special_clauses=[change_description],
             created_by_id=current_user_id,
         )

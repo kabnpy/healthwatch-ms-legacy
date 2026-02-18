@@ -560,7 +560,7 @@ class RiskNoteBase(AuditMixin, SQLModel):
 
 
 class RiskNoteCreate(RiskNoteBase):
-    taxes: dict[str, Any] = Field(default_factory=dict)
+    financial_breakdown: dict[str, Any] = Field(default_factory=dict)
     policy_snapshot: dict[str, Any] = Field(default_factory=dict)
     special_clauses: list[str] = Field(default_factory=list)
 
@@ -576,7 +576,7 @@ class RiskNoteUpdate(SQLModel):
     coverage_start: date | None = None
     coverage_end: date | None = None
     net_premium: Decimal | None = None
-    taxes: dict[str, Any] | None = None
+    financial_breakdown: dict[str, Any] | None = None
     commission_amount: Decimal | None = None
     total_amount: Decimal | None = None
     policy_snapshot: dict[str, Any] | None = None
@@ -586,7 +586,7 @@ class RiskNoteUpdate(SQLModel):
 class RiskNotePublic(RiskNoteBase):
     id: uuid.UUID
     policy: PolicyPublic | None = None
-    taxes: dict[str, Any] = Field(default_factory=dict)
+    financial_breakdown: dict[str, Any] = Field(default_factory=dict)
     policy_snapshot: dict[str, Any] = Field(default_factory=dict)
     special_clauses: list[str] = Field(default_factory=list)
 
@@ -598,7 +598,7 @@ class RiskNote(RiskNoteBase, table=True):
         back_populates="risk_note"
     )
     allocations: list["ReceiptAllocation"] = Relationship(back_populates="risk_note")
-    taxes: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    financial_breakdown: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
     policy_snapshot: dict[str, Any] = Field(
         default_factory=dict, sa_column=Column(JSON)
     )

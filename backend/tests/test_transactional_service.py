@@ -42,6 +42,8 @@ def test_atomic_policy_creation(db: Session) -> None:
     rn = policy.risk_notes[0]
     assert rn.transaction_type == TransactionType.NEW_BUSINESS
     assert rn.policy_snapshot["risk_details"] == risk_details
+    assert rn.financial_breakdown["type"] == "motor"
+    assert "training_levy" in rn.financial_breakdown["taxes"]
     assert rn.coverage_start == start_date
     assert rn.coverage_end == end_date
     assert policy.current_risk_details == risk_details

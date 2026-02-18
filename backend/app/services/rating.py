@@ -69,6 +69,12 @@ class RatingService:
     }
 
     @classmethod
+    def calculate_levies(cls, net_premium: Decimal) -> dict[str, Decimal]:
+        # Uses the standard Kenyan levies logic
+        strategy = MotorPrivateRatingStrategy() # Both currently use same levies
+        return strategy._calculate_standard_levies(net_premium)
+
+    @classmethod
     def calculate_breakdown(cls, product: Product, risk_details: dict[str, Any]) -> BaseFinancialBreakdown | MotorFinancialBreakdown:
         class_of_insurance = product.class_of_insurance.lower()
         
