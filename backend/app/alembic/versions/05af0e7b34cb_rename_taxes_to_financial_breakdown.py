@@ -19,8 +19,14 @@ depends_on = None
 
 
 def upgrade():
-    # 1. Rename the column
-    op.alter_column('risknote', 'taxes', new_column_name='financial_breakdown')
+    # Check if 'taxes' column exists
+    conn = op.get_bind()
+    inspector = sa.inspect(conn)
+    columns = [c['name'] for c in inspector.get_columns('risknote')]
+    
+    # 1. Rename the column if it exists
+    if 'taxes' in columns:
+        op.alter_column('risknote', 'taxes', new_column_name='financial_breakdown')
     
     # 2. Transform existing data to new structure
     # Old structure: {"training_levy": 10.0, ...}
@@ -43,6 +49,11 @@ def upgrade():
 
 
 def downgrade():
+    # Check if 'financial_breakdown' column exists
+    conn = op.get_bind()
+    inspector = sa.inspect(conn)
+    columns = [c['name'] for c in inspector.get_columns('risknote')]
+
     # 1. Revert structure (extract taxes field)
     op.execute(
         """
@@ -52,5 +63,6 @@ def downgrade():
         """
     )
     
-    # 2. Rename back
-    op.alter_column('risknote', 'financial_breakdown', new_column_name='taxes')
+    # 2. Rename back if it exists
+    if 'financial_breakdown' in columns:
+        op.alter_column('risknote', 'financial_breakdown', new_column_name='taxes')
