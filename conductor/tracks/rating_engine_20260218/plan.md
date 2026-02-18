@@ -21,13 +21,13 @@ Update the database schema to store authoritative financial snapshots.
 - [x] Task: **Write Integration Tests**: Verify that creating a policy correctly persists the full financial breakdown. (1334e77)
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Persistence Layer & Migration' (Protocol in workflow.md) (0a668f7)
 
-## Phase 3: Quote API & Service Orchestration [checkpoint: ]
+## Phase 3: Quote API & Service Orchestration [checkpoint: 69a0e0b]
 Expose the rating engine via API and integrate it into the policy issuance flow.
 
-- [ ] Task: Implement `POST /api/v1/policies/quote` endpoint in `backend/app/api/routes/policies.py`.
-- [ ] Task: Refactor `PolicyService.create_policy` to call `RatingService` as the source of truth before saving.
-- [ ] Task: **Verify Coverage**: Ensure >80% coverage for the new rating and quote logic.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Quote API & Service Orchestration' (Protocol in workflow.md)
+- [x] Task: Implement `POST /api/v1/policies/quote` endpoint in `backend/app/api/routes/policies.py`. (f1293a1)
+- [x] Task: Refactor `PolicyService.create_policy` to call `RatingService` as the source of truth before saving. (f1293a1)
+- [x] Task: **Verify Coverage**: Ensure >80% coverage for the new rating and quote logic. (f1293a1)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Quote API & Service Orchestration' (Protocol in workflow.md) (69a0e0b)
 
 ## Phase 4: Frontend Integration & Real-time UI [checkpoint: ]
 Connect the wizard to the authoritative backend math.
