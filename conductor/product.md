@@ -14,7 +14,7 @@ HealthWatch MS is a high-performance Insurance Management System designed for pr
 ## 3. Core Functional Pillars
 - **Client Hub:** A professional portfolio management center providing a comprehensive view of client active covers and historical data.
 - **Insurance Dashboard:** A deep-dive environment for policy management, history logging, and document storage.
-- **Transaction Engine (Risk Notes):** Every policy change (New Business, Renewal, Endorsement) generates a locked Risk Note snapshot, ensuring temporal integrity and a clear audit trail. This process is atomically linked to financial invoicing through a dedicated **Service Layer**.
+- **Transaction Engine (Risk Notes):** Every policy change generates a locked Risk Note with an authoritative financial breakdown from a centralized Rating Engine, ensuring precision and auditability. This process is atomically linked to financial invoicing through a dedicated **Service Layer**.
 - **Integrated Invoicing:** The Risk Note doubles as a Debit Note, providing valid tax invoice generation directly from policy data. Access to these financial mutations is restricted via **Simplified RBAC** (Staff vs. Viewer).
 
 ## 4. Immediate Roadmap Focus
