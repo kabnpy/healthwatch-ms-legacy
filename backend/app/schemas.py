@@ -1,3 +1,4 @@
+import uuid
 from decimal import Decimal
 from typing import Any, Annotated, Literal, Union
 
@@ -28,6 +29,15 @@ class FinancialBreakdown(BaseModel):
         Union[MotorFinancialBreakdown, BaseFinancialBreakdown],
         Field(discriminator="type")
     ]
+
+
+class QuoteRequest(BaseModel):
+    product_id: uuid.UUID
+    risk_details: dict[str, Any]
+
+
+class QuoteResponse(BaseModel):
+    breakdown: Union[MotorFinancialBreakdown, BaseFinancialBreakdown]
 
 
 class MotorPrivateRiskDetails(BaseModel):

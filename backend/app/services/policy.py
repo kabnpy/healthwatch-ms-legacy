@@ -126,10 +126,7 @@ class PolicyService:
         delta_premium = full_breakdown.net_premium - current_rn.net_premium
 
         # 3. Create NEW risk note
-        # We recalculate levies on the DELTA premium
-        delta_levies = RatingService.calculate_levies(delta_premium)
-        total_delta_levies = sum(delta_levies.values())
-
+        # We store the full authoritative breakdown for the new state
         risk_note_in = RiskNoteCreate(
             policy_id=policy.id,
             transaction_type=TransactionType.ENDORSEMENT,
@@ -149,15 +146,9 @@ class PolicyService:
                 },
             },
             net_premium=delta_premium,
-            financial_breakdown={
-                "type": "base", # Endorsements often use a simplified delta breakdown
-                "net_premium": float(delta_premium),
-                "taxes": {k: float(v) for k, v in delta_levies.items()},
-                "total_amount": float(delta_premium + total_delta_levies),
-                "commission_amount": float((full_breakdown.commission_amount - current_rn.commission_amount))
-            },
+            financial_breakdown=full_breakdown.model_dump(mode="json"),
             commission_amount=full_breakdown.commission_amount - current_rn.commission_amount,
-            total_amount=delta_premium + total_delta_levies,
+            total_amount=full_breakdown.total_amount - current_rn.total_amount,
             special_clauses=[change_description],
             created_by_id=current_user_id,
         )
