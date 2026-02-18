@@ -12,7 +12,7 @@ from tests.utils.utils import random_lower_string
 def test_atomic_policy_creation(db: Session) -> None:
     # 1. Setup
     client = create_random_client(db)
-    product = create_random_product(db)
+    product = create_random_product(db, class_of_insurance="Motor Private")
     policy_number = random_lower_string()
 
     policy_in = PolicyCreate(
@@ -51,7 +51,7 @@ def test_atomic_policy_creation(db: Session) -> None:
 def test_endorsement_creation(db: Session) -> None:
     # 1. Setup a policy with one RiskNote
     client = create_random_client(db)
-    product = create_random_product(db)
+    product = create_random_product(db, class_of_insurance="Motor Private")
     policy_in = PolicyCreate(
         policy_number=random_lower_string(),
         client_id=client.id,
