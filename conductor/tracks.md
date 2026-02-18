@@ -4,7 +4,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: rating_engine_20260218**
+- [x] **Track: rating_engine_20260218**
 *Link: [./tracks/rating_engine_20260218/](./tracks/rating_engine_20260218/)*
 
 ---
