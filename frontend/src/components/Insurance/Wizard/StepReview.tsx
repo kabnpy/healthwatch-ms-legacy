@@ -43,6 +43,7 @@ export function StepReview({
           pvt: !!state.extensions?.pvt,
           excess_protector: !!state.extensions?.excessProtector,
           om_rescue_plus: !!state.extensions?.omRescuePlus,
+          passenger_liability: !!state.extensions?.passengerLiability,
         },
       },
     }
@@ -53,9 +54,7 @@ export function StepReview({
     isMotorPrivate,
   ])
 
-  const { data: quoteData } = useQuoteQuery(
-    quoteRequest as any,
-  )
+  const { data: quoteData } = useQuoteQuery(quoteRequest as any)
 
   const breakdown =
     isMotorPrivate && quoteData

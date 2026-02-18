@@ -225,6 +225,8 @@ class ProductBase(AuditMixin, SQLModel):
     name: str
     class_of_insurance: str  # "Motor Private", "Fire"
     product_details: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
+    pricing_strategy: PricingStrategy = Field(default=PricingStrategy.PERCENTAGE)
+    pricing_rules: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
     default_commission_rate: float = 10.0
 
 
@@ -237,6 +239,8 @@ class ProductUpdate(SQLModel):
     name: str | None = None
     class_of_insurance: str | None = None
     product_details: dict[str, Any] | None = None
+    pricing_strategy: PricingStrategy | None = None
+    pricing_rules: dict[str, Any] | None = None
     default_commission_rate: float | None = None
 
 
@@ -257,8 +261,13 @@ class Product(ProductBase, table=True):
             risk_data = risk_details
             if "VEHICLE DETAILS" in risk_details:
                 risk_data = risk_details["VEHICLE DETAILS"]
+
             validated = MotorPrivateRiskDetails(**risk_data)
-            return {"VEHICLE DETAILS": validated.model_dump(by_alias=True)}
+
+            result = {"VEHICLE DETAILS": validated.model_dump(by_alias=True)}
+            if "EXTENSIONS" in risk_details:
+                result["EXTENSIONS"] = risk_details["EXTENSIONS"]
+            return result
         return risk_details
 
     def calculate_premium(self, risk_details: dict[str, Any]) -> Decimal:

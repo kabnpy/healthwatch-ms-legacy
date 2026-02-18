@@ -113,6 +113,7 @@ export function StepFinancials({
             pvt: !!extensions.pvt,
             excess_protector: !!extensions.excessProtector,
             om_rescue_plus: !!extensions.omRescuePlus,
+            passenger_liability: !!extensions.passengerLiability,
           },
         },
       })
@@ -125,6 +126,7 @@ export function StepFinancials({
     extensions.pvt,
     extensions.excessProtector,
     extensions.omRescuePlus,
+    extensions.passengerLiability,
     isMotorPrivate,
     quoteMutation.mutate,
   ])
@@ -314,6 +316,25 @@ export function StepFinancials({
                       </FormItem>
                     )}
                   />
+                  {isMotorPrivate && (
+                    <FormField
+                      control={form.control as any}
+                      name="extensions.passengerLiability"
+                      render={({ field }) => (
+                        <FormItem className="flex items-center justify-between space-y-0 rounded-lg p-2 border bg-white">
+                          <FormLabel className="text-sm cursor-pointer w-full">
+                            Passenger Liability (KES 500)
+                          </FormLabel>
+                          <FormControl>
+                            <Checkbox
+                              checked={!!field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  )}
                   {isMotorPrivate && (
                     <FormField
                       control={form.control as any}

@@ -40,6 +40,8 @@ def create_mock_data() -> None:
             name: str,
             class_of_insurance: str,
             product_details: dict[str, Any],
+            pricing_strategy: str = "Percentage",
+            pricing_rules: dict[str, Any] = None,
         ) -> Product:
             product = session.exec(select(Product).where(Product.name == name)).first()
             if not product:
@@ -48,12 +50,16 @@ def create_mock_data() -> None:
                     name=name,
                     class_of_insurance=class_of_insurance,
                     product_details=product_details,
+                    pricing_strategy=pricing_strategy,
+                    pricing_rules=pricing_rules or {},
                 )
                 session.add(product)
                 logger.info(f"Created product: {name}")
             else:
                 product.product_details = product_details
                 product.class_of_insurance = class_of_insurance
+                product.pricing_strategy = pricing_strategy
+                product.pricing_rules = pricing_rules or {}
                 session.add(product)
                 logger.info(f"Updated product: {name}")
             session.commit()
@@ -89,8 +95,21 @@ def create_mock_data() -> None:
                 "Third Party Injury": "Nil",
             },
         }
+        motor_pricing_rules = {
+            "tiers": [
+                {"max": 1500000, "rate": 5.0, "min": 60000},
+                {"max": 2500000, "rate": 4.0, "min": 75000},
+                {"max": 3000000, "rate": 3.5, "min": 100000},
+                {"max": 5000000, "rate": 3.25, "min": 0},
+                {"max": None, "rate": 3.0, "min": 0},
+            ]
+        }
         motor_product = upsert_product(
-            "Motor Private - Comprehensive", "Motor Private", motor_details
+            "Motor Private - Comprehensive",
+            "Motor Private",
+            motor_details,
+            pricing_strategy="FixedTiered",
+            pricing_rules=motor_pricing_rules,
         )
 
         # PRODUCT: DOMESTIC PACKAGE

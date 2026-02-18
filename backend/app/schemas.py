@@ -21,6 +21,8 @@ class BaseFinancialBreakdown(BaseModel):
 class MotorFinancialBreakdown(BaseFinancialBreakdown):
     type: Literal["motor"] = "motor"
     benefits: list[BenefitLineItem] = Field(default_factory=list)
+    basic_rate: Decimal | None = None
+    is_high_end: bool = False
 
 
 class FinancialBreakdown(BaseModel):

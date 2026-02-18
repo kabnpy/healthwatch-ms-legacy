@@ -19,32 +19,86 @@ class RatingStrategy(ABC):
 
 
 class MotorPrivateRatingStrategy(RatingStrategy):
+    # Default tiers if none provided in product
+    DEFAULT_TIERS = [
+        {"max": Decimal("1500000"), "rate": Decimal("0.05"), "min": Decimal("60000")},
+        {"max": Decimal("2500000"), "rate": Decimal("0.04"), "min": Decimal("75000")},
+        {"max": Decimal("3000000"), "rate": Decimal("0.035"), "min": Decimal("100000")},
+        {"max": Decimal("5000000"), "rate": Decimal("0.0325"), "min": Decimal("0")},
+        {"max": Decimal("Infinity"), "rate": Decimal("0.03"), "min": Decimal("0")},
+    ]
+
     def calculate(
         self, product: Product, risk_details: dict[str, Any]
     ) -> MotorFinancialBreakdown:
         risk_data = risk_details.get("VEHICLE DETAILS", risk_details)
         value = Decimal(str(risk_data.get("Value Kshs.", 0)))
 
-        # 1. Basic Premium
-        basic_rate = Decimal("0.0325")
+        # 1. Basic Premium (Tiered)
+        # Use tiers from product if available, else use defaults
+        product_tiers = product.pricing_rules.get("tiers")
+        if product_tiers:
+            # Convert to Decimal for calculation
+            tiers = []
+            for t in product_tiers:
+                tiers.append(
+                    {
+                        "max": Decimal(str(t["max"]))
+                        if t["max"] is not None
+                        else Decimal("Infinity"),
+                        "rate": Decimal(str(t["rate"]))
+                        / Decimal("100"),  # Convert 5.0 to 0.05
+                        "min": Decimal(str(t.get("min", 0))),
+                    }
+                )
+        else:
+            tiers = self.DEFAULT_TIERS
+
+        tier = next((t for t in tiers if value < t["max"]), tiers[-1])
+        basic_rate = tier["rate"]
+
         basic_premium = (value * basic_rate).quantize(Decimal("0.01"))
-        basic_premium = max(Decimal("15000.00"), basic_premium)
+        basic_premium = max(tier["min"], basic_premium)
 
         # 2. Extensions / Benefits
         extensions = risk_details.get("EXTENSIONS", {})
         benefits = []
 
         net_premium = basic_premium
+        is_high_end = value >= Decimal("3000000")
 
-        if extensions.get("pvt"):
-            pvt_amount = (value * Decimal("0.0025")).quantize(Decimal("0.01"))
-            benefits.append(BenefitLineItem(name="PVT", amount=pvt_amount))
-            net_premium += pvt_amount
+        # Benefits logic: High-end includes PVT and Excess Protector by default at 0 cost
+        include_pvt = extensions.get("pvt")
+        include_ep = extensions.get("excess_protector")
 
-        if extensions.get("excess_protector"):
-            ep_amount = (value * Decimal("0.0025")).quantize(Decimal("0.01"))
-            benefits.append(BenefitLineItem(name="Excess Protector", amount=ep_amount))
-            net_premium += ep_amount
+        if include_pvt:
+            if is_high_end:
+                benefits.append(BenefitLineItem(name="PVT", amount=Decimal("0.00")))
+            else:
+                pvt_amount = (value * Decimal("0.0025")).quantize(Decimal("0.01"))
+                benefits.append(BenefitLineItem(name="PVT", amount=pvt_amount))
+                net_premium += pvt_amount
+
+        if include_ep:
+            if is_high_end:
+                benefits.append(
+                    BenefitLineItem(name="Excess Protector", amount=Decimal("0.00"))
+                )
+            else:
+                ep_amount = (value * Decimal("0.0025")).quantize(Decimal("0.01"))
+                benefits.append(
+                    BenefitLineItem(name="Excess Protector", amount=ep_amount)
+                )
+                net_premium += ep_amount
+
+        if extensions.get("passenger_liability") or extensions.get(
+            "passengerLiability"
+        ):
+            pl_amount = Decimal("500.00")
+            benefits.append(
+                BenefitLineItem(name="Passenger Liability", amount=pl_amount)
+            )
+            net_premium += pl_amount
 
         # 3. Levies
         levies = self._calculate_standard_levies(net_premium)
@@ -68,6 +122,8 @@ class MotorPrivateRatingStrategy(RatingStrategy):
             commission_amount=commission_amount,
             total_amount=net_premium + total_levies + post_levy_total,
             benefits=benefits,
+            basic_rate=basic_rate,
+            is_high_end=is_high_end,
         )
 
     def _calculate_standard_levies(self, net_premium: Decimal) -> dict[str, Decimal]:
