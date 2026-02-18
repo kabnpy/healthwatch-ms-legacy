@@ -54,8 +54,8 @@ class MotorPrivateRiskDetails(BaseModel):
     @classmethod
     def parse_year(cls, v: Any) -> int:
         if isinstance(v, str):
-            # Remove commas and whitespace
-            v = v.replace(",", "").strip()
+            # Remove commas and whitespace, handle placeholders
+            v = v.replace(",", "").replace("[ EMPTY ]", "").strip()
             if not v:
                 return 0
             return int(float(v))
@@ -65,8 +65,8 @@ class MotorPrivateRiskDetails(BaseModel):
     @classmethod
     def parse_value(cls, v: Any) -> float:
         if isinstance(v, str):
-            # Remove commas and whitespace
-            v = v.replace(",", "").strip()
+            # Remove commas and whitespace, handle placeholders
+            v = v.replace(",", "").replace("[ EMPTY ]", "").strip()
             if not v:
                 return 0.0
             return float(v)

@@ -32,7 +32,14 @@ class MotorPrivateRatingStrategy(RatingStrategy):
         self, product: Product, risk_details: dict[str, Any]
     ) -> MotorFinancialBreakdown:
         risk_data = risk_details.get("VEHICLE DETAILS", risk_details)
-        value = Decimal(str(risk_data.get("Value Kshs.", 0)))
+        value_raw = risk_data.get("Value Kshs.", 0)
+
+        # Robust numeric parsing
+        if isinstance(value_raw, str):
+            clean_val = value_raw.replace(",", "").replace("[ EMPTY ]", "").strip()
+            value = Decimal(clean_val) if clean_val else Decimal("0")
+        else:
+            value = Decimal(str(value_raw or 0))
 
         # 1. Basic Premium (Tiered)
         # Use tiers from product if available, else use defaults

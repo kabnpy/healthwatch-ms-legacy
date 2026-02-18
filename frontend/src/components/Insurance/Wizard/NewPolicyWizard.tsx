@@ -119,6 +119,17 @@ export function NewPolicyWizard({
         state.details,
       )
 
+      // Merge extensions into risk details for the backend rating engine
+      const riskDetailsWithExtensions = {
+        ...structuredRiskDetails,
+        EXTENSIONS: {
+          pvt: !!state.extensions?.pvt,
+          excess_protector: !!state.extensions?.excessProtector,
+          om_rescue_plus: !!state.extensions?.omRescuePlus,
+          passenger_liability: !!state.extensions?.passengerLiability,
+        },
+      }
+
       // Create Policy atomically (This also creates the issued Risk Note and Invoice in backend)
       await createPolicy.mutateAsync({
         policy_number: `P/${Math.floor(Math.random() * 1000000)}`,
@@ -126,7 +137,7 @@ export function NewPolicyWizard({
         product_id: state.product_id,
         status: "Active",
         inception_date: startDate,
-        risk_details: structuredRiskDetails,
+        risk_details: riskDetailsWithExtensions,
         coverage_start: startDate,
         coverage_end: endDate,
       } as any)

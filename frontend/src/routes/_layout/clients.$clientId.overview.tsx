@@ -21,7 +21,7 @@ function ClientOverview() {
   const { data: client } = useSuspenseQuery(getClientQueryOptions(clientId))
   const { summary } = useFinancialSummary(clientId)
 
-  const formattedAddress = [
+  const postalAddress = [
     client.postal_number ? `P.O. Box ${client.postal_number}` : null,
     client.postal_code ? `- ${client.postal_code}` : null,
     client.town ? `, ${client.town}` : null,
@@ -63,7 +63,7 @@ function ClientOverview() {
         />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-3">
         <SummaryCard
           title="Email Address"
           value={client.email || "N/A"}
@@ -71,8 +71,13 @@ function ClientOverview() {
           valueClassName="text-sm truncate font-normal"
         />
         <SummaryCard
+          title="Physical Address"
+          value={client.physical_address || "No address provided"}
+          valueClassName="text-sm font-normal whitespace-pre-line"
+        />
+        <SummaryCard
           title="Postal Address"
-          value={formattedAddress || "No address provided"}
+          value={postalAddress || "No address provided"}
           valueClassName="text-sm font-normal whitespace-pre-line"
         />
       </div>

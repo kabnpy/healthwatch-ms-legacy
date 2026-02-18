@@ -60,9 +60,15 @@ export const RiskNoteTemplate = ({
           </p>
           <div className="flex justify-between items-end gap-8">
             <p className="text-[11px] leading-relaxed">
+              {client.physical_address && (
+                <>
+                  {client.physical_address}
+                  <br />
+                </>
+              )}
               {client.postal_number
                 ? `P.O. Box ${client.postal_number}`
-                : "No Address Provided"}
+                : !client.physical_address && "No Address Provided"}
               {client.postal_code && ` - ${client.postal_code}`}
               <br />
               {client.town || "Nairobi"}
@@ -200,8 +206,7 @@ export const RiskNoteTemplate = ({
 
     // 6. ANNUAL PREMIUM
     const breakdown = riskNote.financial_breakdown || {}
-    const taxes =
-      (breakdown.taxes as Record<string, number>) || riskNote.taxes || {}
+    const taxes = (breakdown.taxes as Record<string, number>) || {}
     const benefits = (breakdown.benefits as any[]) || []
 
     const taxRows: Record<string, RiskNoteContentValue> = {}

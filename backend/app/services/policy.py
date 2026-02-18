@@ -1,3 +1,4 @@
+import logging
 import uuid
 from datetime import date
 from typing import Any
@@ -19,6 +20,8 @@ from app.models import (
     TransactionType,
 )
 from app.services.rating import RatingService
+
+logger = logging.getLogger(__name__)
 
 
 def generate_risk_note_number() -> str:
@@ -43,11 +46,23 @@ class PolicyService:
         if not product:
             raise HTTPException(status_code=404, detail="Product not found")
 
+        logger.info(f"Creating policy for product: {product.name} ({product.class_of_insurance})")
+        logger.debug(f"Input risk_details: {risk_details}")
+
         # 1. Validate and price
         try:
             validated_risk = product.validate_risk_details(risk_details)
-            breakdown = RatingService.calculate_breakdown(product, risk_details)
+            logger.debug(f"Validated risk details: {validated_risk}")
+
+            # Ensure extensions are available for rating
+            rating_details = validated_risk.copy()
+            if "EXTENSIONS" not in rating_details and "EXTENSIONS" in risk_details:
+                rating_details["EXTENSIONS"] = risk_details["EXTENSIONS"]
+                
+            breakdown = RatingService.calculate_breakdown(product, rating_details)
+            logger.info(f"Rating breakdown: {breakdown.model_dump()}")
         except Exception as e:
+            logger.exception("Validation or Rating failure")
             raise HTTPException(
                 status_code=400,
                 detail=f"Invalid risk details for {product.class_of_insurance}: {str(e)}",
@@ -57,6 +72,12 @@ class PolicyService:
         policy = crud.create_policy(session=session, policy_in=policy_in)
 
         # 3. Create initial Risk Note
+        policy_snapshot = {
+            "policy_number": policy.policy_number,
+            "risk_details": rating_details,
+            "product": product.model_dump(mode="json"),
+        }
+        
         risk_note_in = RiskNoteCreate(
             policy_id=policy.id,
             transaction_type=TransactionType.NEW_BUSINESS,
@@ -64,11 +85,7 @@ class PolicyService:
             effective_date=coverage_start,
             coverage_start=coverage_start,
             coverage_end=coverage_end,
-            policy_snapshot={
-                "policy_number": policy.policy_number,
-                "risk_details": validated_risk,
-                "product": product.model_dump(mode="json"),
-            },
+            policy_snapshot=policy_snapshot,
             net_premium=breakdown.net_premium,
             financial_breakdown=breakdown.model_dump(mode="json"),
             commission_amount=breakdown.commission_amount,
@@ -82,7 +99,6 @@ class PolicyService:
 
         session.refresh(policy)
         return policy
-
     @staticmethod
     def create_endorsement(
         *,
@@ -114,9 +130,15 @@ class PolicyService:
         # 1. Validate and price NEW state
         try:
             validated_risk = product.validate_risk_details(updated_risk_details)
-            full_breakdown = RatingService.calculate_breakdown(
-                product, updated_risk_details
-            )
+            # Ensure extensions are available for rating
+            rating_details = validated_risk.copy()
+            if (
+                "EXTENSIONS" not in rating_details
+                and "EXTENSIONS" in updated_risk_details
+            ):
+                rating_details["EXTENSIONS"] = updated_risk_details["EXTENSIONS"]
+
+            full_breakdown = RatingService.calculate_breakdown(product, rating_details)
         except Exception as e:
             raise HTTPException(
                 status_code=400,
@@ -138,12 +160,12 @@ class PolicyService:
             coverage_end=current_rn.coverage_end,
             policy_snapshot={
                 "policy_number": policy.policy_number,
-                "risk_details": validated_risk,
+                "risk_details": rating_details,
                 "product": product.model_dump(mode="json"),
                 "changes": {
                     "description": change_description,
                     "from": current_rn.policy_snapshot.get("risk_details"),
-                    "to": validated_risk,
+                    "to": rating_details,
                 },
             },
             net_premium=delta_premium,

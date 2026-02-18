@@ -254,22 +254,26 @@ class Product(ProductBase, table=True):
     insurer: "Insurer" = Relationship(back_populates="products")
     policies: list["Policy"] = Relationship(back_populates="product")
 
-    def validate_risk_details(self, risk_details: dict[str, Any]) -> dict[str, Any]:
-        if "motor private" in self.class_of_insurance.lower():
-            from app.schemas import MotorPrivateRiskDetails
-
-            risk_data = risk_details
-            if "VEHICLE DETAILS" in risk_details:
-                risk_data = risk_details["VEHICLE DETAILS"]
-
-            validated = MotorPrivateRiskDetails(**risk_data)
-
-            result = {"VEHICLE DETAILS": validated.model_dump(by_alias=True)}
-            if "EXTENSIONS" in risk_details:
-                result["EXTENSIONS"] = risk_details["EXTENSIONS"]
-            return result
-        return risk_details
-
+        def validate_risk_details(self, risk_details: dict[str, Any]) -> dict[str, Any]:
+            if "motor private" in self.class_of_insurance.lower():
+                from app.schemas import MotorPrivateRiskDetails
+    
+                # Identify if the input is nested or flat
+                risk_data = risk_details
+                if "VEHICLE DETAILS" in risk_details:
+                    risk_data = risk_details["VEHICLE DETAILS"]
+                
+                # This validation will handle aliases like "Reg. No" and "Value Kshs."
+                validated = MotorPrivateRiskDetails(**risk_data)
+                
+                # Important: Return the EXACT keys used in the blueprint (VEHICLE DETAILS)
+                # and aliases (Reg. No) so the frontend template can find them.
+                result = {"VEHICLE DETAILS": validated.model_dump(by_alias=True)}
+                
+                if "EXTENSIONS" in risk_details:
+                    result["EXTENSIONS"] = risk_details["EXTENSIONS"]
+                return result
+            return risk_details
     def calculate_premium(self, risk_details: dict[str, Any]) -> Decimal:
         if "motor private" in self.class_of_insurance.lower():
             risk_data = risk_details.get("VEHICLE DETAILS", risk_details)
@@ -296,6 +300,7 @@ class ClientBase(AuditMixin, SQLModel):
     kra_pin: str = Field(unique=True, index=True)
     email: str | None = None
     phone: str
+    physical_address: str | None = None
     postal_number: str | None = None
     postal_code: str | None = None
     town: str | None = None
@@ -312,6 +317,7 @@ class ClientUpdate(SQLModel):
     kra_pin: str | None = None
     email: str | None = None
     phone: str | None = None
+    physical_address: str | None = None
     postal_number: str | None = None
     postal_code: str | None = None
     town: str | None = None

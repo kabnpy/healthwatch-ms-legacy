@@ -25,6 +25,8 @@ const financialsSchema = z.object({
   financials: z.object({
     sumInsured: z.coerce.number().min(0),
     rate: z.coerce.number().min(0),
+    basicRate: z.coerce.number().optional(),
+    isHighEnd: z.boolean().optional(),
     startDate: z.string(),
     duration: z.coerce.number().default(12),
   }),
@@ -67,6 +69,8 @@ export function StepFinancials({
       financials: {
         sumInsured: defaultValues.financials?.sumInsured || 0,
         rate: defaultValues.financials?.rate || 0,
+        basicRate: defaultValues.financials?.basicRate || 0,
+        isHighEnd: defaultValues.financials?.isHighEnd || false,
         startDate:
           defaultValues.financials?.startDate ||
           new Date().toISOString().split("T")[0],
@@ -139,17 +143,28 @@ export function StepFinancials({
 
   // Auto-set rate for Motor Private
   useEffect(() => {
-    if (isMotorPrivate && breakdown && breakdown.net_premium > 0) {
-      // Reverse calculate effective rate for display
-      const effectiveRate =
-        (Number(breakdown.net_premium) / (financials.sumInsured || 1)) * 100
-      if (Math.abs(effectiveRate - financials.rate) > 0.001) {
-        form.setValue("financials.rate", Number(effectiveRate.toFixed(3)))
+    if (isMotorPrivate && breakdown) {
+      if (breakdown.net_premium > 0) {
+        // Reverse calculate effective rate for display (inclusive of non-tax extensions)
+        const effectiveRate =
+          (Number(breakdown.net_premium) / (financials.sumInsured || 1)) * 100
+        if (Math.abs(effectiveRate - financials.rate) > 0.001) {
+          form.setValue("financials.rate", Number(effectiveRate.toFixed(3)))
+        }
+      }
+
+      if (breakdown.basic_rate !== undefined) {
+        form.setValue("financials.basicRate", Number(breakdown.basic_rate) * 100)
+      }
+      if (breakdown.is_high_end !== undefined) {
+        form.setValue("financials.isHighEnd", breakdown.is_high_end)
       }
     }
   }, [
     isMotorPrivate,
     breakdown?.net_premium,
+    breakdown?.basic_rate,
+    breakdown?.is_high_end,
     financials.sumInsured,
     financials.rate,
     form.setValue,
@@ -387,9 +402,16 @@ export function StepFinancials({
                 <>
                   <div className="space-y-3">
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-slate-400">
-                        {isPA ? "Base Premium" : "Basic Premium"}
-                      </span>
+                      <div className="flex flex-col">
+                        <span className="text-slate-400">
+                          {isPA ? "Base Premium" : "Basic Premium"}
+                        </span>
+                        {isMotorPrivate && (
+                          <span className="text-[10px] text-slate-500 font-mono">
+                            Applied Rate: {financials.basicRate || financials.rate}%
+                          </span>
+                        )}
+                      </div>
                       <span
                         className={`font-mono font-bold ${
                           quoteMutation.isPending ? "opacity-40" : ""

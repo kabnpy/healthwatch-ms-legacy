@@ -36,6 +36,7 @@ const formSchema = z.object({
   kra_pin: z.string().min(11, "KRA PIN must be 11 characters").max(11),
   email: z.string().email("Invalid email").or(z.literal("")),
   phone: z.string().min(10, "Phone number is required"),
+  physical_address: z.string().optional(),
   postal_number: z.string().optional(),
   postal_code: z.string().optional(),
   town: z.string().optional(),
@@ -67,6 +68,7 @@ export const ClientForm = ({
       kra_pin: initialData?.kra_pin || "",
       email: initialData?.email || "",
       phone: initialData?.phone || "",
+      physical_address: (initialData as any)?.physical_address || "",
       postal_number: (initialData as any)?.postal_number || "",
       postal_code: (initialData as any)?.postal_code || "",
       town: (initialData as any)?.town || "",
@@ -83,6 +85,7 @@ export const ClientForm = ({
     const formattedData = {
       ...data,
       email: data.email === "" ? null : data.email,
+      physical_address: data.physical_address || null,
       postal_number: data.postal_number || null,
       postal_code: data.postal_code || null,
       town: data.town || null,
@@ -172,6 +175,20 @@ export const ClientForm = ({
               <FormLabel>Phone Number</FormLabel>
               <FormControl>
                 <Input placeholder="07..." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="physical_address"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Physical Address</FormLabel>
+              <FormControl>
+                <Input placeholder="Building, Street, Area" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

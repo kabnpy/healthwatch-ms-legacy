@@ -48,13 +48,18 @@ export function injectWizardData(
   blueprint: any,
   inputs: any,
   fullPath: string[] = [],
+  rootInputs?: any, // Keep reference to the root for absolute path lookups
 ): any {
   if (typeof blueprint !== "object" || blueprint === null) {
     return blueprint
   }
 
+  const actualRoot = rootInputs || inputs
+
   if (Array.isArray(blueprint)) {
-    return blueprint.map((item) => injectWizardData(item, inputs, fullPath))
+    return blueprint.map((item) =>
+      injectWizardData(item, inputs, fullPath, actualRoot),
+    )
   }
 
   const result: any = {}
@@ -67,9 +72,9 @@ export function injectWizardData(
       value.startsWith("<<") &&
       value.endsWith(">>")
     ) {
-      // 1. Try to find the value by dot-notated full path (flat inputs)
-      if (inputs && inputs[dotPath] !== undefined) {
-        result[key] = inputs[dotPath]
+      // 1. Try to find the value by dot-notated full path (from root)
+      if (actualRoot && actualRoot[dotPath] !== undefined) {
+        result[key] = actualRoot[dotPath]
       }
       // 2. Try to find it by nested key (if inputs were partially navigated)
       else if (
@@ -82,12 +87,8 @@ export function injectWizardData(
         result[key] = "[ EMPTY ]"
       }
     } else if (typeof value === "object" && value !== null) {
-      // Recurse, passing the same root inputs but extending the path
-      // Also pass the sub-object if it exists for traditional nesting
-      const nextInputs =
-        inputs?.[key] && typeof inputs[key] === "object" ? inputs[key] : inputs
-
-      result[key] = injectWizardData(value, nextInputs, currentPath)
+      // Recurse
+      result[key] = injectWizardData(value, inputs, currentPath, actualRoot)
     } else {
       result[key] = value
     }
