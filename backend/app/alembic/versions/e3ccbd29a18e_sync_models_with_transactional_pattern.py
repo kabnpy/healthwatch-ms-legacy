@@ -35,6 +35,8 @@ def upgrade():
     op.drop_column('document', 'claim_id')
     op.drop_column('document', 'policy_id')
     op.drop_column('document', 'risk_note_id')
+    # Create the transactiontype Enum type before using it in alter_column
+    sa.Enum('NEW_BUSINESS', 'RENEWAL', 'ENDORSEMENT', 'CANCELLATION', name='transactiontype').create(op.get_bind(), checkfirst=True)
     op.alter_column('risknote', 'transaction_type',
                existing_type=sa.VARCHAR(),
                type_=sa.Enum('NEW_BUSINESS', 'RENEWAL', 'ENDORSEMENT', 'CANCELLATION', name='transactiontype'),
