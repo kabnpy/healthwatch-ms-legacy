@@ -8,6 +8,7 @@
 - **Migrations:** Alembic
 - **Authentication:** JWT (PyJWT) with Passlib (bcrypt) and **Simplified RBAC**
 - **Testing:** Pytest (TDD driven with focus on precision and state filtering)
+- **Financial Precision:** Python `Decimal` with fixed-point arithmetic for all premium math.
 
 ## Frontend
 - **Language:** TypeScript
