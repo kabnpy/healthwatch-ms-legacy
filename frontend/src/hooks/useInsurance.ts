@@ -8,6 +8,7 @@ import {
   type PolicyCreateExtended,
   type PolicyUpdate,
   ProductsService,
+  type QuoteRequest,
   type RiskNoteCreate,
   RiskNotesService,
   type RiskNoteUpdate,
@@ -234,5 +235,25 @@ export const useReceipts = (clientId?: string, skip = 0, limit = 100) => {
   return useQuery({
     queryKey: ["receipts", { clientId, skip, limit }],
     queryFn: () => FinancialsService.readReceipts({ clientId, skip, limit }),
+  })
+}
+
+// 8. RATING / QUOTES
+export const useQuote = () => {
+  return useMutation({
+    mutationFn: (data: QuoteRequest) =>
+      PoliciesService.getPolicyQuote({ requestBody: data }),
+  })
+}
+
+export const useQuoteQuery = (data: QuoteRequest | null) => {
+  return useQuery({
+    queryKey: ["quote", data],
+    queryFn: () =>
+      data
+        ? PoliciesService.getPolicyQuote({ requestBody: data })
+        : Promise.reject("No data"),
+    enabled: !!data && !!data.product_id,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   })
 }

@@ -201,17 +201,27 @@ export const RiskNoteTemplate = ({
     })
 
     // 6. ANNUAL PREMIUM
+    const breakdown = riskNote.financial_breakdown || {}
+    const taxes = (breakdown.taxes as Record<string, number>) || riskNote.taxes || {}
+    const benefits = (breakdown.benefits as any[]) || []
+
     const taxRows: Record<string, RiskNoteContentValue> = {}
-    Object.entries(riskNote.taxes || {}).forEach(([name, amt]) => {
-      taxRows[name.replace(/([A-Z])/g, " $1")] = formatCurrency(
+    Object.entries(taxes).forEach(([name, amt]) => {
+      taxRows[name.replace(/_/g, " ").toUpperCase()] = formatCurrency(
         amt as string | number,
       )
+    })
+
+    const benefitRows: Record<string, RiskNoteContentValue> = {}
+    benefits.forEach((b) => {
+      benefitRows[b.name.toUpperCase()] = formatCurrency(b.amount)
     })
 
     sections.push({
       name: "FINANCIAL SUMMARY",
       content: {
         "Net Premium": formatCurrency(riskNote.net_premium),
+        ...benefitRows,
         ...taxRows,
         "Total Amount Payable": (
           <span className="text-xl font-black text-black tracking-tighter">

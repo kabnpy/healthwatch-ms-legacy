@@ -2,8 +2,9 @@ import React, { useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { LoadingButton } from "@/components/ui/loading-button"
-import { useProducts } from "@/hooks/useInsurance"
+import { useProducts, useQuoteQuery } from "@/hooks/useInsurance"
 import { calculatePremium } from "@/lib/calculator"
+import type { MotorFinancialBreakdown } from "@/client"
 import type { EnhancedProduct, WizardState } from "@/types/insurance"
 
 interface StepReviewProps {
@@ -27,13 +28,41 @@ export function StepReview({
       | undefined
   }, [state.product_id, productsData])
 
-  const calculation = calculatePremium({
+  const isMotorPrivate = selectedProduct?.class_of_insurance
+    ?.toLowerCase()
+    .includes("motor private")
+
+  const quoteRequest = useMemo(() => {
+    if (!state.product_id || !isMotorPrivate) return null
+    return {
+      product_id: state.product_id,
+      risk_details: {
+        "VEHICLE DETAILS": {
+          "Value Kshs.": state.financials?.sumInsured || 0,
+        },
+        EXTENSIONS: {
+          pvt: !!state.extensions?.pvt,
+          excess_protector: !!state.extensions?.excessProtector,
+          om_rescue_plus: !!state.extensions?.omRescuePlus,
+        },
+      },
+    }
+  }, [state.product_id, state.financials?.sumInsured, state.extensions, isMotorPrivate])
+
+  const { data: quoteData, isLoading: isQuoteLoading } = useQuoteQuery(quoteRequest as any)
+
+  const localCalculation = calculatePremium({
     sumInsured: state.financials?.sumInsured || 0,
     rate: state.financials?.rate || 0,
     hasPVT: state.extensions?.pvt || false,
     hasExcessProtector: state.extensions?.excessProtector || false,
     hasPassengerLiability: state.extensions?.passengerLiability || false,
   })
+
+  const breakdown =
+    isMotorPrivate && quoteData
+      ? (quoteData.breakdown as MotorFinancialBreakdown)
+      : null
 
   const isPA = selectedProduct?.class_of_insurance
     ?.toLowerCase()
@@ -99,29 +128,76 @@ export function StepReview({
         {/* Financial Summary */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium uppercase text-muted-foreground tracking-wider">
-              Financial Summary
+            <CardTitle className="text-sm font-medium uppercase text-muted-foreground tracking-wider flex justify-between">
+              <span>Financial Summary</span>
+              {breakdown && (
+                <span className="text-[10px] font-bold text-emerald-600 border border-emerald-600 px-1 rounded">
+                  AUTHORITATIVE
+                </span>
+              )}
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-3">
             {!isPA && (
-              <div className="flex justify-between">
+              <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Sum Insured:</span>
                 <span className="font-bold">
                   KES {(state.financials?.sumInsured || 0).toLocaleString()}
                 </span>
               </div>
             )}
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Total Premium:</span>
-              <span className="font-bold text-green-700">
+
+            {breakdown ? (
+              <div className="space-y-2 border-y py-3 my-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Net Premium:</span>
+                  <span className="font-mono">
+                    {Number(breakdown.net_premium).toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                    })}
+                  </span>
+                </div>
+                {breakdown.benefits.map((benefit) => (
+                  <div
+                    key={benefit.name}
+                    className="flex justify-between text-xs pl-4 italic"
+                  >
+                    <span className="text-muted-foreground">{benefit.name}:</span>
+                    <span className="font-mono text-slate-600">
+                      {Number(benefit.amount).toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                      })}
+                    </span>
+                  </div>
+                ))}
+                {Object.entries(breakdown.taxes).map(([name, amount]) => (
+                  <div key={name} className="flex justify-between text-xs">
+                    <span className="text-muted-foreground">
+                      {name.replace(/_/g, " ").toUpperCase()}:
+                    </span>
+                    <span className="font-mono text-slate-600">
+                      {Number(amount).toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                      })}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+
+            <div className="flex justify-between pt-1">
+              <span className="text-muted-foreground">Total Payable:</span>
+              <span className="font-bold text-lg text-green-700">
                 KES{" "}
-                {calculation.breakdown.total.toLocaleString(undefined, {
+                {(breakdown
+                  ? Number(breakdown.total_amount)
+                  : localCalculation.breakdown.total
+                ).toLocaleString(undefined, {
                   minimumFractionDigits: 2,
                 })}
               </span>
             </div>
-            <div className="flex justify-between border-t pt-2">
+            <div className="flex justify-between border-t pt-2 text-sm">
               <span className="text-muted-foreground">Start Date:</span>
               <span className="font-medium">{state.financials?.startDate}</span>
             </div>

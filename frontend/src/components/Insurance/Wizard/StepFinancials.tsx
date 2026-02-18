@@ -13,8 +13,12 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { useProducts } from "@/hooks/useInsurance"
+import { useProducts, useQuote } from "@/hooks/useInsurance"
 import { calculatePremium } from "@/lib/calculator"
+import type {
+  BaseFinancialBreakdown,
+  MotorFinancialBreakdown,
+} from "@/client"
 import type {
   EnhancedProduct,
   WizardExtensions,
@@ -53,6 +57,7 @@ export function StepFinancials({
   productId,
 }: StepFinancialsProps) {
   const { data: productsData } = useProducts()
+  const quoteMutation = useQuote()
 
   const selectedProduct = useMemo(() => {
     return productsData?.data.find((p) => p.id === productId) as
@@ -97,7 +102,38 @@ export function StepFinancials({
     ?.toLowerCase()
     .includes("motor private")
 
-  const calculation = calculatePremium({
+  // 1. Debounced Backend Quote
+  useEffect(() => {
+    if (!productId || !isMotorPrivate) return
+
+    const timer = setTimeout(() => {
+      quoteMutation.mutate({
+        product_id: productId,
+        risk_details: {
+          "VEHICLE DETAILS": {
+            "Value Kshs.": financials.sumInsured || 0,
+          },
+          EXTENSIONS: {
+            pvt: !!extensions.pvt,
+            excess_protector: !!extensions.excessProtector,
+            om_rescue_plus: !!extensions.omRescuePlus,
+          },
+        },
+      })
+    }, 500) // 500ms debounce
+
+    return () => clearTimeout(timer)
+  }, [
+    productId,
+    financials.sumInsured,
+    extensions.pvt,
+    extensions.excessProtector,
+    extensions.omRescuePlus,
+    isMotorPrivate,
+  ])
+
+  // 2. Local Fallback (while loading or if not Motor Private)
+  const localCalculation = calculatePremium({
     sumInsured: financials.sumInsured || 0,
     rate: financials.rate || 0,
     hasPVT: !!extensions.pvt,
@@ -107,19 +143,25 @@ export function StepFinancials({
     isMotorPrivate: !!isMotorPrivate,
   })
 
+  // 3. authoritative source of truth
+  const breakdown =
+    isMotorPrivate && quoteMutation.data
+      ? (quoteMutation.data.breakdown as MotorFinancialBreakdown)
+      : null
+
   // Auto-set rate for Motor Private
   useEffect(() => {
-    if (isMotorPrivate && calculation.breakdown.basic > 0) {
+    if (isMotorPrivate && breakdown && breakdown.net_premium > 0) {
       // Reverse calculate effective rate for display
       const effectiveRate =
-        (calculation.breakdown.basic / (financials.sumInsured || 1)) * 100
-      if (effectiveRate !== financials.rate) {
+        (Number(breakdown.net_premium) / (financials.sumInsured || 1)) * 100
+      if (Math.abs(effectiveRate - financials.rate) > 0.001) {
         form.setValue("financials.rate", Number(effectiveRate.toFixed(3)))
       }
     }
   }, [
     isMotorPrivate,
-    calculation.breakdown.basic,
+    breakdown?.net_premium,
     financials.sumInsured,
     financials.rate,
     form.setValue,
@@ -315,8 +357,11 @@ export function StepFinancials({
               <h3 className="font-bold text-sm uppercase tracking-widest text-slate-400">
                 Premium Preview
               </h3>
-              <div className="text-right text-[10px] font-mono text-slate-500">
-                Calculated Real-time
+              <div className="text-right text-[10px] font-mono text-slate-500 flex items-center gap-2">
+                {quoteMutation.isPending && (
+                  <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+                )}
+                {breakdown ? "AUTHORITATIVE MATH" : "ESTIMATED"}
               </div>
             </div>
 
@@ -327,7 +372,10 @@ export function StepFinancials({
                     {isPA ? "Base Premium" : "Basic Premium"}
                   </span>
                   <span className="font-mono font-bold">
-                    {calculation.breakdown.basic.toLocaleString(undefined, {
+                    {(breakdown
+                      ? Number(breakdown.net_premium)
+                      : localCalculation.breakdown.basic
+                    ).toLocaleString(undefined, {
                       minimumFractionDigits: 2,
                     })}
                   </span>
@@ -337,15 +385,35 @@ export function StepFinancials({
                   <span className="text-[10px] font-bold uppercase text-slate-500 tracking-tight">
                     Benefits
                   </span>
-                  {isMotor && calculation.breakdown.extensions.length > 0 ? (
-                    calculation.breakdown.extensions.map((ext) => (
+                  {breakdown ? (
+                    breakdown.benefits && breakdown.benefits.length > 0 ? (
+                      breakdown.benefits.map((benefit) => (
+                        <div
+                          key={benefit.name}
+                          className="flex justify-between text-xs py-1 border-b border-slate-800 last:border-0"
+                        >
+                          <span className="text-slate-300 italic">
+                            {benefit.name}
+                          </span>
+                          <span className="font-mono">
+                            {Number(benefit.amount).toLocaleString(undefined, {
+                              minimumFractionDigits: 2,
+                            })}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-[10px] text-slate-600 italic">
+                        No additional benefits included.
+                      </p>
+                    )
+                  ) : isMotor && localCalculation.breakdown.extensions.length > 0 ? (
+                    localCalculation.breakdown.extensions.map((ext) => (
                       <div
                         key={ext.name}
                         className="flex justify-between text-xs py-1 border-b border-slate-800 last:border-0"
                       >
-                        <span className="text-slate-300 italic">
-                          {ext.name}
-                        </span>
+                        <span className="text-slate-300 italic">{ext.name}</span>
                         <span
                           className={
                             ext.included
@@ -371,24 +439,43 @@ export function StepFinancials({
 
               <div className="space-y-4 border-t border-slate-800 pt-4">
                 <div className="bg-slate-800/50 p-3 rounded space-y-2">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-slate-400">Training Levy (0.2%)</span>
-                    <span className="font-mono text-slate-300">
-                      {calculation.breakdown.levies.trainingLevy.toLocaleString(
-                        undefined,
-                        { minimumFractionDigits: 2 },
-                      )}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-slate-400">PHCF Levy (0.25%)</span>
-                    <span className="font-mono text-slate-300">
-                      {calculation.breakdown.levies.phcf.toLocaleString(
-                        undefined,
-                        { minimumFractionDigits: 2 },
-                      )}
-                    </span>
-                  </div>
+                  {breakdown ? (
+                    Object.entries(breakdown.taxes).map(([name, amount]) => (
+                      <div key={name} className="flex justify-between text-xs">
+                        <span className="text-slate-400">
+                          {name.replace("_", " ").toUpperCase()}
+                        </span>
+                        <span className="font-mono text-slate-300">
+                          {Number(amount).toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                          })}
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-slate-400">
+                          Training Levy (0.2%)
+                        </span>
+                        <span className="font-mono text-slate-300">
+                          {localCalculation.breakdown.levies.trainingLevy.toLocaleString(
+                            undefined,
+                            { minimumFractionDigits: 2 },
+                          )}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-slate-400">PHCF Levy (0.25%)</span>
+                        <span className="font-mono text-slate-300">
+                          {localCalculation.breakdown.levies.phcf.toLocaleString(
+                            undefined,
+                            { minimumFractionDigits: 2 },
+                          )}
+                        </span>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 <div className="pt-2 border-t border-slate-700">
@@ -399,7 +486,10 @@ export function StepFinancials({
                     <div className="text-right">
                       <span className="text-2xl font-black text-emerald-400 font-mono">
                         <span className="text-sm font-normal mr-1">KES</span>
-                        {calculation.breakdown.total.toLocaleString(undefined, {
+                        {(breakdown
+                          ? Number(breakdown.total_amount)
+                          : localCalculation.breakdown.total
+                        ).toLocaleString(undefined, {
                           minimumFractionDigits: 2,
                         })}
                       </span>
