@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { useProducts, useQuote } from "@/hooks/useInsurance"
-import { calculatePremium } from "@/lib/calculator"
 import type {
   BaseFinancialBreakdown,
   MotorFinancialBreakdown,
@@ -132,18 +131,7 @@ export function StepFinancials({
     isMotorPrivate,
   ])
 
-  // 2. Local Fallback (while loading or if not Motor Private)
-  const localCalculation = calculatePremium({
-    sumInsured: financials.sumInsured || 0,
-    rate: financials.rate || 0,
-    hasPVT: !!extensions.pvt,
-    hasExcessProtector: !!extensions.excessProtector,
-    hasPassengerLiability: !!extensions.passengerLiability,
-    hasOMRescuePlus: !!extensions.omRescuePlus,
-    isMotorPrivate: !!isMotorPrivate,
-  })
-
-  // 3. authoritative source of truth
+  // 2. authoritative source of truth
   const breakdown =
     isMotorPrivate && quoteMutation.data
       ? (quoteMutation.data.breakdown as MotorFinancialBreakdown)
@@ -366,137 +354,127 @@ export function StepFinancials({
             </div>
 
             <div className="space-y-6">
-              <div className="space-y-3">
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-slate-400">
-                    {isPA ? "Base Premium" : "Basic Premium"}
-                  </span>
-                  <span className="font-mono font-bold">
-                    {(breakdown
-                      ? Number(breakdown.net_premium)
-                      : localCalculation.breakdown.basic
-                    ).toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                    })}
-                  </span>
+              {!breakdown && !quoteMutation.isPending ? (
+                <div className="py-12 text-center space-y-2">
+                  <p className="text-slate-500 text-xs uppercase tracking-widest font-bold">
+                    Awaiting Input
+                  </p>
+                  <p className="text-slate-600 text-[10px] italic">
+                    Enter sum insured to generate authoritative quote
+                  </p>
                 </div>
-
-                <div className="space-y-1">
-                  <span className="text-[10px] font-bold uppercase text-slate-500 tracking-tight">
-                    Benefits
-                  </span>
-                  {breakdown ? (
-                    breakdown.benefits && breakdown.benefits.length > 0 ? (
-                      breakdown.benefits.map((benefit) => (
-                        <div
-                          key={benefit.name}
-                          className="flex justify-between text-xs py-1 border-b border-slate-800 last:border-0"
-                        >
-                          <span className="text-slate-300 italic">
-                            {benefit.name}
-                          </span>
-                          <span className="font-mono">
-                            {Number(benefit.amount).toLocaleString(undefined, {
-                              minimumFractionDigits: 2,
-                            })}
-                          </span>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-[10px] text-slate-600 italic">
-                        No additional benefits included.
-                      </p>
-                    )
-                  ) : isMotor && localCalculation.breakdown.extensions.length > 0 ? (
-                    localCalculation.breakdown.extensions.map((ext) => (
-                      <div
-                        key={ext.name}
-                        className="flex justify-between text-xs py-1 border-b border-slate-800 last:border-0"
+              ) : (
+                <>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-slate-400">
+                        {isPA ? "Base Premium" : "Basic Premium"}
+                      </span>
+                      <span
+                        className={`font-mono font-bold ${
+                          quoteMutation.isPending ? "opacity-40" : ""
+                        }`}
                       >
-                        <span className="text-slate-300 italic">{ext.name}</span>
-                        <span
-                          className={
-                            ext.included
-                              ? "font-bold text-emerald-400"
-                              : "font-mono"
-                          }
-                        >
-                          {ext.included
-                            ? "INCLUDED"
-                            : ext.amount.toLocaleString(undefined, {
+                        {breakdown
+                          ? Number(breakdown.net_premium).toLocaleString(
+                              undefined,
+                              {
                                 minimumFractionDigits: 2,
-                              })}
-                        </span>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-[10px] text-slate-600 italic">
-                      No additional benefits selected.
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-4 border-t border-slate-800 pt-4">
-                <div className="bg-slate-800/50 p-3 rounded space-y-2">
-                  {breakdown ? (
-                    Object.entries(breakdown.taxes).map(([name, amount]) => (
-                      <div key={name} className="flex justify-between text-xs">
-                        <span className="text-slate-400">
-                          {name.replace("_", " ").toUpperCase()}
-                        </span>
-                        <span className="font-mono text-slate-300">
-                          {Number(amount).toLocaleString(undefined, {
-                            minimumFractionDigits: 2,
-                          })}
-                        </span>
-                      </div>
-                    ))
-                  ) : (
-                    <>
-                      <div className="flex justify-between text-xs">
-                        <span className="text-slate-400">
-                          Training Levy (0.2%)
-                        </span>
-                        <span className="font-mono text-slate-300">
-                          {localCalculation.breakdown.levies.trainingLevy.toLocaleString(
-                            undefined,
-                            { minimumFractionDigits: 2 },
-                          )}
-                        </span>
-                      </div>
-                      <div className="flex justify-between text-xs">
-                        <span className="text-slate-400">PHCF Levy (0.25%)</span>
-                        <span className="font-mono text-slate-300">
-                          {localCalculation.breakdown.levies.phcf.toLocaleString(
-                            undefined,
-                            { minimumFractionDigits: 2 },
-                          )}
-                        </span>
-                      </div>
-                    </>
-                  )}
-                </div>
-
-                <div className="pt-2 border-t border-slate-700">
-                  <div className="flex justify-between items-baseline">
-                    <span className="text-xs font-bold text-slate-400 uppercase">
-                      Total Amount
-                    </span>
-                    <div className="text-right">
-                      <span className="text-2xl font-black text-emerald-400 font-mono">
-                        <span className="text-sm font-normal mr-1">KES</span>
-                        {(breakdown
-                          ? Number(breakdown.total_amount)
-                          : localCalculation.breakdown.total
-                        ).toLocaleString(undefined, {
-                          minimumFractionDigits: 2,
-                        })}
+                              },
+                            )
+                          : "0.00"}
                       </span>
                     </div>
+
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-bold uppercase text-slate-500 tracking-tight">
+                        Benefits
+                      </span>
+                      {breakdown?.benefits && breakdown.benefits.length > 0 ? (
+                        breakdown.benefits.map((benefit) => (
+                          <div
+                            key={benefit.name}
+                            className={`flex justify-between text-xs py-1 border-b border-slate-800 last:border-0 ${
+                              quoteMutation.isPending ? "opacity-40" : ""
+                            }`}
+                          >
+                            <span className="text-slate-300 italic">
+                              {benefit.name}
+                            </span>
+                            <span className="font-mono">
+                              {Number(benefit.amount).toLocaleString(
+                                undefined,
+                                {
+                                  minimumFractionDigits: 2,
+                                },
+                              )}
+                            </span>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-[10px] text-slate-600 italic">
+                          No additional benefits included.
+                        </p>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </div>
+
+                  <div className="space-y-4 border-t border-slate-800 pt-4">
+                    <div className="bg-slate-800/50 p-3 rounded space-y-2">
+                      {breakdown ? (
+                        Object.entries(breakdown.taxes).map(([name, amount]) => (
+                          <div
+                            key={name}
+                            className={`flex justify-between text-xs ${
+                              quoteMutation.isPending ? "opacity-40" : ""
+                            }`}
+                          >
+                            <span className="text-slate-400">
+                              {name.replace("_", " ").toUpperCase()}
+                            </span>
+                            <span className="font-mono text-slate-300">
+                              {Number(amount).toLocaleString(undefined, {
+                                minimumFractionDigits: 2,
+                              })}
+                            </span>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-[10px] text-slate-600 italic py-2">
+                          Taxes will be calculated on quote
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-700">
+                      <div className="flex justify-between items-baseline">
+                        <span className="text-xs font-bold text-slate-400 uppercase">
+                          Total Amount
+                        </span>
+                        <div className="text-right">
+                          <span
+                            className={`text-2xl font-black text-emerald-400 font-mono ${
+                              quoteMutation.isPending ? "opacity-40" : ""
+                            }`}
+                          >
+                            <span className="text-sm font-normal mr-1">
+                              KES
+                            </span>
+                            {breakdown
+                              ? Number(breakdown.total_amount).toLocaleString(
+                                  undefined,
+                                  {
+                                    minimumFractionDigits: 2,
+                                  },
+                                )
+                              : "0.00"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
