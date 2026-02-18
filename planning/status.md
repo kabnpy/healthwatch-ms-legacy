@@ -24,9 +24,9 @@
 - **Type Integrity & Stabilization**: Resolving persistent TypeScript errors in the auto-generated client and components.
 
 ## Next Steps
-1. **Database Migration**: Apply `risk_note_number` changes to the live database.
-2. **Frontend Stability**: Monitor the production build for any further TypeScript issues.
-3. **eTIMS Integration Prep**: Start planning for tax compliance (invoice number formatting and external API sync).
+1. **Automated Testing & CI/CD**: Implement a robust test suite and automate deployments via GitHub Actions.
+2. **Comprehensive Documentation**: Complete the technical and user documentation for the current feature set.
+3. **Production Monitoring**: Establish basic logging and monitoring for the Railway deployment.
 
 ## Architectural Decisions
 - **Unified Policy Entity**: 1 Policy = 1 Cover Instance. This simplifies data capture and document generation significantly.

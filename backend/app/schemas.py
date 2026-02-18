@@ -1,6 +1,33 @@
-from typing import Any
+from decimal import Decimal
+from typing import Any, Annotated, Literal, Union
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+
+class BenefitLineItem(BaseModel):
+    name: str
+    amount: Decimal
+
+
+class BaseFinancialBreakdown(BaseModel):
+    type: Literal["base"] = "base"
+    net_premium: Decimal
+    taxes: dict[str, Decimal] = Field(default_factory=dict)
+    commission_amount: Decimal
+    total_amount: Decimal
+
+
+class MotorFinancialBreakdown(BaseFinancialBreakdown):
+    type: Literal["motor"] = "motor"
+    benefits: list[BenefitLineItem] = Field(default_factory=list)
+
+
+class FinancialBreakdown(BaseModel):
+    product_class: str
+    breakdown: Annotated[
+        Union[MotorFinancialBreakdown, BaseFinancialBreakdown],
+        Field(discriminator="type")
+    ]
 
 
 class MotorPrivateRiskDetails(BaseModel):

@@ -5,10 +5,10 @@ This plan details the centralization of insurance rating logic into a backend se
 ## Phase 1: Rating Engine & Polymorphic Schemas [checkpoint: ]
 Establish the core logic and validation models for financial breakdowns.
 
-- [ ] Task: Create a new feature branch `feat/rating-engine`.
-- [ ] Task: **Write Tests for Financial Schemas**: Define expected structures for `BaseFinancialBreakdown` and `MotorFinancialBreakdown`.
-- [ ] Task: Implement polymorphic Pydantic schemas in `backend/app/schemas.py` using `Annotated` and `Discriminator`.
-- [ ] Task: **Write Tests for Rating Service**: Define test cases for Motor Private math (PVT, Excess Protector, etc.) with `Decimal` precision.
+- [x] Task: Create a new feature branch `feat/rating-engine`. (manual)
+- [x] Task: **Write Tests for Financial Schemas**: Define expected structures for `BaseFinancialBreakdown` and `MotorFinancialBreakdown`. (Red Phase Complete)
+- [x] Task: Implement polymorphic Pydantic schemas in `backend/app/schemas.py` using `Annotated` and `Discriminator`. (30bc787)
+- [x] Task: **Write Tests for Rating Service**: Define test cases for Motor Private math (PVT, Excess Protector, etc.) with `Decimal` precision. (Red Phase Complete)
 - [ ] Task: Implement `RatingService` and `MotorPrivateRatingStrategy` in `backend/app/services/rating.py` using the Strategy Pattern.
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Rating Engine & Polymorphic Schemas' (Protocol in workflow.md)
 
