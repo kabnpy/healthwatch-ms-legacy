@@ -30,4 +30,4 @@ COPY ./tests /app/tests
 # Sync the project
 RUN uv sync
 
-CMD ["fastapi", "run", "--workers", "4", "--port", "8000", "app/main.py"]
+CMD ["sh", "-c", "bash scripts/prestart.sh && fastapi run --workers 4 --port 8000 app/main.py"]

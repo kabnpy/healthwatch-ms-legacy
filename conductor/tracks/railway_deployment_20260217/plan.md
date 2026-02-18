@@ -22,9 +22,9 @@ Setting up the persistent data layer.
 Deploying and hardening the API service.
 
 - [x] Task: Configure all required backend environment variables in Railway (e.g., `SECRET_KEY`, `CORS_ORIGINS`). (manual)
-- [~] Task: Push configuration changes to GitHub to trigger Railway backend deployment (including explicit port fix).
+- [~] Task: Push configuration changes to GitHub to trigger Railway backend deployment (including explicit migration and port fix).
 - [x] Task: Execute database migrations against the Railway PostgreSQL instance using the backend service. (manual)
-- [x] Task: Verify the backend health check endpoint on the public Railway URL. (manual)
+- [ ] Task: Verify the backend health check endpoint on the public Railway URL.
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Backend Deployment & Verification' (Protocol in workflow.md)
 
 ## Phase 4: Frontend Deployment & Verification [checkpoint: ]
