@@ -102,9 +102,11 @@ export function StepFinancials({
     ?.toLowerCase()
     .includes("motor private")
 
+  const isManual = selectedProduct?.pricing_strategy === "Manual"
+
   // 1. Debounced Backend Quote
   useEffect(() => {
-    if (!productId || !isMotorPrivate) return
+    if (!productId) return
 
     const timer = setTimeout(() => {
       quoteMutation.mutate({
@@ -112,6 +114,10 @@ export function StepFinancials({
         risk_details: {
           "VEHICLE DETAILS": {
             "Value Kshs.": financials.sumInsured || 0,
+          },
+          financials: {
+            sumInsured: financials.sumInsured || 0,
+            rate: financials.rate || 0,
           },
           EXTENSIONS: {
             pvt: !!extensions.pvt,
@@ -127,24 +133,21 @@ export function StepFinancials({
   }, [
     productId,
     financials.sumInsured,
+    financials.rate,
     extensions.pvt,
     extensions.excessProtector,
     extensions.omRescuePlus,
     extensions.passengerLiability,
-    isMotorPrivate,
     quoteMutation.mutate,
   ])
 
   // 2. authoritative source of truth
-  const breakdown =
-    isMotorPrivate && quoteMutation.data
-      ? (quoteMutation.data.breakdown as MotorFinancialBreakdown)
-      : null
+  const breakdown = quoteMutation.data?.breakdown as any
 
   // Auto-set rate for Motor Private
   useEffect(() => {
-    if (isMotorPrivate && breakdown) {
-      if (breakdown.net_premium > 0) {
+    if (breakdown) {
+      if (isMotorPrivate && breakdown.net_premium > 0) {
         // Reverse calculate effective rate for display (inclusive of non-tax extensions)
         const effectiveRate =
           (Number(breakdown.net_premium) / (financials.sumInsured || 1)) * 100
@@ -228,8 +231,8 @@ export function StepFinancials({
                         step="0.01"
                         {...field}
                         value={field.value || 0}
-                        readOnly={!!isMotorPrivate}
-                        className={isMotorPrivate ? "bg-slate-100" : ""}
+                        readOnly={!!isMotorPrivate && !isManual}
+                        className={isMotorPrivate && !isManual ? "bg-slate-100" : ""}
                       />
                     </FormControl>
                     <FormMessage />
