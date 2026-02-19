@@ -1,6 +1,6 @@
 # Implementation Plan: Financial Hardening & Rating Service Refinement
 
-## Phase 1: Backend Core Hardening (Rating Service & Endorsement Logic)
+## Phase 1: Backend Core Hardening (Rating Service & Endorsement Logic) [checkpoint: 48e0abd]
 This phase focuses on making the backend the single, robust source of truth for all financial calculations and ensuring endorsement audits are mathematically sound.
 
 - [x] **Task: Implement Robust Numeric Parsing in Rating Service** [4b87e4c]
