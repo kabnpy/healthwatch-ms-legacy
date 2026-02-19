@@ -16,10 +16,10 @@ This phase focuses on making the backend the single, robust source of truth for 
     - [x] Update `PolicyService.create_endorsement` to calculate the full breakdown for the new state and explicitly derive the deltas.
     - [x] Ensure `net_premium`, `total_amount`, and `commission_amount` on the `RiskNote` match the calculated deltas.
     - [x] Verify tests pass.
-- [ ] **Task: Support Manual and Generic Pricing Strategies**
-    - [ ] Write failing tests for `MANUAL` pricing strategy and a generic fallback for products like "Fire" or "Personal Accident".
-    - [ ] Implement `ManualRatingStrategy` and update `RatingService._calculate_generic` to return a non-zero premium based on `pricing_rules` if available.
-    - [ ] Verify tests pass.
+- [x] **Task: Support Manual and Generic Pricing Strategies** [67f2287]
+    - [x] Write failing tests for `MANUAL` pricing strategy and a generic fallback for products like "Fire" or "Personal Accident".
+    - [x] Implement `ManualRatingStrategy` and update `RatingService._calculate_generic` to return a non-zero premium based on `pricing_rules` if available.
+    - [x] Verify tests pass.
 - [ ] **Task: Conductor - User Manual Verification 'Backend Core Hardening' (Protocol in workflow.md)**
 
 ## Phase 2: Frontend & Model Refinement
