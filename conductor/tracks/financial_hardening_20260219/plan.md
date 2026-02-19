@@ -3,10 +3,10 @@
 ## Phase 1: Backend Core Hardening (Rating Service & Endorsement Logic)
 This phase focuses on making the backend the single, robust source of truth for all financial calculations and ensuring endorsement audits are mathematically sound.
 
-- [ ] **Task: Implement Robust Numeric Parsing in Rating Service**
-    - [ ] Write failing tests in `backend/tests/test_rating_service.py` for `RatingService` handling currency strings (e.g., "1,500.00"), empty placeholders (`[ EMPTY ]`), and non-numeric characters.
-    - [ ] Implement regex-based parsing in `MotorPrivateRatingStrategy` and `RatingService`.
-    - [ ] Verify tests pass.
+- [x] **Task: Implement Robust Numeric Parsing in Rating Service** [4b87e4c]
+    - [x] Write failing tests in `backend/tests/test_rating_service.py` for `RatingService` handling currency strings (e.g., "1,500.00"), empty placeholders (`[ EMPTY ]`), and non-numeric characters.
+    - [x] Implement regex-based parsing in `MotorPrivateRatingStrategy` and `RatingService`.
+    - [x] Verify tests pass.
 - [ ] **Task: Implement Automated Tier Sorting**
     - [ ] Write failing tests for `MotorPrivateRatingStrategy` where provided `pricing_rules` tiers are out of order.
     - [ ] Add sorting logic to `MotorPrivateRatingStrategy.calculate` before the tier lookup.
