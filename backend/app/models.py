@@ -275,12 +275,10 @@ class Product(ProductBase, table=True):
             return result
         return risk_details
     def calculate_premium(self, risk_details: dict[str, Any]) -> Decimal:
-        if "motor private" in self.class_of_insurance.lower():
-            risk_data = risk_details.get("VEHICLE DETAILS", risk_details)
-            value = float(risk_data.get("Value Kshs.", 0))
-            premium = max(15000.0, value * 0.0325)
-            return Decimal(str(premium)).quantize(Decimal("0.01"))
-        return Decimal("0.00")
+        from app.services.rating import RatingService
+
+        breakdown = RatingService.calculate_breakdown(self, risk_details)
+        return breakdown.net_premium
 
 
 class ProductsPublic(SQLModel):
