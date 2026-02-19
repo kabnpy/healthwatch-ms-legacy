@@ -33,10 +33,10 @@ This phase integrates the backend changes into the frontend and cleans up redund
     - [x] Update `frontend/src/components/Insurance/Wizard/StepFinancials.tsx` to remove the `isMotorPrivate` restriction on the quote `useEffect`.
     - [x] Ensure the premium preview UI correctly maps to the generic `BaseFinancialBreakdown` when a motor-specific one isn't available.
     - [x] Verify that changing "Fire" or "PA" fields triggers a backend quote and updates the UI.
-- [ ] **Task: Fix Nested Path Lookup in `injectWizardData`**
-    - [ ] Write failing unit tests in `frontend/src/utils/documentData.test.ts` for resolving nested paths like `VEHICLE DETAILS.Reg. No`.
-    - [ ] Update `injectWizardData` to support recursive dot-notation lookup in the `actualRoot` object.
-    - [ ] Verify tests pass.
+- [x] **Task: Fix Nested Path Lookup in `injectWizardData`** [d718bd9]
+    - [x] Write failing unit tests in `frontend/src/utils/documentData.test.ts` for resolving nested paths like `VEHICLE DETAILS.Reg. No`.
+    - [x] Update `injectWizardData` to support recursive dot-notation lookup in the `actualRoot` object.
+    - [x] Verify tests pass.
 - [ ] **Task: Conductor - User Manual Verification 'Frontend & Model Refinement' (Protocol in workflow.md)**
 
 ## Phase 3: Final Verification & Audit
