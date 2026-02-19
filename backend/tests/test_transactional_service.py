@@ -41,14 +41,14 @@ def test_atomic_policy_creation(db: Session) -> None:
     assert len(policy.risk_notes) == 1
     rn = policy.risk_notes[0]
     assert rn.transaction_type == TransactionType.NEW_BUSINESS
-    assert rn.policy_snapshot["risk_details"]["VEHICLE DETAILS"] == risk_details["VEHICLE DETAILS"]
-    assert rn.policy_snapshot["risk_details"]["Value Kshs."] == 5000000.0
+    assert rn.policy_snapshot["risk_details"]["VEHICLE DETAILS"]["Value Kshs."] == 5000000.0
+    assert rn.policy_snapshot["risk_details"]["sum_insured"] == 5000000.0
     assert rn.financial_breakdown["type"] == "motor"
     assert "training_levy" in rn.financial_breakdown["taxes"]
     assert rn.coverage_start == start_date
     assert rn.coverage_end == end_date
-    assert policy.current_risk_details["VEHICLE DETAILS"] == risk_details["VEHICLE DETAILS"]
-    assert policy.current_risk_details["Value Kshs."] == 5000000.0
+    assert policy.current_risk_details["VEHICLE DETAILS"]["Value Kshs."] == 5000000.0
+    assert policy.current_risk_details["sum_insured"] == 5000000.0
 
 def test_endorsement_creation(db: Session) -> None:
     # 1. Setup a policy with one RiskNote
@@ -89,8 +89,8 @@ def test_endorsement_creation(db: Session) -> None:
     assert sorted_notes[0].id == endorsement_rn.id
 
     assert policy.current_risk_note.id == endorsement_rn.id
-    assert policy.current_risk_details["VEHICLE DETAILS"] == new_risk_details["VEHICLE DETAILS"]
-    assert policy.current_risk_details["Value Kshs."] == 6000000.0
+    assert policy.current_risk_details["VEHICLE DETAILS"]["Value Kshs."] == 6000000.0
+    assert policy.current_risk_details["sum_insured"] == 6000000.0
     assert endorsement_rn.transaction_type == TransactionType.ENDORSEMENT
     assert endorsement_rn.policy_snapshot["changes"]["description"] == "Increased vehicle value"
 

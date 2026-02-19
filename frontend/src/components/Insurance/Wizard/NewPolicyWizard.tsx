@@ -40,7 +40,7 @@ export function NewPolicyWizard({
     product_id: "",
     details: {},
     financials: {
-      sumInsured: 0,
+      sum_insured: 0,
       rate: 4.5,
       startDate: new Date().toISOString().split("T")[0],
       duration: 12,
@@ -64,17 +64,19 @@ export function NewPolicyWizard({
       setState((prev) => ({ ...prev, product_id: data.product_id }))
     } else if (step === 1) {
       // Sync logic: Extract "Value" or "Sum Insured" from details (recursive search)
+      // Now using 'sum_insured' as the semantic key
       const findValue = (obj: any): number => {
         if (!obj || typeof obj !== "object") return 0
         for (const [k, v] of Object.entries(obj)) {
-          if (/value|sum insured/i.test(k) && typeof v !== "object") {
+          // Look for sum_insured, value, or display aliases
+          if (/sum_insured|value|sum insured/i.test(k) && typeof v !== "object") {
             const cleanVal =
               typeof v === "string" ? v.replace(/[^0-9.]/g, "") : v
             return Number(cleanVal) || 0
           }
           if (typeof v === "object") {
             const found = findValue(v)
-            if (found > 0) return found
+            if (found !== 0) return found
           }
         }
         return 0
@@ -87,8 +89,8 @@ export function NewPolicyWizard({
         details: data,
         financials: {
           ...prev.financials,
-          sumInsured:
-            extractedValue > 0 ? extractedValue : prev.financials.sumInsured,
+          sum_insured:
+            extractedValue !== 0 ? extractedValue : prev.financials.sum_insured,
         },
       }))
     } else {

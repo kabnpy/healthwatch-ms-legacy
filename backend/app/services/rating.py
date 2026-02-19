@@ -61,16 +61,19 @@ class MotorPrivateRatingStrategy(RatingStrategy):
     def calculate(
         self, product: Product, risk_details: dict[str, Any]
     ) -> MotorFinancialBreakdown:
+        # 1. Determine Sum Insured (Authoritative Source)
         # Prioritize top-level, then nested
-        value_raw = risk_details.get("Value Kshs.")
-        if value_raw is None:
+        si_raw = risk_details.get("sum_insured")
+        if si_raw is None:
+            # Check for alias
+            si_raw = risk_details.get("Value Kshs.")
+        if si_raw is None:
             vehicle_details = risk_details.get("VEHICLE DETAILS", {})
-            value_raw = vehicle_details.get("Value Kshs.", 0)
+            si_raw = vehicle_details.get("sum_insured", vehicle_details.get("Value Kshs.", 0))
     
-        # Robust numeric parsing
-        value = self.parse_decimal(value_raw)
+        value = self.parse_decimal(si_raw)
 
-        # 1. Basic Premium (Tiered)
+        # 2. Basic Premium (Tiered)
         # Use tiers from product if available, else use defaults
         product_tiers = product.pricing_rules.get("tiers")
         if product_tiers:
@@ -245,11 +248,14 @@ class RatingService:
     ) -> BaseFinancialBreakdown:
         # Fallback for products like Fire or PA
         # Use a simple rate if provided in pricing_rules
-        financials = risk_details.get("financials", {})
-        sum_insured_raw = financials.get("sumInsured", 0)
+        si_raw = risk_details.get("sum_insured")
+        if si_raw is None:
+            # Try financials object if it came from the wizard financials step
+            financials = risk_details.get("financials", {})
+            si_raw = financials.get("sum_insured", financials.get("sumInsured", 0))
         
         motor_strategy = MotorPrivateRatingStrategy()
-        sum_insured = motor_strategy.parse_decimal(sum_insured_raw)
+        sum_insured = motor_strategy.parse_decimal(si_raw)
         
         rate_val = product.pricing_rules.get("rate", 0)
         rate = Decimal(str(rate_val)) / Decimal("100")

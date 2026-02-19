@@ -24,7 +24,7 @@ import type {
 
 const financialsSchema = z.object({
   financials: z.object({
-    sumInsured: z.coerce.number().min(0),
+    sum_insured: z.coerce.number().min(0),
     rate: z.coerce.number().min(0),
     basicRate: z.coerce.number().optional(),
     isHighEnd: z.boolean().optional(),
@@ -68,7 +68,7 @@ export function StepFinancials({
     resolver: zodResolver(financialsSchema),
     defaultValues: {
       financials: {
-        sumInsured: defaultValues.financials?.sumInsured || 0,
+        sum_insured: Number(defaultValues.financials?.sum_insured) || 0,
         rate: defaultValues.financials?.rate || 0,
         basicRate: defaultValues.financials?.basicRate || 0,
         isHighEnd: defaultValues.financials?.isHighEnd || false,
@@ -91,14 +91,6 @@ export function StepFinancials({
   const financials = watchedValues.financials || {}
   const extensions = watchedValues.extensions || {}
 
-  const isPA = selectedProduct?.class_of_insurance
-    ?.toLowerCase()
-    .includes("personal accident")
-
-  const isMotor = selectedProduct?.class_of_insurance
-    ?.toLowerCase()
-    .includes("motor")
-
   const isMotorPrivate = selectedProduct?.class_of_insurance
     ?.toLowerCase()
     .includes("motor private")
@@ -113,11 +105,9 @@ export function StepFinancials({
       quoteMutation.mutate({
         product_id: productId,
         risk_details: {
-          "VEHICLE DETAILS": {
-            "Value Kshs.": financials.sumInsured || 0,
-          },
+          sum_insured: financials.sum_insured,
           financials: {
-            sumInsured: financials.sumInsured || 0,
+            sum_insured: financials.sum_insured || 0,
             rate: financials.rate || 0,
           },
           EXTENSIONS: {
@@ -133,7 +123,7 @@ export function StepFinancials({
     return () => clearTimeout(timer)
   }, [
     productId,
-    financials.sumInsured,
+    financials.sum_insured,
     financials.rate,
     extensions.pvt,
     extensions.excessProtector,
@@ -150,8 +140,9 @@ export function StepFinancials({
     if (breakdown) {
       if (isMotorPrivate && breakdown.net_premium > 0) {
         // Reverse calculate effective rate for display (inclusive of non-tax extensions)
+        const siNum = Number(financials.sum_insured) || 1
         const effectiveRate =
-          (Number(breakdown.net_premium) / (financials.sumInsured || 1)) * 100
+          (Number(breakdown.net_premium) / siNum) * 100
         if (Math.abs(effectiveRate - financials.rate) > 0.001) {
           form.setValue("financials.rate", Number(effectiveRate.toFixed(3)))
         }
@@ -169,7 +160,7 @@ export function StepFinancials({
     breakdown?.net_premium,
     breakdown?.basic_rate,
     breakdown?.is_high_end,
-    financials.sumInsured,
+    financials.sum_insured,
     financials.rate,
     form.setValue,
     breakdown,
@@ -177,20 +168,20 @@ export function StepFinancials({
 
   // High-End Logic: Auto-select included benefits
   useEffect(() => {
-    if (isMotorPrivate && (financials.sumInsured || 0) >= 3000000) {
+    if (isMotorPrivate && (Number(financials.sum_insured) || 0) >= 3000000) {
       if (!extensions.pvt) form.setValue("extensions.pvt", true)
       if (!extensions.excessProtector)
         form.setValue("extensions.excessProtector", true)
     }
   }, [
     isMotorPrivate,
-    financials.sumInsured,
+    financials.sum_insured,
     extensions.excessProtector,
     extensions.pvt,
     form.setValue,
   ])
 
-  const isHighEnd = isMotorPrivate && (financials.sumInsured || 0) >= 3000000
+  const isHighEnd = isMotorPrivate && (Number(financials.sum_insured) || 0) >= 3000000
 
   return (
     <Form {...(form as any)}>
@@ -202,7 +193,7 @@ export function StepFinancials({
               {!isPA && (
                 <FormField
                   control={form.control as any}
-                  name="financials.sumInsured"
+                  name="financials.sum_insured"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Sum Insured</FormLabel>

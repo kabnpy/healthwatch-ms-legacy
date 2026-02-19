@@ -46,17 +46,17 @@ class MotorPrivateRiskDetails(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
         alias_generator=None,
-        extra="ignore" # Allow sumInsured to be passed without crashing, though we prefer Value Kshs.
+        extra="ignore"
     )
 
     registration_number: str = Field(..., alias="Reg. No", min_length=1)
     make: str = Field(..., alias="Make", min_length=1)
     year_of_manufacture: int = Field(..., alias="Year")
-    value: float = Field(..., alias="Value Kshs.")
+    sum_insured: float = Field(..., alias="Value Kshs.")
 
-    @field_validator("value", mode="before")
+    @field_validator("sum_insured", mode="before")
     @classmethod
-    def parse_value(cls, v: Any) -> float:
+    def parse_sum_insured(cls, v: Any) -> float:
         if v is None:
             return 0.0
         if isinstance(v, str):

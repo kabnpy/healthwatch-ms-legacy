@@ -270,7 +270,8 @@ class Product(ProductBase, table=True):
             validated_dump = validated.model_dump(by_alias=True)
             result = {
                 "VEHICLE DETAILS": validated_dump,
-                **validated_dump # Flattened fields at top level
+                "sum_insured": validated.sum_insured,
+                **validated_dump # Flattened fields (including Value Kshs alias)
             }
             
             if "EXTENSIONS" in risk_details:

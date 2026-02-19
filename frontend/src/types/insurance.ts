@@ -48,7 +48,7 @@ export interface RiskNoteSection {
  */
 
 export interface WizardFinancials {
-  sumInsured: number
+  sum_insured: number
   rate: number
   startDate: string
   duration: number
