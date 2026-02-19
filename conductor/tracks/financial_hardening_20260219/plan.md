@@ -29,10 +29,10 @@ This phase integrates the backend changes into the frontend and cleans up redund
     - [x] Identify and remove hardcoded logic in `backend/app/models.py` (`Product.calculate_premium`).
     - [x] Refactor `Product.calculate_premium` to delegate entirely to `RatingService`.
     - [x] Verify all existing tests pass.
-- [ ] **Task: Implement Unified Frontend Quote Hook**
-    - [ ] Update `frontend/src/components/Insurance/Wizard/StepFinancials.tsx` to remove the `isMotorPrivate` restriction on the quote `useEffect`.
-    - [ ] Ensure the premium preview UI correctly maps to the generic `BaseFinancialBreakdown` when a motor-specific one isn't available.
-    - [ ] Verify that changing "Fire" or "PA" fields triggers a backend quote and updates the UI.
+- [x] **Task: Implement Unified Frontend Quote Hook** [3dc8541]
+    - [x] Update `frontend/src/components/Insurance/Wizard/StepFinancials.tsx` to remove the `isMotorPrivate` restriction on the quote `useEffect`.
+    - [x] Ensure the premium preview UI correctly maps to the generic `BaseFinancialBreakdown` when a motor-specific one isn't available.
+    - [x] Verify that changing "Fire" or "PA" fields triggers a backend quote and updates the UI.
 - [ ] **Task: Fix Nested Path Lookup in `injectWizardData`**
     - [ ] Write failing unit tests in `frontend/src/utils/documentData.test.ts` for resolving nested paths like `VEHICLE DETAILS.Reg. No`.
     - [ ] Update `injectWizardData` to support recursive dot-notation lookup in the `actualRoot` object.
