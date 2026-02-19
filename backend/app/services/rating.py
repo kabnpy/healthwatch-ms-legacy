@@ -84,6 +84,8 @@ class MotorPrivateRatingStrategy(RatingStrategy):
                         "min": Decimal(str(t.get("min", 0))),
                     }
                 )
+            # Sort tiers by 'max' to ensure correct application
+            tiers.sort(key=lambda x: x["max"])
         else:
             tiers = self.DEFAULT_TIERS
 

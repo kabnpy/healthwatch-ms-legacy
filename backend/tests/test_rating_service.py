@@ -166,3 +166,33 @@ def test_rating_service_robust_parsing():
     assert breakdown.net_premium == Decimal("80000.00")
     assert breakdown.total_amount == Decimal("80400.00")
 
+def test_motor_private_tier_sorting():
+    # Product with UNSORTED tiers in pricing_rules
+    product = Product(
+        name="Motor Private - Comprehensive",
+        class_of_insurance="Motor Private",
+        default_commission_rate=10.0,
+        pricing_rules={
+            "tiers": [
+                {"max": 5000000, "rate": 3.25, "min": 0},
+                {"max": 1500000, "rate": 5.0, "min": 60000}, # This is the "lower" tier but placed second
+                {"max": 2500000, "rate": 4.0, "min": 75000},
+            ]
+        }
+    )
+    
+    # Test for a value that should hit the 1.5M tier (5%)
+    risk_details = {
+        "VEHICLE DETAILS": {
+            "Value Kshs.": 1000000.0,
+        }
+    }
+    
+    # If not sorted, it might hit the 5M tier first and apply 3.25%
+    breakdown = RatingService.calculate_breakdown(product, risk_details)
+    
+    # Correct math (1.5M tier): 1M * 0.05 = 50,000 -> Min 60,000
+    assert breakdown.net_premium == Decimal("60000.00")
+    assert breakdown.basic_rate == Decimal("0.05")
+
+
