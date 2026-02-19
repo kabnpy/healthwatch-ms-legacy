@@ -91,6 +91,14 @@ export function StepFinancials({
   const financials = watchedValues.financials || {}
   const extensions = watchedValues.extensions || {}
 
+  const isPA = selectedProduct?.class_of_insurance
+    ?.toLowerCase()
+    .includes("personal accident")
+
+  const isMotor = selectedProduct?.class_of_insurance
+    ?.toLowerCase()
+    .includes("motor")
+
   const isMotorPrivate = selectedProduct?.class_of_insurance
     ?.toLowerCase()
     .includes("motor private")
