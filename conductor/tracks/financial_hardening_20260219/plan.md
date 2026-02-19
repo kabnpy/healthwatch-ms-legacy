@@ -11,11 +11,11 @@ This phase focuses on making the backend the single, robust source of truth for 
     - [x] Write failing tests for `MotorPrivateRatingStrategy` where provided `pricing_rules` tiers are out of order.
     - [x] Add sorting logic to `MotorPrivateRatingStrategy.calculate` before the tier lookup.
     - [x] Verify tests pass.
-- [ ] **Task: Implement Robust Endorsement Delta Logic**
-    - [ ] Write failing integration tests in `backend/tests/test_transactional_service.py` that verify an endorsement's `financial_breakdown` JSON contains both `new_state` and `delta` objects.
-    - [ ] Update `PolicyService.create_endorsement` to calculate the full breakdown for the new state and explicitly derive the deltas.
-    - [ ] Ensure `net_premium`, `total_amount`, and `commission_amount` on the `RiskNote` match the calculated deltas.
-    - [ ] Verify tests pass.
+- [x] **Task: Implement Robust Endorsement Delta Logic** [17c15f2]
+    - [x] Write failing integration tests in `backend/tests/test_transactional_service.py` that verify an endorsement's `financial_breakdown` JSON contains both `new_state` and `delta` objects.
+    - [x] Update `PolicyService.create_endorsement` to calculate the full breakdown for the new state and explicitly derive the deltas.
+    - [x] Ensure `net_premium`, `total_amount`, and `commission_amount` on the `RiskNote` match the calculated deltas.
+    - [x] Verify tests pass.
 - [ ] **Task: Support Manual and Generic Pricing Strategies**
     - [ ] Write failing tests for `MANUAL` pricing strategy and a generic fallback for products like "Fire" or "Personal Accident".
     - [ ] Implement `ManualRatingStrategy` and update `RatingService._calculate_generic` to return a non-zero premium based on `pricing_rules` if available.
