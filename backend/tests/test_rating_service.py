@@ -195,4 +195,49 @@ def test_motor_private_tier_sorting():
     assert breakdown.net_premium == Decimal("60000.00")
     assert breakdown.basic_rate == Decimal("0.05")
 
+def test_manual_rating_strategy():
+    from app.models import PricingStrategy
+    product = Product(
+        name="Special Product",
+        class_of_insurance="Special",
+        pricing_strategy=PricingStrategy.MANUAL,
+        default_commission_rate=15.0
+    )
+    
+    # In manual mode, the user provides the "Premium" directly
+    risk_details = {
+        "financials": {
+            "rate": 5000.0, # This is the absolute premium in Manual mode
+        }
+    }
+    
+    breakdown = RatingService.calculate_breakdown(product, risk_details)
+    
+    assert breakdown.net_premium == Decimal("5000.00")
+    assert breakdown.taxes["stamp_duty"] == Decimal("40.00")
+    assert breakdown.total_amount > Decimal("5000.00")
+    assert breakdown.commission_amount == Decimal("750.00") # 15% of 5000
+
+def test_generic_fallback_with_rate():
+    # Test fallback for e.g. "Fire" which doesn't have a specific strategy yet
+    product = Product(
+        name="Fire Insurance",
+        class_of_insurance="Fire",
+        pricing_rules={
+            "rate": 0.5 # 0.5%
+        }
+    )
+    
+    risk_details = {
+        "financials": {
+            "sumInsured": 10000000.0 # 10M
+        }
+    }
+    
+    breakdown = RatingService.calculate_breakdown(product, risk_details)
+    
+    # 10M * 0.005 = 50,000.00
+    assert breakdown.net_premium == Decimal("50000.00")
+    assert breakdown.total_amount > Decimal("50000.00")
+
 

@@ -169,6 +169,37 @@ class MotorPrivateRatingStrategy(RatingStrategy):
         return {"training_levy": training_levy, "phcf": phcf, "stamp_duty": stamp_duty}
 
 
+class ManualRatingStrategy(RatingStrategy):
+    """
+    Used when pricing_strategy is 'MANUAL'.
+    The user provides the premium directly in risk_details['financials']['rate'].
+    """
+
+    def calculate(
+        self, product: Product, risk_details: dict[str, Any]
+    ) -> BaseFinancialBreakdown:
+        financials = risk_details.get("financials", {})
+        # In manual mode, 'rate' is treated as a flat amount
+        premium_raw = financials.get("rate", 0)
+        net_premium = self.parse_decimal(premium_raw)
+
+        # Apply standard levies
+        motor_strategy = MotorPrivateRatingStrategy()
+        levies = motor_strategy._calculate_standard_levies(net_premium)
+        total_levies = sum(levies.values())
+
+        commission_rate = Decimal(str(product.default_commission_rate / 100))
+        commission_amount = (net_premium * commission_rate).quantize(Decimal("0.01"))
+
+        return BaseFinancialBreakdown(
+            type="base",
+            net_premium=net_premium,
+            taxes=levies,
+            commission_amount=commission_amount,
+            total_amount=net_premium + total_levies,
+        )
+
+
 class RatingService:
     _strategies: dict[str, RatingStrategy] = {
         "motor private": MotorPrivateRatingStrategy()
@@ -184,6 +215,13 @@ class RatingService:
     def calculate_breakdown(
         cls, product: Product, risk_details: dict[str, Any]
     ) -> BaseFinancialBreakdown | MotorFinancialBreakdown:
+        from app.models import PricingStrategy
+
+        # 1. Check if explicitly Manual
+        if product.pricing_strategy == PricingStrategy.MANUAL:
+            return ManualRatingStrategy().calculate(product, risk_details)
+
+        # 2. Match by Class
         class_of_insurance = product.class_of_insurance.lower()
 
         strategy = None
@@ -202,14 +240,29 @@ class RatingService:
     def _calculate_generic(
         cls, product: Product, risk_details: dict[str, Any]
     ) -> BaseFinancialBreakdown:
-        # Placeholder for other products
-        net_premium = Decimal("0.00")
-        stamp_duty = Decimal("40.00")
+        # Fallback for products like Fire or PA
+        # Use a simple rate if provided in pricing_rules
+        financials = risk_details.get("financials", {})
+        sum_insured_raw = financials.get("sumInsured", 0)
+        
+        motor_strategy = MotorPrivateRatingStrategy()
+        sum_insured = motor_strategy.parse_decimal(sum_insured_raw)
+        
+        rate_val = product.pricing_rules.get("rate", 0)
+        rate = Decimal(str(rate_val)) / Decimal("100")
+        
+        net_premium = (sum_insured * rate).quantize(Decimal("0.01"))
+        
+        levies = motor_strategy._calculate_standard_levies(net_premium)
+        total_levies = sum(levies.values())
+
+        commission_rate = Decimal(str(product.default_commission_rate / 100))
+        commission_amount = (net_premium * commission_rate).quantize(Decimal("0.01"))
 
         return BaseFinancialBreakdown(
             type="base",
             net_premium=net_premium,
-            taxes={"stamp_duty": stamp_duty},
-            commission_amount=Decimal("0.00"),
-            total_amount=net_premium + stamp_duty,
+            taxes=levies,
+            commission_amount=commission_amount,
+            total_amount=net_premium + total_levies,
         )
