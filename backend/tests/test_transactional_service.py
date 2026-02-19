@@ -90,3 +90,13 @@ def test_endorsement_creation(db: Session) -> None:
     assert policy.current_risk_details == new_risk_details
     assert endorsement_rn.transaction_type == TransactionType.ENDORSEMENT
     assert endorsement_rn.policy_snapshot["changes"]["description"] == "Increased vehicle value"
+
+    # Delta logic verification
+    assert "new_state" in endorsement_rn.financial_breakdown
+    assert "delta" in endorsement_rn.financial_breakdown
+    
+    # Verify summary fields match deltas
+    delta = endorsement_rn.financial_breakdown["delta"]
+    assert endorsement_rn.net_premium == delta["net_premium"]
+    assert endorsement_rn.total_amount == delta["total_amount"]
+    assert endorsement_rn.commission_amount == delta["commission_amount"]

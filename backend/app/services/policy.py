@@ -145,11 +145,22 @@ class PolicyService:
                 detail=f"Invalid risk details for {product.class_of_insurance}: {str(e)}",
             )
 
-        # 2. Calculate delta (pro-rata logic could be added here, for now it's just delta of full term)
-        delta_premium = full_breakdown.net_premium - current_rn.net_premium
+        # 2. Calculate delta
+        delta_net_premium = full_breakdown.net_premium - current_rn.net_premium
+        delta_total_amount = full_breakdown.total_amount - current_rn.total_amount
+        delta_commission = full_breakdown.commission_amount - current_rn.commission_amount
 
-        # 3. Create NEW risk note
-        # We store the full authoritative breakdown for the new state
+        # 3. Structure the breakdown with both new state and delta
+        financial_breakdown = {
+            "new_state": full_breakdown.model_dump(mode="json"),
+            "delta": {
+                "net_premium": float(delta_net_premium),
+                "total_amount": float(delta_total_amount),
+                "commission_amount": float(delta_commission),
+            }
+        }
+
+        # 4. Create NEW risk note
         risk_note_in = RiskNoteCreate(
             policy_id=policy.id,
             transaction_type=TransactionType.ENDORSEMENT,
@@ -168,11 +179,10 @@ class PolicyService:
                     "to": rating_details,
                 },
             },
-            net_premium=delta_premium,
-            financial_breakdown=full_breakdown.model_dump(mode="json"),
-            commission_amount=full_breakdown.commission_amount
-            - current_rn.commission_amount,
-            total_amount=full_breakdown.total_amount - current_rn.total_amount,
+            net_premium=delta_net_premium,
+            financial_breakdown=financial_breakdown,
+            commission_amount=delta_commission,
+            total_amount=delta_total_amount,
             special_clauses=[change_description],
             created_by_id=current_user_id,
         )
