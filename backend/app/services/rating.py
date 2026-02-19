@@ -252,7 +252,7 @@ class RatingService:
         if si_raw is None:
             # Try financials object if it came from the wizard financials step
             financials = risk_details.get("financials", {})
-            si_raw = financials.get("sum_insured", financials.get("sumInsured", 0))
+            si_raw = financials.get("sum_insured", 0)
         
         motor_strategy = MotorPrivateRatingStrategy()
         sum_insured = motor_strategy.parse_decimal(si_raw)

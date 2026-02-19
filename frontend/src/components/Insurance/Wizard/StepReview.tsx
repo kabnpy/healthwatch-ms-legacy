@@ -36,8 +36,9 @@ export function StepReview({
     return {
       product_id: state.product_id,
       risk_details: {
+        sum_insured: state.financials?.sum_insured || 0,
         "VEHICLE DETAILS": {
-          "Value Kshs.": state.financials?.sumInsured || 0,
+          "Value Kshs.": state.financials?.sum_insured || 0,
         },
         EXTENSIONS: {
           pvt: !!state.extensions?.pvt,
@@ -49,7 +50,7 @@ export function StepReview({
     }
   }, [
     state.product_id,
-    state.financials?.sumInsured,
+    state.financials?.sum_insured,
     state.extensions,
     isMotorPrivate,
   ])
@@ -139,7 +140,7 @@ export function StepReview({
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Sum Insured:</span>
                 <span className="font-bold">
-                  KES {(state.financials?.sumInsured || 0).toLocaleString()}
+                  KES {(Number(state.financials?.sum_insured) || 0).toLocaleString()}
                 </span>
               </div>
             )}

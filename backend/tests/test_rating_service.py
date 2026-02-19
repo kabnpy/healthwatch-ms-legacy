@@ -230,7 +230,7 @@ def test_generic_fallback_with_rate():
     
     risk_details = {
         "financials": {
-            "sumInsured": 10000000.0 # 10M
+            "sum_insured": 10000000.0 # 10M
         }
     }
     
