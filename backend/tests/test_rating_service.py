@@ -114,3 +114,55 @@ def test_motor_private_high_end_inclusive():
     # Benefits exist but are 0.00
     pvt = next(b for b in breakdown.benefits if b.name == "PVT")
     assert pvt.amount == Decimal("0.00")
+
+def test_rating_service_robust_parsing():
+    product = Product(
+        name="Motor Private - Comprehensive",
+        class_of_insurance="Motor Private",
+        default_commission_rate=10.0
+    )
+    
+    # Test with formatted currency string
+    risk_details_formatted = {
+        "VEHICLE DETAILS": {
+            "Value Kshs.": "1,500,000.00",
+        }
+    }
+    
+    # 1.5M * 0.05 = 75,000.00 (min 60,000) -> 75,000.00
+    # Net: 75,000.00
+    # Levies on 75,000:
+    #   Training: 75,000 * 0.002 = 150.00
+    #   PHCF: 75,000 * 0.0025 = 187.50
+    #   Stamp Duty: 40.00
+    # Total: 75,000 + 150 + 187.50 + 40 = 75,377.50
+    
+    breakdown = RatingService.calculate_breakdown(product, risk_details_formatted)
+    assert breakdown.net_premium == Decimal("75000.00")
+    assert breakdown.total_amount == Decimal("75377.50")
+
+    # Test with empty placeholder
+    risk_details_empty = {
+        "VEHICLE DETAILS": {
+            "Value Kshs.": "[ EMPTY ]",
+        }
+    }
+    breakdown = RatingService.calculate_breakdown(product, risk_details_empty)
+    # Value is 0, so basic premium is 0, but min is 60,000 or some other logic
+    # Looking at tiers: for 0 < 1.5M, rate is 0.05, min is 60,000.
+    assert breakdown.net_premium == Decimal("60000.00")
+
+    # Test with other non-numeric characters
+    risk_details_dirty = {
+        "VEHICLE DETAILS": {
+            "Value Kshs.": "KES 2,000,000.00",
+        }
+    }
+    
+    # 2M * 0.04 = 80,000.00 (min 75,000) -> 80,000.00
+    # Levies: 160 + 200 + 40 = 400.00
+    # Total: 80,000 + 400 = 80,400.00
+    breakdown = RatingService.calculate_breakdown(product, risk_details_dirty)
+    assert breakdown.net_premium == Decimal("80000.00")
+    assert breakdown.total_amount == Decimal("80400.00")
+

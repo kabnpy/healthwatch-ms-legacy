@@ -1,5 +1,6 @@
+import re
 from abc import ABC, abstractmethod
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from typing import Any
 
 from app.models import Product
@@ -17,6 +18,35 @@ class RatingStrategy(ABC):
     ) -> BaseFinancialBreakdown | MotorFinancialBreakdown:
         pass
 
+    def parse_decimal(self, value: Any) -> Decimal:
+        """
+        Robustly parse a value into a Decimal.
+        Handles:
+        - None/Zero
+        - Floats/Ints
+        - Formatted currency strings (e.g. "KES 1,500.00")
+        - Placeholders (e.g. "[ EMPTY ]")
+        """
+        if value is None:
+            return Decimal("0")
+        if isinstance(value, (int, float, Decimal)):
+            return Decimal(str(value))
+        
+        if isinstance(value, str):
+            # 1. Clean common placeholders
+            clean = value.replace("[ EMPTY ]", "").strip()
+            # 2. Extract digits and decimal point only
+            # This handles "KES 1,500.00", "1.500.000,00" (if we wanted to support European, but sticking to standard for now)
+            # We specifically remove commas and other separators
+            clean = re.sub(r"[^\d.]", "", clean)
+            
+            try:
+                return Decimal(clean) if clean else Decimal("0")
+            except (InvalidOperation, ValueError):
+                return Decimal("0")
+        
+        return Decimal("0")
+
 
 class MotorPrivateRatingStrategy(RatingStrategy):
     # Default tiers if none provided in product
@@ -33,13 +63,9 @@ class MotorPrivateRatingStrategy(RatingStrategy):
     ) -> MotorFinancialBreakdown:
         risk_data = risk_details.get("VEHICLE DETAILS", risk_details)
         value_raw = risk_data.get("Value Kshs.", 0)
-
+    
         # Robust numeric parsing
-        if isinstance(value_raw, str):
-            clean_val = value_raw.replace(",", "").replace("[ EMPTY ]", "").strip()
-            value = Decimal(clean_val) if clean_val else Decimal("0")
-        else:
-            value = Decimal(str(value_raw or 0))
+        value = self.parse_decimal(value_raw)
 
         # 1. Basic Premium (Tiered)
         # Use tiers from product if available, else use defaults
