@@ -14,6 +14,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { CurrencyInput } from "@/components/ui/currency-input"
 import { useProducts, useQuote } from "@/hooks/useInsurance"
 import type {
   EnhancedProduct,
@@ -206,10 +207,9 @@ export function StepFinancials({
                     <FormItem>
                       <FormLabel>Sum Insured</FormLabel>
                       <FormControl>
-                        <Input
-                          type="number"
-                          {...field}
+                        <CurrencyInput
                           value={field.value || 0}
+                          onValueChange={field.onChange}
                         />
                       </FormControl>
                       <FormMessage />

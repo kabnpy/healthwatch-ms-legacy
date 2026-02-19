@@ -61,8 +61,11 @@ class MotorPrivateRatingStrategy(RatingStrategy):
     def calculate(
         self, product: Product, risk_details: dict[str, Any]
     ) -> MotorFinancialBreakdown:
-        risk_data = risk_details.get("VEHICLE DETAILS", risk_details)
-        value_raw = risk_data.get("Value Kshs.", 0)
+        # Prioritize top-level, then nested
+        value_raw = risk_details.get("Value Kshs.")
+        if value_raw is None:
+            vehicle_details = risk_details.get("VEHICLE DETAILS", {})
+            value_raw = vehicle_details.get("Value Kshs.", 0)
     
         # Robust numeric parsing
         value = self.parse_decimal(value_raw)

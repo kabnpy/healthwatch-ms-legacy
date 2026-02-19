@@ -266,9 +266,12 @@ class Product(ProductBase, table=True):
             # This validation will handle aliases like "Reg. No" and "Value Kshs."
             validated = MotorPrivateRiskDetails(**risk_data)
             
-            # Important: Return the EXACT keys used in the blueprint (VEHICLE DETAILS)
-            # and aliases (Reg. No) so the frontend template can find them.
-            result = {"VEHICLE DETAILS": validated.model_dump(by_alias=True)}
+            # Return nested for template, but also top-level for easier access/rating
+            validated_dump = validated.model_dump(by_alias=True)
+            result = {
+                "VEHICLE DETAILS": validated_dump,
+                **validated_dump # Flattened fields at top level
+            }
             
             if "EXTENSIONS" in risk_details:
                 result["EXTENSIONS"] = risk_details["EXTENSIONS"]
