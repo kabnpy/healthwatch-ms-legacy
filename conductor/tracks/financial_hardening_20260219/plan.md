@@ -7,10 +7,10 @@ This phase focuses on making the backend the single, robust source of truth for 
     - [x] Write failing tests in `backend/tests/test_rating_service.py` for `RatingService` handling currency strings (e.g., "1,500.00"), empty placeholders (`[ EMPTY ]`), and non-numeric characters.
     - [x] Implement regex-based parsing in `MotorPrivateRatingStrategy` and `RatingService`.
     - [x] Verify tests pass.
-- [ ] **Task: Implement Automated Tier Sorting**
-    - [ ] Write failing tests for `MotorPrivateRatingStrategy` where provided `pricing_rules` tiers are out of order.
-    - [ ] Add sorting logic to `MotorPrivateRatingStrategy.calculate` before the tier lookup.
-    - [ ] Verify tests pass.
+- [x] **Task: Implement Automated Tier Sorting** [1120272]
+    - [x] Write failing tests for `MotorPrivateRatingStrategy` where provided `pricing_rules` tiers are out of order.
+    - [x] Add sorting logic to `MotorPrivateRatingStrategy.calculate` before the tier lookup.
+    - [x] Verify tests pass.
 - [ ] **Task: Implement Robust Endorsement Delta Logic**
     - [ ] Write failing integration tests in `backend/tests/test_transactional_service.py` that verify an endorsement's `financial_breakdown` JSON contains both `new_state` and `delta` objects.
     - [ ] Update `PolicyService.create_endorsement` to calculate the full breakdown for the new state and explicitly derive the deltas.
