@@ -25,10 +25,10 @@ This phase focuses on making the backend the single, robust source of truth for 
 ## Phase 2: Frontend & Model Refinement
 This phase integrates the backend changes into the frontend and cleans up redundant logic to prevent future technical debt.
 
-- [ ] **Task: Cleanup Redundant Product Model Logic**
-    - [ ] Identify and remove hardcoded logic in `backend/app/models.py` (`Product.calculate_premium`).
-    - [ ] Refactor `Product.calculate_premium` to delegate entirely to `RatingService`.
-    - [ ] Verify all existing tests pass.
+- [x] **Task: Cleanup Redundant Product Model Logic** [a28e47a]
+    - [x] Identify and remove hardcoded logic in `backend/app/models.py` (`Product.calculate_premium`).
+    - [x] Refactor `Product.calculate_premium` to delegate entirely to `RatingService`.
+    - [x] Verify all existing tests pass.
 - [ ] **Task: Implement Unified Frontend Quote Hook**
     - [ ] Update `frontend/src/components/Insurance/Wizard/StepFinancials.tsx` to remove the `isMotorPrivate` restriction on the quote `useEffect`.
     - [ ] Ensure the premium preview UI correctly maps to the generic `BaseFinancialBreakdown` when a motor-specific one isn't available.
