@@ -48,7 +48,6 @@ export interface RiskNoteSection {
  */
 
 export interface WizardFinancials {
-  sum_insured: number
   rate: number
   startDate: string
   duration: number
@@ -63,6 +62,7 @@ export interface WizardExtensions {
 
 export interface WizardState {
   product_id: string
+  sum_insured: number
   details: Record<string, any>
   financials: WizardFinancials
   extensions: WizardExtensions

@@ -20,7 +20,7 @@ This phase focuses on making the backend the single, robust source of truth for 
     - [x] Write failing tests for `MANUAL` pricing strategy and a generic fallback for products like "Fire" or "Personal Accident".
     - [x] Implement `ManualRatingStrategy` and update `RatingService._calculate_generic` to return a non-zero premium based on `pricing_rules` if available.
     - [x] Verify tests pass.
-- [ ] **Task: Conductor - User Manual Verification 'Backend Core Hardening' (Protocol in workflow.md)**
+- [x] **Task: Conductor - User Manual Verification 'Backend Core Hardening' (Protocol in workflow.md)**
 
 ## Phase 2: Frontend & Model Refinement
 This phase integrates the backend changes into the frontend and cleans up redundant logic to prevent future technical debt.
@@ -37,10 +37,10 @@ This phase integrates the backend changes into the frontend and cleans up redund
     - [x] Write failing unit tests in `frontend/src/utils/documentData.test.ts` for resolving nested paths like `VEHICLE DETAILS.Reg. No`.
     - [x] Update `injectWizardData` to support recursive dot-notation lookup in the `actualRoot` object.
     - [x] Verify tests pass.
-- [ ] **Task: Conductor - User Manual Verification 'Frontend & Model Refinement' (Protocol in workflow.md)**
+- [x] **Task: Conductor - User Manual Verification 'Frontend & Model Refinement' (Protocol in workflow.md)**
 
 ## Phase 3: Final Verification & Audit
-- [ ] **Task: Comprehensive End-to-End Audit**
-    - [ ] Run a full "New Business" -> "Endorsement" flow for both a Motor and a Non-Motor product.
-    - [ ] Verify that the resulting Risk Notes and Invoices are mathematically consistent and the `financial_breakdown` JSONs are audit-ready.
+- [x] **Task: Comprehensive End-to-End Audit** [fe5e73d]
+    - [x] Run a full "New Business" -> "Endorsement" flow for both a Motor and a Non-Motor product.
+    - [x] Verify that the resulting Risk Notes and Invoices are mathematically consistent and the `financial_breakdown` JSONs are audit-ready.
 - [ ] **Task: Conductor - User Manual Verification 'Final Verification & Audit' (Protocol in workflow.md)**

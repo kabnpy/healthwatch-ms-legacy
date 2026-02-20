@@ -38,9 +38,9 @@ export function NewPolicyWizard({
 
   const [state, setState] = useState<WizardState>({
     product_id: "",
+    sum_insured: 0,
     details: {},
     financials: {
-      sum_insured: 0,
       rate: 4.5,
       startDate: new Date().toISOString().split("T")[0],
       duration: 12,
@@ -87,11 +87,8 @@ export function NewPolicyWizard({
       setState((prev) => ({
         ...prev,
         details: data,
-        financials: {
-          ...prev.financials,
-          sum_insured:
-            extractedValue !== 0 ? extractedValue : prev.financials.sum_insured,
-        },
+        sum_insured:
+          extractedValue !== 0 ? extractedValue : prev.sum_insured,
       }))
     } else {
       setState((prev) => ({ ...prev, ...data }))
@@ -121,9 +118,10 @@ export function NewPolicyWizard({
         state.details,
       )
 
-      // Merge extensions into risk details for the backend rating engine
+      // Merge extensions and authoritative sum_insured into risk details for the backend rating engine
       const riskDetailsWithExtensions = {
         ...structuredRiskDetails,
+        sum_insured: state.sum_insured,
         EXTENSIONS: {
           pvt: !!state.extensions?.pvt,
           excess_protector: !!state.extensions?.excessProtector,
@@ -206,6 +204,7 @@ export function NewPolicyWizard({
           {step === 2 && (
             <StepFinancials
               productId={state.product_id || ""}
+              sum_insured={state.sum_insured}
               defaultValues={{
                 financials: state.financials,
                 extensions: state.extensions,

@@ -46,14 +46,13 @@ class QuoteResponse(BaseModel):
 class MotorPrivateRiskDetails(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
-        alias_generator=None,
         extra="ignore"
     )
 
-    registration_number: str = Field(..., alias="Reg. No", min_length=1)
-    make: str = Field(..., alias="Make", min_length=1)
-    year_of_manufacture: int = Field(..., alias="Year")
-    sum_insured: float = Field(..., alias="Value Kshs.")
+    registration_number: str = Field(..., min_length=1)
+    make: str = Field(..., min_length=1)
+    year_of_manufacture: int = Field(...)
+    sum_insured: float = Field(...)
 
     @field_validator("sum_insured", mode="before")
     @classmethod
@@ -61,11 +60,14 @@ class MotorPrivateRiskDetails(BaseModel):
         if v is None:
             return 0.0
         if isinstance(v, str):
-            # Remove commas and whitespace, handle placeholders
-            v = v.replace(",", "").replace("[ EMPTY ]", "").strip()
-            # Handle KES prefix if present
-            v = re.sub(r"[^\d.]", "", v)
-            if not v:
-                return 0.0
-            return float(v)
+            clean = v.replace(",", "").replace("[ EMPTY ]", "").strip()
+            clean = re.sub(r"[^\d.]", "", clean)
+            return float(clean) if clean else 0.0
         return float(v)
+
+
+class MotorPrivateRiskDetailsLegacy(MotorPrivateRiskDetails):
+    """Temporary helper for legacy data migration if needed"""
+    model_config = ConfigDict(populate_by_name=True)
+    registration_number: str = Field(..., alias="Reg. No")
+    sum_insured: float = Field(..., alias="Value Kshs.")

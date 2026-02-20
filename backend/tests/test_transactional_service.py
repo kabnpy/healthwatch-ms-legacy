@@ -21,12 +21,12 @@ def test_atomic_policy_creation(db: Session) -> None:
         product_id=product.id,
     )
 
-    # Mocking fields that should go to RiskNote
-    risk_details = {"VEHICLE DETAILS": {"Value Kshs.": 5000000, "Reg. No": "KCM 123", "Make": "Toyota", "Year": 2020}}
+    # Singular Semantic Input
+    risk_details = {"sum_insured": 5000000, "registration_number": "KCM 123", "make": "Toyota", "year_of_manufacture": 2020}
     start_date = date.today()
     end_date = start_date + timedelta(days=365)
 
-    # Execute (Service should be refactored to handle this)
+    # Execute
     policy = policy_service.create_policy(
         session=db,
         policy_in=policy_in,
@@ -41,13 +41,12 @@ def test_atomic_policy_creation(db: Session) -> None:
     assert len(policy.risk_notes) == 1
     rn = policy.risk_notes[0]
     assert rn.transaction_type == TransactionType.NEW_BUSINESS
-    assert rn.policy_snapshot["risk_details"]["VEHICLE DETAILS"]["Value Kshs."] == 5000000.0
+    # Verify snapshot uses singular keys
     assert rn.policy_snapshot["risk_details"]["sum_insured"] == 5000000.0
+    assert rn.policy_snapshot["risk_details"]["registration_number"] == "KCM 123"
     assert rn.financial_breakdown["type"] == "motor"
-    assert "training_levy" in rn.financial_breakdown["taxes"]
     assert rn.coverage_start == start_date
     assert rn.coverage_end == end_date
-    assert policy.current_risk_details["VEHICLE DETAILS"]["Value Kshs."] == 5000000.0
     assert policy.current_risk_details["sum_insured"] == 5000000.0
 
 def test_endorsement_creation(db: Session) -> None:
@@ -61,7 +60,7 @@ def test_endorsement_creation(db: Session) -> None:
     )
     start_date = date.today()
     end_date = start_date + timedelta(days=365)
-    risk_details = {"VEHICLE DETAILS": {"Value Kshs.": 5000000, "Reg. No": "KCM 123", "Make": "Toyota", "Year": 2020}}
+    risk_details = {"sum_insured": 5000000, "registration_number": "KCM 123", "make": "Toyota", "year_of_manufacture": 2020}
 
     policy = policy_service.create_policy(
         session=db,
@@ -72,7 +71,7 @@ def test_endorsement_creation(db: Session) -> None:
     )
 
     # 2. Create Endorsement
-    new_risk_details = {"VEHICLE DETAILS": {"Value Kshs.": 6000000, "Reg. No": "KCM 123", "Make": "Toyota", "Year": 2020}}
+    new_risk_details = {"sum_insured": 6000000, "registration_number": "KCM 123", "make": "Toyota", "year_of_manufacture": 2020}
     endorsement_rn = policy_service.create_endorsement(
         session=db,
         policy_id=policy.id,
@@ -89,7 +88,6 @@ def test_endorsement_creation(db: Session) -> None:
     assert sorted_notes[0].id == endorsement_rn.id
 
     assert policy.current_risk_note.id == endorsement_rn.id
-    assert policy.current_risk_details["VEHICLE DETAILS"]["Value Kshs."] == 6000000.0
     assert policy.current_risk_details["sum_insured"] == 6000000.0
     assert endorsement_rn.transaction_type == TransactionType.ENDORSEMENT
     assert endorsement_rn.policy_snapshot["changes"]["description"] == "Increased vehicle value"

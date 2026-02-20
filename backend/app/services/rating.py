@@ -61,17 +61,9 @@ class MotorPrivateRatingStrategy(RatingStrategy):
     def calculate(
         self, product: Product, risk_details: dict[str, Any]
     ) -> MotorFinancialBreakdown:
-        # 1. Determine Sum Insured (Authoritative Source)
-        # Prioritize top-level, then nested
-        si_raw = risk_details.get("sum_insured")
-        if si_raw is None:
-            # Check for alias
-            si_raw = risk_details.get("Value Kshs.")
-        if si_raw is None:
-            vehicle_details = risk_details.get("VEHICLE DETAILS", {})
-            si_raw = vehicle_details.get("sum_insured", vehicle_details.get("Value Kshs.", 0))
-    
-        value = self.parse_decimal(si_raw)
+        # Singular Source of Truth: The system enforces 'sum_insured' during validation
+        value_raw = risk_details.get("sum_insured", 0)
+        value = self.parse_decimal(value_raw)
 
         # 2. Basic Premium (Tiered)
         # Use tiers from product if available, else use defaults
@@ -184,9 +176,8 @@ class ManualRatingStrategy(RatingStrategy):
     def calculate(
         self, product: Product, risk_details: dict[str, Any]
     ) -> BaseFinancialBreakdown:
-        financials = risk_details.get("financials", {})
-        # In manual mode, 'rate' is treated as a flat amount
-        premium_raw = financials.get("rate", 0)
+        # In manual mode, 'sum_insured' is treated as the net premium amount
+        premium_raw = risk_details.get("sum_insured", 0)
         net_premium = self.parse_decimal(premium_raw)
 
         # Apply standard levies

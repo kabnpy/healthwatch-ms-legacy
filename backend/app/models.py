@@ -263,20 +263,19 @@ class Product(ProductBase, table=True):
             if "VEHICLE DETAILS" in risk_details:
                 risk_data = risk_details["VEHICLE DETAILS"]
             
-            # This validation will handle aliases like "Reg. No" and "Value Kshs."
+            # Map legacy keys manually before validation if necessary, 
+            # or expect the frontend to send 'sum_insured'
+            if "Value Kshs." in risk_data and "sum_insured" not in risk_data:
+                risk_data["sum_insured"] = risk_data["Value Kshs."]
+            if "Reg. No" in risk_data and "registration_number" not in risk_data:
+                risk_data["registration_number"] = risk_data["Reg. No"]
+            if "Year" in risk_data and "year_of_manufacture" not in risk_data:
+                risk_data["year_of_manufacture"] = risk_data["Year"]
+
             validated = MotorPrivateRiskDetails(**risk_data)
             
-            # Return nested for template, but also top-level for easier access/rating
-            validated_dump = validated.model_dump(by_alias=True)
-            result = {
-                "VEHICLE DETAILS": validated_dump,
-                "sum_insured": validated.sum_insured,
-                **validated_dump # Flattened fields (including Value Kshs alias)
-            }
-            
-            if "EXTENSIONS" in risk_details:
-                result["EXTENSIONS"] = risk_details["EXTENSIONS"]
-            return result
+            # Return a clean, semantic structure
+            return validated.model_dump()
         return risk_details
     def calculate_premium(self, risk_details: dict[str, Any]) -> Decimal:
         from app.services.rating import RatingService

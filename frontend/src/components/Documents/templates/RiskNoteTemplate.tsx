@@ -179,6 +179,11 @@ export const RiskNoteTemplate = ({
               }
             })
           }
+          
+          // Singular Source Mapping: Map the internal 'sum_insured' to the template's 'Value Kshs.'
+          if (instance.sum_insured !== undefined && instance.sum_insured !== "[ EMPTY ]") {
+            mergedContent["Value Kshs."] = instance.sum_insured
+          }
         } else if (instanceContent && instanceContent !== "[ EMPTY ]") {
           mergedContent = instanceContent
         }

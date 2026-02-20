@@ -24,7 +24,6 @@ import type {
 
 const financialsSchema = z.object({
   financials: z.object({
-    sum_insured: z.coerce.number().min(0),
     rate: z.coerce.number().min(0),
     basicRate: z.coerce.number().optional(),
     isHighEnd: z.boolean().optional(),
@@ -47,6 +46,7 @@ interface StepFinancialsProps {
   onNext: (data: any) => void
   onBack: () => void
   productId: string
+  sum_insured: number
 }
 
 export function StepFinancials({
@@ -54,6 +54,7 @@ export function StepFinancials({
   onNext,
   onBack,
   productId,
+  sum_insured,
 }: StepFinancialsProps) {
   const { data: productsData } = useProducts()
   const quoteMutation = useQuote()
@@ -68,7 +69,6 @@ export function StepFinancials({
     resolver: zodResolver(financialsSchema),
     defaultValues: {
       financials: {
-        sum_insured: Number(defaultValues.financials?.sum_insured) || 0,
         rate: defaultValues.financials?.rate || 0,
         basicRate: defaultValues.financials?.basicRate || 0,
         isHighEnd: defaultValues.financials?.isHighEnd || false,
@@ -113,9 +113,8 @@ export function StepFinancials({
       quoteMutation.mutate({
         product_id: productId,
         risk_details: {
-          sum_insured: financials.sum_insured,
+          sum_insured: sum_insured,
           financials: {
-            sum_insured: financials.sum_insured || 0,
             rate: financials.rate || 0,
           },
           EXTENSIONS: {
@@ -131,7 +130,7 @@ export function StepFinancials({
     return () => clearTimeout(timer)
   }, [
     productId,
-    financials.sum_insured,
+    sum_insured,
     financials.rate,
     extensions.pvt,
     extensions.excessProtector,
@@ -148,7 +147,7 @@ export function StepFinancials({
     if (breakdown) {
       if (isMotorPrivate && breakdown.net_premium > 0) {
         // Reverse calculate effective rate for display (inclusive of non-tax extensions)
-        const siNum = Number(financials.sum_insured) || 1
+        const siNum = Number(sum_insured) || 1
         const effectiveRate =
           (Number(breakdown.net_premium) / siNum) * 100
         if (Math.abs(effectiveRate - financials.rate) > 0.001) {
@@ -168,7 +167,7 @@ export function StepFinancials({
     breakdown?.net_premium,
     breakdown?.basic_rate,
     breakdown?.is_high_end,
-    financials.sum_insured,
+    sum_insured,
     financials.rate,
     form.setValue,
     breakdown,
@@ -176,20 +175,20 @@ export function StepFinancials({
 
   // High-End Logic: Auto-select included benefits
   useEffect(() => {
-    if (isMotorPrivate && (Number(financials.sum_insured) || 0) >= 3000000) {
+    if (isMotorPrivate && (Number(sum_insured) || 0) >= 3000000) {
       if (!extensions.pvt) form.setValue("extensions.pvt", true)
       if (!extensions.excessProtector)
         form.setValue("extensions.excessProtector", true)
     }
   }, [
     isMotorPrivate,
-    financials.sum_insured,
+    sum_insured,
     extensions.excessProtector,
     extensions.pvt,
     form.setValue,
   ])
 
-  const isHighEnd = isMotorPrivate && (Number(financials.sum_insured) || 0) >= 3000000
+  const isHighEnd = isMotorPrivate && (Number(sum_insured) || 0) >= 3000000
 
   return (
     <Form {...(form as any)}>
@@ -199,22 +198,15 @@ export function StepFinancials({
           <div className="space-y-6">
             <div className="space-y-4">
               {!isPA && (
-                <FormField
-                  control={form.control as any}
-                  name="financials.sum_insured"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Sum Insured</FormLabel>
-                      <FormControl>
-                        <CurrencyInput
-                          value={field.value || 0}
-                          onValueChange={field.onChange}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="space-y-2">
+                  <FormLabel>Sum Insured</FormLabel>
+                  <div className="h-10 px-3 py-2 rounded-md border border-input bg-muted/50 text-sm font-bold flex items-center">
+                    KES {(Number(sum_insured) || 0).toLocaleString()}
+                  </div>
+                  <p className="text-[10px] text-muted-foreground italic">
+                    Value derived from asset details.
+                  </p>
+                </div>
               )}
               <FormField
                 control={form.control as any}
