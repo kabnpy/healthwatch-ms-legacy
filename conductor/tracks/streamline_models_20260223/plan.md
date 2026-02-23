@@ -26,13 +26,13 @@ Safely migrate existing data and update service logic to the new structure.
     - [x] Refactor any logic that checked `RiskNote.payment_status` to instead derive it from the linked `Invoice.balance_due`.
 - [x] **Task: Conductor - User Manual Verification 'Data Migration & Integration' (Protocol in workflow.md)**
 
-## Phase 3: Validation & Cleanup [checkpoint: [pending]]
+## Phase 3: Validation & Cleanup [checkpoint: d72c2a6]
 Ensure full system integrity and remove any remaining technical debt.
 
-- [ ] **Task: Update Backend Test Suite**
-    - [ ] Refactor existing tests in `backend/tests/` that relied on the old model structure (especially `test_soft_delete.py`, `test_transactional_models.py`).
-    - [ ] Ensure tests verify the "single source of truth" for risk data and derived payment status.
-- [ ] **Task: Verify Coverage & Performance**
-    - [ ] Run coverage reports and ensure >80% coverage for the refactored models and services.
-    - [ ] Monitor for any "n+1" query issues introduced by the refactor.
-- [ ] **Task: Conductor - User Manual Verification 'Validation & Cleanup' (Protocol in workflow.md)**
+- [x] **Task: Update Backend Test Suite** [d72c2a6]
+    - [x] Refactor existing tests in `backend/tests/` that relied on the old model structure (especially `test_soft_delete.py`, `test_transactional_models.py`).
+    - [x] Ensure tests verify the "single source of truth" for risk data and derived payment status.
+- [x] **Task: Verify Coverage & Performance** [d72c2a6]
+    - [x] Run coverage reports and ensure >80% coverage for the refactored models and services.
+    - [x] Monitor for any "n+1" query issues introduced by the refactor.
+- [x] **Task: Conductor - User Manual Verification 'Validation & Cleanup' (Protocol in workflow.md)**
