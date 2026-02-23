@@ -27,23 +27,23 @@ export const RiskNoteTemplate = ({
   isEditable = false,
   onSave,
 }: RiskNoteTemplateProps) => {
-  const [localSnapshot, setLocalSnapshot] = useState<Record<string, any>>(
-    riskNote.policy_snapshot || {},
+  const [localRiskDetails, setLocalRiskDetails] = useState<Record<string, any>>(
+    policy.risk_details || {},
   )
 
   // Keep local state in sync with external changes if not editing
   useEffect(() => {
     if (!isEditable) {
-      setLocalSnapshot(riskNote.policy_snapshot || {})
+      setLocalRiskDetails(policy.risk_details || {})
     }
-  }, [riskNote.policy_snapshot, isEditable])
+  }, [policy.risk_details, isEditable])
 
   const handleSave = () => {
-    onSave?.(localSnapshot)
+    onSave?.(localRiskDetails)
   }
 
   const handleReset = () => {
-    setLocalSnapshot(riskNote.policy_snapshot || {})
+    setLocalRiskDetails(policy.risk_details || {})
   }
 
   // --- DATA CONSOLIDATION LOGIC ---
@@ -141,7 +141,7 @@ export const RiskNoteTemplate = ({
 
     // 5. DYNAMIC RISK SECTIONS (Template + Instance)
     const template: Record<string, any> = policy.product?.product_details || {}
-    const instance: Record<string, any> = localSnapshot.risk_details || {}
+    const instance: Record<string, any> = localRiskDetails || {}
 
     // Merge logic: template provides structure, instance provides values
     // We iterate over the template sections to ensure order and grouping
@@ -253,15 +253,12 @@ export const RiskNoteTemplate = ({
     })
 
     return sections
-  }, [client, policy, riskNote, localSnapshot.risk_details])
+  }, [client, policy, riskNote, localRiskDetails])
 
   const handleUpdateSection = (sectionName: string, updatedContent: any) => {
-    setLocalSnapshot({
-      ...localSnapshot,
-      risk_details: {
-        ...localSnapshot.risk_details,
-        [sectionName]: updatedContent,
-      },
+    setLocalRiskDetails({
+      ...localRiskDetails,
+      [sectionName]: updatedContent,
     })
   }
 
