@@ -2,7 +2,7 @@
 
 This plan focuses on auditing the financial data lifecycle for Motor Private policies and ensuring the Risk Note and Invoice templates reflect the "Single Source of Truth" from the backend.
 
-## Phase 1: Diagnosis & Backend Hardening [checkpoint: [pending]]
+## Phase 1: Diagnosis & Backend Hardening [checkpoint: 3a4ff87]
 Establish robust data persistence and rating audits.
 
 - [x] **Task: Audit Rating Engine Outputs** [9b5da55]
