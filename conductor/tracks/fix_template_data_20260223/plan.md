@@ -5,7 +5,7 @@ This plan focuses on auditing the financial data lifecycle for Motor Private pol
 ## Phase 1: Diagnosis & Backend Hardening [checkpoint: [pending]]
 Establish robust data persistence and rating audits.
 
-- [ ] **Task: Audit Rating Engine Outputs**
+- [x] **Task: Audit Rating Engine Outputs** [9b5da55]
     - [ ] Write unit tests in `backend/tests/test_rating_service.py` to verify that `MotorPrivateRatingStrategy` returns high-precision `Decimal` values for all levies and benefits.
 - [ ] **Task: Verify Policy Persistence**
     - [ ] Write integration tests in `backend/tests/crud/test_insurance.py` to verify that `PolicyService.create_policy` correctly persists the full financial breakdown in the `RiskNote.financial_breakdown` JSON field.
