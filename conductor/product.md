@@ -9,7 +9,7 @@ HealthWatch MS is a high-performance Insurance Management System designed for pr
 ## 2. Product Quality & Evolution
 - **Design Philosophy:** Grounded in a "Modern and Minimal" identity, the product prioritizes professional structural patterns, such as inset layouts and layered navigation. We emphasize high-quality typography and consistent component treatments to create a focused, high-trust user experience.
 - **Technical Excellence:** We prioritize **Data Integrity and Architectural Rigor**. All financial calculations are implemented with decimal precision to eliminate rounding errors. The system employs a **Soft Delete** pattern with a comprehensive audit trail for all primary entities, ensuring no data is ever permanently lost without a record.
-- **Development Priority:** The immediate focus is on refining the core "shippable" product. We prioritize stability, UX polish, and the hardening of existing base functionality over the introduction of new modules.
+- **Development Priority:** We utilize a **Single Source of Truth** architecture where the Policy model maintains the authoritative state of the risk, and transactional documents (Risk Notes) record immutable snapshots of terms and financial deltas.
 
 ## 3. Core Functional Pillars
 - **Client Hub:** A professional portfolio management center providing a comprehensive view of client active covers and historical data.
