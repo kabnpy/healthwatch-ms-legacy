@@ -137,7 +137,7 @@ export const InvoiceTemplate = ({
                 const product = policy?.product
 
                 const period = riskNote
-                  ? `${new Date(riskNote.start_date).toLocaleDateString("en-GB")} - ${new Date(riskNote.end_date).toLocaleDateString("en-GB")}`
+                  ? `${new Date(riskNote.coverage_start).toLocaleDateString("en-GB")} - ${new Date(riskNote.coverage_end).toLocaleDateString("en-GB")}`
                   : "N/A"
 
                 return (
