@@ -69,15 +69,10 @@ class PolicyService:
             )
 
         # 2. Create Policy (container)
+        policy_in.risk_details = rating_details
         policy = crud.create_policy(session=session, policy_in=policy_in)
 
         # 3. Create initial Risk Note
-        policy_snapshot = {
-            "policy_number": policy.policy_number,
-            "risk_details": rating_details,
-            "product": product.model_dump(mode="json"),
-        }
-        
         risk_note_in = RiskNoteCreate(
             policy_id=policy.id,
             transaction_type=TransactionType.NEW_BUSINESS,
@@ -85,7 +80,6 @@ class PolicyService:
             effective_date=coverage_start,
             coverage_start=coverage_start,
             coverage_end=coverage_end,
-            policy_snapshot=policy_snapshot,
             net_premium=breakdown.net_premium,
             financial_breakdown=breakdown.model_dump(mode="json"),
             commission_amount=breakdown.commission_amount,
@@ -150,7 +144,14 @@ class PolicyService:
         delta_total_amount = full_breakdown.total_amount - current_rn.total_amount
         delta_commission = full_breakdown.commission_amount - current_rn.commission_amount
 
-        # 3. Structure the breakdown with both new state and delta
+        # 3. Calculate diff for change_log
+        current_risk = policy.risk_details
+        diff = {}
+        for k, v in rating_details.items():
+            if current_risk.get(k) != v:
+                diff[k] = {"from": current_risk.get(k), "to": v}
+
+        # 4. Structure the breakdown with both new state and delta
         financial_breakdown = {
             "new_state": full_breakdown.model_dump(mode="json"),
             "delta": {
@@ -160,7 +161,7 @@ class PolicyService:
             }
         }
 
-        # 4. Create NEW risk note
+        # 5. Create NEW risk note
         risk_note_in = RiskNoteCreate(
             policy_id=policy.id,
             transaction_type=TransactionType.ENDORSEMENT,
@@ -169,16 +170,7 @@ class PolicyService:
             effective_date=date.today(),
             coverage_start=current_rn.coverage_start,
             coverage_end=current_rn.coverage_end,
-            policy_snapshot={
-                "policy_number": policy.policy_number,
-                "risk_details": rating_details,
-                "product": product.model_dump(mode="json"),
-                "changes": {
-                    "description": change_description,
-                    "from": current_rn.policy_snapshot.get("risk_details"),
-                    "to": rating_details,
-                },
-            },
+            change_log=diff,
             net_premium=delta_net_premium,
             financial_breakdown=financial_breakdown,
             commission_amount=delta_commission,
@@ -186,6 +178,10 @@ class PolicyService:
             special_clauses=[change_description],
             created_by_id=current_user_id,
         )
+
+        # 6. Update Policy state in-place
+        policy.risk_details = rating_details
+        session.add(policy)
 
         # Mark previous as replaced
         current_rn.status = RiskNoteStatus.REPLACED
