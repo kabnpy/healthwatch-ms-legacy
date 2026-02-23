@@ -48,6 +48,17 @@ def test_atomic_policy_creation(db: Session) -> None:
     
     # Verify RiskNote financials
     assert rn.financial_breakdown["type"] == "motor"
+    assert "net_premium" in rn.financial_breakdown
+    assert "taxes" in rn.financial_breakdown
+    assert "total_amount" in rn.financial_breakdown
+    assert "commission_amount" in rn.financial_breakdown
+    assert "benefits" in rn.financial_breakdown
+    
+    # Verify exact math for 5M Motor Private
+    # 5M Tier: 3.0% (since it's not < 5M), min 0
+    # 5,000,000 * 0.03 = 150,000
+    assert float(rn.net_premium) == 150000.0
+    assert float(rn.financial_breakdown["net_premium"]) == 150000.0
     assert rn.coverage_start == start_date
     assert rn.coverage_end == end_date
 
