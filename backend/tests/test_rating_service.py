@@ -154,3 +154,26 @@ def test_generic_fallback_with_rate():
     breakdown = RatingService.calculate_breakdown(product, risk_details)
     
     assert breakdown.net_premium == Decimal("50000.00")
+
+def test_rating_breakdown_types():
+    product = Product(
+        name="Motor Private - Comprehensive",
+        class_of_insurance="Motor Private",
+        default_commission_rate=10.0
+    )
+    risk_details = {
+        "sum_insured": 1000000.0,
+        "EXTENSIONS": {
+            "pvt": True,
+            "om_rescue_plus": True
+        }
+    }
+    breakdown = RatingService.calculate_breakdown(product, risk_details)
+    
+    assert isinstance(breakdown.net_premium, Decimal)
+    assert isinstance(breakdown.total_amount, Decimal)
+    assert isinstance(breakdown.commission_amount, Decimal)
+    for levy_val in breakdown.taxes.values():
+        assert isinstance(levy_val, Decimal)
+    for benefit in breakdown.benefits:
+        assert isinstance(benefit.amount, Decimal)
