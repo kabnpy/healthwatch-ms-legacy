@@ -13,18 +13,18 @@ Refactor the primary models to centralize risk data and eliminate redundancy.
     - [x] Align `PolicyStatus`, `TransactionType`, and other enums with the streamlined definitions in `planning/models.py`.
 - [ ] **Task: Conductor - User Manual Verification 'Core Model Refactor' (Protocol in workflow.md)**
 
-## Phase 2: Data Migration & Integration [checkpoint: [pending]]
+## Phase 2: Data Migration & Integration [checkpoint: c9ddd37]
 Safely migrate existing data and update service logic to the new structure.
 
-- [ ] **Task: Create and Verify Alembic Migration**
-    - [ ] Generate a migration to add `Policy.risk_details` and remove old columns.
-    - [ ] **CRITICAL:** Include an `upgrade()` script that populates `Policy.risk_details` from the *most recent* `RiskNote.policy_snapshot` for each policy.
-- [ ] **Task: Update `PolicyService` and `CRUD` Logic**
-    - [ ] Update `backend/app/crud.py` to handle `risk_details` on the `Policy` model during creation and updates.
-    - [ ] Refactor endorsement logic to update `Policy.risk_details` in-place and record the diff in `RiskNote.change_log`.
-- [ ] **Task: Update Financial Status Logic**
-    - [ ] Refactor any logic that checked `RiskNote.payment_status` to instead derive it from the linked `Invoice.balance_due`.
-- [ ] **Task: Conductor - User Manual Verification 'Data Migration & Integration' (Protocol in workflow.md)**
+- [x] **Task: Create and Verify Alembic Migration** [c9ddd37]
+    - [x] Generate a migration to add `Policy.risk_details` and remove old columns.
+    - [x] **CRITICAL:** Include an `upgrade()` script that populates `Policy.risk_details` from the *most recent* `RiskNote.policy_snapshot` for each policy.
+- [x] **Task: Update `PolicyService` and `CRUD` Logic** [c9ddd37]
+    - [x] Update `backend/app/crud.py` to handle `risk_details` on the `Policy` model during creation and updates.
+    - [x] Refactor endorsement logic to update `Policy.risk_details` in-place and record the diff in `RiskNote.change_log`.
+- [x] **Task: Update Financial Status Logic** [c9ddd37]
+    - [x] Refactor any logic that checked `RiskNote.payment_status` to instead derive it from the linked `Invoice.balance_due`.
+- [x] **Task: Conductor - User Manual Verification 'Data Migration & Integration' (Protocol in workflow.md)**
 
 ## Phase 3: Validation & Cleanup [checkpoint: [pending]]
 Ensure full system integrity and remove any remaining technical debt.
