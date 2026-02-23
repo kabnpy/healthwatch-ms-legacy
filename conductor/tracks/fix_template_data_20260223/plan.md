@@ -7,7 +7,7 @@ Establish robust data persistence and rating audits.
 
 - [x] **Task: Audit Rating Engine Outputs** [9b5da55]
     - [ ] Write unit tests in `backend/tests/test_rating_service.py` to verify that `MotorPrivateRatingStrategy` returns high-precision `Decimal` values for all levies and benefits.
-- [ ] **Task: Verify Policy Persistence**
+- [x] **Task: Verify Policy Persistence** [b19116e]
     - [ ] Write integration tests in `backend/tests/crud/test_insurance.py` to verify that `PolicyService.create_policy` correctly persists the full financial breakdown in the `RiskNote.financial_breakdown` JSON field.
 - [ ] **Task: Restrict Product Selection**
     - [ ] Update `frontend/src/components/Insurance/Wizard/NewPolicyWizard.tsx` to temporarily filter out all products except "Motor Private" to ensure system stability.
