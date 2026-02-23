@@ -54,9 +54,8 @@ class TransactionType(str, Enum):
 class RiskNoteStatus(str, Enum):
     DRAFT = "Draft"
     ISSUED = "Issued"
-    REPLACED = "Replaced"
+    REPLACED = "Replaced"  # superseded by a newer note on same policy
     CANCELLED = "Cancelled"
-    ACTIVE = "Issued"  # Alias for backward compatibility
 
 
 class InvoiceStatus(str, Enum):
@@ -389,7 +388,11 @@ class PolicyBase(AuditMixin, SQLModel):
         default=None, foreign_key="product.id", index=True
     )
     status: PolicyStatus = Field(default=PolicyStatus.ACTIVE)
-    inception_date: date | None = Field(default_factory=date.today)
+    # inception_date = when this policy was first taken out. Never changes.
+    inception_date: date = Field(default_factory=date.today)
+    # risk_details = authoritative record of what is insured.
+    # Endorsements update this in-place; the RiskNote records the diff.
+    risk_details: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
 
 
 class PolicyCreate(PolicyBase):
@@ -397,7 +400,6 @@ class PolicyCreate(PolicyBase):
 
 
 class PolicyCreateExtended(PolicyCreate):
-    risk_details: dict[str, Any] = Field(default_factory=dict)
     coverage_start: date = Field(default_factory=date.today)
     coverage_end: date
 
@@ -428,125 +430,10 @@ class Policy(PolicyBase, table=True):
     )
     claims: list["Claim"] = Relationship(back_populates="policy")
 
-    @property
-    def current_risk_note(self) -> Optional["RiskNote"]:
-        active_notes = [
-            rn
-            for rn in self.risk_notes
-            if rn.status in [RiskNoteStatus.ISSUED, RiskNoteStatus.ACTIVE]
-        ]
-        return active_notes[0] if active_notes else None
-
-    @property
-    def current_risk_details(self) -> dict[str, Any]:
-        rn = self.current_risk_note
-        if rn and isinstance(rn.policy_snapshot, dict):
-            return cast(dict[str, Any], rn.policy_snapshot.get("risk_details", {}))
-        return {}
-
-    @property
-    def current_premium(self) -> Decimal:
-        rn = self.current_risk_note
-        return rn.total_amount if rn else Decimal("0")
-
-    @property
-    def current_term_start(self) -> date | None:
-        rn = self.current_risk_note
-        return rn.coverage_start if rn else None
-
-    @property
-    def current_term_end(self) -> date | None:
-        rn = self.current_risk_note
-        return rn.coverage_end if rn else None
-
 
 class PolicyPublic(PolicyBase):
     id: uuid.UUID
     product: ProductPublic | None = None
-
-    @computed_field  # type: ignore
-    @property
-    def current_risk_details(self) -> dict[str, Any]:
-        if not hasattr(self, "risk_notes") or not self.risk_notes:
-            return {}
-        active_notes = [
-            rn
-            for rn in self.risk_notes
-            if rn.status in [RiskNoteStatus.ISSUED, RiskNoteStatus.ACTIVE]
-        ]
-        if not active_notes:
-            return {}
-        return cast(
-            dict[str, Any], active_notes[0].policy_snapshot.get("risk_details", {})
-        )
-
-    @computed_field  # type: ignore
-    @property
-    def total_premium(self) -> Decimal:
-        if not hasattr(self, "risk_notes") or not self.risk_notes:
-            return Decimal("0")
-        active_notes = [
-            rn
-            for rn in self.risk_notes
-            if rn.status in [RiskNoteStatus.ISSUED, RiskNoteStatus.ACTIVE]
-        ]
-        return (
-            cast(Decimal, active_notes[0].total_amount)
-            if active_notes
-            else Decimal("0")
-        )
-
-    @computed_field  # type: ignore
-    @property
-    def start_date(self) -> date | None:
-        if not hasattr(self, "risk_notes") or not self.risk_notes:
-            return None
-        active_notes = [
-            rn
-            for rn in self.risk_notes
-            if rn.status in [RiskNoteStatus.ISSUED, RiskNoteStatus.ACTIVE]
-        ]
-        return active_notes[0].coverage_start if active_notes else None
-
-    @computed_field  # type: ignore
-    @property
-    def end_date(self) -> date | None:
-        if not hasattr(self, "risk_notes") or not self.risk_notes:
-            return None
-        active_notes = [
-            rn
-            for rn in self.risk_notes
-            if rn.status in [RiskNoteStatus.ISSUED, RiskNoteStatus.ACTIVE]
-        ]
-        return active_notes[0].coverage_end if active_notes else None
-
-    @computed_field  # type: ignore
-    @property
-    def display_name(self) -> str:
-        def recursive_search(obj: Any, targets: list[str]) -> str | None:
-            if not isinstance(obj, dict):
-                return None
-            for k, v in obj.items():
-                if any(t.lower() == str(k).lower().strip() for t in targets):
-                    if isinstance(v, str) and v and "<<" not in v:
-                        return v.strip()
-            for v in obj.values():
-                res = recursive_search(v, targets)
-                if res:
-                    return res
-            return None
-
-        if self.product:
-            base_name = self.product.class_of_insurance or self.product.name
-            risk_details = self.current_risk_details
-            if "motor private" in base_name.lower():
-                reg_no = recursive_search(
-                    risk_details, ["reg_no", "Reg No", "Reg. No", "Registration"]
-                )
-                if reg_no:
-                    return f"{base_name} - {reg_no}"
-            return base_name
-        return self.policy_number
 
 
 class PoliciesPublic(SQLModel):
@@ -566,7 +453,6 @@ class RiskNoteBase(AuditMixin, SQLModel):
     created_by_id: uuid.UUID | None = Field(
         default=None, foreign_key="user.id", index=True
     )
-    payment_status: str = Field(default="Unpaid")
     effective_date: date = Field(default_factory=date.today, index=True)
     coverage_start: date
     coverage_end: date
@@ -577,8 +463,10 @@ class RiskNoteBase(AuditMixin, SQLModel):
 
 class RiskNoteCreate(RiskNoteBase):
     financial_breakdown: dict[str, Any] = Field(default_factory=dict)
-    policy_snapshot: dict[str, Any] = Field(default_factory=dict)
     special_clauses: list[str] = Field(default_factory=list)
+    # Only populated for Endorsement notes. Records field-level diff.
+    # Schema: {"risk_details.vehicle.value": {"from": 1_000_000, "to": 1_200_000}}
+    change_log: dict[str, Any] = Field(default_factory=dict)
 
 
 class RiskNoteUpdate(SQLModel):
@@ -587,7 +475,6 @@ class RiskNoteUpdate(SQLModel):
     status: RiskNoteStatus | None = None
     previous_risk_note_id: uuid.UUID | None = None
     invoice_number: str | None = None
-    payment_status: str | None = None
     effective_date: date | None = None
     coverage_start: date | None = None
     coverage_end: date | None = None
@@ -595,16 +482,16 @@ class RiskNoteUpdate(SQLModel):
     financial_breakdown: dict[str, Any] | None = None
     commission_amount: Decimal | None = None
     total_amount: Decimal | None = None
-    policy_snapshot: dict[str, Any] | None = None
     special_clauses: list[str] | None = None
+    change_log: dict[str, Any] | None = None
 
 
 class RiskNotePublic(RiskNoteBase):
     id: uuid.UUID
     policy: PolicyPublic | None = None
     financial_breakdown: dict[str, Any] = Field(default_factory=dict)
-    policy_snapshot: dict[str, Any] = Field(default_factory=dict)
     special_clauses: list[str] = Field(default_factory=list)
+    change_log: dict[str, Any] = Field(default_factory=dict)
 
 
 class RiskNote(RiskNoteBase, table=True):
@@ -617,10 +504,8 @@ class RiskNote(RiskNoteBase, table=True):
     financial_breakdown: dict[str, Any] = Field(
         default_factory=dict, sa_column=Column(JSON)
     )
-    policy_snapshot: dict[str, Any] = Field(
-        default_factory=dict, sa_column=Column(JSON)
-    )
     special_clauses: list[str] = Field(default_factory=list, sa_column=Column(JSON))
+    change_log: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
 
 
 class RiskNotesPublic(SQLModel):
