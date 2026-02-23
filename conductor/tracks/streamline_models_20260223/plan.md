@@ -1,0 +1,38 @@
+# Implementation Plan: Backend Model Streamlining & Debt Reduction
+
+## Phase 1: Core Model Refactor [checkpoint: [pending]]
+Refactor the primary models to centralize risk data and eliminate redundancy.
+
+- [ ] **Task: Update `Policy` Model for Authoritative State**
+    - [ ] Update `backend/app/models.py`: Add `risk_details: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))` to the `Policy` model.
+    - [ ] Remove computed properties on `Policy` that perform relationship traversals (`current_risk_details`, `total_premium`, `start_date`, `end_date`, `display_name`).
+- [ ] **Task: Refactor `RiskNote` and Remove Redundant Fields**
+    - [ ] Update `backend/app/models.py`: Remove `policy_snapshot` and `payment_status` from `RiskNote`.
+    - [ ] Ensure `RiskNote` has `change_log: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))` for recording diffs.
+- [ ] **Task: Standardize Project Enums**
+    - [ ] Align `PolicyStatus`, `TransactionType`, and other enums with the streamlined definitions in `planning/models.py`.
+- [ ] **Task: Conductor - User Manual Verification 'Core Model Refactor' (Protocol in workflow.md)**
+
+## Phase 2: Data Migration & Integration [checkpoint: [pending]]
+Safely migrate existing data and update service logic to the new structure.
+
+- [ ] **Task: Create and Verify Alembic Migration**
+    - [ ] Generate a migration to add `Policy.risk_details` and remove old columns.
+    - [ ] **CRITICAL:** Include an `upgrade()` script that populates `Policy.risk_details` from the *most recent* `RiskNote.policy_snapshot` for each policy.
+- [ ] **Task: Update `PolicyService` and `CRUD` Logic**
+    - [ ] Update `backend/app/crud.py` to handle `risk_details` on the `Policy` model during creation and updates.
+    - [ ] Refactor endorsement logic to update `Policy.risk_details` in-place and record the diff in `RiskNote.change_log`.
+- [ ] **Task: Update Financial Status Logic**
+    - [ ] Refactor any logic that checked `RiskNote.payment_status` to instead derive it from the linked `Invoice.balance_due`.
+- [ ] **Task: Conductor - User Manual Verification 'Data Migration & Integration' (Protocol in workflow.md)**
+
+## Phase 3: Validation & Cleanup [checkpoint: [pending]]
+Ensure full system integrity and remove any remaining technical debt.
+
+- [ ] **Task: Update Backend Test Suite**
+    - [ ] Refactor existing tests in `backend/tests/` that relied on the old model structure (especially `test_soft_delete.py`, `test_transactional_models.py`).
+    - [ ] Ensure tests verify the "single source of truth" for risk data and derived payment status.
+- [ ] **Task: Verify Coverage & Performance**
+    - [ ] Run coverage reports and ensure >80% coverage for the refactored models and services.
+    - [ ] Monitor for any "n+1" query issues introduced by the refactor.
+- [ ] **Task: Conductor - User Manual Verification 'Validation & Cleanup' (Protocol in workflow.md)**
