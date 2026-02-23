@@ -36,12 +36,12 @@ def upgrade():
     op.execute(
         """
         UPDATE risknote 
-        SET financial_breakdown = jsonb_build_object(
+        SET financial_breakdown = json_build_object(
             'type', 'base',
             'taxes', financial_breakdown,
-            'net_premium', net_premium,
-            'total_amount', total_amount,
-            'commission_amount', commission_amount
+            'net_premium', COALESCE(net_premium, 0),
+            'total_amount', COALESCE(total_amount, 0),
+            'commission_amount', COALESCE(commission_amount, 0)
         )
         WHERE financial_breakdown IS NOT NULL AND (financial_breakdown->>'type') IS NULL
         """

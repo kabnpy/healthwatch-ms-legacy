@@ -43,7 +43,7 @@ def test_atomic_policy_creation(db: Session) -> None:
     assert rn.transaction_type == TransactionType.NEW_BUSINESS
     
     # Verify authoritative state on Policy
-    assert policy.risk_details["sum_insured"] == 5000000.0
+    assert float(policy.risk_details["sum_insured"]) == 5000000.0
     assert policy.risk_details["registration_number"] == "KCM 123"
     
     # Verify RiskNote financials
@@ -86,12 +86,12 @@ def test_endorsement_creation(db: Session) -> None:
     assert len(policy.risk_notes) == 2
 
     # Verify updated state on Policy
-    assert policy.risk_details["sum_insured"] == 6000000.0
+    assert float(policy.risk_details["sum_insured"]) == 6000000.0
     
     assert endorsement_rn.transaction_type == TransactionType.ENDORSEMENT
     # Verify change_log on RiskNote
-    assert endorsement_rn.change_log["sum_insured"]["from"] == 5000000.0
-    assert endorsement_rn.change_log["sum_insured"]["to"] == 6000000.0
+    assert float(endorsement_rn.change_log["sum_insured"]["from"]) == 5000000.0
+    assert float(endorsement_rn.change_log["sum_insured"]["to"]) == 6000000.0
 
     # Delta logic verification
     assert "new_state" in endorsement_rn.financial_breakdown

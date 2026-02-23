@@ -2,39 +2,15 @@ import uuid
 from datetime import date, datetime
 from decimal import Decimal
 from enum import Enum
-from typing import Any, Optional, cast
+from typing import Any, Optional
 
-from pydantic import ConfigDict, EmailStr, computed_field
+from pydantic import ConfigDict, EmailStr
 from sqlalchemy import JSON, Column, Numeric
 from sqlmodel import Field, Relationship, SQLModel
 
 # ==========================================
-# Mixins
-# ==========================================
-
-
-class AuditMixin(SQLModel):
-    created_at: datetime = Field(default_factory=datetime.now)
-    updated_at: datetime = Field(
-        default_factory=datetime.now, sa_column_kwargs={"onupdate": datetime.now}
-    )
-
-    deleted_at: datetime | None = Field(default=None, index=True)
-    deleted_by_id: uuid.UUID | None = Field(
-        default=None, foreign_key="user.id", index=True
-    )
-
-
-# ==========================================
 # Enums
 # ==========================================
-
-
-class UserRole(str, Enum):
-    ADMIN = "Admin"
-    UNDERWRITER = "Underwriter"
-    CASHIER = "Cashier"
-    VIEWER = "Viewer"
 
 
 class PolicyStatus(str, Enum):
@@ -89,27 +65,29 @@ class DocumentEntityType(str, Enum):
     CLIENT = "Client"
     POLICY = "Policy"
     CLAIM = "Claim"
-    USER = "User"
     RISK_NOTE = "RiskNote"
 
 
 class DocumentType(str, Enum):
     LOGBOOK = "Logbook"
     ID = "ID"
+    KRA_CERTIFICATE = "KraCertificate"
     VALUATION = "Valuation"
     POLICE_ABSTRACT = "PoliceAbstract"
-    RECEIPT = "Receipt"
+    COVER_NOTE = "CoverNote"
     OTHER = "Other"
 
 
-class PricingStrategy(str, Enum):
-    PERCENTAGE = "Percentage"
-    FIXED_TIERED = "FixedTiered"
-    MANUAL = "Manual"
+class RenewalStatus(str, Enum):
+    PENDING = "Pending"  # created by scheduler; awaiting team action
+    UNDER_REVIEW = "UnderReview"  # team has insurer notice; comparing to last term
+    CLIENT_NOTIFIED = "ClientNotified"  # payment notice sent to client
+    COMPLETED = "Completed"  # new RiskNote issued; renewal done
+    LAPSED = "Lapsed"  # client didn't pay; policy lapsed
 
 
 # ==========================================
-# Common Models
+# Common
 # ==========================================
 
 
@@ -126,8 +104,13 @@ class TokenPayload(SQLModel):
     sub: str | None = None
 
 
+class NewPassword(SQLModel):
+    token: str
+    new_password: str = Field(min_length=8, max_length=128)
+
+
 # ==========================================
-# User Models
+# User
 # ==========================================
 
 
@@ -136,7 +119,6 @@ class UserBase(SQLModel):
     is_active: bool = True
     is_superuser: bool = False
     full_name: str | None = Field(default=None, max_length=255)
-    role: UserRole = Field(default=UserRole.VIEWER)
 
 
 class UserCreate(UserBase):
@@ -178,21 +160,15 @@ class UsersPublic(SQLModel):
     count: int
 
 
-class NewPassword(SQLModel):
-    token: str
-    new_password: str = Field(min_length=8, max_length=128)
-
-
 # ==========================================
-# Insurer & Product Models
+# Insurer
 # ==========================================
 
 
-class InsurerBase(AuditMixin, SQLModel):
-    model_config = ConfigDict(validate_assignment=True)  # type: ignore
-    name: str = Field(unique=True, index=True)
-    email: str | None = None
-    phone: str | None = None
+class InsurerBase(SQLModel):
+    name: str = Field(unique=True, index=True, max_length=255)
+    email: str | None = Field(default=None, max_length=255)
+    phone: str | None = Field(default=None, max_length=50)
 
 
 class InsurerCreate(InsurerBase):
@@ -205,13 +181,13 @@ class InsurerUpdate(SQLModel):
     phone: str | None = None
 
 
-class InsurerPublic(InsurerBase):
-    id: uuid.UUID
-
-
 class Insurer(InsurerBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     products: list["Product"] = Relationship(back_populates="insurer")
+
+
+class InsurerPublic(InsurerBase):
+    id: uuid.UUID
 
 
 class InsurersPublic(SQLModel):
@@ -219,14 +195,24 @@ class InsurersPublic(SQLModel):
     count: int
 
 
-class ProductBase(AuditMixin, SQLModel):
+# ==========================================
+# Product
+#
+# A product is an insurer's named offering for a class of insurance.
+# It carries no business logic — premium calculation and risk detail
+# validation belong in the service layer, not the data model.
+# ==========================================
+
+
+class ProductBase(SQLModel):
     insurer_id: uuid.UUID = Field(foreign_key="insurer.id", index=True)
-    name: str
-    class_of_insurance: str  # "Motor Private", "Fire"
-    product_details: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
+    name: str = Field(max_length=255)
+    class_of_insurance: str = Field(max_length=100)  # "Motor Private", "Fire", etc.
     pricing_strategy: PricingStrategy = Field(default=PricingStrategy.PERCENTAGE)
-    pricing_rules: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
-    default_commission_rate: float = 10.0
+    # For PERCENTAGE/FIXED_TIERED: {"tiers": [{"max": 1500000, "rate": 5.0, "min": 60000}, ...]}
+    # For a flat rate product:      {"rate": 2.5}
+    # For MANUAL:                   {} — user supplies premium directly
+    pricing_rules: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
 
 
 class ProductCreate(ProductBase):
@@ -237,15 +223,6 @@ class ProductUpdate(SQLModel):
     insurer_id: uuid.UUID | None = None
     name: str | None = None
     class_of_insurance: str | None = None
-    product_details: dict[str, Any] | None = None
-    pricing_strategy: PricingStrategy | None = None
-    pricing_rules: dict[str, Any] | None = None
-    default_commission_rate: float | None = None
-
-
-class ProductPublic(ProductBase):
-    id: uuid.UUID
-    insurer: Optional["InsurerPublic"] = None
 
 
 class Product(ProductBase, table=True):
@@ -253,44 +230,10 @@ class Product(ProductBase, table=True):
     insurer: "Insurer" = Relationship(back_populates="products")
     policies: list["Policy"] = Relationship(back_populates="product")
 
-    def validate_risk_details(self, risk_details: dict[str, Any]) -> dict[str, Any]:
-        if "motor private" in self.class_of_insurance.lower():
-            from app.schemas import MotorPrivateRiskDetails
 
-            # Identify if the input is nested or flat
-            risk_data = risk_details
-            if "VEHICLE DETAILS" in risk_details:
-                risk_data = risk_details["VEHICLE DETAILS"]
-            
-            # Create a copy to avoid mutating the original input if needed
-            risk_data = risk_data.copy()
-
-            # Map legacy/varied keys manually before validation
-            key_mapping = {
-                "Value Kshs.": "sum_insured",
-                "Value": "sum_insured",
-                "Sum Insured": "sum_insured",
-                "Reg. No": "registration_number",
-                "Reg No": "registration_number",
-                "Registration": "registration_number",
-                "Year": "year_of_manufacture",
-                "Make": "make",
-            }
-
-            for legacy_key, target_key in key_mapping.items():
-                if legacy_key in risk_data and target_key not in risk_data:
-                    risk_data[target_key] = risk_data[legacy_key]
-
-            validated = MotorPrivateRiskDetails(**risk_data)
-            
-            # Return a clean, semantic structure that is JSON-serializable
-            return validated.model_dump(mode="json")
-        return risk_details
-    def calculate_premium(self, risk_details: dict[str, Any]) -> Decimal:
-        from app.services.rating import RatingService
-
-        breakdown = RatingService.calculate_breakdown(self, risk_details)
-        return breakdown.net_premium
+class ProductPublic(ProductBase):
+    id: uuid.UUID
+    insurer: InsurerPublic | None = None
 
 
 class ProductsPublic(SQLModel):
@@ -299,22 +242,23 @@ class ProductsPublic(SQLModel):
 
 
 # ==========================================
-# Client Models
+# Client
 # ==========================================
 
 
-class ClientBase(AuditMixin, SQLModel):
+class ClientBase(SQLModel):
     model_config = ConfigDict(validate_assignment=True)  # type: ignore
-    client_type: str = Field(default="Individual")
-    name: str = Field(index=True)
-    kra_pin: str = Field(unique=True, index=True)
-    email: str | None = None
-    phone: str
-    physical_address: str | None = None
-    postal_number: str | None = None
-    postal_code: str | None = None
-    town: str | None = None
-    contacts: list[dict[str, Any]] = Field(default_factory=list, sa_type=JSON)
+    client_type: str = Field(default="Individual", max_length=50)
+    name: str = Field(index=True, max_length=255)
+    kra_pin: str = Field(unique=True, index=True, max_length=50)
+    email: str | None = Field(default=None, max_length=255)
+    phone: str = Field(max_length=50)
+    postal_number: str | None = Field(default=None, max_length=50)
+    postal_code: str | None = Field(default=None, max_length=20)
+    town: str | None = Field(default=None, max_length=100)
+    # Additional named contacts (e.g. fleet manager, accountant).
+    # Schema: [{"name": str, "role": str, "phone": str, "email": str}]
+    contacts: list[dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
 
 
 class ClientCreate(ClientBase):
@@ -327,23 +271,21 @@ class ClientUpdate(SQLModel):
     kra_pin: str | None = None
     email: str | None = None
     phone: str | None = None
-    physical_address: str | None = None
     postal_number: str | None = None
     postal_code: str | None = None
     town: str | None = None
     contacts: list[dict[str, Any]] | None = None
 
 
-class ClientPublic(ClientBase):
-    id: uuid.UUID
-
-
 class Client(ClientBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     policies: list["Policy"] = Relationship(back_populates="client")
-    correspondence: list["Correspondence"] = Relationship(back_populates="client")
     invoices: list["Invoice"] = Relationship(back_populates="client")
     receipts: list["Receipt"] = Relationship(back_populates="client")
+
+
+class ClientPublic(ClientBase):
+    id: uuid.UUID
 
 
 class ClientsPublic(SQLModel):
@@ -351,52 +293,25 @@ class ClientsPublic(SQLModel):
     count: int
 
 
-class CorrespondenceBase(AuditMixin, SQLModel):
-    client_id: uuid.UUID = Field(foreign_key="client.id", index=True)
-    subject: str
-    summary: str | None = None
-    file_path: str
-    date_logged: datetime = Field(default_factory=datetime.now)
-
-
-class CorrespondenceCreate(CorrespondenceBase):
-    pass
-
-
-class CorrespondenceUpdate(SQLModel):
-    client_id: uuid.UUID | None = None
-    subject: str | None = None
-    summary: str | None = None
-    file_path: str | None = None
-    date_logged: datetime | None = None
-
-
-class CorrespondencePublic(CorrespondenceBase):
-    id: uuid.UUID
-
-
-class Correspondence(CorrespondenceBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    client: "Client" = Relationship(back_populates="correspondence")
-
-
-class CorrespondencesPublic(SQLModel):
-    data: list[CorrespondencePublic]
-    count: int
-
-
 # ==========================================
-# Policy & Risk Note Models
+# Policy
+#
+# A Policy is the long-lived contract. It is the single source of truth
+# for WHAT is being insured (risk_details). Coverage period and premium
+# are per-term concerns that belong on RiskNote, not here.
+#
+# risk_details schema is intentionally open (JSON) because it varies by
+# class of insurance (motor needs reg/make/value; fire needs location/
+# sum insured; medical needs beneficiary count). Validation happens in
+# the service layer using class_of_insurance from the related Product.
 # ==========================================
 
 
-class PolicyBase(AuditMixin, SQLModel):
+class PolicyBase(SQLModel):
     model_config = ConfigDict(validate_assignment=True)  # type: ignore
-    policy_number: str = Field(unique=True, index=True)
+    policy_number: str = Field(unique=True, index=True, max_length=100)
     client_id: uuid.UUID = Field(foreign_key="client.id", index=True)
-    product_id: uuid.UUID | None = Field(
-        default=None, foreign_key="product.id", index=True
-    )
+    product_id: uuid.UUID = Field(foreign_key="product.id", index=True)
     status: PolicyStatus = Field(default=PolicyStatus.ACTIVE)
     # inception_date = when this policy was first taken out. Never changes.
     inception_date: date = Field(default_factory=date.today)
@@ -409,53 +324,29 @@ class PolicyCreate(PolicyBase):
     pass
 
 
-class PolicyCreateExtended(PolicyCreate):
-    coverage_start: date = Field(default_factory=date.today)
-    coverage_end: date
-
-
-class EndorsementCreate(SQLModel):
-    updated_risk_details: dict[str, Any]
-    change_description: str
-
-
 class PolicyUpdate(SQLModel):
     policy_number: str | None = None
-    client_id: uuid.UUID | None = None
     product_id: uuid.UUID | None = None
     status: PolicyStatus | None = None
-    inception_date: date | None = None
+    risk_details: dict[str, Any] | None = None
 
 
 class Policy(PolicyBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     client: "Client" = Relationship(back_populates="policies")
-    product: Optional["Product"] = Relationship(back_populates="policies")
-    risk_notes: list["RiskNote"] = Relationship(
-        back_populates="policy",
-        sa_relationship_kwargs={
-            "order_by": "RiskNote.effective_date.desc(), RiskNote.created_at.desc()",
-            "lazy": "selectin",
-        },
-    )
+    product: "Product" = Relationship(back_populates="policies")
+    risk_notes: list["RiskNote"] = Relationship(back_populates="policy")
     claims: list["Claim"] = Relationship(back_populates="policy")
+    renewal_workflows: list["RenewalWorkflow"] = Relationship(back_populates="policy")
 
 
 class PolicyPublic(PolicyBase):
     id: uuid.UUID
     product: ProductPublic | None = None
-
-    @computed_field
-    @property
-    def display_name(self) -> str:
-        if self.product:
-            base_name = self.product.class_of_insurance or self.product.name
-            if "motor private" in base_name.lower():
-                reg_no = self.risk_details.get("registration_number") or self.risk_details.get("Reg. No")
-                if reg_no:
-                    return f"{base_name} - {reg_no}"
-            return base_name
-        return self.policy_number
+    # Deliberately no computed fields here. Callers that need current
+    # coverage period or premium should load the active RiskNote explicitly.
+    # Hiding relationship traversal inside computed properties caused
+    # subtle loading bugs in the previous model.
 
 
 class PoliciesPublic(SQLModel):
@@ -463,15 +354,33 @@ class PoliciesPublic(SQLModel):
     count: int
 
 
-class RiskNoteBase(AuditMixin, SQLModel):
+# ==========================================
+# RiskNote
+#
+# A RiskNote is the document issued per transaction (New Business,
+# Renewal, Endorsement, Cancellation). It records the terms for a
+# specific coverage period.
+#
+# Critically: it does NOT store a copy of risk_details. That data lives
+# on Policy. For endorsements, change_log records only the diff
+# ({"field": {"from": old, "to": new}}), keeping history lean.
+#
+# The chain of notes for a policy is navigable via previous_risk_note_id,
+# forming a linked list: NB → Renewal 1 → Renewal 2.
+# ==========================================
+
+
+class RiskNoteBase(SQLModel):
     policy_id: uuid.UUID = Field(foreign_key="policy.id", index=True)
-    risk_note_number: str | None = Field(default=None, unique=True, index=True)
+    risk_note_number: str | None = Field(
+        default=None, unique=True, index=True, max_length=100
+    )
     transaction_type: TransactionType
     status: RiskNoteStatus = Field(default=RiskNoteStatus.DRAFT)
+    # Links to the note this one supersedes. Null for New Business.
     previous_risk_note_id: uuid.UUID | None = Field(
         default=None, foreign_key="risknote.id", index=True
     )
-    invoice_number: str | None = None
     created_by_id: uuid.UUID | None = Field(
         default=None, foreign_key="user.id", index=True
     )
@@ -479,12 +388,12 @@ class RiskNoteBase(AuditMixin, SQLModel):
     coverage_start: date
     coverage_end: date
     net_premium: Decimal = Field(sa_column=Column(Numeric(precision=15, scale=2)))
-    commission_amount: Decimal = Field(sa_column=Column(Numeric(precision=15, scale=2)))
     total_amount: Decimal = Field(sa_column=Column(Numeric(precision=15, scale=2)))
 
 
 class RiskNoteCreate(RiskNoteBase):
-    financial_breakdown: dict[str, Any] = Field(default_factory=dict)
+    # taxes: {"stamp_duty": 40, "phcf": 0.25, ...}
+    taxes: dict[str, Any] = Field(default_factory=dict)
     special_clauses: list[str] = Field(default_factory=list)
     # Only populated for Endorsement notes. Records field-level diff.
     # Schema: {"risk_details.vehicle.value": {"from": 1_000_000, "to": 1_200_000}}
@@ -492,42 +401,35 @@ class RiskNoteCreate(RiskNoteBase):
 
 
 class RiskNoteUpdate(SQLModel):
-    transaction_type: TransactionType | None = None
     risk_note_number: str | None = None
     status: RiskNoteStatus | None = None
-    previous_risk_note_id: uuid.UUID | None = None
-    invoice_number: str | None = None
     effective_date: date | None = None
     coverage_start: date | None = None
     coverage_end: date | None = None
     net_premium: Decimal | None = None
-    financial_breakdown: dict[str, Any] | None = None
-    commission_amount: Decimal | None = None
     total_amount: Decimal | None = None
+    taxes: dict[str, Any] | None = None
     special_clauses: list[str] | None = None
     change_log: dict[str, Any] | None = None
 
 
-class RiskNotePublic(RiskNoteBase):
-    id: uuid.UUID
-    policy: PolicyPublic | None = None
-    financial_breakdown: dict[str, Any] = Field(default_factory=dict)
-    special_clauses: list[str] = Field(default_factory=list)
-    change_log: dict[str, Any] = Field(default_factory=dict)
-
-
 class RiskNote(RiskNoteBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    policy: Policy = Relationship(back_populates="risk_notes")
+    policy: "Policy" = Relationship(back_populates="risk_notes")
     invoice_line_items: list["InvoiceLineItem"] = Relationship(
         back_populates="risk_note"
     )
     allocations: list["ReceiptAllocation"] = Relationship(back_populates="risk_note")
-    financial_breakdown: dict[str, Any] = Field(
-        default_factory=dict, sa_column=Column(JSON)
-    )
+    taxes: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
     special_clauses: list[str] = Field(default_factory=list, sa_column=Column(JSON))
     change_log: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+
+
+class RiskNotePublic(RiskNoteBase):
+    id: uuid.UUID
+    taxes: dict[str, Any] = Field(default_factory=dict)
+    special_clauses: list[str] = Field(default_factory=list)
+    change_log: dict[str, Any] = Field(default_factory=dict)
 
 
 class RiskNotesPublic(SQLModel):
@@ -536,22 +438,100 @@ class RiskNotesPublic(SQLModel):
 
 
 # ==========================================
-# Financial Models
+# Renewal Workflow
+#
+# Created automatically by a scheduler when a policy's active RiskNote
+# has coverage_end within the alert window. Everything after creation
+# is human-driven — the system tracks state and handles email dispatch.
+#
+# The authoritative premium for the new term lives on the RiskNote
+# created at completion, NOT here. quoted_premium is a working field
+# used during the review/negotiation stage only.
 # ==========================================
 
 
-class InvoiceBase(AuditMixin, SQLModel):
+class RenewalWorkflowBase(SQLModel):
+    policy_id: uuid.UUID = Field(foreign_key="policy.id", index=True)
+    # The note whose coverage_end triggered this workflow.
+    expiring_risk_note_id: uuid.UUID = Field(foreign_key="risknote.id", index=True)
+    status: RenewalStatus = Field(default=RenewalStatus.PENDING)
+    # Filled in when team receives and reviews the insurer's renewal notice.
+    insurer_notice_received_at: datetime | None = None
+    insurer_notice_notes: str | None = None  # what changed vs last term
+    quoted_premium: Decimal | None = Field(
+        default=None, sa_column=Column(Numeric(precision=15, scale=2))
+    )
+    new_coverage_start: date | None = None
+    new_coverage_end: date | None = None
+    # Filled when team confirms the review.
+    reviewed_by_id: uuid.UUID | None = Field(
+        default=None, foreign_key="user.id", index=True
+    )
+    reviewed_at: datetime | None = None
+    # Filled when the client payment notice email is sent.
+    client_notified_at: datetime | None = None
+    # Filled when the renewal is complete and a new RiskNote is issued.
+    completed_at: datetime | None = None
+    created_at: datetime = Field(default_factory=datetime.now)
+
+
+class RenewalWorkflowCreate(RenewalWorkflowBase):
+    pass
+
+
+class RenewalWorkflowUpdate(SQLModel):
+    status: RenewalStatus | None = None
+    insurer_notice_received_at: datetime | None = None
+    insurer_notice_notes: str | None = None
+    quoted_premium: Decimal | None = None
+    new_coverage_start: date | None = None
+    new_coverage_end: date | None = None
+    reviewed_by_id: uuid.UUID | None = None
+    reviewed_at: datetime | None = None
+    client_notified_at: datetime | None = None
+    completed_at: datetime | None = None
+
+
+class RenewalWorkflow(RenewalWorkflowBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    policy: "Policy" = Relationship(back_populates="renewal_workflows")
+
+
+class RenewalWorkflowPublic(RenewalWorkflowBase):
+    id: uuid.UUID
+
+
+class RenewalWorkflowsPublic(SQLModel):
+    data: list[RenewalWorkflowPublic]
+    count: int
+
+
+# ==========================================
+# Invoice & Line Items
+#
+# An Invoice is raised against a Client for one or more RiskNotes.
+# The line items are the bridge — each line item points at one RiskNote.
+# This means the Invoice never needs to store a copy of policy or
+# premium data; it's all reachable via the line item → risk note chain.
+#
+# Payment status is derived from balance_due, not stored as a redundant
+# enum on RiskNote. A RiskNote is "paid" when its line item's invoice
+# has balance_due == 0.
+# ==========================================
+
+
+class InvoiceBase(SQLModel):
     model_config = ConfigDict(validate_assignment=True)  # type: ignore
-    invoice_number: str = Field(unique=True, index=True)
+    invoice_number: str = Field(unique=True, index=True, max_length=100)
     client_id: uuid.UUID = Field(foreign_key="client.id", index=True)
     date_issued: date = Field(default_factory=date.today)
     due_date: date | None = None
     status: InvoiceStatus = Field(default=InvoiceStatus.UNPAID)
     total_amount: Decimal = Field(
-        default=Decimal("0.0"), sa_column=Column(Numeric(precision=15, scale=2))
+        default=Decimal("0.00"), sa_column=Column(Numeric(precision=15, scale=2))
     )
     balance_due: Decimal = Field(
-        default=Decimal("0.0"), sa_column=Column(Numeric(precision=15, scale=2))
+        default=Decimal("0.00"), sa_column=Column(Numeric(precision=15, scale=2))
     )
     notes: str | None = None
 
@@ -561,17 +541,18 @@ class InvoiceCreate(InvoiceBase):
 
 
 class InvoiceBulkCreate(SQLModel):
+    """Create a single invoice covering multiple risk notes at once."""
+
     client_id: uuid.UUID
     risk_note_ids: list[uuid.UUID]
     date_issued: date = Field(default_factory=date.today)
+    due_date: date | None = None
     notes: str | None = None
 
 
 class InvoiceUpdate(SQLModel):
-    invoice_number: str | None = None
     due_date: date | None = None
     status: InvoiceStatus | None = None
-    total_amount: Decimal | None = None
     balance_due: Decimal | None = None
     notes: str | None = None
 
@@ -600,16 +581,42 @@ class InvoiceLineItem(InvoiceLineItemBase, table=True):
     risk_note: "RiskNote" = Relationship(back_populates="invoice_line_items")
 
 
-class ReceiptBase(AuditMixin, SQLModel):
-    receipt_number: str = Field(unique=True, index=True)
+class InvoiceLineItemPublic(InvoiceLineItemBase):
+    id: uuid.UUID
+    risk_note: RiskNotePublic | None = None
+
+
+class InvoicePublic(InvoiceBase):
+    id: uuid.UUID
+    line_items: list[InvoiceLineItemPublic] = []
+    allocations: list["ReceiptAllocationPublic"] = []
+
+
+class InvoicesPublic(SQLModel):
+    data: list[InvoicePublic]
+    count: int
+
+
+# ==========================================
+# Receipt & Allocations
+#
+# A Receipt records money received from a client. The amount may cover
+# multiple invoices, so it is split across them via ReceiptAllocation.
+# unallocated_amount = amount - sum(allocations). This is the only place
+# that tracks whether money has been applied somewhere.
+# ==========================================
+
+
+class ReceiptBase(SQLModel):
+    receipt_number: str = Field(unique=True, index=True, max_length=100)
     client_id: uuid.UUID = Field(foreign_key="client.id", index=True)
     date_received: date
     amount: Decimal = Field(sa_column=Column(Numeric(precision=15, scale=2)))
     unallocated_amount: Decimal = Field(
-        default=Decimal("0.0"), sa_column=Column(Numeric(precision=15, scale=2))
+        default=Decimal("0.00"), sa_column=Column(Numeric(precision=15, scale=2))
     )
-    mode: str
-    reference: str
+    mode: str = Field(max_length=50)  # "MPESA", "Bank Transfer", "Cheque"
+    reference: str = Field(max_length=100)  # MPESA code, cheque number, etc.
     notes: str | None = None
     status: ReceiptStatus = Field(default=ReceiptStatus.ACTIVE)
     created_by_id: uuid.UUID | None = Field(
@@ -622,19 +629,34 @@ class ReceiptCreate(ReceiptBase):
 
 
 class ReceiptUpdate(SQLModel):
-    receipt_number: str | None = None
     date_received: date | None = None
-    amount: Decimal | None = None
-    unallocated_amount: Decimal | None = None
     mode: str | None = None
     reference: str | None = None
     notes: str | None = None
     status: ReceiptStatus | None = None
 
 
+class Receipt(ReceiptBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    client: "Client" = Relationship(back_populates="receipts")
+    allocations: list["ReceiptAllocation"] = Relationship(back_populates="receipt")
+
+
+class ReceiptPublic(ReceiptBase):
+    id: uuid.UUID
+    allocations: list["ReceiptAllocationPublic"] = []
+
+
+class ReceiptsPublic(SQLModel):
+    data: list[ReceiptPublic]
+    count: int
+
+
 class ReceiptAllocationBase(SQLModel):
     receipt_id: uuid.UUID = Field(foreign_key="receipt.id", index=True)
     invoice_id: uuid.UUID = Field(foreign_key="invoice.id", index=True)
+    # risk_note_id here lets you see exactly which note a payment covers
+    # without having to traverse invoice → line_items. Useful for statements.
     risk_note_id: uuid.UUID | None = Field(
         default=None, foreign_key="risknote.id", index=True
     )
@@ -649,60 +671,27 @@ class ReceiptAllocation(ReceiptAllocationBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     receipt: "Receipt" = Relationship(back_populates="allocations")
     invoice: "Invoice" = Relationship(back_populates="allocations")
-    risk_note: "RiskNote" = Relationship(back_populates="allocations")
+    risk_note: Optional["RiskNote"] = Relationship(back_populates="allocations")
 
 
-class ReceiptAllocationsPublic(SQLModel):
-    data: list[ReceiptAllocationBase]
-    count: int
-
-
-class InvoiceLineItemPublic(InvoiceLineItemBase):
+class ReceiptAllocationPublic(ReceiptAllocationBase):
     id: uuid.UUID
-    risk_note: Optional["RiskNotePublic"] = None
-
-
-class InvoicePublic(InvoiceBase):
-    id: uuid.UUID
-    line_items: list[InvoiceLineItemPublic] = []
-    allocations: list[ReceiptAllocationBase] = []
-
-
-class InvoicesPublic(SQLModel):
-    data: list[InvoicePublic]
-    count: int
-
-
-class ReceiptPublic(ReceiptBase):
-    id: uuid.UUID
-    allocations: list[ReceiptAllocationBase] = []
-
-
-class Receipt(ReceiptBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    client: "Client" = Relationship(back_populates="receipts")
-    allocations: list["ReceiptAllocation"] = Relationship(back_populates="receipt")
-
-
-class ReceiptsPublic(SQLModel):
-    data: list[ReceiptPublic]
-    count: int
 
 
 # ==========================================
-# Claim Models
+# Claims
 # ==========================================
 
 
-class ClaimBase(AuditMixin, SQLModel):
-    claim_number: str = Field(unique=True, index=True)
+class ClaimBase(SQLModel):
+    claim_number: str = Field(unique=True, index=True, max_length=100)
     policy_id: uuid.UUID = Field(foreign_key="policy.id", index=True)
     date_of_loss: date
     date_reported: date = Field(default_factory=date.today)
     description: str
     status: ClaimStatus = Field(default=ClaimStatus.REPORTED)
     reserve_amount: Decimal = Field(
-        default=Decimal("0.0"), sa_column=Column(Numeric(precision=15, scale=2))
+        default=Decimal("0.00"), sa_column=Column(Numeric(precision=15, scale=2))
     )
 
 
@@ -711,23 +700,20 @@ class ClaimCreate(ClaimBase):
 
 
 class ClaimUpdate(SQLModel):
-    claim_number: str | None = None
-    policy_id: uuid.UUID | None = None
     date_of_loss: date | None = None
-    date_reported: date | None = None
     description: str | None = None
     status: ClaimStatus | None = None
     reserve_amount: Decimal | None = None
-
-
-class ClaimPublic(ClaimBase):
-    id: uuid.UUID
 
 
 class Claim(ClaimBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     policy: "Policy" = Relationship(back_populates="claims")
     events: list["ClaimEvent"] = Relationship(back_populates="claim")
+
+
+class ClaimPublic(ClaimBase):
+    id: uuid.UUID
 
 
 class ClaimsPublic(SQLModel):
@@ -749,13 +735,13 @@ class ClaimEventCreate(ClaimEventBase):
     pass
 
 
-class ClaimEventPublic(ClaimEventBase):
-    id: uuid.UUID
-
-
 class ClaimEvent(ClaimEventBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     claim: "Claim" = Relationship(back_populates="events")
+
+
+class ClaimEventPublic(ClaimEventBase):
+    id: uuid.UUID
 
 
 class ClaimEventsPublic(SQLModel):
@@ -764,43 +750,43 @@ class ClaimEventsPublic(SQLModel):
 
 
 # ==========================================
-# Document Models
+# Documents
+#
+# Generic attachment store. entity_type + entity_id form a polymorphic
+# reference — one table covers documents for clients, policies, claims,
+# and risk notes without needing four separate document tables.
 # ==========================================
 
 
 class DocumentBase(SQLModel):
-    model_config = ConfigDict(validate_assignment=True)  # type: ignore
     document_type: DocumentType
+    entity_type: DocumentEntityType
+    entity_id: uuid.UUID = Field(index=True)
     file_path: str
     mime_type: str | None = None
     uploaded_at: datetime = Field(default_factory=datetime.now)
+    uploaded_by_id: uuid.UUID | None = Field(
+        default=None, foreign_key="user.id", index=True
+    )
+    # Free-form metadata: original filename, file size, description, etc.
+    doc_metadata: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
 
 
 class DocumentCreate(DocumentBase):
-    entity_type: DocumentEntityType
-    entity_id: uuid.UUID
-    doc_metadata: dict[str, Any] = Field(default_factory=dict)
+    pass
 
 
 class DocumentUpdate(SQLModel):
     document_type: DocumentType | None = None
-    file_path: str | None = None
-    mime_type: str | None = None
     doc_metadata: dict[str, Any] | None = None
-
-
-class DocumentPublic(DocumentBase):
-    id: uuid.UUID
-    entity_type: DocumentEntityType
-    entity_id: uuid.UUID
-    doc_metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class Document(DocumentBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    entity_type: DocumentEntityType
-    entity_id: uuid.UUID
-    doc_metadata: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+
+
+class DocumentPublic(DocumentBase):
+    id: uuid.UUID
 
 
 class DocumentsPublic(SQLModel):
@@ -809,7 +795,7 @@ class DocumentsPublic(SQLModel):
 
 
 # ==========================================
-# Late Binding / Rebuild
+# Late binding — resolve forward references
 # ==========================================
 
 InvoiceLineItemPublic.model_rebuild()
@@ -821,9 +807,3 @@ PolicyPublic.model_rebuild()
 PoliciesPublic.model_rebuild()
 RiskNotePublic.model_rebuild()
 RiskNotesPublic.model_rebuild()
-ClaimPublic.model_rebuild()
-ClaimsPublic.model_rebuild()
-ClaimEventPublic.model_rebuild()
-ClaimEventsPublic.model_rebuild()
-DocumentPublic.model_rebuild()
-DocumentsPublic.model_rebuild()

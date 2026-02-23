@@ -42,4 +42,19 @@ describe('injectWizardData', () => {
     const result = injectWizardData(blueprint, inputs);
     expect(result.section.deep.field).toBe('ROOT_VALUE');
   });
+
+  it('should resolve relative paths when recursing', () => {
+    const blueprint = {
+      section: {
+        field: '<<field>>'
+      }
+    };
+    const inputs = {
+      section: {
+        field: 'RELATIVE_VALUE'
+      }
+    };
+    const result = injectWizardData(blueprint, inputs);
+    expect(result.section.field).toBe('RELATIVE_VALUE');
+  });
 });

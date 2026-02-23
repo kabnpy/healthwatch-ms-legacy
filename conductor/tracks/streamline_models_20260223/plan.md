@@ -36,3 +36,6 @@ Ensure full system integrity and remove any remaining technical debt.
     - [x] Run coverage reports and ensure >80% coverage for the refactored models and services.
     - [x] Monitor for any "n+1" query issues introduced by the refactor.
 - [x] **Task: Conductor - User Manual Verification 'Validation & Cleanup' (Protocol in workflow.md)**
+
+## Phase: Review Fixes
+- [~] Task: Apply review suggestions

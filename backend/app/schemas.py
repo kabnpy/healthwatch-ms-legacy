@@ -52,18 +52,13 @@ class MotorPrivateRiskDetails(BaseModel):
     registration_number: str = Field(..., min_length=1)
     make: str = Field(..., min_length=1)
     year_of_manufacture: int = Field(...)
-    sum_insured: float = Field(...)
+    sum_insured: Decimal = Field(...)
 
     @field_validator("sum_insured", mode="before")
     @classmethod
-    def parse_sum_insured(cls, v: Any) -> float:
-        if v is None:
-            return 0.0
-        if isinstance(v, str):
-            clean = v.replace(",", "").replace("[ EMPTY ]", "").strip()
-            clean = re.sub(r"[^\d.]", "", clean)
-            return float(clean) if clean else 0.0
-        return float(v)
+    def parse_sum_insured(cls, v: Any) -> Decimal:
+        from app.services.rating import RatingStrategy
+        return RatingStrategy.parse_decimal(v)
 
 
 class MotorPrivateRiskDetailsLegacy(MotorPrivateRiskDetails):

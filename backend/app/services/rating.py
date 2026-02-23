@@ -18,7 +18,8 @@ class RatingStrategy(ABC):
     ) -> BaseFinancialBreakdown | MotorFinancialBreakdown:
         pass
 
-    def parse_decimal(self, value: Any) -> Decimal:
+    @staticmethod
+    def parse_decimal(value: Any) -> Decimal:
         """
         Robustly parse a value into a Decimal.
         Handles:
@@ -63,7 +64,7 @@ class MotorPrivateRatingStrategy(RatingStrategy):
     ) -> MotorFinancialBreakdown:
         # Singular Source of Truth: The system enforces 'sum_insured' during validation
         value_raw = risk_details.get("sum_insured", 0)
-        value = self.parse_decimal(value_raw)
+        value = RatingStrategy.parse_decimal(value_raw)
 
         # 2. Basic Premium (Tiered)
         # Use tiers from product if available, else use defaults
@@ -98,7 +99,9 @@ class MotorPrivateRatingStrategy(RatingStrategy):
         benefits = []
 
         net_premium = basic_premium
-        is_high_end = value >= Decimal("3000000")
+        # High-end benefits start at the boundary of the 3rd tier (defaults to 3M)
+        high_end_threshold = tiers[2]["max"] if len(tiers) > 2 else Decimal("Infinity")
+        is_high_end = value >= high_end_threshold
 
         # Benefits logic: High-end includes PVT and Excess Protector by default at 0 cost
         include_pvt = extensions.get("pvt")
@@ -178,7 +181,7 @@ class ManualRatingStrategy(RatingStrategy):
     ) -> BaseFinancialBreakdown:
         # In manual mode, 'sum_insured' is treated as the net premium amount
         premium_raw = risk_details.get("sum_insured", 0)
-        net_premium = self.parse_decimal(premium_raw)
+        net_premium = RatingStrategy.parse_decimal(premium_raw)
 
         # Apply standard levies
         motor_strategy = MotorPrivateRatingStrategy()
@@ -245,15 +248,14 @@ class RatingService:
             financials = risk_details.get("financials", {})
             si_raw = financials.get("sum_insured", 0)
         
-        motor_strategy = MotorPrivateRatingStrategy()
-        sum_insured = motor_strategy.parse_decimal(si_raw)
+        sum_insured = RatingStrategy.parse_decimal(si_raw)
         
         rate_val = product.pricing_rules.get("rate", 0)
         rate = Decimal(str(rate_val)) / Decimal("100")
         
         net_premium = (sum_insured * rate).quantize(Decimal("0.01"))
         
-        levies = motor_strategy._calculate_standard_levies(net_premium)
+        levies = cls.calculate_levies(net_premium)
         total_levies = sum(levies.values())
 
         commission_rate = Decimal(str(product.default_commission_rate / 100))

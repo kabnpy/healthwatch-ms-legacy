@@ -72,12 +72,12 @@ export function injectWizardData(
 
     for (let i = 0; i < parts.length; i++) {
       const part = parts[i]
-      if (current[part] !== undefined) {
+      if (current && typeof current === "object" && current[part] !== undefined) {
         current = current[part]
       } else {
         // Fallback: maybe the dot is part of the key
         // Try combining current part with the next one
-        if (i < parts.length - 1) {
+        if (current && typeof current === "object" && i < parts.length - 1) {
           const combined = `${part}.${parts[i + 1]}`
           if (current[combined] !== undefined) {
             current = current[combined]
@@ -125,8 +125,12 @@ export function injectWizardData(
         result[key] = "[ EMPTY ]"
       }
     } else if (typeof value === "object" && value !== null) {
-      // Recurse
-      result[key] = injectWizardData(value, inputs, currentPath, actualRoot)
+      // Recurse, passing the same root inputs but extending the path
+      // Also pass the sub-object if it exists for traditional nesting
+      const nextInputs =
+        inputs?.[key] && typeof inputs[key] === "object" ? inputs[key] : inputs
+
+      result[key] = injectWizardData(value, nextInputs, currentPath, actualRoot)
     } else {
       result[key] = value
     }

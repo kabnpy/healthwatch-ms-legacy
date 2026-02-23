@@ -37,7 +37,8 @@ def upgrade():
         WHERE risk_details IS NULL;
     """)
     
-    # 3. Alter inception_date to be NOT NULL
+    # 3. Populate null inception dates and alter to NOT NULL
+    op.execute("UPDATE policy SET inception_date = created_at::date WHERE inception_date IS NULL")
     op.alter_column('policy', 'inception_date',
                existing_type=sa.DATE(),
                nullable=False)

@@ -402,7 +402,7 @@ export function StepFinancials({
                         </span>
                         {isMotorPrivate && (
                           <span className="text-[10px] text-slate-500 font-mono">
-                            Applied Rate: {financials.basicRate || financials.rate}%
+                            Applied Rate: {(financials as any).basicRate || financials.rate}%
                           </span>
                         )}
                       </div>

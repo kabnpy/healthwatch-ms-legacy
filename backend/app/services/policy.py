@@ -1,6 +1,7 @@
 import logging
 import uuid
 from datetime import date
+from decimal import Decimal
 from typing import Any
 
 from fastapi import HTTPException
@@ -151,17 +152,22 @@ class PolicyService:
         # 3. Calculate diff for change_log
         current_risk = policy.risk_details
         diff = {}
-        for k, v in rating_details.items():
-            if current_risk.get(k) != v:
-                diff[k] = {"from": current_risk.get(k), "to": v}
+        # For now, shallow diff is sufficient for current schemas. 
+        # Consider a recursive diff utility if nesting increases.
+        all_keys = set(current_risk.keys()) | set(rating_details.keys())
+        for k in all_keys:
+            old_val = current_risk.get(k)
+            new_val = rating_details.get(k)
+            if old_val != new_val:
+                diff[k] = {"from": old_val, "to": new_val}
 
         # 4. Structure the breakdown with both new state and delta
         financial_breakdown = {
             "new_state": full_breakdown.model_dump(mode="json"),
             "delta": {
-                "net_premium": float(delta_net_premium),
-                "total_amount": float(delta_total_amount),
-                "commission_amount": float(delta_commission),
+                "net_premium": str(delta_net_premium.quantize(Decimal("0.01"))),
+                "total_amount": str(delta_total_amount.quantize(Decimal("0.01"))),
+                "commission_amount": str(delta_commission.quantize(Decimal("0.01"))),
             }
         }
 

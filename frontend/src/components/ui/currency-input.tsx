@@ -27,9 +27,13 @@ export const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputPro
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const raw = e.target.value.replace(/,/g, "")
       if (raw === "" || !isNaN(Number(raw))) {
-        const num = raw === "" ? 0 : Number(raw)
-        setDisplayValue(e.target.value.replace(/[^\d]/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ","))
-        onValueChange(num)
+        const digitsAndDot = e.target.value.replace(/[^\d.]/g, "");
+        const [integers, decimals] = digitsAndDot.split(".");
+        const formattedInts = integers.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        const limitedDecimals = decimals !== undefined ? decimals.slice(0, 2) : undefined;
+        setDisplayValue(limitedDecimals !== undefined ? `${formattedInts}.${limitedDecimals}` : formattedInts);
+        const correctedNum = parseFloat(Number(digitsAndDot).toFixed(2)) || 0;
+        onValueChange(correctedNum)
       }
     }
 
