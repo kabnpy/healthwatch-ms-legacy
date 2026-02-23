@@ -3,14 +3,14 @@
 ## Phase 1: Core Model Refactor [checkpoint: [pending]]
 Refactor the primary models to centralize risk data and eliminate redundancy.
 
-- [ ] **Task: Update `Policy` Model for Authoritative State**
-    - [ ] Update `backend/app/models.py`: Add `risk_details: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))` to the `Policy` model.
-    - [ ] Remove computed properties on `Policy` that perform relationship traversals (`current_risk_details`, `total_premium`, `start_date`, `end_date`, `display_name`).
-- [ ] **Task: Refactor `RiskNote` and Remove Redundant Fields**
-    - [ ] Update `backend/app/models.py`: Remove `policy_snapshot` and `payment_status` from `RiskNote`.
-    - [ ] Ensure `RiskNote` has `change_log: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))` for recording diffs.
-- [ ] **Task: Standardize Project Enums**
-    - [ ] Align `PolicyStatus`, `TransactionType`, and other enums with the streamlined definitions in `planning/models.py`.
+- [x] **Task: Update `Policy` Model for Authoritative State** [e49be45]
+    - [x] Update `backend/app/models.py`: Add `risk_details: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))` to the `Policy` model.
+    - [x] Remove computed properties on `Policy` that perform relationship traversals (`current_risk_details`, `total_premium`, `start_date`, `end_date`, `display_name`).
+- [x] **Task: Refactor `RiskNote` and Remove Redundant Fields** [e49be45]
+    - [x] Update `backend/app/models.py`: Remove `policy_snapshot` and `payment_status` from `RiskNote`.
+    - [x] Ensure `RiskNote` has `change_log: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))` for recording diffs.
+- [x] **Task: Standardize Project Enums** [e49be45]
+    - [x] Align `PolicyStatus`, `TransactionType`, and other enums with the streamlined definitions in `planning/models.py`.
 - [ ] **Task: Conductor - User Manual Verification 'Core Model Refactor' (Protocol in workflow.md)**
 
 ## Phase 2: Data Migration & Integration [checkpoint: [pending]]
