@@ -258,13 +258,13 @@ class Product(ProductBase, table=True):
             from app.schemas import MotorPrivateRiskDetails
 
             # Identify if the input is nested or flat
-            risk_data = risk_details
+            risk_data = risk_details.copy()
             if "VEHICLE DETAILS" in risk_details:
-                risk_data = risk_details["VEHICLE DETAILS"]
+                nested = risk_details["VEHICLE DETAILS"]
+                if isinstance(nested, dict):
+                    # Merge nested into a flat dict, but allow top-level overrides
+                    risk_data = {**nested, **risk_details}
             
-            # Create a copy to avoid mutating the original input if needed
-            risk_data = risk_data.copy()
-
             # Map legacy/varied keys manually before validation
             key_mapping = {
                 "Value Kshs.": "sum_insured",

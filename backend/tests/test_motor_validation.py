@@ -1,3 +1,4 @@
+import uuid
 from datetime import date, timedelta
 
 from fastapi.testclient import TestClient
@@ -83,3 +84,27 @@ def test_motor_private_validation_passes_with_correct_fields(
     )
 
     assert response.status_code == 200
+
+def test_motor_private_validation_merges_nested_and_top_level(db: Session) -> None:
+    # 1. Create product
+    product = Product(
+        name="Motor Private",
+        class_of_insurance="Motor Private",
+        insurer_id=uuid.uuid4() # Mock ID
+    )
+    
+    # 2. Test Input with nested data containing 0 and top-level override
+    risk_details = {
+        "VEHICLE DETAILS": {
+            "Reg. No": "KCM 123",
+            "Make": "Toyota",
+            "Year": 2020,
+            "Value Kshs.": 0 # This is what the blueprint might send if empty
+        },
+        "sum_insured": 5000000.0 # This is what the wizard adds explicitly
+    }
+    
+    validated = product.validate_risk_details(risk_details)
+    
+    assert validated["registration_number"] == "KCM 123"
+    assert float(validated["sum_insured"]) == 5000000.0
