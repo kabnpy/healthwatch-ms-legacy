@@ -1,6 +1,6 @@
 # Implementation Plan: Backend Model Streamlining & Debt Reduction
 
-## Phase 1: Core Model Refactor [checkpoint: [pending]]
+## Phase 1: Core Model Refactor [checkpoint: 5940fb6]
 Refactor the primary models to centralize risk data and eliminate redundancy.
 
 - [x] **Task: Update `Policy` Model for Authoritative State** [e49be45]
