@@ -115,7 +115,11 @@ class PolicyService:
                 status_code=400, detail="Policy has no product assigned"
             )
 
-        current_rn = policy.current_risk_note
+        # Get current active risk note
+        current_rn = next(
+            (rn for rn in policy.risk_notes if rn.status == RiskNoteStatus.ISSUED),
+            None
+        )
         if not current_rn:
             raise HTTPException(
                 status_code=400, detail="Cannot endorse policy without active risk note"

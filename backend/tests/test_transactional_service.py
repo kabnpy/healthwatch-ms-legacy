@@ -41,13 +41,15 @@ def test_atomic_policy_creation(db: Session) -> None:
     assert len(policy.risk_notes) == 1
     rn = policy.risk_notes[0]
     assert rn.transaction_type == TransactionType.NEW_BUSINESS
-    # Verify snapshot uses singular keys
-    assert rn.policy_snapshot["risk_details"]["sum_insured"] == 5000000.0
-    assert rn.policy_snapshot["risk_details"]["registration_number"] == "KCM 123"
+    
+    # Verify authoritative state on Policy
+    assert policy.risk_details["sum_insured"] == 5000000.0
+    assert policy.risk_details["registration_number"] == "KCM 123"
+    
+    # Verify RiskNote financials
     assert rn.financial_breakdown["type"] == "motor"
     assert rn.coverage_start == start_date
     assert rn.coverage_end == end_date
-    assert policy.current_risk_details["sum_insured"] == 5000000.0
 
 def test_endorsement_creation(db: Session) -> None:
     # 1. Setup a policy with one RiskNote
@@ -83,14 +85,13 @@ def test_endorsement_creation(db: Session) -> None:
     db.refresh(policy)
     assert len(policy.risk_notes) == 2
 
-    # Sort locally to verify logic
-    sorted_notes = sorted(policy.risk_notes, key=lambda x: (x.effective_date, x.created_at), reverse=True)
-    assert sorted_notes[0].id == endorsement_rn.id
-
-    assert policy.current_risk_note.id == endorsement_rn.id
-    assert policy.current_risk_details["sum_insured"] == 6000000.0
+    # Verify updated state on Policy
+    assert policy.risk_details["sum_insured"] == 6000000.0
+    
     assert endorsement_rn.transaction_type == TransactionType.ENDORSEMENT
-    assert endorsement_rn.policy_snapshot["changes"]["description"] == "Increased vehicle value"
+    # Verify change_log on RiskNote
+    assert endorsement_rn.change_log["sum_insured"]["from"] == 5000000.0
+    assert endorsement_rn.change_log["sum_insured"]["to"] == 6000000.0
 
     # Delta logic verification
     assert "new_state" in endorsement_rn.financial_breakdown
@@ -98,6 +99,6 @@ def test_endorsement_creation(db: Session) -> None:
     
     # Verify summary fields match deltas
     delta = endorsement_rn.financial_breakdown["delta"]
-    assert endorsement_rn.net_premium == delta["net_premium"]
-    assert endorsement_rn.total_amount == delta["total_amount"]
-    assert endorsement_rn.commission_amount == delta["commission_amount"]
+    assert float(endorsement_rn.net_premium) == float(delta["net_premium"])
+    assert float(endorsement_rn.total_amount) == float(delta["total_amount"])
+    assert float(endorsement_rn.commission_amount) == float(delta["commission_amount"])

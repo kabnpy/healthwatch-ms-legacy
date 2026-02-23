@@ -262,14 +262,26 @@ class Product(ProductBase, table=True):
             if "VEHICLE DETAILS" in risk_details:
                 risk_data = risk_details["VEHICLE DETAILS"]
             
-            # Map legacy keys manually before validation if necessary, 
-            # or expect the frontend to send 'sum_insured'
-            if "Value Kshs." in risk_data and "sum_insured" not in risk_data:
-                risk_data["sum_insured"] = risk_data["Value Kshs."]
-            if "Reg. No" in risk_data and "registration_number" not in risk_data:
-                risk_data["registration_number"] = risk_data["Reg. No"]
-            if "Year" in risk_data and "year_of_manufacture" not in risk_data:
-                risk_data["year_of_manufacture"] = risk_data["Year"]
+            # Create a copy to avoid mutating the original input if needed
+            risk_data = risk_data.copy()
+
+            # Map legacy/varied keys manually before validation
+            key_mapping = {
+                "Value Kshs.": "sum_insured",
+                "Value": "sum_insured",
+                "Sum Insured": "sum_insured",
+                "Reg. No": "registration_number",
+                "Reg No": "registration_number",
+                "Registration": "registration_number",
+                "Year": "year_of_manufacture",
+                "Make": "make",
+                "Model": "model",
+                "Body Type": "body_type",
+            }
+
+            for legacy_key, target_key in key_mapping.items():
+                if legacy_key in risk_data and target_key not in risk_data:
+                    risk_data[target_key] = risk_data[legacy_key]
 
             validated = MotorPrivateRiskDetails(**risk_data)
             

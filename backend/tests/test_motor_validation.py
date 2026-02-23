@@ -33,7 +33,7 @@ def test_motor_private_validation_fails_with_missing_fields(
         "client_id": str(db_client.id),
         "product_id": str(product.id),
         "coverage_end": str(date.today() + timedelta(days=365)),
-        "risk_details": {"something": "irrelevant"} # Missing Reg No, Make, etc.
+        "risk_details": {"something": "irrelevant"} # Missing registration_number, make, etc.
     }
 
     response = client.post(
@@ -69,10 +69,10 @@ def test_motor_private_validation_passes_with_correct_fields(
         "product_id": str(product.id),
         "coverage_end": str(date.today() + timedelta(days=365)),
         "risk_details": {
-            "Reg. No": "KCM 123X",
-            "Make": "Toyota",
-            "Year": 2020,
-            "Value Kshs.": 5000000.0
+            "registration_number": "KCM 123X",
+            "make": "Toyota",
+            "year_of_manufacture": 2020,
+            "sum_insured": 5000000.0
         }
     }
 

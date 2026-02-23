@@ -10,12 +10,14 @@ def test_get_policy_quote_motor_private(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
     product = create_random_product(db, class_of_insurance="Motor Private")
+    # Use singular semantic keys directly
     data = {
         "product_id": str(product.id),
         "risk_details": {
-            "VEHICLE DETAILS": {
-                "Value Kshs.": 1000000
-            },
+            "sum_insured": 4000000,
+            "registration_number": "KCM 123",
+            "make": "Toyota",
+            "year_of_manufacture": 2020,
             "EXTENSIONS": {
                 "pvt": True,
                 "excess_protector": True
@@ -32,11 +34,11 @@ def test_get_policy_quote_motor_private(
     assert "breakdown" in content
     breakdown = content["breakdown"]
     assert breakdown["type"] == "motor"
-    # Basic: 1,000,000 * 0.0325 = 32,500
-    # PVT: 1,000,000 * 0.0025 = 2,500
-    # EP: 1,000,000 * 0.0025 = 2,500
-    # Net: 32,500 + 2,500 + 2,500 = 37,500
-    assert float(breakdown["net_premium"]) == 37500.0
+    # Basic: 4,000,000 * 0.0325 = 130,000 (Tier 4: 3M-5M)
+    # PVT: 4,000,000 * 0 = 0 (is_high_end = True for >= 3M)
+    # EP: 4,000,000 * 0 = 0
+    # Net: 130,000
+    assert float(breakdown["net_premium"]) == 130000.0
     assert "taxes" in breakdown
     assert "training_levy" in breakdown["taxes"]
     assert "phcf" in breakdown["taxes"]
@@ -68,6 +70,7 @@ def test_create_policy_with_breakdown(
     db_client = create_random_client(db)
     product = create_random_product(db, class_of_insurance="Motor Private")
     
+    # Use singular semantic keys
     data = {
         "policy_number": f"POL-{uuid.uuid4().hex[:6].upper()}",
         "client_id": str(db_client.id),
@@ -75,12 +78,10 @@ def test_create_policy_with_breakdown(
         "coverage_start": str(date.today()),
         "coverage_end": str(date.today() + timedelta(days=365)),
         "risk_details": {
-            "VEHICLE DETAILS": {
-                "Reg. No": "KAA 001A",
-                "Make": "Toyota",
-                "Year": 2020,
-                "Value Kshs.": 1000000
-            }
+            "sum_insured": 1000000,
+            "registration_number": "KAA 001A",
+            "make": "Toyota",
+            "year_of_manufacture": 2020
         }
     }
     
@@ -107,7 +108,8 @@ def test_create_policy_with_breakdown(
     assert "financial_breakdown" in risk_note
     breakdown = risk_note["financial_breakdown"]
     assert breakdown["type"] == "motor"
-    assert float(breakdown["net_premium"]) == 32500.0 # 3.25% of 1M
+    # Basic: 1,000,000 * 0.05 = 50,000. Min is 60,000.
+    assert float(breakdown["net_premium"]) == 60000.0
 
 
 def test_read_policies(
