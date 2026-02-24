@@ -14,5 +14,10 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Fix Risk Note & Invoice Template Data**
+- [~] **Track: Fix Risk Note & Invoice Template Data**
 *Link: [./tracks/fix_template_data_20260223/](./tracks/fix_template_data_20260223/)*
+
+---
+
+- [ ] **Track: Cleanup Convoluted Legacy Logic**
+*Link: [./tracks/cleanup_legacy_logic_20260224/](./tracks/cleanup_legacy_logic_20260224/)*
