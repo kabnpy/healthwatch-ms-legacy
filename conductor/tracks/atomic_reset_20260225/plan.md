@@ -33,3 +33,11 @@ Focus: Align the UI wizard and history view with the new atomic model.
 - [x] Task: Refactor the New Policy Wizard to support text-based Terms and the new snapshot structure. 8ef2eb2
 - [x] Task: Implement the "Version History" view on the Policy detail page. 142c5d0
 - [x] Task: Conductor - User Manual Verification 'Phase 4' (Protocol in workflow.md) [checkpoint: 142c5d0]
+
+## Phase 5: Architectural Hardening & Bug Fixes
+Focus: Resolve critical API errors, improve document numbering, and clean up technical debt.
+
+- [x] Task: Fix `PolicyCreateExtended` schema mismatch and `AttributeError` in routes. 089f258
+- [x] Task: Harden document ID generation (Invoices/Risk Notes) to prevent collisions. 089f258
+- [x] Task: Move decimal parsing to a shared utility to remove delegation duplication. 089f258
+- [x] Task: Update `.gitignore` to exclude `backend.log`. 089f258
