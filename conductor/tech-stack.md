@@ -9,6 +9,10 @@
 - **Authentication:** JWT (PyJWT) with Passlib (bcrypt) and **Simplified RBAC**
 - **Testing:** Pytest (TDD driven with focus on precision and state filtering)
 - **Financial Precision:** Python `Decimal` with fixed-point arithmetic for all premium math.
+- **Data Patterns:**
+    - **Atomic Snapshots:** Every policy transaction (New Business, Endorsement, Renewal) is stored as a 100% complete snapshot of the cover in the `RiskNote` table.
+    - **Dynamic Snapshot Storage:** Flexible JSON schemas are used for product-specific cover data within snapshots, ensuring the system can support multiple insurance classes without migrations.
+    - **Clean Container Pattern:** The `Policy` table is a stable identity container, free of temporal state, which instead resides in the versioned `RiskNote` snapshots.
 
 ## Frontend
 - **Language:** TypeScript
