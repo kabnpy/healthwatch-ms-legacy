@@ -5,8 +5,8 @@ This plan implements the "Atomic Snapshot" architecture, simplifying the Policy/
 ## Phase 1: Database & Model Refactoring
 Focus: Strip Policy metadata and enhance RiskNote for full snapshots.
 
-- [ ] Task: Write tests for new `Policy`, `RiskNote`, and `Product` model structures.
-- [ ] Task: Update `backend/app/models.py` to remove `risk_details` from `Policy` and enhance `RiskNote`.
+- [x] Task: Write tests for new `Policy`, `RiskNote`, and `Product` model structures.
+- [x] Task: Update `backend/app/models.py` to remove `risk_details` from `Policy` and enhance `RiskNote`. 808bd81
 - [ ] Task: Create and apply a "Clean Slate" Alembic migration for the new schema.
 - [ ] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)
 
