@@ -9,7 +9,7 @@ from app.models import (
     Client,
     Insurer,
     Policy,
-    PolicyCreateExtended,
+    PolicyCreate,
     Product,
 )
 from app.services.policy import policy_service
@@ -84,7 +84,15 @@ def create_mock_data() -> None:
                 "Own Damage and Partial": "2.5% of value minimum Kshs. 15,000/- Max Kshs. 100,000.00",
                 "Third Party damage claims": "Kshs. 5,000.00",
                 "Third Party Injury": "Nil",
+                "Total Theft losses with antitheft device": "10% of vehicle value minimum Kshs. 20,000/-",
+                "Total Theft losses without antitheft device": "20% of vehicle value minimum Kshs. 20,000/-",
+                "Total Theft losses for vehicles with tracking device": "2.5% of vehicle value minimum Kshs. 20,000/-",
+                "Young and novice drivers": "Additional Kshs. 7,500.00 Each (under 21 years / Less than 1 year)",
             },
+            "special_clauses": [
+                "Including special perils",
+                "Including Kenya jurisdiction",
+            ],
         }
         motor_pricing_rules = {
             "tiers": [
@@ -129,41 +137,31 @@ def create_mock_data() -> None:
         if not policy:
             start_date = date(2025, 8, 2)
             end_date = date(2026, 8, 1)
-            risk_details = {
-                "vehicle_details": {
+            cover_snapshot = {
+                "vehicle": {
                     "registration_number": "KCM 780L",
                     "make": "Toyota",
                     "year_of_manufacture": 2016,
                     "sum_insured": 4700000.0,
                 },
-                "benefits_and_limits": {},
-                "excesses": {
-                    "Own Damage and Partial": "2.5% of value minimum Kshs. 15,000/- Max Kshs. 100,000.00",
-                    "Third Party damage claims": "Kshs. 5,000.00",
-                    "Third Party Injury": "Nil",
-                },
-                "added_benefits": {
-                    "pvt": True,
-                    "excess_protector": True
-                },
-                "special_clauses": []
+                "extensions": {"pvt": True, "excess_protector": True},
+                "benefits_and_limits": "Standard Comprehensive Benefits...",
+                "excesses": "Standard Motor Private Excesses...",
+                "special_clauses": "Subject to annual valuation...",
             }
 
-            policy_in = PolicyCreateExtended(
+            policy_in = PolicyCreate(
                 policy_number="010/070/1/012473/2017",
                 client_id=client.id,
                 product_id=motor_product.id,
                 status="Active",
                 inception_date=start_date,
-                coverage_start=start_date,
-                coverage_end=end_date,
-                risk_details=risk_details,
             )
 
             policy = policy_service.create_policy(
                 session=session,
                 policy_in=policy_in,
-                risk_details=risk_details,
+                cover_snapshot=cover_snapshot,
                 coverage_start=start_date,
                 coverage_end=end_date,
             )
@@ -173,30 +171,13 @@ def create_mock_data() -> None:
             )
 
             # 4. ADD AN ENDORSEMENT
-            new_risk_details = {
-                "vehicle_details": {
-                    "registration_number": "KCM 780L",
-                    "make": "Toyota",
-                    "year_of_manufacture": 2016,
-                    "sum_insured": 5000000.0,
-                },
-                "benefits_and_limits": {},
-                "excesses": {
-                    "Own Damage and Partial": "2.5% of value minimum Kshs. 15,000/- Max Kshs. 100,000.00",
-                    "Third Party damage claims": "Kshs. 5,000.00",
-                    "Third Party Injury": "Nil",
-                },
-                "added_benefits": {
-                    "pvt": True,
-                    "excess_protector": True
-                },
-                "special_clauses": []
-            }
+            new_cover_snapshot = cover_snapshot.copy()
+            new_cover_snapshot["vehicle"]["sum_insured"] = 5000000.0
 
             endorsement_rn = policy_service.create_endorsement(
                 session=session,
                 policy_id=policy.id,
-                updated_risk_details=new_risk_details,
+                updated_cover_snapshot=new_cover_snapshot,
                 change_description="Increased vehicle value to 5M",
             )
             logger.info(
