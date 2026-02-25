@@ -14,8 +14,9 @@ import { StepAsset } from "./StepAsset"
 import { StepBlueprint } from "./StepBlueprint"
 import { StepFinancials } from "./StepFinancials"
 import { StepReview } from "./StepReview"
+import { StepTerms } from "./StepTerms"
 
-const steps = ["Product", "Details", "Financials", "Review"]
+const steps = ["Product", "Details", "Terms", "Financials", "Review"]
 
 interface NewPolicyWizardProps {
   clientId: string
@@ -40,6 +41,11 @@ export function NewPolicyWizard({
     product_id: "",
     sum_insured: 0,
     details: {},
+    terms: {
+      benefits_and_limits: "",
+      excesses: "",
+      special_clauses: "",
+    },
     financials: {
       rate: 4.5,
       startDate: new Date().toISOString().split("T")[0],
@@ -87,8 +93,20 @@ export function NewPolicyWizard({
       setState((prev) => ({
         ...prev,
         details: data,
-        sum_insured:
-          extractedValue !== 0 ? extractedValue : prev.sum_insured,
+        sum_insured: extractedValue !== 0 ? extractedValue : prev.sum_insured,
+        // Pre-populate terms from Product templates if not already set
+        terms: {
+          benefits_and_limits:
+            prev.terms.benefits_and_limits ||
+            selectedProduct?.default_benefits_and_limits ||
+            "",
+          excesses:
+            prev.terms.excesses || selectedProduct?.default_excesses || "",
+          special_clauses:
+            prev.terms.special_clauses ||
+            selectedProduct?.default_special_clauses ||
+            "",
+        },
       }))
     } else {
       setState((prev) => ({ ...prev, ...data }))
@@ -130,10 +148,10 @@ export function NewPolicyWizard({
           om_rescue_plus: !!state.extensions?.omRescuePlus,
           passenger_liability: !!state.extensions?.passengerLiability,
         },
-        // Populate terms from Product templates (UI could later allow editing these)
-        benefits_and_limits: selectedProduct.default_benefits_and_limits || "",
-        excesses: selectedProduct.default_excesses || "",
-        special_clauses: selectedProduct.default_special_clauses || "",
+        // Use the customized terms from the wizard state
+        benefits_and_limits: state.terms.benefits_and_limits,
+        excesses: state.terms.excesses,
+        special_clauses: state.terms.special_clauses,
       }
 
       // Create Policy atomically
@@ -208,6 +226,13 @@ export function NewPolicyWizard({
             />
           )}
           {step === 2 && (
+            <StepTerms
+              defaultValues={state.terms}
+              onNext={handleNext}
+              onBack={handleBack}
+            />
+          )}
+          {step === 3 && (
             <StepFinancials
               productId={state.product_id || ""}
               sum_insured={state.sum_insured}
@@ -219,7 +244,7 @@ export function NewPolicyWizard({
               onBack={handleBack}
             />
           )}
-          {step === 3 && (
+          {step === 4 && (
             <StepReview
               state={state}
               onIssue={handleIssuePolicy}
