@@ -227,6 +227,10 @@ class ProductBase(AuditMixin, SQLModel):
     pricing_strategy: PricingStrategy = Field(default=PricingStrategy.PERCENTAGE)
     pricing_rules: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
     default_commission_rate: float = 10.0
+    # Text templates for document terms
+    default_benefits_and_limits: str | None = None
+    default_excesses: str | None = None
+    default_special_clauses: str | None = None
 
 
 class ProductCreate(ProductBase):
@@ -376,9 +380,6 @@ class PolicyBase(AuditMixin, SQLModel):
     status: PolicyStatus = Field(default=PolicyStatus.ACTIVE)
     # inception_date = when this policy was first taken out. Never changes.
     inception_date: date = Field(default_factory=date.today)
-    # risk_details = authoritative record of what is insured.
-    # Endorsements update this in-place; the RiskNote records the diff.
-    risk_details: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
 
 
 class PolicyCreate(PolicyBase):
@@ -422,37 +423,6 @@ class PolicyPublic(PolicyBase):
     id: uuid.UUID
     product: ProductPublic | None = None
 
-    @property
-    def display_name(self) -> str:
-        if not self.product:
-            return self.policy_number
-
-        base_name = self.product.class_of_insurance or self.product.name
-        
-        # Generic logic: Look for common identification keys in the risk details
-        def find_id_value(obj: Any) -> str | None:
-            if not isinstance(obj, dict):
-                return None
-            
-            # Priority keys for display names
-            priority_keys = ["registration_number", "reg_no", "serial_number", "id_number", "name"]
-            for k in priority_keys:
-                if k in obj and isinstance(obj[k], str) and obj[k]:
-                    return obj[k]
-            
-            # Recurse into sub-objects (e.g., vehicle_details)
-            for v in obj.values():
-                res = find_id_value(v)
-                if res:
-                    return res
-            return None
-
-        id_val = find_id_value(self.risk_details)
-        if id_val:
-            return f"{base_name} - {id_val}"
-            
-        return base_name
-
 
 class PoliciesPublic(SQLModel):
     data: list[PolicyPublic]
@@ -477,14 +447,12 @@ class RiskNoteBase(AuditMixin, SQLModel):
     net_premium: Decimal = Field(sa_column=Column(Numeric(precision=15, scale=2)))
     commission_amount: Decimal = Field(sa_column=Column(Numeric(precision=15, scale=2)))
     total_amount: Decimal = Field(sa_column=Column(Numeric(precision=15, scale=2)))
+    cover_snapshot: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
 
 
 class RiskNoteCreate(RiskNoteBase):
     financial_breakdown: dict[str, Any] = Field(default_factory=dict)
     special_clauses: list[str] = Field(default_factory=list)
-    # Only populated for Endorsement notes. Records field-level diff.
-    # Schema: {"risk_details.vehicle.value": {"from": 1_000_000, "to": 1_200_000}}
-    change_log: dict[str, Any] = Field(default_factory=dict)
 
 
 class RiskNoteUpdate(SQLModel):
@@ -501,7 +469,7 @@ class RiskNoteUpdate(SQLModel):
     commission_amount: Decimal | None = None
     total_amount: Decimal | None = None
     special_clauses: list[str] | None = None
-    change_log: dict[str, Any] | None = None
+    cover_snapshot: dict[str, Any] | None = None
 
 
 class RiskNotePublic(RiskNoteBase):
@@ -509,7 +477,6 @@ class RiskNotePublic(RiskNoteBase):
     policy: PolicyPublic | None = None
     financial_breakdown: dict[str, Any] = Field(default_factory=dict)
     special_clauses: list[str] = Field(default_factory=list)
-    change_log: dict[str, Any] = Field(default_factory=dict)
 
 
 class RiskNote(RiskNoteBase, table=True):
@@ -523,7 +490,6 @@ class RiskNote(RiskNoteBase, table=True):
         default_factory=dict, sa_column=Column(JSON)
     )
     special_clauses: list[str] = Field(default_factory=list, sa_column=Column(JSON))
-    change_log: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
 
 
 class RiskNotesPublic(SQLModel):
