@@ -111,13 +111,13 @@ function RiskNoteLoader({ id }: { id: string }) {
   }) as { data: ClientPublic }
 
   const mutation = useMutation({
-    mutationFn: (updatedRiskDetails: any) =>
-      PoliciesService.updatePolicy({
-        id: riskNote.policy_id,
-        requestBody: { risk_details: updatedRiskDetails },
+    mutationFn: (updatedSnapshot: any) =>
+      RiskNotesService.updateRiskNote({
+        id: riskNote.id,
+        requestBody: { cover_snapshot: updatedSnapshot },
       }),
     onSuccess: () => {
-      showSuccessToast("Policy risk details updated successfully")
+      showSuccessToast("Risk note snapshot updated successfully")
       qClient.invalidateQueries({ queryKey: ["risk-notes", id] })
       qClient.invalidateQueries({ queryKey: ["policies", riskNote.policy_id] })
     },

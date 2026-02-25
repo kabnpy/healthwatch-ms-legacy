@@ -118,20 +118,22 @@ export function NewPolicyWizard({
         state.details,
       )
 
-      // Add UI-driven extensions and sum_insured to the structured result
-      const riskDetails = {
-        ...structuredRiskDetails,
-        added_benefits: {
+      // Align with Atomic Snapshot Schema: Sensible Nesting
+      const coverSnapshot = {
+        vehicle: {
+          ...structuredRiskDetails["VEHICLE DETAILS"],
+          sum_insured: state.sum_insured,
+        },
+        extensions: {
           pvt: !!state.extensions?.pvt,
           excess_protector: !!state.extensions?.excessProtector,
           om_rescue_plus: !!state.extensions?.omRescuePlus,
           passenger_liability: !!state.extensions?.passengerLiability,
         },
-      }
-
-      // Ensure sum_insured is correctly placed in vehicle_details if it was mapped there
-      if (riskDetails.vehicle_details) {
-        riskDetails.vehicle_details.sum_insured = state.sum_insured
+        // Populate terms from Product templates (UI could later allow editing these)
+        benefits_and_limits: selectedProduct.default_benefits_and_limits || "",
+        excesses: selectedProduct.default_excesses || "",
+        special_clauses: selectedProduct.default_special_clauses || "",
       }
 
       // Create Policy atomically
@@ -141,7 +143,7 @@ export function NewPolicyWizard({
         product_id: state.product_id,
         status: "Active",
         inception_date: startDate,
-        risk_details: riskDetails,
+        risk_details: coverSnapshot as any, // Pointing to the new structured object
         coverage_start: startDate,
         coverage_end: endDate,
       } as any)

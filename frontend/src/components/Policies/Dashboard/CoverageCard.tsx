@@ -2,7 +2,7 @@ import { FileText, Shield } from "lucide-react"
 import type { RiskNotePublic } from "@/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { getPolicyDisplayName } from "@/utils"
+import { getPolicyDisplayName } from "@/utils/insurance"
 
 interface CoverageCardProps {
   riskNote?: RiskNotePublic
@@ -21,11 +21,13 @@ export function CoverageCard({ riskNote, onViewBreakdown }: CoverageCardProps) {
     )
   }
 
+  const displayName = riskNote.policy ? getPolicyDisplayName(riskNote.policy) : "Coverage"
+
   return (
     <Card className="h-full border-l-4 border-l-green-600 shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
-          {getPolicyDisplayName(riskNote)}
+          {displayName}
         </CardTitle>
         <Shield className="size-4 text-green-600" />
       </CardHeader>
@@ -39,7 +41,7 @@ export function CoverageCard({ riskNote, onViewBreakdown }: CoverageCardProps) {
               })}
             </div>
             <p className="text-xs text-muted-foreground uppercase tracking-tighter">
-              {riskNote.payment_status} • Total Amount
+              {riskNote.status} • Total Amount
             </p>
           </div>
 

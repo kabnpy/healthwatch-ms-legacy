@@ -36,8 +36,10 @@ export function StepReview({
     return {
       product_id: state.product_id,
       risk_details: {
-        sum_insured: state.sum_insured,
-        EXTENSIONS: {
+        vehicle: {
+          sum_insured: state.sum_insured,
+        },
+        extensions: {
           pvt: !!state.extensions?.pvt,
           excess_protector: !!state.extensions?.excessProtector,
           om_rescue_plus: !!state.extensions?.omRescuePlus,
@@ -55,7 +57,7 @@ export function StepReview({
   const { data: quoteData } = useQuoteQuery(quoteRequest as any)
 
   const breakdown =
-    isMotorPrivate && quoteData
+    isMotorPrivate && quoteData?.breakdown
       ? (quoteData.breakdown as MotorFinancialBreakdown)
       : null
 
@@ -152,7 +154,7 @@ export function StepReview({
                     })}
                   </span>
                 </div>
-                {breakdown.benefits.map((benefit) => (
+                {breakdown.benefits?.map((benefit) => (
                   <div
                     key={benefit.name}
                     className="flex justify-between text-xs pl-4 italic"
@@ -167,7 +169,7 @@ export function StepReview({
                     </span>
                   </div>
                 ))}
-                {Object.entries(breakdown.taxes).map(([name, amount]) => (
+                {breakdown.taxes && Object.entries(breakdown.taxes).map(([name, amount]) => (
                   <div key={name} className="flex justify-between text-xs">
                     <span className="text-muted-foreground">
                       {name.replace(/_/g, " ").toUpperCase()}:

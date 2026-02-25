@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/command"
 import { useInvoices, useReceipts } from "@/hooks/useFinancials"
 import { useClients, usePolicies } from "@/hooks/useInsurance"
+import { getPolicyDisplayName } from "@/utils/insurance"
 
 export function CommandMenu() {
   const [open, setOpen] = React.useState(false)
@@ -94,32 +95,35 @@ export function CommandMenu() {
           <CommandSeparator />
 
           <CommandGroup heading="Policies">
-            {policiesData?.data.map((policy) => (
-              <CommandItem
-                key={policy.id}
-                value={`${policy.policy_number} ${policy.display_name}`}
-                onSelect={() => {
-                  runCommand(() =>
-                    navigate({
-                      to: "/clients/$clientId/policies/$policyId",
-                      params: {
-                        clientId: policy.client_id,
-                        policyId: policy.id,
-                      },
-                    }),
-                  )
-                }}
-              >
-                <Shield className="mr-2 h-4 w-4" />
-                <div className="flex flex-col">
-                  <span>{policy.display_name}</span>
-                  <span className="text-[10px] text-muted-foreground">
-                    {policy.policy_number}
-                  </span>
-                </div>
-                <CommandShortcut>{policy.status}</CommandShortcut>
-              </CommandItem>
-            ))}
+            {policiesData?.data.map((policy) => {
+              const displayName = getPolicyDisplayName(policy)
+              return (
+                <CommandItem
+                  key={policy.id}
+                  value={`${policy.policy_number} ${displayName}`}
+                  onSelect={() => {
+                    runCommand(() =>
+                      navigate({
+                        to: "/clients/$clientId/policies/$policyId",
+                        params: {
+                          clientId: policy.client_id,
+                          policyId: policy.id,
+                        },
+                      }),
+                    )
+                  }}
+                >
+                  <Shield className="mr-2 h-4 w-4" />
+                  <div className="flex flex-col">
+                    <span>{displayName}</span>
+                    <span className="text-[10px] text-muted-foreground">
+                      {policy.policy_number}
+                    </span>
+                  </div>
+                  <CommandShortcut>{policy.status}</CommandShortcut>
+                </CommandItem>
+              )
+            })}
           </CommandGroup>
 
           <CommandSeparator />

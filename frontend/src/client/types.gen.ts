@@ -194,6 +194,7 @@ export type EndorsementCreate = {
         [key: string]: unknown;
     };
     change_description: string;
+    effective_date?: (string | null);
 };
 
 export type HTTPValidationError = {
@@ -325,9 +326,6 @@ export type PolicyCreateExtended = {
     product_id?: (string | null);
     status?: PolicyStatus;
     inception_date?: string;
-    risk_details?: {
-        [key: string]: unknown;
-    };
     coverage_start?: string;
     coverage_end: string;
 };
@@ -342,12 +340,9 @@ export type PolicyPublic = {
     product_id?: (string | null);
     status?: PolicyStatus;
     inception_date?: string;
-    risk_details?: {
-        [key: string]: unknown;
-    };
     id: string;
     product?: (ProductPublic | null);
-    readonly display_name: string;
+    active_note?: (RiskNotePublic | null);
 };
 
 export type PolicyStatus = 'Active' | 'Expired' | 'Cancelled' | 'Lapsed';
@@ -385,6 +380,9 @@ export type ProductCreate = {
         [key: string]: unknown;
     };
     default_commission_rate?: number;
+    default_benefits_and_limits?: (string | null);
+    default_excesses?: (string | null);
+    default_special_clauses?: (string | null);
 };
 
 export type ProductPublic = {
@@ -403,6 +401,9 @@ export type ProductPublic = {
         [key: string]: unknown;
     };
     default_commission_rate?: number;
+    default_benefits_and_limits?: (string | null);
+    default_excesses?: (string | null);
+    default_special_clauses?: (string | null);
     id: string;
     insurer?: (InsurerPublic | null);
 };
@@ -512,13 +513,13 @@ export type RiskNoteCreate = {
     net_premium: (number | string);
     commission_amount: (number | string);
     total_amount: (number | string);
+    cover_snapshot?: {
+        [key: string]: unknown;
+    };
     financial_breakdown?: {
         [key: string]: unknown;
     };
     special_clauses?: Array<(string)>;
-    change_log?: {
-        [key: string]: unknown;
-    };
 };
 
 export type RiskNotePublic = {
@@ -539,15 +540,15 @@ export type RiskNotePublic = {
     net_premium: string;
     commission_amount: string;
     total_amount: string;
+    cover_snapshot?: {
+        [key: string]: unknown;
+    };
     id: string;
     policy?: (PolicyPublic | null);
     financial_breakdown?: {
         [key: string]: unknown;
     };
     special_clauses?: Array<(string)>;
-    change_log?: {
-        [key: string]: unknown;
-    };
 };
 
 export type RiskNotesPublic = {
@@ -573,7 +574,7 @@ export type RiskNoteUpdate = {
     commission_amount?: (number | string | null);
     total_amount?: (number | string | null);
     special_clauses?: (Array<(string)> | null);
-    change_log?: ({
+    cover_snapshot?: ({
     [key: string]: unknown;
 } | null);
 };

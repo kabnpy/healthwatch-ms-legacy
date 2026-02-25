@@ -54,8 +54,7 @@ function RiskNotePrintContent({ id }: { id: string }) {
     getClientQueryOptions(policy.client_id),
   )
 
-  const policySnapshot = (riskNote.policy_snapshot as any) || {}
-  const riskDetails = policySnapshot.risk_details || {}
+  const riskDetails = riskNote.cover_snapshot || {}
 
   const isInvoice = mode === "invoice" || !mode
 
@@ -245,8 +244,8 @@ function RiskNotePrintContent({ id }: { id: string }) {
               </tr>
 
               {/* Taxes/Levies */}
-              {riskNote.taxes &&
-                Object.entries(riskNote.taxes).map(
+              <>{riskNote.financial_breakdown?.taxes &&
+                Object.entries(riskNote.financial_breakdown.taxes).map(
                   ([key, val]: [string, any], i: number) => (
                     <tr key={i}>
                       <td className="py-2 pl-2 text-gray-600 capitalize">
@@ -259,7 +258,7 @@ function RiskNotePrintContent({ id }: { id: string }) {
                       </td>
                     </tr>
                   ),
-                )}
+                )}</>
 
               {/* TOTAL */}
               <tr className="bg-gray-100 font-bold text-lg">

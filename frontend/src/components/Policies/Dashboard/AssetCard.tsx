@@ -1,6 +1,7 @@
 import { Car } from "lucide-react"
 import type { PolicyPublic } from "@/client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { getPolicyDisplayName } from "@/utils/insurance"
 
 interface AssetCardProps {
   policy?: PolicyPublic
@@ -18,16 +19,18 @@ export function AssetCard({ policy }: AssetCardProps) {
     )
   }
 
-  // Assuming details is a generic dict
-  const riskDetails = (policy.current_risk_details as Record<string, any>) || {}
+  // Use the active note's snapshot
+  const activeNote = (policy as any).active_note
+  const riskDetails = activeNote?.cover_snapshot || {}
 
   // Flatten details for display
   const flattenDetails = (obj: any): Record<string, any> => {
     let result: Record<string, any> = {}
+    if (!obj) return result
     for (const [key, value] of Object.entries(obj)) {
-      if (typeof value === "object" && value !== null) {
+      if (typeof value === "object" && value !== null && !Array.isArray(value)) {
         result = { ...result, ...flattenDetails(value) }
-      } else {
+      } else if (typeof value !== "object") {
         result[key] = value
       }
     }
@@ -35,7 +38,8 @@ export function AssetCard({ policy }: AssetCardProps) {
   }
 
   const details = flattenDetails(riskDetails)
-  const insuredValue = details["Value Kshs."] || details.sum_insured || 0
+  const insuredValue = details.sum_insured || details["Value Kshs."] || 0
+  const displayName = getPolicyDisplayName(policy)
 
   return (
     <Card className="h-full shadow-sm">
@@ -49,7 +53,7 @@ export function AssetCard({ policy }: AssetCardProps) {
         <div className="flex flex-col gap-4">
           <div>
             <div className="text-xl font-bold truncate">
-              {policy.display_name}
+              {displayName}
             </div>
             <p className="text-sm text-muted-foreground">
               {policy.product?.class_of_insurance || "Insurance"} cover

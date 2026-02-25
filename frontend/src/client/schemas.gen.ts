@@ -1062,6 +1062,18 @@ export const EndorsementCreateSchema = {
         change_description: {
             type: 'string',
             title: 'Change Description'
+        },
+        effective_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Effective Date'
         }
     },
     type: 'object',
@@ -1795,11 +1807,6 @@ export const PolicyCreateExtendedSchema = {
             format: 'date',
             title: 'Inception Date'
         },
-        risk_details: {
-            additionalProperties: true,
-            type: 'object',
-            title: 'Risk Details'
-        },
         coverage_start: {
             type: 'string',
             format: 'date',
@@ -1882,11 +1889,6 @@ export const PolicyPublicSchema = {
             format: 'date',
             title: 'Inception Date'
         },
-        risk_details: {
-            additionalProperties: true,
-            type: 'object',
-            title: 'Risk Details'
-        },
         id: {
             type: 'string',
             format: 'uuid',
@@ -1902,14 +1904,19 @@ export const PolicyPublicSchema = {
                 }
             ]
         },
-        display_name: {
-            type: 'string',
-            title: 'Display Name',
-            readOnly: true
+        active_note: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/RiskNotePublic'
+                },
+                {
+                    type: 'null'
+                }
+            ]
         }
     },
     type: 'object',
-    required: ['policy_number', 'client_id', 'id', 'display_name'],
+    required: ['policy_number', 'client_id', 'id'],
     title: 'PolicyPublic'
 } as const;
 
@@ -2081,6 +2088,39 @@ export const ProductCreateSchema = {
             type: 'number',
             title: 'Default Commission Rate',
             default: 10
+        },
+        default_benefits_and_limits: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Default Benefits And Limits'
+        },
+        default_excesses: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Default Excesses'
+        },
+        default_special_clauses: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Default Special Clauses'
         }
     },
     type: 'object',
@@ -2155,6 +2195,39 @@ export const ProductPublicSchema = {
             type: 'number',
             title: 'Default Commission Rate',
             default: 10
+        },
+        default_benefits_and_limits: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Default Benefits And Limits'
+        },
+        default_excesses: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Default Excesses'
+        },
+        default_special_clauses: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Default Special Clauses'
         },
         id: {
             type: 'string',
@@ -2797,6 +2870,11 @@ export const RiskNoteCreateSchema = {
             ],
             title: 'Total Amount'
         },
+        cover_snapshot: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Cover Snapshot'
+        },
         financial_breakdown: {
             additionalProperties: true,
             type: 'object',
@@ -2808,11 +2886,6 @@ export const RiskNoteCreateSchema = {
             },
             type: 'array',
             title: 'Special Clauses'
-        },
-        change_log: {
-            additionalProperties: true,
-            type: 'object',
-            title: 'Change Log'
         }
     },
     type: 'object',
@@ -2944,6 +3017,11 @@ export const RiskNotePublicSchema = {
             pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$',
             title: 'Total Amount'
         },
+        cover_snapshot: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Cover Snapshot'
+        },
         id: {
             type: 'string',
             format: 'uuid',
@@ -2970,11 +3048,6 @@ export const RiskNotePublicSchema = {
             },
             type: 'array',
             title: 'Special Clauses'
-        },
-        change_log: {
-            additionalProperties: true,
-            type: 'object',
-            title: 'Change Log'
         }
     },
     type: 'object',
@@ -3151,7 +3224,7 @@ export const RiskNoteUpdateSchema = {
             ],
             title: 'Special Clauses'
         },
-        change_log: {
+        cover_snapshot: {
             anyOf: [
                 {
                     additionalProperties: true,
@@ -3161,7 +3234,7 @@ export const RiskNoteUpdateSchema = {
                     type: 'null'
                 }
             ],
-            title: 'Change Log'
+            title: 'Cover Snapshot'
         }
     },
     type: 'object',

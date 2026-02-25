@@ -49,6 +49,8 @@ export interface RiskNoteSection {
 
 export interface WizardFinancials {
   rate: number
+  basicRate?: number
+  isHighEnd?: boolean
   startDate: string
   duration: number
 }

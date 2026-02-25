@@ -12,19 +12,22 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { getPolicyDisplayName } from "@/utils"
+import { getPolicyDisplayName } from "@/utils/insurance"
 
 export const getColumns = (
   onView: (riskNote: RiskNotePublic) => void,
 ): ColumnDef<RiskNotePublic>[] => [
   {
-    accessorKey: "display_name",
+    id: "display_name",
     header: "Policy / Cover",
-    cell: ({ row }) => (
-      <span className="font-medium text-foreground">
-        {getPolicyDisplayName(row.original)}
-      </span>
-    ),
+    cell: ({ row }) => {
+      const displayName = row.original.policy ? getPolicyDisplayName(row.original.policy) : "Cover"
+      return (
+        <span className="font-medium text-foreground">
+          {displayName}
+        </span>
+      )
+    },
   },
   {
     accessorKey: "risk_note_number",
@@ -44,7 +47,7 @@ export const getColumns = (
     header: "Type",
   },
   {
-    accessorKey: "start_date",
+    accessorKey: "coverage_start",
     header: "Start Date",
   },
   {
@@ -60,7 +63,7 @@ export const getColumns = (
             })}
           </span>
           <span className="text-[10px] uppercase text-muted-foreground">
-            {row.original.payment_status}
+            {row.original.status}
           </span>
         </div>
       )

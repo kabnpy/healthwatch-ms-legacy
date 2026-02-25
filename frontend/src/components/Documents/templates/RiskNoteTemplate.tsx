@@ -28,22 +28,22 @@ export const RiskNoteTemplate = ({
   onSave,
 }: RiskNoteTemplateProps) => {
   const [localRiskDetails, setLocalRiskDetails] = useState<Record<string, any>>(
-    policy.risk_details || {},
+    riskNote.cover_snapshot || {},
   )
 
   // Keep local state in sync with external changes if not editing
   useEffect(() => {
     if (!isEditable) {
-      setLocalRiskDetails(policy.risk_details || {})
+      setLocalRiskDetails(riskNote.cover_snapshot || {})
     }
-  }, [policy.risk_details, isEditable])
+  }, [riskNote.cover_snapshot, isEditable])
 
   const handleSave = () => {
     onSave?.(localRiskDetails)
   }
 
   const handleReset = () => {
-    setLocalRiskDetails(policy.risk_details || {})
+    setLocalRiskDetails(riskNote.cover_snapshot || {})
   }
 
   // --- DATA CONSOLIDATION LOGIC ---

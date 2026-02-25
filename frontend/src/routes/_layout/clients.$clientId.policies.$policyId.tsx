@@ -25,6 +25,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useClient, usePolicyDashboard } from "@/hooks/useInsurance"
 import { queryClient } from "@/queryClient"
 import type { EnhancedPolicy, EnhancedRiskNote } from "@/types/insurance"
+import { getPolicyDisplayName } from "@/utils/insurance"
 
 // --- Route Definition ---
 
@@ -115,15 +116,14 @@ function PolicyDashboardContent({
     return <PendingItems />
   }
 
-  const daysToExpiry = latestRiskNote
+  const daysToExpiry = latestRiskNote?.coverage_end
     ? Math.ceil(
-        (new Date(
-          latestRiskNote.coverage_end || (latestRiskNote as any).end_date,
-        ).getTime() -
-          Date.now()) /
+        (new Date(latestRiskNote.coverage_end).getTime() - Date.now()) /
           (1000 * 60 * 60 * 24),
       )
     : 0
+
+  const displayName = getPolicyDisplayName(policy)
 
   return (
     <div className="flex flex-col gap-6">
@@ -131,7 +131,7 @@ function PolicyDashboardContent({
         clientName={client.name}
         clientId={client.id}
         policyNumber={policy.policy_number}
-        displayName={policy.display_name}
+        displayName={displayName}
         status={policy.status || "Unknown"}
         onRenew={handleRenew}
         onEndorse={handleEndorse}

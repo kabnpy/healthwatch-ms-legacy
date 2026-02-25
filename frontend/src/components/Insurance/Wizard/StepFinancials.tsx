@@ -14,7 +14,6 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { CurrencyInput } from "@/components/ui/currency-input"
 import { useProducts, useQuote } from "@/hooks/useInsurance"
 import type {
   EnhancedProduct,
@@ -113,11 +112,13 @@ export function StepFinancials({
       quoteMutation.mutate({
         product_id: productId,
         risk_details: {
-          sum_insured: sum_insured,
+          vehicle: {
+            sum_insured: sum_insured,
+          },
           financials: {
             rate: financials.rate || 0,
           },
-          EXTENSIONS: {
+          extensions: {
             pvt: !!extensions.pvt,
             excess_protector: !!extensions.excessProtector,
             om_rescue_plus: !!extensions.omRescuePlus,
@@ -140,12 +141,12 @@ export function StepFinancials({
   ])
 
   // 2. authoritative source of truth
-  const breakdown = quoteMutation.data?.breakdown as any
+  const breakdown = quoteMutation.data?.breakdown as MotorFinancialBreakdown | undefined
 
   // Auto-set rate for Motor Private
   useEffect(() => {
     if (breakdown) {
-      if (isMotorPrivate && breakdown.net_premium > 0) {
+      if (isMotorPrivate && Number(breakdown.net_premium) > 0) {
         // Reverse calculate effective rate for display (inclusive of non-tax extensions)
         const siNum = Number(sum_insured) || 1
         const effectiveRate =
@@ -427,7 +428,7 @@ export function StepFinancials({
                         Benefits
                       </span>
                       {breakdown?.benefits && breakdown.benefits.length > 0 ? (
-                        breakdown.benefits.map((benefit) => (
+                        breakdown.benefits.map((benefit: any) => (
                           <div
                             key={benefit.name}
                             className={`flex justify-between text-xs py-1 border-b border-slate-800 last:border-0 ${
@@ -457,7 +458,7 @@ export function StepFinancials({
 
                   <div className="space-y-4 border-t border-slate-800 pt-4">
                     <div className="bg-slate-800/50 p-3 rounded space-y-2">
-                      {breakdown ? (
+                      {breakdown?.taxes ? (
                         Object.entries(breakdown.taxes).map(
                           ([name, amount]) => (
                             <div

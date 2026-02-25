@@ -77,7 +77,7 @@ export const RiskNoteForm = ({
   // Populate form when data is loaded
   useEffect(() => {
     if (existingRiskNote) {
-      const policySnapshot = (existingRiskNote.policy_snapshot as any) || {}
+      const coverSnapshot = existingRiskNote.cover_snapshot || {}
       const existingRN = existingRiskNote as any
 
       form.reset({
@@ -90,41 +90,29 @@ export const RiskNoteForm = ({
         status: existingRN.status || "Draft",
         net_premium: Number(existingRiskNote.net_premium),
         commission_amount: Number(existingRiskNote.commission_amount),
-        details:
-          policySnapshot.risk_details ||
-          (policy as any)?.current_risk_details ||
-          {},
+        details: coverSnapshot,
       })
     } else if (policy) {
-      const latestRN = (policy as any).latest_risk_note
+      const activeNote = (policy as any).active_note
       form.reset({
         transaction_type: "New Business",
         coverage_start:
-          latestRN?.coverage_start || new Date().toISOString().split("T")[0],
+          activeNote?.coverage_start || new Date().toISOString().split("T")[0],
         coverage_end:
-          latestRN?.coverage_end ||
+          activeNote?.coverage_end ||
           new Date(new Date().setFullYear(new Date().getFullYear() + 1))
             .toISOString()
             .split("T")[0],
         status: "Draft",
-        net_premium: Number(latestRN?.net_premium || 0),
-        commission_amount: Number(latestRN?.commission_amount || 0),
-        details: (policy as any).current_risk_details || {},
+        net_premium: Number(activeNote?.net_premium || 0),
+        commission_amount: Number(activeNote?.commission_amount || 0),
+        details: activeNote?.cover_snapshot || {},
       })
     }
   }, [existingRiskNote, policy, form])
 
   const onSubmit: SubmitHandler<FormData> = (data) => {
     if (!riskNoteId) return
-
-    // Preparing the snapshot of the policy
-    const policy_snapshot = {
-      ...(policy || {}),
-      risk_details: data.details,
-      coverage_start: data.coverage_start,
-      coverage_end: data.coverage_end,
-      net_premium: data.net_premium,
-    }
 
     // Basic tax calculation for now (matching seeding logic)
     const trainingLevy = data.net_premium * 0.002
@@ -138,8 +126,13 @@ export const RiskNoteForm = ({
       net_premium: data.net_premium,
       commission_amount: data.commission_amount,
       status: data.status as RiskNoteStatus,
-      policy_snapshot,
-      levies: { training_levy: trainingLevy, phcf: phcf },
+      cover_snapshot: data.details,
+      financial_breakdown: {
+        taxes: { training_levy: trainingLevy, phcf: phcf },
+        net_premium: data.net_premium,
+        total_amount,
+        commission_amount: data.commission_amount,
+      },
       total_amount,
     }
 
