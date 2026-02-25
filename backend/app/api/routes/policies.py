@@ -107,7 +107,7 @@ def create_policy(
     policy = policy_service.create_policy(
         session=session,
         policy_in=policy_in,
-        risk_details=policy_in.risk_details,
+        cover_snapshot=policy_in.risk_details,
         coverage_start=policy_in.coverage_start,
         coverage_end=policy_in.coverage_end,
         current_user_id=current_user.id,
@@ -131,7 +131,7 @@ def create_endorsement(
     res = policy_service.create_endorsement(
         session=session,
         policy_id=id,
-        updated_risk_details=endorsement_in.updated_risk_details,
+        updated_cover_snapshot=endorsement_in.updated_risk_details,
         change_description=endorsement_in.change_description,
         effective_date=endorsement_in.effective_date,
         current_user_id=current_user.id,

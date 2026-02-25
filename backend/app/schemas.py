@@ -46,14 +46,21 @@ class QuoteResponse(BaseModel):
 class MotorVehicleDetails(BaseModel):
     registration_number: str = Field(..., min_length=1)
     make: str = Field(..., min_length=1)
-    year_of_manufacture: int = Field(...)
-    sum_insured: Decimal = Field(...)
+    year_of_manufacture: int | None = None
+    sum_insured: Decimal = Field(default=Decimal("0"))
 
     @field_validator("sum_insured", mode="before")
     @classmethod
     def parse_sum_insured(cls, v: Any) -> Decimal:
-        from app.services.rating import RatingStrategy
-        return RatingStrategy.parse_decimal(v)
+        if v is None:
+            return Decimal("0")
+        if isinstance(v, (int, float, Decimal)):
+            return Decimal(str(v))
+        if isinstance(v, str):
+            import re
+            clean = re.sub(r"[^\d.]", "", v.replace("[ EMPTY ]", "").strip())
+            return Decimal(clean) if clean else Decimal("0")
+        return Decimal("0")
 
 
 class MotorExtensions(BaseModel):
@@ -69,38 +76,59 @@ class MotorPrivateRiskDetails(BaseModel):
         extra="ignore"
     )
 
-    vehicle_details: MotorVehicleDetails
-    benefits_and_limits: dict[str, Any] = Field(default_factory=dict)
-    excesses: dict[str, Any] = Field(default_factory=dict)
-    added_benefits: MotorExtensions
-    special_clauses: list[str] = Field(default_factory=list)
+    vehicle: MotorVehicleDetails
+    extensions: MotorExtensions = Field(default_factory=MotorExtensions)
+    # Terms as plain text/markdown
+    benefits_and_limits: str = ""
+    excesses: str = ""
+    special_clauses: str = ""
 
     @pydantic.model_validator(mode="before")
     @classmethod
-    def wrap_flat_fields(cls, data: Any) -> Any:
+    def wrap_legacy_and_flat_fields(cls, data: Any) -> Any:
         if not isinstance(data, dict):
             return data
         
-        # If already structured correctly, return as is
-        if "vehicle_details" in data and "added_benefits" in data:
-            return data
+        # 1. Handle legacy "vehicle_details" -> "vehicle"
+        if "vehicle_details" in data and "vehicle" not in data:
+            data["vehicle"] = data.pop("vehicle_details")
             
+        # 2. Handle legacy "added_benefits" -> "extensions"
+        if "added_benefits" in data and "extensions" not in data:
+            data["extensions"] = data.pop("added_benefits")
+
+        # 3. Handle flat fields if they exist at top level or nested 'terms'
+        if "terms" in data and isinstance(data["terms"], dict):
+            terms = data.pop("terms")
+            for k, v in terms.items():
+                if k not in data:
+                    data[k] = v
+
         vehicle_keys = {"registration_number", "make", "year_of_manufacture", "sum_insured"}
         extension_keys = {"pvt", "excess_protector", "om_rescue_plus", "passenger_liability"}
         
-        vehicle = data.get("vehicle_details", {})
+        vehicle = data.get("vehicle", {})
         for k in vehicle_keys:
             if k in data:
                 vehicle[k] = data.pop(k)
         
-        added = data.get("added_benefits") or data.get("extensions") or {}
+        extensions = data.get("extensions", {})
         for k in extension_keys:
             if k in data:
-                added[k] = data.pop(k)
+                extensions[k] = data.pop(k)
         
         if vehicle:
-            data["vehicle_details"] = vehicle
-        if added:
-            data["added_benefits"] = added
+            data["vehicle"] = vehicle
+        if extensions:
+            data["extensions"] = extensions
             
+        # 4. Handle terms that might be list/dict in legacy data
+        for term_key in ["benefits_and_limits", "excesses", "special_clauses"]:
+            val = data.get(term_key)
+            if isinstance(val, (list, dict)):
+                import json
+                data[term_key] = json.dumps(val, indent=2)
+            elif val is None:
+                data[term_key] = ""
+                
         return data

@@ -46,7 +46,7 @@ class PolicyService:
         *,
         session: Session,
         policy_in: PolicyCreate,
-        risk_details: dict[str, Any],
+        cover_snapshot: dict[str, Any],
         coverage_start: date,
         coverage_end: date,
         current_user_id: uuid.UUID | None = None,
@@ -59,7 +59,7 @@ class PolicyService:
             raise HTTPException(status_code=404, detail="Product not found")
 
         try:
-            validated_risk = product.validate_risk_details(risk_details)
+            validated_risk = product.validate_risk_details(cover_snapshot)
             breakdown = RatingService.calculate_breakdown(product, validated_risk)
         except Exception as e:
             logger.exception("Validation or Rating failure")
@@ -68,7 +68,6 @@ class PolicyService:
                 detail=f"Invalid risk details for {product.class_of_insurance}: {str(e)}",
             )
 
-        policy_in.risk_details = validated_risk
         policy = crud.create_policy(session=session, policy_in=policy_in)
 
         risk_note_in = RiskNoteCreate(
@@ -82,6 +81,7 @@ class PolicyService:
             financial_breakdown=PolicyService.to_numeric_dict(breakdown.model_dump()),
             commission_amount=breakdown.commission_amount,
             total_amount=breakdown.total_amount,
+            cover_snapshot=validated_risk,
             created_by_id=current_user_id,
         )
 
@@ -92,39 +92,17 @@ class PolicyService:
         return policy
 
     @staticmethod
-    def calculate_diff(old_val: Any, new_val: Any) -> Any:
-        """ Recursively calculate diff between two objects. """
-        if old_val is None and new_val is None:
-            return None
-        if old_val is None:
-            return {"from": None, "to": new_val}
-        if new_val is None:
-            return {"from": old_val, "to": None}
-
-        if isinstance(old_val, dict) and isinstance(new_val, dict):
-            diff = {}
-            all_keys = set(old_val.keys()) | set(new_val.keys())
-            for k in all_keys:
-                res = PolicyService.calculate_diff(old_val.get(k), new_val.get(k))
-                if res:
-                    diff[k] = res
-            return diff
-        elif old_val != new_val:
-            return {"from": old_val, "to": new_val}
-        return None
-
-    @staticmethod
     def create_endorsement(
         *,
         session: Session,
         policy_id: uuid.UUID,
-        updated_risk_details: dict[str, Any],
+        updated_cover_snapshot: dict[str, Any],
         change_description: str,
         effective_date: date | None = None,
         current_user_id: uuid.UUID | None = None,
     ) -> RiskNote:
         """
-        Create a mid-term modification (Endorsement).
+        Create a mid-term modification (Endorsement) using a full updated snapshot.
         """
         policy = session.get(Policy, policy_id)
         if not policy or not policy.product:
@@ -136,9 +114,9 @@ class PolicyService:
             raise HTTPException(status_code=400, detail="No active risk note found")
 
         try:
-            validated_risk = policy.product.validate_risk_details(updated_risk_details)
+            validated_risk = policy.product.validate_risk_details(updated_cover_snapshot)
             full_breakdown = RatingService.calculate_breakdown(policy.product, validated_risk)
-            old_full_breakdown = RatingService.calculate_breakdown(policy.product, policy.risk_details)
+            old_full_breakdown = RatingService.calculate_breakdown(policy.product, current_rn.cover_snapshot)
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))
 
@@ -153,7 +131,12 @@ class PolicyService:
         old_levies = RatingService.calculate_levies(old_full_breakdown.net_premium)
         delta_levies = {k: ((new_levies[k] - old_levies.get(k, 0)) * prorata_factor).quantize(Decimal("0.01")) for k in new_levies}
         
-        delta_total = delta_net + sum(delta_levies.values())
+        # Calculate delta for post-levy benefits (e.g., OM Rescue Plus)
+        old_post_levy = old_full_breakdown.total_amount - old_full_breakdown.net_premium - sum(old_levies.values())
+        new_post_levy = full_breakdown.total_amount - full_breakdown.net_premium - sum(new_levies.values())
+        delta_post_levy = ((new_post_levy - old_post_levy) * prorata_factor).quantize(Decimal("0.01"))
+        
+        delta_total = delta_net + sum(delta_levies.values()) + delta_post_levy
 
         financial_breakdown = PolicyService.to_numeric_dict({
             "new_state": full_breakdown.model_dump(),
@@ -178,18 +161,16 @@ class PolicyService:
             effective_date=effective_date,
             coverage_start=current_rn.coverage_start,
             coverage_end=current_rn.coverage_end,
-            change_log=PolicyService.calculate_diff(policy.risk_details, validated_risk) or {},
             net_premium=delta_net,
             financial_breakdown=financial_breakdown,
             commission_amount=delta_comm,
             total_amount=delta_total,
+            cover_snapshot=validated_risk,
             special_clauses=[change_description],
             created_by_id=current_user_id,
         )
 
-        policy.risk_details = validated_risk
         current_rn.status = RiskNoteStatus.REPLACED
-        session.add(policy)
         session.add(current_rn)
 
         return PolicyService.create_risk_note_with_invoice(session=session, risk_note_in=risk_note_in)
