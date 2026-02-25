@@ -1,47 +1,48 @@
 # Implementation Plan: Cleanup Convoluted Legacy Logic
 
-## Phase 1: Validation & Schema Simplification
-Refactor the model and schema layers to remove legacy key-mapping and nested logic.
+## Phase 1: Validation & Schema Semantic Nesting
+Refactor the schema layer to use strict nesting (e.g., `vehicle`, `extensions`) and remove all legacy aliases.
 
-- [ ] Task: Remove legacy schema helpers and aliases
-    - [ ] Identify and remove `MotorPrivateRiskDetailsLegacy` or similar in `backend/app/schemas.py`
-    - [ ] Clean up `field_validator` logic that handles legacy numeric formats or keys
-- [ ] Task: Simplify `Product.validate_risk_details`
-    - [ ] Remove `key_mapping` dictionary and loops in `backend/app/models.py`
-    - [ ] Remove nested "VEHICLE DETAILS" extraction logic
-    - [ ] Implement direct Pydantic validation using the new flat structure
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Validation & Schema Simplification' (Protocol in workflow.md)
+- [x] Task: Refactor `MotorPrivateRiskDetails` schema
+    - [x] Create `VehicleDetails` sub-model
+    - [x] Create `MotorExtensions` sub-model
+    - [x] Remove all top-level keys and `field_validator` legacy parsing
+- [x] Task: Update `Product.validate_risk_details`
+    - [x] Clean up any remaining fallback loops in `backend/app/models.py`
+    - [x] Ensure it returns the correctly nested Pydantic output
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Validation & Schema Semantic Nesting' (Protocol in workflow.md)
 
-## Phase 2: Service Layer Refactoring
-Clean up the Policy and RiskNote services to remove snapshot dependencies and redundant logic.
+## Phase 2: Rating Engine & Service Alignment
+Update the business logic to work with the new nested risk details.
 
-- [ ] Task: Write failing tests for simplified Policy Service
-    - [ ] Create tests that validate policy creation using ONLY flat `risk_details`
-    - [ ] Create tests for endorsements verifying delta-only change logs
-- [ ] Task: Refactor `create_policy` in `PolicyService`
-    - [ ] Remove `policy_snapshot` assignment logic
-    - [ ] Ensure `risk_details` are passed directly from validated output
-- [ ] Task: Refactor `create_endorsement` in `PolicyService`
-    - [ ] Remove snapshot retrieval and comparison logic
-    - [ ] Ensure the delta calculation uses the singular semantic state on the Policy object
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Service Layer Refactoring' (Protocol in workflow.md)
+- [x] Task: Standardize `MotorPrivateRatingStrategy`
+    - [x] Update it to pull `sum_insured` from `risk_details["vehicle"]["sum_insured"]`
+    - [x] Update it to pull benefits from `risk_details["extensions"]`
+- [x] Task: Refactor `PolicyService` for nested state
+    - [x] Ensure `create_endorsement` diffing handles the nested structure correctly
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Rating Engine & Service Alignment' (Protocol in workflow.md)
 
-## Phase 3: Rating Engine Cleanup
-Standardize the rating strategies to use the authoritative `sum_insured` key.
+## Phase 3: Migration & Database Finalization
+Ensure data integrity and clean deployment.
 
-- [ ] Task: Write failing tests for Rating Engine standardization
-    - [ ] Verify `RatingService` fails if provided with nested or legacy keys
-- [ ] Task: Simplify `RatingService._calculate_generic`
-    - [ ] Remove the fallback logic for searching `financials` or nested `sum_insured`
-- [ ] Task: Standardize `MotorPrivateRatingStrategy`
-    - [ ] Ensure it pulls `sum_insured` directly from the risk details dictionary
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Rating Engine Cleanup' (Protocol in workflow.md)
+- [x] Task: Cleanup migration data extraction
+    - [x] Ensure `c5c580ca4b1f` migration initializes the nested structure if possible or defaults to empty
+- [x] Task: Final System Verification
+    - [x] Run E2E Playwright tests to ensure wizard flows work with nested backend structure
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Migration & Database Finalization' (Protocol in workflow.md)
 
-## Phase 4: Migration & Database Finalization
-Ensure the database schema and migration history are clean and strictly follow the new models.
+## Phase 4: Robustness & Transactional Integrity
+Address critical bugs in the pro-rata engine, atomicity violations, and tight coupling.
 
-- [ ] Task: Review and cleanup recent migration versions
-    - [ ] Ensure the latest migrations don't contain "best-effort" data loss risks for clean system deployment
-- [ ] Task: Final System Verification
-    - [ ] Run E2E Playwright tests to ensure wizard flows still work with the simplified backend
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Migration & Database Finalization' (Protocol in workflow.md)
+- [x] Task: Harden `PolicyService` logic
+    - [x] Fix `calculate_diff` crash risk with explicit `None` checks
+    - [x] Add `effective_date` parameter to `create_endorsement`
+    - [x] Remove internal commits from `create_risk_note_with_invoice` to ensure atomicity
+- [x] Task: Update API Routers for Transactional Integrity
+    - [x] Update `policies.py` to handle session commits after service calls
+    - [x] Expose `effective_date` in the endorsement endpoint
+- [x] Task: Decouple `display_name` property
+    - [x] Refactor `display_name` in `backend/app/models.py` to be more generic or product-aware
+- [x] Task: Finalize Frontend Wizard
+    - [x] Refactor `NewPolicyWizard.tsx` to use the blueprint-driven structure instead of hardcoded mapping
+- [~] Task: Conductor - User Manual Verification 'Phase 4: Robustness & Transactional Integrity' (Protocol in workflow.md)

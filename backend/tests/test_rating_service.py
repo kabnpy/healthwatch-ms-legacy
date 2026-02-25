@@ -13,8 +13,10 @@ def test_motor_private_rating_logic():
     )
     
     risk_details = {
-        "sum_insured": 1000000.0, # 1M
-        "EXTENSIONS": {
+        "vehicle": {
+            "sum_insured": 1000000.0, # 1M
+        },
+        "extensions": {
             "pvt": True,
             "excess_protector": True
         }
@@ -44,8 +46,10 @@ def test_motor_private_om_rescue_plus():
     )
     
     risk_details = {
-        "sum_insured": 1000000.0,
-        "EXTENSIONS": {
+        "vehicle": {
+            "sum_insured": 1000000.0,
+        },
+        "extensions": {
             "om_rescue_plus": True
         }
     }
@@ -64,8 +68,10 @@ def test_motor_private_high_end_inclusive():
     )
     
     risk_details = {
-        "sum_insured": 4000000.0, # 4M
-        "EXTENSIONS": {
+        "vehicle": {
+            "sum_insured": 4000000.0, # 4M
+        },
+        "extensions": {
             "pvt": True,
             "excess_protector": True
         }
@@ -86,7 +92,9 @@ def test_rating_service_robust_parsing():
     
     # Test with formatted currency string
     risk_details_formatted = {
-        "sum_insured": "1,500,000.00",
+        "vehicle": {
+            "sum_insured": "1,500,000.00",
+        }
     }
     
     breakdown = RatingService.calculate_breakdown(product, risk_details_formatted)
@@ -94,7 +102,9 @@ def test_rating_service_robust_parsing():
 
     # Test with empty placeholder
     risk_details_empty = {
-        "sum_insured": "[ EMPTY ]",
+        "vehicle": {
+            "sum_insured": "[ EMPTY ]",
+        }
     }
     breakdown = RatingService.calculate_breakdown(product, risk_details_empty)
     # Value is 0, so basic premium is 0, but min is 60,000.
@@ -114,7 +124,9 @@ def test_motor_private_tier_sorting():
         }
     )
     
-    risk_details = { "sum_insured": 1000000.0 }
+    risk_details = { 
+        "vehicle": { "sum_insured": 1000000.0 } 
+    }
     breakdown = RatingService.calculate_breakdown(product, risk_details)
     
     assert breakdown.net_premium == Decimal("60000.00")
@@ -130,7 +142,9 @@ def test_manual_rating_strategy():
     )
     
     risk_details = {
-        "sum_insured": 5000.0,
+        "vehicle": {
+            "sum_insured": 5000.0,
+        }
     }
     
     breakdown = RatingService.calculate_breakdown(product, risk_details)
@@ -148,7 +162,9 @@ def test_generic_fallback_with_rate():
     )
     
     risk_details = {
-        "sum_insured": 10000000.0 # 10M
+        "vehicle": {
+            "sum_insured": 10000000.0 # 10M
+        }
     }
     
     breakdown = RatingService.calculate_breakdown(product, risk_details)
@@ -162,8 +178,10 @@ def test_rating_breakdown_types():
         default_commission_rate=10.0
     )
     risk_details = {
-        "sum_insured": 1000000.0,
-        "EXTENSIONS": {
+        "vehicle": {
+            "sum_insured": 1000000.0,
+        },
+        "extensions": {
             "pvt": True,
             "om_rescue_plus": True
         }
@@ -177,3 +195,22 @@ def test_rating_breakdown_types():
         assert isinstance(levy_val, Decimal)
     for benefit in breakdown.benefits:
         assert isinstance(benefit.amount, Decimal)
+
+def test_rating_fails_with_legacy_keys():
+    product = Product(
+        name="Fire Insurance",
+        class_of_insurance="Fire",
+        pricing_rules={
+            "rate": 0.5
+        }
+    )
+    
+    # Using legacy key from old schema
+    risk_details = {
+        "Value Kshs.": 10000000.0
+    }
+    
+    breakdown = RatingService.calculate_breakdown(product, risk_details)
+    
+    # Should result in 0 premium because sum_insured was not found
+    assert breakdown.net_premium == Decimal("0.00")

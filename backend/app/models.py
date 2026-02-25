@@ -257,31 +257,7 @@ class Product(ProductBase, table=True):
         if "motor private" in self.class_of_insurance.lower():
             from app.schemas import MotorPrivateRiskDetails
 
-            # Identify if the input is nested or flat
-            risk_data = risk_details.copy()
-            if "VEHICLE DETAILS" in risk_details:
-                nested = risk_details["VEHICLE DETAILS"]
-                if isinstance(nested, dict):
-                    # Merge nested into a flat dict, but allow top-level overrides
-                    risk_data = {**nested, **risk_details}
-            
-            # Map legacy/varied keys manually before validation
-            key_mapping = {
-                "Value Kshs.": "sum_insured",
-                "Value": "sum_insured",
-                "Sum Insured": "sum_insured",
-                "Reg. No": "registration_number",
-                "Reg No": "registration_number",
-                "Registration": "registration_number",
-                "Year": "year_of_manufacture",
-                "Make": "make",
-            }
-
-            for legacy_key, target_key in key_mapping.items():
-                if legacy_key in risk_data and target_key not in risk_data:
-                    risk_data[target_key] = risk_data[legacy_key]
-
-            validated = MotorPrivateRiskDetails(**risk_data)
+            validated = MotorPrivateRiskDetails(**risk_details)
             
             # Return a clean, semantic structure that is JSON-serializable
             return validated.model_dump(mode="json")
@@ -417,6 +393,7 @@ class PolicyCreateExtended(PolicyCreate):
 class EndorsementCreate(SQLModel):
     updated_risk_details: dict[str, Any]
     change_description: str
+    effective_date: date | None = None
 
 
 class PolicyUpdate(SQLModel):
@@ -445,17 +422,36 @@ class PolicyPublic(PolicyBase):
     id: uuid.UUID
     product: ProductPublic | None = None
 
-    @computed_field
     @property
     def display_name(self) -> str:
-        if self.product:
-            base_name = self.product.class_of_insurance or self.product.name
-            if "motor private" in base_name.lower():
-                reg_no = self.risk_details.get("registration_number") or self.risk_details.get("Reg. No")
-                if reg_no:
-                    return f"{base_name} - {reg_no}"
-            return base_name
-        return self.policy_number
+        if not self.product:
+            return self.policy_number
+
+        base_name = self.product.class_of_insurance or self.product.name
+        
+        # Generic logic: Look for common identification keys in the risk details
+        def find_id_value(obj: Any) -> str | None:
+            if not isinstance(obj, dict):
+                return None
+            
+            # Priority keys for display names
+            priority_keys = ["registration_number", "reg_no", "serial_number", "id_number", "name"]
+            for k in priority_keys:
+                if k in obj and isinstance(obj[k], str) and obj[k]:
+                    return obj[k]
+            
+            # Recurse into sub-objects (e.g., vehicle_details)
+            for v in obj.values():
+                res = find_id_value(v)
+                if res:
+                    return res
+            return None
+
+        id_val = find_id_value(self.risk_details)
+        if id_val:
+            return f"{base_name} - {id_val}"
+            
+        return base_name
 
 
 class PoliciesPublic(SQLModel):

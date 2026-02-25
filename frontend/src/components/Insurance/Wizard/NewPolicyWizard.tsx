@@ -118,11 +118,10 @@ export function NewPolicyWizard({
         state.details,
       )
 
-      // Merge extensions and authoritative sum_insured into risk details for the backend rating engine
-      const riskDetailsWithExtensions = {
+      // Add UI-driven extensions and sum_insured to the structured result
+      const riskDetails = {
         ...structuredRiskDetails,
-        sum_insured: state.sum_insured,
-        EXTENSIONS: {
+        added_benefits: {
           pvt: !!state.extensions?.pvt,
           excess_protector: !!state.extensions?.excessProtector,
           om_rescue_plus: !!state.extensions?.omRescuePlus,
@@ -130,14 +129,19 @@ export function NewPolicyWizard({
         },
       }
 
-      // Create Policy atomically (This also creates the issued Risk Note and Invoice in backend)
+      // Ensure sum_insured is correctly placed in vehicle_details if it was mapped there
+      if (riskDetails.vehicle_details) {
+        riskDetails.vehicle_details.sum_insured = state.sum_insured
+      }
+
+      // Create Policy atomically
       await createPolicy.mutateAsync({
         policy_number: `P/${Math.floor(Math.random() * 1000000)}`,
         client_id: clientId,
         product_id: state.product_id,
         status: "Active",
         inception_date: startDate,
-        risk_details: riskDetailsWithExtensions,
+        risk_details: riskDetails,
         coverage_start: startDate,
         coverage_end: endDate,
       } as any)

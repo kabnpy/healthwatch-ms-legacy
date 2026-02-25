@@ -25,4 +25,5 @@
 ## Architectural Decisions
 - **Singular Semantic Truth**: We enforce `sum_insured` as the authoritative key for the primary value of any risk, regardless of how it's labeled in a specific template. This avoids data duplication and rating errors during state transitions.
 - **Unified Policy Entity**: 1 Policy = 1 Cover Instance. This simplifies data capture and document generation significantly.
-- **Temporal Integrity via Snapshots**: Auditing is preserved by capturing the full Policy state in each Risk Note transaction.
+- **Audit via Deltas**: To ensure a single source of truth for the current state, we store only the authoritative record on the `Policy`. Audit history is preserved via the `change_log` (delta) on each `RiskNote` instead of using full-state snapshots.
+- **Pro-rata Endorsements**: Premium adjustments for mid-term modifications are now calculated pro-rata based on the remaining coverage period.

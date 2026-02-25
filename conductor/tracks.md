@@ -19,5 +19,10 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Cleanup Convoluted Legacy Logic**
+- [~] **Track: Cleanup Convoluted Legacy Logic**
 *Link: [./tracks/cleanup_legacy_logic_20260224/](./tracks/cleanup_legacy_logic_20260224/)*
+
+---
+
+- [ ] **Track: Atomic Reset (Structural Simplification)**
+*Link: [./tracks/atomic_reset_20260225/](./tracks/atomic_reset_20260225/)*

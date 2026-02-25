@@ -31,6 +31,17 @@ def generate_risk_note_number() -> str:
 
 class PolicyService:
     @staticmethod
+    def to_numeric_dict(data: Any) -> Any:
+        """ Recursively convert Decimals to floats for JSON serialization. """
+        if isinstance(data, dict):
+            return {k: PolicyService.to_numeric_dict(v) for k, v in data.items()}
+        elif isinstance(data, list):
+            return [PolicyService.to_numeric_dict(v) for v in data]
+        elif isinstance(data, Decimal):
+            return float(data)
+        return data
+
+    @staticmethod
     def create_policy(
         *,
         session: Session,
@@ -47,21 +58,9 @@ class PolicyService:
         if not product:
             raise HTTPException(status_code=404, detail="Product not found")
 
-        logger.info(f"Creating policy for product: {product.name} ({product.class_of_insurance})")
-        logger.debug(f"Input risk_details: {risk_details}")
-
-        # 1. Validate and price
         try:
             validated_risk = product.validate_risk_details(risk_details)
-            logger.debug(f"Validated risk details: {validated_risk}")
-
-            # Ensure extensions are available for rating
-            rating_details = validated_risk.copy()
-            if "EXTENSIONS" not in rating_details and "EXTENSIONS" in risk_details:
-                rating_details["EXTENSIONS"] = risk_details["EXTENSIONS"]
-                
-            breakdown = RatingService.calculate_breakdown(product, rating_details)
-            logger.info(f"Rating breakdown: {breakdown.model_dump()}")
+            breakdown = RatingService.calculate_breakdown(product, validated_risk)
         except Exception as e:
             logger.exception("Validation or Rating failure")
             raise HTTPException(
@@ -69,11 +68,9 @@ class PolicyService:
                 detail=f"Invalid risk details for {product.class_of_insurance}: {str(e)}",
             )
 
-        # 2. Create Policy (container)
-        policy_in.risk_details = rating_details
+        policy_in.risk_details = validated_risk
         policy = crud.create_policy(session=session, policy_in=policy_in)
 
-        # 3. Create initial Risk Note
         risk_note_in = RiskNoteCreate(
             policy_id=policy.id,
             transaction_type=TransactionType.NEW_BUSINESS,
@@ -82,7 +79,7 @@ class PolicyService:
             coverage_start=coverage_start,
             coverage_end=coverage_end,
             net_premium=breakdown.net_premium,
-            financial_breakdown=breakdown.model_dump(mode="json"),
+            financial_breakdown=PolicyService.to_numeric_dict(breakdown.model_dump()),
             commission_amount=breakdown.commission_amount,
             total_amount=breakdown.total_amount,
             created_by_id=current_user_id,
@@ -92,8 +89,30 @@ class PolicyService:
             session=session, risk_note_in=risk_note_in
         )
 
-        session.refresh(policy)
         return policy
+
+    @staticmethod
+    def calculate_diff(old_val: Any, new_val: Any) -> Any:
+        """ Recursively calculate diff between two objects. """
+        if old_val is None and new_val is None:
+            return None
+        if old_val is None:
+            return {"from": None, "to": new_val}
+        if new_val is None:
+            return {"from": old_val, "to": None}
+
+        if isinstance(old_val, dict) and isinstance(new_val, dict):
+            diff = {}
+            all_keys = set(old_val.keys()) | set(new_val.keys())
+            for k in all_keys:
+                res = PolicyService.calculate_diff(old_val.get(k), new_val.get(k))
+                if res:
+                    diff[k] = res
+            return diff
+        elif old_val != new_val:
+            return {"from": old_val, "to": new_val}
+        return None
+
     @staticmethod
     def create_endorsement(
         *,
@@ -101,105 +120,79 @@ class PolicyService:
         policy_id: uuid.UUID,
         updated_risk_details: dict[str, Any],
         change_description: str,
+        effective_date: date | None = None,
         current_user_id: uuid.UUID | None = None,
     ) -> RiskNote:
         """
         Create a mid-term modification (Endorsement).
         """
         policy = session.get(Policy, policy_id)
-        if not policy:
-            raise HTTPException(status_code=404, detail="Policy not found")
+        if not policy or not policy.product:
+            raise HTTPException(status_code=404, detail="Policy or Product not found")
 
-        product = policy.product
-        if not product:
-            raise HTTPException(
-                status_code=400, detail="Policy has no product assigned"
-            )
-
-        # Get current active risk note
-        current_rn = next(
-            (rn for rn in policy.risk_notes if rn.status == RiskNoteStatus.ISSUED),
-            None
-        )
+        effective_date = effective_date or date.today()
+        current_rn = next((rn for rn in policy.risk_notes if rn.status == RiskNoteStatus.ISSUED), None)
         if not current_rn:
-            raise HTTPException(
-                status_code=400, detail="Cannot endorse policy without active risk note"
-            )
+            raise HTTPException(status_code=400, detail="No active risk note found")
 
-        # 1. Validate and price NEW state
         try:
-            validated_risk = product.validate_risk_details(updated_risk_details)
-            # Ensure extensions are available for rating
-            rating_details = validated_risk.copy()
-            if (
-                "EXTENSIONS" not in rating_details
-                and "EXTENSIONS" in updated_risk_details
-            ):
-                rating_details["EXTENSIONS"] = updated_risk_details["EXTENSIONS"]
-
-            full_breakdown = RatingService.calculate_breakdown(product, rating_details)
+            validated_risk = policy.product.validate_risk_details(updated_risk_details)
+            full_breakdown = RatingService.calculate_breakdown(policy.product, validated_risk)
+            old_full_breakdown = RatingService.calculate_breakdown(policy.product, policy.risk_details)
         except Exception as e:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Invalid risk details for {product.class_of_insurance}: {str(e)}",
-            )
+            raise HTTPException(status_code=400, detail=str(e))
 
-        # 2. Calculate delta
-        delta_net_premium = full_breakdown.net_premium - current_rn.net_premium
-        delta_total_amount = full_breakdown.total_amount - current_rn.total_amount
-        delta_commission = full_breakdown.commission_amount - current_rn.commission_amount
+        total_days = max(1, (current_rn.coverage_end - current_rn.coverage_start).days)
+        remaining_days = max(0, (current_rn.coverage_end - effective_date).days)
+        prorata_factor = Decimal(str(remaining_days)) / Decimal(str(total_days))
 
-        # 3. Calculate diff for change_log
-        current_risk = policy.risk_details
-        diff = {}
-        # For now, shallow diff is sufficient for current schemas. 
-        # Consider a recursive diff utility if nesting increases.
-        all_keys = set(current_risk.keys()) | set(rating_details.keys())
-        for k in all_keys:
-            old_val = current_risk.get(k)
-            new_val = rating_details.get(k)
-            if old_val != new_val:
-                diff[k] = {"from": old_val, "to": new_val}
+        delta_net = ((full_breakdown.net_premium - old_full_breakdown.net_premium) * prorata_factor).quantize(Decimal("0.01"))
+        delta_comm = ((full_breakdown.commission_amount - old_full_breakdown.commission_amount) * prorata_factor).quantize(Decimal("0.01"))
+        
+        new_levies = RatingService.calculate_levies(full_breakdown.net_premium)
+        old_levies = RatingService.calculate_levies(old_full_breakdown.net_premium)
+        delta_levies = {k: ((new_levies[k] - old_levies.get(k, 0)) * prorata_factor).quantize(Decimal("0.01")) for k in new_levies}
+        
+        delta_total = delta_net + sum(delta_levies.values())
 
-        # 4. Structure the breakdown with both new state and delta
-        financial_breakdown = {
-            "new_state": full_breakdown.model_dump(mode="json"),
+        financial_breakdown = PolicyService.to_numeric_dict({
+            "new_state": full_breakdown.model_dump(),
             "delta": {
-                "net_premium": str(delta_net_premium.quantize(Decimal("0.01"))),
-                "total_amount": str(delta_total_amount.quantize(Decimal("0.01"))),
-                "commission_amount": str(delta_commission.quantize(Decimal("0.01"))),
+                "net_premium": delta_net,
+                "total_amount": delta_total,
+                "commission_amount": delta_comm,
+                "levies": delta_levies,
+            },
+            "prorata_info": {
+                "remaining_days": remaining_days,
+                "total_days": total_days,
+                "factor": prorata_factor
             }
-        }
+        })
 
-        # 5. Create NEW risk note
         risk_note_in = RiskNoteCreate(
             policy_id=policy.id,
             transaction_type=TransactionType.ENDORSEMENT,
             previous_risk_note_id=current_rn.id,
             status=RiskNoteStatus.ISSUED,
-            effective_date=date.today(),
+            effective_date=effective_date,
             coverage_start=current_rn.coverage_start,
             coverage_end=current_rn.coverage_end,
-            change_log=diff,
-            net_premium=delta_net_premium,
+            change_log=PolicyService.calculate_diff(policy.risk_details, validated_risk) or {},
+            net_premium=delta_net,
             financial_breakdown=financial_breakdown,
-            commission_amount=delta_commission,
-            total_amount=delta_total_amount,
+            commission_amount=delta_comm,
+            total_amount=delta_total,
             special_clauses=[change_description],
             created_by_id=current_user_id,
         )
 
-        # 6. Update Policy state in-place
-        policy.risk_details = rating_details
-        session.add(policy)
-
-        # Mark previous as replaced
+        policy.risk_details = validated_risk
         current_rn.status = RiskNoteStatus.REPLACED
+        session.add(policy)
         session.add(current_rn)
 
-        return PolicyService.create_risk_note_with_invoice(
-            session=session, risk_note_in=risk_note_in
-        )
+        return PolicyService.create_risk_note_with_invoice(session=session, risk_note_in=risk_note_in)
 
     @staticmethod
     def create_risk_note_with_invoice(
@@ -208,9 +201,6 @@ class PolicyService:
         risk_note_in: RiskNoteCreate,
         created_by_id: uuid.UUID | None = None,
     ) -> RiskNote:
-        """
-        Create a Risk Note and automatically generate its Invoice.
-        """
         if created_by_id:
             risk_note_in.created_by_id = created_by_id
 
@@ -219,37 +209,29 @@ class PolicyService:
 
         risk_note = crud.create_risk_note(session=session, risk_note_in=risk_note_in)
 
-        # Only create invoice if it's not a Draft
         if risk_note.status != RiskNoteStatus.DRAFT:
             policy = crud.get_policy(session=session, id=risk_note.policy_id)
             if not policy:
-                raise HTTPException(
-                    status_code=404, detail="Policy not found for invoice generation"
-                )
+                raise HTTPException(status_code=404, detail="Policy not found")
 
-            policy_num = policy.policy_number
-            invoice_in = InvoiceCreate(
+            invoice = crud.create_invoice(session=session, invoice_in=InvoiceCreate(
                 invoice_number=f"INV-{uuid.uuid4().hex[:8].upper()}",
                 client_id=policy.client_id,
                 date_issued=date.today(),
                 total_amount=risk_note.total_amount,
                 balance_due=risk_note.total_amount,
                 status=InvoiceStatus.UNPAID,
-            )
-            invoice = crud.create_invoice(session=session, invoice_in=invoice_in)
+            ))
 
-            line_item_in = InvoiceLineItemCreate(
+            crud.create_invoice_line_item(session=session, line_item_in=InvoiceLineItemCreate(
                 invoice_id=invoice.id,
                 risk_note_id=risk_note.id,
                 amount=risk_note.total_amount,
-                description=f"{risk_note.transaction_type} - {policy_num}",
-            )
-            crud.create_invoice_line_item(session=session, line_item_in=line_item_in)
+                description=f"{risk_note.transaction_type.value} - {policy.policy_number}",
+            ))
 
             risk_note.invoice_number = invoice.invoice_number
             session.add(risk_note)
-            session.commit()
-            session.refresh(risk_note)
 
         return risk_note
 

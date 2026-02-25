@@ -324,7 +324,7 @@ export type PolicyCreateExtended = {
     client_id: string;
     product_id?: (string | null);
     status?: PolicyStatus;
-    inception_date?: (string | null);
+    inception_date?: string;
     risk_details?: {
         [key: string]: unknown;
     };
@@ -341,15 +341,12 @@ export type PolicyPublic = {
     client_id: string;
     product_id?: (string | null);
     status?: PolicyStatus;
-    inception_date?: (string | null);
-    id: string;
-    product?: (ProductPublic | null);
-    readonly current_risk_details: {
+    inception_date?: string;
+    risk_details?: {
         [key: string]: unknown;
     };
-    readonly total_premium: string;
-    readonly start_date: (string | null);
-    readonly end_date: (string | null);
+    id: string;
+    product?: (ProductPublic | null);
     readonly display_name: string;
 };
 
@@ -509,7 +506,6 @@ export type RiskNoteCreate = {
     previous_risk_note_id?: (string | null);
     invoice_number?: (string | null);
     created_by_id?: (string | null);
-    payment_status?: string;
     effective_date?: string;
     coverage_start: string;
     coverage_end: string;
@@ -519,10 +515,10 @@ export type RiskNoteCreate = {
     financial_breakdown?: {
         [key: string]: unknown;
     };
-    policy_snapshot?: {
+    special_clauses?: Array<(string)>;
+    change_log?: {
         [key: string]: unknown;
     };
-    special_clauses?: Array<(string)>;
 };
 
 export type RiskNotePublic = {
@@ -537,7 +533,6 @@ export type RiskNotePublic = {
     previous_risk_note_id?: (string | null);
     invoice_number?: (string | null);
     created_by_id?: (string | null);
-    payment_status?: string;
     effective_date?: string;
     coverage_start: string;
     coverage_end: string;
@@ -549,10 +544,10 @@ export type RiskNotePublic = {
     financial_breakdown?: {
         [key: string]: unknown;
     };
-    policy_snapshot?: {
+    special_clauses?: Array<(string)>;
+    change_log?: {
         [key: string]: unknown;
     };
-    special_clauses?: Array<(string)>;
 };
 
 export type RiskNotesPublic = {
@@ -568,7 +563,6 @@ export type RiskNoteUpdate = {
     status?: (RiskNoteStatus | null);
     previous_risk_note_id?: (string | null);
     invoice_number?: (string | null);
-    payment_status?: (string | null);
     effective_date?: (string | null);
     coverage_start?: (string | null);
     coverage_end?: (string | null);
@@ -578,10 +572,10 @@ export type RiskNoteUpdate = {
 } | null);
     commission_amount?: (number | string | null);
     total_amount?: (number | string | null);
-    policy_snapshot?: ({
+    special_clauses?: (Array<(string)> | null);
+    change_log?: ({
     [key: string]: unknown;
 } | null);
-    special_clauses?: (Array<(string)> | null);
 };
 
 export type Token = {

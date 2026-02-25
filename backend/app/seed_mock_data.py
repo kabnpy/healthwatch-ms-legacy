@@ -66,30 +66,21 @@ def create_mock_data() -> None:
             session.refresh(product)
             return product
 
-        # PRODUCT: PERSONAL ACCIDENT
-        pa_details = {
-            "OCCUPATION": {"Occupation": "<<text>>"},
-            "BENEFITS": {
-                "Accidental Death": "Kshs. 500,000/-",
-                "Permanent Total Disablement": "Kshs. 500,000/-",
-                "Hospital Cash": "Kshs. 1,000/-",
-                "Accidental temporary total disability": "Kshs. 5,000/- (Weekly benefits 104 weeks)",
-                "Accidental medical expenses": "Kshs. 70,000/-",
-                "Artificial appliances (Accidental Loss)": "Kshs. 10,000/-",
-                "Last expense (Accidental Death)": "Kshs. 50,000/-",
-            },
-        }
-        upsert_product("Maxpac Personal Accident", "Personal Accident", pa_details)
-
         # PRODUCT: MOTOR PRIVATE
         motor_details = {
-            "VEHICLE DETAILS": {
-                "Reg. No": "<<text>>",
-                "Make": "<<text>>",
-                "Year": "<<number>>",
-                "Value Kshs.": "<<number>>",
+            "vehicle_details": {
+                "registration_number": "<<text>>",
+                "make": "<<text>>",
+                "year_of_manufacture": "<<number>>",
+                "sum_insured": "<<number>>",
             },
-            "EXCESS": {
+            "added_benefits": {
+                "pvt": "<<boolean>>",
+                "excess_protector": "<<boolean>>",
+                "om_rescue_plus": "<<boolean>>",
+                "passenger_liability": "<<boolean>>",
+            },
+            "excesses": {
                 "Own Damage and Partial": "2.5% of value minimum Kshs. 15,000/- Max Kshs. 100,000.00",
                 "Third Party damage claims": "Kshs. 5,000.00",
                 "Third Party Injury": "Nil",
@@ -110,18 +101,6 @@ def create_mock_data() -> None:
             motor_details,
             pricing_strategy="FixedTiered",
             pricing_rules=motor_pricing_rules,
-        )
-
-        # PRODUCT: DOMESTIC PACKAGE
-        domestic_details = {
-            "LOCATION": {"Location": "<<text>>", "Value Kshs.": "<<number>>"},
-            "INTEREST & SUM INSURED": {
-                "Section B: (Contents)": "Kshs. 6,430,000/- (As per the attached Schedule)",
-                "Section C: (All Risks)": "Kshs. 450,000/- (As per the attached Schedule)",
-            },
-        }
-        upsert_product(
-            "Domestic Package - HomeShield", "Domestic Package", domestic_details
         )
 
         # 2. CLIENT (Agnes Njoki Mwangi)
@@ -151,12 +130,23 @@ def create_mock_data() -> None:
             start_date = date(2025, 8, 2)
             end_date = date(2026, 8, 1)
             risk_details = {
-                "VEHICLE DETAILS": {
-                    "Reg. No": "KCM 780L",
-                    "Make": "Toyota Landcruiser Prado",
-                    "Year": 2016,
-                    "Value Kshs.": 4700000.0,
-                }
+                "vehicle_details": {
+                    "registration_number": "KCM 780L",
+                    "make": "Toyota",
+                    "year_of_manufacture": 2016,
+                    "sum_insured": 4700000.0,
+                },
+                "benefits_and_limits": {},
+                "excesses": {
+                    "Own Damage and Partial": "2.5% of value minimum Kshs. 15,000/- Max Kshs. 100,000.00",
+                    "Third Party damage claims": "Kshs. 5,000.00",
+                    "Third Party Injury": "Nil",
+                },
+                "added_benefits": {
+                    "pvt": True,
+                    "excess_protector": True
+                },
+                "special_clauses": []
             }
 
             policy_in = PolicyCreateExtended(
@@ -183,14 +173,24 @@ def create_mock_data() -> None:
             )
 
             # 4. ADD AN ENDORSEMENT
-            # Increase value 3 months later
             new_risk_details = {
-                "VEHICLE DETAILS": {
-                    "Reg. No": "KCM 780L",
-                    "Make": "Toyota Landcruiser Prado",
-                    "Year": 2016,
-                    "Value Kshs.": 5000000.0,
-                }
+                "vehicle_details": {
+                    "registration_number": "KCM 780L",
+                    "make": "Toyota",
+                    "year_of_manufacture": 2016,
+                    "sum_insured": 5000000.0,
+                },
+                "benefits_and_limits": {},
+                "excesses": {
+                    "Own Damage and Partial": "2.5% of value minimum Kshs. 15,000/- Max Kshs. 100,000.00",
+                    "Third Party damage claims": "Kshs. 5,000.00",
+                    "Third Party Injury": "Nil",
+                },
+                "added_benefits": {
+                    "pvt": True,
+                    "excess_protector": True
+                },
+                "special_clauses": []
             }
 
             endorsement_rn = policy_service.create_endorsement(

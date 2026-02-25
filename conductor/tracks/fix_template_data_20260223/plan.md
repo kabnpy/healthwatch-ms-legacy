@@ -16,11 +16,11 @@ Establish robust data persistence and rating audits.
 ## Phase 2: Template Refactoring & Data Binding [checkpoint: [pending]]
 Align document templates with the authoritative backend snapshots.
 
-- [ ] **Task: Refactor Risk Note Template**
+- [x] **Task: Refactor Risk Note Template** [f77e01a]
     - [ ] Update `frontend/src/components/Documents/templates/RiskNoteTemplate.tsx` to bind its financial table directly to the `financial_breakdown` object fetched from the backend.
-- [ ] **Task: Refactor Invoice Template**
+- [x] **Task: Refactor Invoice Template** [c8d87d5]
     - [ ] Update `frontend/src/components/Documents/templates/InvoiceTemplate.tsx` to ensure total amounts and itemized lists are derived from the authoritative backend invoice record.
-- [ ] **Task: End-to-End Verification**
+- [~] **Task: End-to-End Verification**
     - [ ] Create a Playwright E2E test in `frontend/tests/policy-issuance.spec.ts` that creates a policy and verifies the text content of the generated Risk Note and Invoice templates.
 - [ ] **Task: Conductor - User Manual Verification 'Phase 2: Template Refactoring & Data Binding' (Protocol in workflow.md)**
 

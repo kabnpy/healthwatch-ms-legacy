@@ -112,6 +112,8 @@ def create_policy(
         coverage_end=policy_in.coverage_end,
         current_user_id=current_user.id,
     )
+    session.commit()
+    session.refresh(policy)
     return prepare_policy_public(policy)
 
 
@@ -126,13 +128,17 @@ def create_endorsement(
     """
     Create a policy endorsement.
     """
-    return policy_service.create_endorsement(
+    res = policy_service.create_endorsement(
         session=session,
         policy_id=id,
         updated_risk_details=endorsement_in.updated_risk_details,
         change_description=endorsement_in.change_description,
+        effective_date=endorsement_in.effective_date,
         current_user_id=current_user.id,
     )
+    session.commit()
+    session.refresh(res)
+    return res
 
 
 @router.put("/{id}", response_model=PolicyPublic)

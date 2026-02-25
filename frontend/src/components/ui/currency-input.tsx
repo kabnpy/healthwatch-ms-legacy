@@ -19,7 +19,7 @@ export const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputPro
     // Initialize display value
     React.useEffect(() => {
       const formatted = format(value)
-      if (formatted !== displayValue.replace(/,/g, "")) {
+      if (formatted !== displayValue) {
          setDisplayValue(formatted)
       }
     }, [value])
@@ -32,7 +32,7 @@ export const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputPro
         const formattedInts = integers.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         const limitedDecimals = decimals !== undefined ? decimals.slice(0, 2) : undefined;
         setDisplayValue(limitedDecimals !== undefined ? `${formattedInts}.${limitedDecimals}` : formattedInts);
-        const correctedNum = parseFloat(Number(digitsAndDot).toFixed(2)) || 0;
+        const correctedNum = Math.round(Number(digitsAndDot) * 100) / 100 || 0;
         onValueChange(correctedNum)
       }
     }

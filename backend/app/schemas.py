@@ -1,5 +1,5 @@
 import uuid
-import re
+import pydantic
 from decimal import Decimal
 from typing import Annotated, Any, Literal
 
@@ -43,12 +43,7 @@ class QuoteResponse(BaseModel):
     breakdown: MotorFinancialBreakdown | BaseFinancialBreakdown
 
 
-class MotorPrivateRiskDetails(BaseModel):
-    model_config = ConfigDict(
-        populate_by_name=True,
-        extra="ignore"
-    )
-
+class MotorVehicleDetails(BaseModel):
     registration_number: str = Field(..., min_length=1)
     make: str = Field(..., min_length=1)
     year_of_manufacture: int = Field(...)
@@ -61,8 +56,51 @@ class MotorPrivateRiskDetails(BaseModel):
         return RatingStrategy.parse_decimal(v)
 
 
-class MotorPrivateRiskDetailsLegacy(MotorPrivateRiskDetails):
-    """Temporary helper for legacy data migration if needed"""
-    model_config = ConfigDict(populate_by_name=True)
-    registration_number: str = Field(..., alias="Reg. No")
-    sum_insured: float = Field(..., alias="Value Kshs.")
+class MotorExtensions(BaseModel):
+    pvt: bool = False
+    excess_protector: bool = False
+    om_rescue_plus: bool = False
+    passenger_liability: bool = False
+
+
+class MotorPrivateRiskDetails(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        extra="ignore"
+    )
+
+    vehicle_details: MotorVehicleDetails
+    benefits_and_limits: dict[str, Any] = Field(default_factory=dict)
+    excesses: dict[str, Any] = Field(default_factory=dict)
+    added_benefits: MotorExtensions
+    special_clauses: list[str] = Field(default_factory=list)
+
+    @pydantic.model_validator(mode="before")
+    @classmethod
+    def wrap_flat_fields(cls, data: Any) -> Any:
+        if not isinstance(data, dict):
+            return data
+        
+        # If already structured correctly, return as is
+        if "vehicle_details" in data and "added_benefits" in data:
+            return data
+            
+        vehicle_keys = {"registration_number", "make", "year_of_manufacture", "sum_insured"}
+        extension_keys = {"pvt", "excess_protector", "om_rescue_plus", "passenger_liability"}
+        
+        vehicle = data.get("vehicle_details", {})
+        for k in vehicle_keys:
+            if k in data:
+                vehicle[k] = data.pop(k)
+        
+        added = data.get("added_benefits") or data.get("extensions") or {}
+        for k in extension_keys:
+            if k in data:
+                added[k] = data.pop(k)
+        
+        if vehicle:
+            data["vehicle_details"] = vehicle
+        if added:
+            data["added_benefits"] = added
+            
+        return data

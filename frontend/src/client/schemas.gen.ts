@@ -1791,15 +1791,8 @@ export const PolicyCreateExtendedSchema = {
             default: 'Active'
         },
         inception_date: {
-            anyOf: [
-                {
-                    type: 'string',
-                    format: 'date'
-                },
-                {
-                    type: 'null'
-                }
-            ],
+            type: 'string',
+            format: 'date',
             title: 'Inception Date'
         },
         risk_details: {
@@ -1885,16 +1878,14 @@ export const PolicyPublicSchema = {
             default: 'Active'
         },
         inception_date: {
-            anyOf: [
-                {
-                    type: 'string',
-                    format: 'date'
-                },
-                {
-                    type: 'null'
-                }
-            ],
+            type: 'string',
+            format: 'date',
             title: 'Inception Date'
+        },
+        risk_details: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Risk Details'
         },
         id: {
             type: 'string',
@@ -1911,44 +1902,6 @@ export const PolicyPublicSchema = {
                 }
             ]
         },
-        current_risk_details: {
-            additionalProperties: true,
-            type: 'object',
-            title: 'Current Risk Details',
-            readOnly: true
-        },
-        total_premium: {
-            type: 'string',
-            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$',
-            title: 'Total Premium',
-            readOnly: true
-        },
-        start_date: {
-            anyOf: [
-                {
-                    type: 'string',
-                    format: 'date'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Start Date',
-            readOnly: true
-        },
-        end_date: {
-            anyOf: [
-                {
-                    type: 'string',
-                    format: 'date'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'End Date',
-            readOnly: true
-        },
         display_name: {
             type: 'string',
             title: 'Display Name',
@@ -1956,7 +1909,7 @@ export const PolicyPublicSchema = {
         }
     },
     type: 'object',
-    required: ['policy_number', 'client_id', 'id', 'current_risk_details', 'total_premium', 'start_date', 'end_date', 'display_name'],
+    required: ['policy_number', 'client_id', 'id', 'display_name'],
     title: 'PolicyPublic'
 } as const;
 
@@ -2793,11 +2746,6 @@ export const RiskNoteCreateSchema = {
             ],
             title: 'Created By Id'
         },
-        payment_status: {
-            type: 'string',
-            title: 'Payment Status',
-            default: 'Unpaid'
-        },
         effective_date: {
             type: 'string',
             format: 'date',
@@ -2854,17 +2802,17 @@ export const RiskNoteCreateSchema = {
             type: 'object',
             title: 'Financial Breakdown'
         },
-        policy_snapshot: {
-            additionalProperties: true,
-            type: 'object',
-            title: 'Policy Snapshot'
-        },
         special_clauses: {
             items: {
                 type: 'string'
             },
             type: 'array',
             title: 'Special Clauses'
+        },
+        change_log: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Change Log'
         }
     },
     type: 'object',
@@ -2966,11 +2914,6 @@ export const RiskNotePublicSchema = {
             ],
             title: 'Created By Id'
         },
-        payment_status: {
-            type: 'string',
-            title: 'Payment Status',
-            default: 'Unpaid'
-        },
         effective_date: {
             type: 'string',
             format: 'date',
@@ -3021,17 +2964,17 @@ export const RiskNotePublicSchema = {
             type: 'object',
             title: 'Financial Breakdown'
         },
-        policy_snapshot: {
-            additionalProperties: true,
-            type: 'object',
-            title: 'Policy Snapshot'
-        },
         special_clauses: {
             items: {
                 type: 'string'
             },
             type: 'array',
             title: 'Special Clauses'
+        },
+        change_log: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Change Log'
         }
     },
     type: 'object',
@@ -3041,7 +2984,7 @@ export const RiskNotePublicSchema = {
 
 export const RiskNoteStatusSchema = {
     type: 'string',
-    enum: ['Draft', 'Issued', 'Replaced', 'Cancelled', 'Issued'],
+    enum: ['Draft', 'Issued', 'Replaced', 'Cancelled'],
     title: 'RiskNoteStatus'
 } as const;
 
@@ -3101,17 +3044,6 @@ export const RiskNoteUpdateSchema = {
             ],
             title: 'Invoice Number'
         },
-        payment_status: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Payment Status'
-        },
         effective_date: {
             anyOf: [
                 {
@@ -3205,18 +3137,6 @@ export const RiskNoteUpdateSchema = {
             ],
             title: 'Total Amount'
         },
-        policy_snapshot: {
-            anyOf: [
-                {
-                    additionalProperties: true,
-                    type: 'object'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Policy Snapshot'
-        },
         special_clauses: {
             anyOf: [
                 {
@@ -3230,6 +3150,18 @@ export const RiskNoteUpdateSchema = {
                 }
             ],
             title: 'Special Clauses'
+        },
+        change_log: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Change Log'
         }
     },
     type: 'object',
