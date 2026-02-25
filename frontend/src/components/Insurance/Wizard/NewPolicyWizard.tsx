@@ -156,7 +156,7 @@ export function NewPolicyWizard({
 
       // Create Policy atomically
       await createPolicy.mutateAsync({
-        policy_number: `P/${Math.floor(Math.random() * 1000000)}`,
+        policy_number: `P/${Date.now()}/${Math.floor(Math.random() * 1000)}`,
         client_id: clientId,
         product_id: state.product_id,
         status: "Active",

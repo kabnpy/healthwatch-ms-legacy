@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 def generate_risk_note_number() -> str:
-    return f"RN-{uuid.uuid4().hex[:8].upper()}"
+    return f"RN-{uuid.uuid4().hex[:12].upper()}"
 
 
 class PolicyService:
@@ -196,7 +196,7 @@ class PolicyService:
                 raise HTTPException(status_code=404, detail="Policy not found")
 
             invoice = crud.create_invoice(session=session, invoice_in=InvoiceCreate(
-                invoice_number=f"INV-{uuid.uuid4().hex[:8].upper()}",
+                invoice_number=f"INV-{uuid.uuid4().hex[:12].upper()}",
                 client_id=policy.client_id,
                 date_issued=date.today(),
                 total_amount=risk_note.total_amount,

@@ -52,15 +52,8 @@ class MotorVehicleDetails(BaseModel):
     @field_validator("sum_insured", mode="before")
     @classmethod
     def parse_sum_insured(cls, v: Any) -> Decimal:
-        if v is None:
-            return Decimal("0")
-        if isinstance(v, (int, float, Decimal)):
-            return Decimal(str(v))
-        if isinstance(v, str):
-            import re
-            clean = re.sub(r"[^\d.]", "", v.replace("[ EMPTY ]", "").strip())
-            return Decimal(clean) if clean else Decimal("0")
-        return Decimal("0")
+        from app.utils import parse_decimal
+        return parse_decimal(v)
 
 
 class MotorExtensions(BaseModel):

@@ -22,20 +22,8 @@ class RatingStrategy(ABC):
         """
         Robustly parse a value into a Decimal.
         """
-        if value is None:
-            return Decimal("0")
-        if isinstance(value, (int, float, Decimal)):
-            return Decimal(str(value))
-        
-        if isinstance(value, str):
-            clean = value.replace("[ EMPTY ]", "").strip()
-            clean = re.sub(r"[^\d.]", "", clean)
-            try:
-                return Decimal(clean) if clean else Decimal("0")
-            except (InvalidOperation, ValueError):
-                return Decimal("0")
-        
-        return Decimal("0")
+        from app.utils import parse_decimal
+        return parse_decimal(value)
 
 
 class MotorPrivateRatingStrategy(RatingStrategy):

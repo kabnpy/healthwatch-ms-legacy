@@ -389,6 +389,7 @@ class PolicyCreate(PolicyBase):
 class PolicyCreateExtended(PolicyCreate):
     coverage_start: date = Field(default_factory=date.today)
     coverage_end: date
+    risk_details: dict[str, Any] = Field(default_factory=dict)
 
 
 class EndorsementCreate(SQLModel):
