@@ -29,7 +29,7 @@ Focus: Expose the "Current State" (active note) via the Policy API.
 ## Phase 4: Frontend UI & Experience
 Focus: Align the UI wizard and history view with the new atomic model.
 
-- [ ] Task: Update Frontend TypeScript types and regenerate the API client.
-- [ ] Task: Refactor the New Policy Wizard to support text-based Terms and the new snapshot structure.
-- [ ] Task: Implement the "Version History" view on the Policy detail page.
-- [ ] Task: Conductor - User Manual Verification 'Phase 4' (Protocol in workflow.md)
+- [x] Task: Update Frontend TypeScript types and regenerate the API client. 66b1235
+- [x] Task: Refactor the New Policy Wizard to support text-based Terms and the new snapshot structure. 8ef2eb2
+- [x] Task: Implement the "Version History" view on the Policy detail page. 142c5d0
+- [x] Task: Conductor - User Manual Verification 'Phase 4' (Protocol in workflow.md) [checkpoint: 142c5d0]
