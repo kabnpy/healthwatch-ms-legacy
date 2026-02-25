@@ -9,6 +9,7 @@ import ErrorComponent from "@/components/Common/ErrorComponent"
 import { DocumentViewer } from "@/components/Documents/DocumentViewer"
 import { RiskNoteTemplate } from "@/components/Documents/templates/RiskNoteTemplate"
 import { RiskNoteForm } from "@/components/Insurance/RiskNoteForm"
+import { VersionHistory } from "@/components/Insurance/VersionHistory"
 import PendingItems from "@/components/Pending/PendingItems"
 import { PolicyDashboardSkeleton } from "@/components/Policies/Dashboard/PolicyDashboardSkeleton"
 import { PolicyHeader } from "@/components/Policies/Dashboard/PolicyHeader"
@@ -248,17 +249,49 @@ function PolicyDashboardContent({
         {/* TAB 2: HISTORY (Risk Notes) */}
 
         <TabsContent value="history" className="pt-6">
-          <div className="border rounded-lg p-4 bg-card">
-            <h3 className="text-lg font-semibold mb-4 text-primary">
-              Transaction History (Risk Notes)
-            </h3>
+          <div className="max-w-5xl mx-auto space-y-8">
+            <div className="flex justify-between items-center border-b pb-4">
+              <h3 className="text-xl font-black uppercase tracking-tighter text-slate-900">
+                Transaction History
+              </h3>
+            </div>
 
-            <DataTable
-              columns={getRiskNoteColumns((rn) =>
-                handleViewRiskNote(rn.id, "risknote"),
-              )}
-              data={riskNotes}
-            />
+            <Tabs defaultValue="timeline" className="w-full">
+              <div className="flex justify-end mb-6">
+                <TabsList className="bg-slate-100 p-1">
+                  <TabsTrigger
+                    value="timeline"
+                    className="text-xs font-bold uppercase tracking-widest px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                  >
+                    Timeline
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="table"
+                    className="text-xs font-bold uppercase tracking-widest px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                  >
+                    Table
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+
+              <TabsContent value="timeline" className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <VersionHistory
+                  riskNotes={riskNotes}
+                  onView={(rn) => handleViewRiskNote(rn.id, "risknote")}
+                />
+              </TabsContent>
+
+              <TabsContent value="table" className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div className="border rounded-xl bg-card overflow-hidden shadow-sm">
+                  <DataTable
+                    columns={getRiskNoteColumns((rn) =>
+                      handleViewRiskNote(rn.id, "risknote"),
+                    )}
+                    data={riskNotes}
+                  />
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
         </TabsContent>
 
