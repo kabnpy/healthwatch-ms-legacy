@@ -50,7 +50,7 @@ class MotorPrivateRatingStrategy(RatingStrategy):
     def calculate(
         self, product: Product, risk_details: dict[str, Any]
     ) -> MotorFinancialBreakdown:
-        vehicle = risk_details.get("vehicle_details", {})
+        vehicle = risk_details.get("vehicle") or risk_details.get("vehicle_details", {})
         value = RatingStrategy.parse_decimal(vehicle.get("sum_insured", 0))
 
         product_tiers = product.pricing_rules.get("tiers")
@@ -70,7 +70,7 @@ class MotorPrivateRatingStrategy(RatingStrategy):
         basic_rate = applicable_tier["rate"]
         basic_premium = max(applicable_tier["min"], (value * basic_rate).quantize(Decimal("0.01")))
 
-        extensions = risk_details.get("added_benefits", {})
+        extensions = risk_details.get("extensions") or risk_details.get("added_benefits", {})
         benefits = []
         net_premium = basic_premium
         high_end_threshold = Decimal(str(product.pricing_rules.get("high_end_threshold", "3000000")))
@@ -131,5 +131,6 @@ class RatingService:
     def calculate_breakdown(
         cls, product: Product, clean_risk: dict[str, Any]
     ) -> MotorFinancialBreakdown:
-        # We now focus exclusively on Motor Private
-        return MotorPrivateRatingStrategy().calculate(product, clean_risk)
+        if "motor private" in product.class_of_insurance.lower():
+            return MotorPrivateRatingStrategy().calculate(product, clean_risk)
+        raise NotImplementedError(f"Rating strategy for {product.class_of_insurance} not implemented")
