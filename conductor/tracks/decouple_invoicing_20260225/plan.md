@@ -13,8 +13,8 @@
 - [x] Task: Write tests for the "un-invoiced" detection logic. 9f50d28
 - [x] Task: Conductor - User Manual Verification 'Data Model & Linking' (Protocol in workflow.md) 97b2eed
 
-## Phase 3: Frontend & Wizard Integration
-- [ ] Task: Update the `InvoiceWizard` component to fetch and display only un-invoiced Risk Notes.
-- [ ] Task: Update the Risk Note detail view to retrieve the associated Invoice via the `invoice_line_items` relationship instead of `invoice_number`.
-- [ ] Task: Verify consolidated invoice generation works correctly with the refactored backend logic.
-- [ ] Task: Conductor - User Manual Verification 'Frontend Integration' (Protocol in workflow.md)
+## Phase 3: Frontend & Wizard Integration [checkpoint: 7ba432c]
+- [x] Task: Update the `InvoiceWizard` component to fetch and display only un-invoiced Risk Notes. 7ba432c
+- [x] Task: Update the Risk Note detail view to retrieve the associated Invoice via the `invoice_line_items` relationship instead of `invoice_number`. 7ba432c
+- [x] Task: Verify consolidated invoice generation works correctly with the refactored backend logic. 7ba432c
+- [x] Task: Conductor - User Manual Verification 'Frontend Integration' (Protocol in workflow.md) 7ba432c
