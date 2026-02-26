@@ -1,7 +1,7 @@
 # Implementation Plan: Decouple Risk Note and Invoice Creation
 
 ## Phase 1: Backend Service Refactoring (Decoupling)
-- [ ] Task: Write tests for `PolicyService` to verify Risk Note creation without Invoices.
+- [x] Task: Write tests for `PolicyService` to verify Risk Note creation without Invoices. 55aebe2
 - [ ] Task: Refactor `PolicyService.create_policy` and `create_endorsement` to remove automatic invoice generation.
 - [ ] Task: Rename `create_risk_note_with_invoice` to `create_risk_note` and remove internal invoice creation logic.
 - [ ] Task: Conductor - User Manual Verification 'Backend Decoupling' (Protocol in workflow.md)
