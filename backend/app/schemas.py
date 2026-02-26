@@ -1,4 +1,5 @@
 import uuid
+import json
 import pydantic
 from decimal import Decimal
 from typing import Annotated, Any, Literal
@@ -119,7 +120,6 @@ class MotorPrivateRiskDetails(BaseModel):
         for term_key in ["benefits_and_limits", "excesses", "special_clauses"]:
             val = data.get(term_key)
             if isinstance(val, (list, dict)):
-                import json
                 data[term_key] = json.dumps(val, indent=2)
             elif val is None:
                 data[term_key] = ""

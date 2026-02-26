@@ -18,11 +18,18 @@ depends_on = None
 
 
 def upgrade():
-    # 1. Add risk_details to policy
-    op.add_column('policy', sa.Column('risk_details', sa.JSON(), nullable=True))
+    # 1. Add cover_snapshot to risknote
+    op.add_column('risknote', sa.Column('cover_snapshot', sa.JSON(), nullable=True))
     
-    # 2. Data migration: Initialize with empty object for clean system deployment
-    op.execute("UPDATE policy SET risk_details = '{}'::jsonb WHERE risk_details IS NULL")
+    # 2. Data migration: Copy data from policy_snapshot to cover_snapshot
+    # The old structure was: policy_snapshot = {"risk_details": {...}, "terms": {...}}
+    # The new structure is: cover_snapshot = {...} (the actual risk details)
+    op.execute("""
+        UPDATE risknote 
+        SET cover_snapshot = policy_snapshot->'risk_details' 
+        WHERE policy_snapshot IS NOT NULL AND (policy_snapshot->'risk_details') IS NOT NULL
+    """)
+    op.execute("UPDATE risknote SET cover_snapshot = '{}'::jsonb WHERE cover_snapshot IS NULL")
     
     # 3. Populate null inception dates and alter to NOT NULL
     op.execute("UPDATE policy SET inception_date = COALESCE(created_at::date, CURRENT_DATE) WHERE inception_date IS NULL")
@@ -40,7 +47,12 @@ def downgrade():
     op.add_column('risknote', sa.Column('payment_status', sa.VARCHAR(), autoincrement=False, nullable=True))
     op.add_column('risknote', sa.Column('policy_snapshot', sa.JSON(), autoincrement=False, nullable=True))
     
-    # 2. Data migration back: Initialize with empty object
+    # 2. Data migration back: Restore policy_snapshot from cover_snapshot
+    op.execute("""
+        UPDATE risknote 
+        SET policy_snapshot = json_build_object('risk_details', cover_snapshot)
+        WHERE cover_snapshot IS NOT NULL
+    """)
     op.execute("UPDATE risknote SET policy_snapshot = '{}'::jsonb WHERE policy_snapshot IS NULL")
     
     # 3. Alter inception_date to be nullable
@@ -48,5 +60,5 @@ def downgrade():
                existing_type=sa.DATE(),
                nullable=True)
     
-    # 4. Drop risk_details from policy
-    op.drop_column('policy', 'risk_details')
+    # 4. Drop cover_snapshot from risknote
+    op.drop_column('risknote', 'cover_snapshot')

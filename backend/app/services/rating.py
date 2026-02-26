@@ -40,6 +40,9 @@ class MotorPrivateRatingStrategy(RatingStrategy):
     ) -> MotorFinancialBreakdown:
         vehicle = risk_details.get("vehicle") or risk_details.get("vehicle_details", {})
         value = RatingStrategy.parse_decimal(vehicle.get("sum_insured", 0))
+        
+        if value <= 0:
+            raise ValueError("Sum insured must be greater than zero for Motor Private insurance.")
 
         product_tiers = product.pricing_rules.get("tiers")
         if product_tiers:
@@ -50,6 +53,7 @@ class MotorPrivateRatingStrategy(RatingStrategy):
                     "rate": Decimal(str(t["rate"])) / Decimal("100"),
                     "min": Decimal(str(t.get("min", 0))),
                 })
+            # Tiers should ideally be stored sorted, but we ensure sorting here once.
             tiers.sort(key=lambda x: x["max"])
         else:
             tiers = self.DEFAULT_TIERS
@@ -112,13 +116,9 @@ class MotorPrivateRatingStrategy(RatingStrategy):
 
 class RatingService:
     @classmethod
-    def calculate_levies(cls, net_premium: Decimal) -> dict[str, Decimal]:
-        return MotorPrivateRatingStrategy()._calculate_standard_levies(net_premium)
-
-    @classmethod
     def calculate_breakdown(
         cls, product: Product, clean_risk: dict[str, Any]
-    ) -> MotorFinancialBreakdown:
+    ) -> Any:
         if "motor private" in product.class_of_insurance.lower():
             return MotorPrivateRatingStrategy().calculate(product, clean_risk)
         raise NotImplementedError(f"Rating strategy for {product.class_of_insurance} not implemented")

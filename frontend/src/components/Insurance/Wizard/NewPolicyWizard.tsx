@@ -124,11 +124,24 @@ export function NewPolicyWizard({
 
       const startDate =
         state.financials?.startDate || new Date().toISOString().split("T")[0]
-      const endDate = new Date(
-        new Date(startDate).setFullYear(new Date(startDate).getFullYear() + 1),
-      )
-        .toISOString()
-        .split("T")[0]
+      
+      const durationMonths = state.financials?.duration || 12
+      const endDateDate = new Date(startDate)
+      
+      // For standard 12-month terms, we use setFullYear to maintain day consistency 
+      // (e.g., Feb 29 logic). For other durations, we use the month-based offset.
+      if (durationMonths === 12) {
+        endDateDate.setFullYear(endDateDate.getFullYear() + 1)
+      } else {
+        const targetMonth = endDateDate.getMonth() + durationMonths
+        endDateDate.setMonth(targetMonth)
+        // If the day of month shifted (e.g. Jan 31 -> March 3), roll back to last day of previous month
+        if (endDateDate.getMonth() % 12 !== targetMonth % 12) {
+          endDateDate.setDate(0)
+        }
+      }
+      
+      const endDate = endDateDate.toISOString().split("T")[0]
 
       // Structure the risk details using the product blueprint
       const structuredRiskDetails = injectWizardData(

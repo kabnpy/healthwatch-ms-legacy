@@ -32,13 +32,13 @@ def generate_risk_note_number() -> str:
 class PolicyService:
     @staticmethod
     def to_numeric_dict(data: Any) -> Any:
-        """ Recursively convert Decimals to floats for JSON serialization. """
+        """ Recursively convert Decimals to strings for JSON serialization. """
         if isinstance(data, dict):
             return {k: PolicyService.to_numeric_dict(v) for k, v in data.items()}
         elif isinstance(data, list):
             return [PolicyService.to_numeric_dict(v) for v in data]
         elif isinstance(data, Decimal):
-            return float(data)
+            return str(data)
         return data
 
     @staticmethod
@@ -81,7 +81,7 @@ class PolicyService:
             financial_breakdown=PolicyService.to_numeric_dict(breakdown.model_dump()),
             commission_amount=breakdown.commission_amount,
             total_amount=breakdown.total_amount,
-            cover_snapshot=validated_risk,
+            cover_snapshot=PolicyService.to_numeric_dict(validated_risk),
             created_by_id=current_user_id,
         )
 
@@ -108,6 +108,8 @@ class PolicyService:
         if not policy or not policy.product:
             raise HTTPException(status_code=404, detail="Policy or Product not found")
 
+        # effective_date is already defaulted to date.today() in the controller/schema if null
+        # but we re-verify here for service-layer safety.
         effective_date = effective_date or date.today()
         current_rn = next((rn for rn in policy.risk_notes if rn.status == RiskNoteStatus.ISSUED), None)
         if not current_rn:
@@ -127,9 +129,13 @@ class PolicyService:
         delta_net = ((full_breakdown.net_premium - old_full_breakdown.net_premium) * prorata_factor).quantize(Decimal("0.01"))
         delta_comm = ((full_breakdown.commission_amount - old_full_breakdown.commission_amount) * prorata_factor).quantize(Decimal("0.01"))
         
-        new_levies = RatingService.calculate_levies(full_breakdown.net_premium)
-        old_levies = RatingService.calculate_levies(old_full_breakdown.net_premium)
-        delta_levies = {k: ((new_levies[k] - old_levies.get(k, 0)) * prorata_factor).quantize(Decimal("0.01")) for k in new_levies}
+        new_levies = full_breakdown.taxes
+        old_levies = old_full_breakdown.taxes
+        all_levy_keys = set(new_levies.keys()) | set(old_levies.keys())
+        delta_levies = {
+            k: ((new_levies.get(k, Decimal("0")) - old_levies.get(k, Decimal("0"))) * prorata_factor).quantize(Decimal("0.01"))
+            for k in all_levy_keys
+        }
         
         # Calculate delta for post-levy benefits (e.g., OM Rescue Plus)
         old_post_levy = old_full_breakdown.total_amount - old_full_breakdown.net_premium - sum(old_levies.values())
@@ -165,7 +171,7 @@ class PolicyService:
             financial_breakdown=financial_breakdown,
             commission_amount=delta_comm,
             total_amount=delta_total,
-            cover_snapshot=validated_risk,
+            cover_snapshot=PolicyService.to_numeric_dict(validated_risk),
             special_clauses=[change_description],
             created_by_id=current_user_id,
         )

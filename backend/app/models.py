@@ -56,6 +56,7 @@ class RiskNoteStatus(str, Enum):
     ISSUED = "Issued"
     REPLACED = "Replaced"  # superseded by a newer note on same policy
     CANCELLED = "Cancelled"
+    ACTIVE = "Issued"  # Alias for backward compatibility
 
 
 class InvoiceStatus(str, Enum):
@@ -264,7 +265,7 @@ class Product(ProductBase, table=True):
             validated = MotorPrivateRiskDetails(**risk_details)
             
             # Return a clean, semantic structure that is JSON-serializable
-            return validated.model_dump(mode="json")
+            return validated.model_dump(mode="python")
         return risk_details
     def calculate_premium(self, risk_details: dict[str, Any]) -> Decimal:
         from app.services.rating import RatingService

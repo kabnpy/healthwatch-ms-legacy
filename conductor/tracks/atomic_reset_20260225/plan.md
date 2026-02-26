@@ -41,3 +41,11 @@ Focus: Resolve critical API errors, improve document numbering, and clean up tec
 - [x] Task: Harden document ID generation (Invoices/Risk Notes) to prevent collisions. 089f258
 - [x] Task: Move decimal parsing to a shared utility to remove delegation duplication. 089f258
 - [x] Task: Update `.gitignore` to exclude `backend.log`. 089f258
+
+## Phase 6: Quality Polish & Strategy Registry
+Focus: Refactor rating dispatch, deduplicate imports, and move document numbering to constants.
+
+- [ ] Task: Deduplicate imports in `app/utils.py`.
+- [ ] Task: Move document prefixes ("INV-", "RN-") to constants in `PolicyService`.
+- [ ] Task: Implement a `StrategyRegistry` in `RatingService` to remove brittle string checks.
+- [ ] Task: Move Policy Number generation from Frontend to `PolicyService` (Backend).
