@@ -1,6 +1,8 @@
 import logging
+import re
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
 
@@ -121,3 +123,26 @@ def verify_password_reset_token(token: str) -> str | None:
         return str(decoded_token["sub"])
     except InvalidTokenError:
         return None
+
+
+def parse_decimal(value: Any) -> Decimal:
+    """
+    Robustly parse a value into a Decimal.
+    Handles numeric strings with commas and specific placeholders.
+    """
+    if value is None:
+        return Decimal("0")
+    if isinstance(value, (int, float, Decimal)):
+        return Decimal(str(value))
+
+    if isinstance(value, str):
+        # Remove placeholders and whitespace
+        clean = value.replace("[ EMPTY ]", "").strip()
+        # Remove commas and other non-numeric characters except the decimal point
+        clean = re.sub(r"[^\d.]", "", clean)
+        try:
+            return Decimal(clean) if clean else Decimal("0")
+        except (InvalidOperation, ValueError):
+            return Decimal("0")
+
+    return Decimal("0")

@@ -58,11 +58,15 @@ export function StepAsset({ defaultValues, onNext }: StepAssetProps) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {productsData?.data.map((product) => (
-                    <SelectItem key={product.id} value={product.id}>
-                      {product.name} ({product.class_of_insurance})
-                    </SelectItem>
-                  ))}
+                  {productsData?.data
+                    .filter((p) =>
+                      p.class_of_insurance.toLowerCase().includes("motor private"),
+                    )
+                    .map((product) => (
+                      <SelectItem key={product.id} value={product.id}>
+                        {product.name} ({product.class_of_insurance})
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
               <FormMessage />

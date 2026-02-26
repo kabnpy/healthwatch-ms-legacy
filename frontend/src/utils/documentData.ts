@@ -48,13 +48,53 @@ export function injectWizardData(
   blueprint: any,
   inputs: any,
   fullPath: string[] = [],
+  rootInputs?: any, // Keep reference to the root for absolute path lookups
 ): any {
   if (typeof blueprint !== "object" || blueprint === null) {
     return blueprint
   }
 
+  const actualRoot = rootInputs || inputs
+
+  /**
+   * Helper to get value from a nested object using dot-notation path.
+   * Handles keys that might contain dots themselves by trying literal matches.
+   */
+  const getValueByPath = (obj: any, path: string): any => {
+    if (!obj || !path) return undefined
+
+    // 1. Try literal match for the whole path
+    if (obj[path] !== undefined) return obj[path]
+
+    // 2. Try splitting by dot
+    const parts = path.split(".")
+    let current = obj
+
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i]
+      if (current && typeof current === "object" && current[part] !== undefined) {
+        current = current[part]
+      } else {
+        // Fallback: maybe the dot is part of the key
+        // Try combining current part with the next one
+        if (current && typeof current === "object" && i < parts.length - 1) {
+          const combined = `${part}.${parts[i + 1]}`
+          if (current[combined] !== undefined) {
+            current = current[combined]
+            i++ // Skip next part
+            continue
+          }
+        }
+        return undefined
+      }
+    }
+    return current
+  }
+
   if (Array.isArray(blueprint)) {
-    return blueprint.map((item) => injectWizardData(item, inputs, fullPath))
+    return blueprint.map((item) =>
+      injectWizardData(item, inputs, fullPath, actualRoot),
+    )
   }
 
   const result: any = {}
@@ -67,17 +107,20 @@ export function injectWizardData(
       value.startsWith("<<") &&
       value.endsWith(">>")
     ) {
-      // 1. Try to find the value by dot-notated full path (flat inputs)
+      // The content inside << >> can be a type (like <<text>>) or a specific path (like <<VEHICLE DETAILS.Reg. No>>)
+      const pathOrType = value.slice(2, -2)
+
+      // 1. Try to find the value by dot-notated full path from current position (flat inputs)
       if (inputs && inputs[dotPath] !== undefined) {
         result[key] = inputs[dotPath]
       }
-      // 2. Try to find it by nested key (if inputs were partially navigated)
-      else if (
-        inputs &&
-        inputs[key] !== undefined &&
-        typeof inputs[key] !== "object"
-      ) {
-        result[key] = inputs[key]
+      // 2. Try the dotPath from root
+      else if (getValueByPath(actualRoot, dotPath) !== undefined) {
+        result[key] = getValueByPath(actualRoot, dotPath)
+      }
+      // 3. Try the content of the placeholder as a direct path from root
+      else if (getValueByPath(actualRoot, pathOrType) !== undefined) {
+        result[key] = getValueByPath(actualRoot, pathOrType)
       } else {
         result[key] = "[ EMPTY ]"
       }
@@ -87,7 +130,7 @@ export function injectWizardData(
       const nextInputs =
         inputs?.[key] && typeof inputs[key] === "object" ? inputs[key] : inputs
 
-      result[key] = injectWizardData(value, nextInputs, currentPath)
+      result[key] = injectWizardData(value, nextInputs, currentPath, actualRoot)
     } else {
       result[key] = value
     }

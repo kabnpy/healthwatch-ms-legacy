@@ -19,25 +19,29 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { getPolicyDisplayName } from "@/utils/insurance"
 import { StatusIndicator } from "../Common/StatusIndicator"
 
 export const columns: ColumnDef<PolicyPublic>[] = [
   {
-    accessorKey: "display_name",
+    id: "display_name",
     header: "Policy",
-    cell: ({ row }) => (
-      <Link
-        to="/clients/$clientId/policies/$policyId"
-        params={{
-          clientId: row.original.client_id,
-          policyId: row.original.id,
-        }}
-        className="font-medium hover:underline text-primary flex items-center gap-2"
-      >
-        {row.original.display_name}
-        <ExternalLink className="size-3 opacity-50" />
-      </Link>
-    ),
+    cell: ({ row }) => {
+      const displayName = getPolicyDisplayName(row.original)
+      return (
+        <Link
+          to="/clients/$clientId/policies/$policyId"
+          params={{
+            clientId: row.original.client_id,
+            policyId: row.original.id,
+          }}
+          className="font-medium hover:underline text-primary flex items-center gap-2"
+        >
+          {displayName}
+          <ExternalLink className="size-3 opacity-50" />
+        </Link>
+      )
+    },
   },
   {
     accessorKey: "status",

@@ -1,33 +1,22 @@
-# Project Status (Session End: 2026-02-17)
+# Project Status (Session End: 2026-02-20)
 
 ## Finished (Key Milestones)
-- **Frontend Routing & Policy View Refinement**: Resolved a routing conflict by converting `clients.$clientId.policies.tsx` to an index route (`clients.$clientId.policies.index.tsx`). Previously, it was acting as a layout for sub-routes but lacked an `<Outlet />`, which blocked specific policy views. Also fixed a `queryKey` mismatch, optimized client data fetching, and improved the `activeTab` detection logic.
-- **CRUD Layer Hardening**: Fixed a widespread bug where SQLAlchemy `where` clauses used `is None` instead of `== None`, which caused incorrect SQL generation and failed to retrieve records with NULL values. This resolved the `404: Policy not found` errors during mock data seeding.
+- **Database & Model Reconciliation**: Synchronized the database schema with the backend models. Updated Alembic migration `c5c580ca4b1f` to correctly implement `RiskNote.cover_snapshot` as the source of truth for risk details, replacing the redundant `Policy.risk_details` approach.
+- **Service Layer Hardening**: Refactored `PolicyService` to improve temporal precision in endorsements and optimized the `RatingService` by consolidating tier sorting logic.
+- **Wizard Data Flow Alignment**: Enhanced the frontend `NewPolicyWizard` to calculate dynamic coverage periods based on selected duration, eliminating hardcoded 1-year assumptions.
+- **Financial Hardening & Rating Engine**: Standardized `sum_insured` as the single authoritative source for insured values across the stack. Refactored `RatingService` to use a singular semantic input and implemented `ManualRatingStrategy` for non-motor products.
 - **Prestart Service Stabilization**: The `prestart` service now successfully completes database migrations and mock data seeding.
 - **Client Regeneration**: Successfully regenerated the TypeScript client from the backend OpenAPI schema and verified type integrity with `tsc`.
-- **Policy Issuance Error Fix**: Resolved "Internal Server Error" (500) during policy creation. Fixed three root causes:
-    1. Added Pydantic validators to `MotorPrivateRiskDetails` to handle numeric strings with commas (e.g., "1,500,000").
-    2. Converted Decimal values to floats in `calculate_levies` to ensure JSON serializability for database storage.
-    3. Corrected field mapping in `PolicyService` from `levies` to `taxes` to align with the `RiskNote` model and database schema.
-    4. Wrapped premium calculation in `PolicyService` within a try-except block to return 400 Bad Request instead of 500 Internal Server Error for calculation failures.
-- **Motor Private Validation & Schema Refinement**: Removed the "Model" field from Motor Private schema, blueprints, and seed data. Improved `injectWizardData` in the frontend to resiliently handle both nested and flat input structures, ensuring proper mapping of wizard data to document blueprints.
-- **Motor Private Validation Fix**: Resolved policy creation failure by correcting `injectWizardData` in the frontend to handle nested blueprint structures. Updated the backend `MotorPrivateRiskDetails` schema and `PolicyService` to support flexible type coercion and nested data extraction.
-- **Risk Note & Invoice Refinement**: Significant enhancements to Risk Note generation, invoicing workflow, layout standardization, and dynamic cover display.
-- **Standardized Wizard Layout**: Improved user experience and responsiveness for the New Policy Wizard.
-- **Motor Private Premium Calculator**: Implemented complex premium calculation logic for Motor Private policies.
-- **Policy Wizard Value Sync**: Automated data transfer between wizard steps for improved efficiency.
-- **Client & Policy UI Refinements**: Standardized table views, status indicators, and address granularity.
-- **Simplified Insurance Models Refactor**: Streamlined core data models by merging RiskItem into Policy for a 1:1 relationship, including backend and database changes, and frontend adaptation.
-- **Unified Document Upload & Management**: Consolidated file handling into a single robust workflow for uploads and viewing.
 
 ## Ongoing
 - **Type Integrity & Stabilization**: Resolving persistent TypeScript errors in the auto-generated client and components.
 
 ## Next Steps
-1. **Database Migration**: Apply `risk_note_number` changes to the live database.
-2. **Frontend Stability**: Monitor the production build for any further TypeScript issues.
-3. **eTIMS Integration Prep**: Start planning for tax compliance (invoice number formatting and external API sync).
+1. **Audit Traceability**: Finalize the `change_log` implementation for endorsements to ensure full traceability of risk detail modifications.
+2. **Automated Testing**: Expand the backend test suite to cover the new pro-rata endorsement calculations and rating tier logic.
+3. **Frontend Refinement**: Polish the document viewing experience to handle the new `cover_snapshot` structure across all templates.
 
 ## Architectural Decisions
-- **Unified Policy Entity**: 1 Policy = 1 Cover Instance. This simplifies data capture and document generation significantly.
-- **Temporal Integrity via Snapshots**: Auditing is preserved by capturing the full Policy state in each Risk Note transaction.
+- **Atomic Snapshot Strategy**: We store the full state of the risk (the "Snapshot") on the `RiskNote` issued for each transaction. This ensures that every document (Risk Note, Invoice) refers to the authoritative state of the cover at the exact moment of issuance.
+- **Policy as the Contract Container**: The `Policy` model remains the long-lived container for the contract, but coverage-specific data (dates, values) is derived from its related `RiskNotes`.
+- **Pro-rata Endorsements**: Premium adjustments for mid-term modifications are calculated pro-rata based on the remaining coverage period relative to the original term.

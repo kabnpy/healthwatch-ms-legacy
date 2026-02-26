@@ -1,0 +1,10 @@
+/home/adam/src/healthwatch-ms-legacy/backend/app/core/config.py:104: UserWarning: The value of SECRET_KEY is "changethis", for security, please change it, at least for deployments.
+  warnings.warn(message, stacklevel=1)
+/home/adam/src/healthwatch-ms-legacy/backend/app/core/config.py:104: UserWarning: The value of FIRST_SUPERUSER_PASSWORD is "changethis", for security, please change it, at least for deployments.
+  warnings.warn(message, stacklevel=1)
+INFO:     Started server process [44086]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+ERROR:    [Errno 98] error while attempting to bind on address ('0.0.0.0', 8000): address already in use
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.

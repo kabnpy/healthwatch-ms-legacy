@@ -8,6 +8,7 @@ import {
   type PolicyCreateExtended,
   type PolicyUpdate,
   ProductsService,
+  type QuoteRequest,
   type RiskNoteCreate,
   RiskNotesService,
   type RiskNoteUpdate,
@@ -170,23 +171,20 @@ export const usePolicyDashboard = (policyId: string) => {
   const policyQuery = usePolicy(policyId)
   const riskNotesQuery = useRiskNotes(policyId)
 
-  // API now returns prepared PolicyPublic, but let's ensure
-  // local consistency if we have both loaded.
-  const latestRiskNote = riskNotesQuery.data?.data?.[0]
+  // The backend now provides the active_note directly in the policy response
   const policy = policyQuery.data
+  const latestRiskNote = policy?.active_note || riskNotesQuery.data?.data?.[0]
 
-  // Simple local enhancement if the relationship wasn't loaded in the main query
+  // Enhanced Policy for UI backwards compatibility where needed,
+  // but pointing to the new atomic locations.
   const enhancedPolicy = policy
     ? {
         ...policy,
-        current_risk_details:
-          policy.current_risk_details ||
-          latestRiskNote?.policy_snapshot?.risk_details ||
-          {},
-        total_premium:
-          policy.total_premium || latestRiskNote?.total_amount || 0,
-        coverage_start: policy.start_date || latestRiskNote?.coverage_start,
-        coverage_end: policy.end_date || latestRiskNote?.coverage_end,
+        // Legacy field mapping for existing components
+        current_risk_details: latestRiskNote?.cover_snapshot || {},
+        total_premium: latestRiskNote?.total_amount || 0,
+        coverage_start: latestRiskNote?.coverage_start,
+        coverage_end: latestRiskNote?.coverage_end,
       }
     : undefined
 
@@ -234,5 +232,25 @@ export const useReceipts = (clientId?: string, skip = 0, limit = 100) => {
   return useQuery({
     queryKey: ["receipts", { clientId, skip, limit }],
     queryFn: () => FinancialsService.readReceipts({ clientId, skip, limit }),
+  })
+}
+
+// 8. RATING / QUOTES
+export const useQuote = () => {
+  return useMutation({
+    mutationFn: async (data: QuoteRequest) =>
+      await PoliciesService.getPolicyQuote({ requestBody: data }),
+  })
+}
+
+export const useQuoteQuery = (data: QuoteRequest | null) => {
+  return useQuery({
+    queryKey: ["quote", data],
+    queryFn: async () => {
+      if (!data) return Promise.reject("No data")
+      return await PoliciesService.getPolicyQuote({ requestBody: data })
+    },
+    enabled: !!data && !!data.product_id,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   })
 }

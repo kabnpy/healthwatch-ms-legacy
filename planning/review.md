@@ -486,3 +486,13 @@ Add event sourcing for financial state
 
 
 The codebase shows good FastAPI/SQLModel patterns, but the financial domain logic needs hardening. The migration churn suggests you're still discovering the domain model—consider pausing feature development to solidify the core abstractions.
+
+curl -X POST http://localhost:8000/api/v1/policies/quote \
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzI1NDIyNzAsInN1YiI6ImE5OWZhZjJkLWU5M2ItNDQ4Yy1iYWY1LTRkZjY3ODZjMzJiZCJ9.0-zp_IcinAccNoP5m4bjFiWn8VgOz-RsoEUiphd-pFQ" \
+-H "Content-Type: application/json" \
+-d '{
+  "product_id": "<motor_private_product_id>",
+  "risk_details": {
+    "vehicle": { "sum_insured": 1000000, "registration_number": "KCM 123", "make": "Toyota", "model": "Prado", "year_of_manufacture": 2020 }
+  }
+}'

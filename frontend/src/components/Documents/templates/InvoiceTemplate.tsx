@@ -30,8 +30,8 @@ export const InvoiceTemplate = ({
         {/* DOCUMENT HEADER */}
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-5xl font-black uppercase tracking-tighter text-black">
-              Debit Note
+            <h1 className="text-3xl font-black uppercase tracking-tighter text-black">
+              Invoice
             </h1>
             <div className="flex items-center gap-3 mt-2">
               <p className="text-[11px] text-slate-500 font-mono uppercase bg-slate-100 px-2 py-0.5 rounded">
@@ -50,7 +50,7 @@ export const InvoiceTemplate = ({
           </div>
           <div className="text-right flex flex-col items-end">
             <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-1">
-              Financial Year
+              Year
             </p>
             <p className="text-xl font-black uppercase tracking-tighter text-black bg-black text-white px-3 py-1">
               {yearRange}
@@ -71,14 +71,20 @@ export const InvoiceTemplate = ({
                 </th>
                 <td className="py-4 px-6 align-top border-l border-black/5">
                   <div className="text-black">
-                    <p className="font-black text-xl leading-tight mb-2 tracking-tight">
+                    <p className="font-bold text-lg leading-tight mb-2 tracking-tight">
                       {client.name}
                     </p>
                     <div className="flex justify-between items-end gap-8">
                       <p className="text-[11px] leading-relaxed font-medium">
+                        {client.physical_address && (
+                          <>
+                            {client.physical_address}
+                            <br />
+                          </>
+                        )}
                         {client.postal_number
                           ? `P.O. Box ${client.postal_number}`
-                          : "No Address Provided"}
+                          : !client.physical_address && "No Address Provided"}
                         {client.postal_code && ` - ${client.postal_code}`}
                         <br />
                         {client.town || "Nairobi"}
@@ -97,7 +103,7 @@ export const InvoiceTemplate = ({
                 >
                   Insurer
                 </th>
-                <td className="py-4 px-6 align-middle border-l border-black/5 font-black uppercase tracking-tighter text-lg">
+                <td className="py-4 px-6 align-middle border-l border-black/5 font-bold uppercase text-xs">
                   {insurerName}
                 </td>
               </tr>
@@ -131,7 +137,7 @@ export const InvoiceTemplate = ({
                 const product = policy?.product
 
                 const period = riskNote
-                  ? `${new Date(riskNote.start_date).toLocaleDateString("en-GB")} - ${new Date(riskNote.end_date).toLocaleDateString("en-GB")}`
+                  ? `${new Date(riskNote.coverage_start).toLocaleDateString("en-GB")} - ${new Date(riskNote.coverage_end).toLocaleDateString("en-GB")}`
                   : "N/A"
 
                 return (
@@ -145,15 +151,15 @@ export const InvoiceTemplate = ({
                     <td className="py-4 px-4 text-[11px] font-black text-black uppercase tracking-tight">
                       {product?.class_of_insurance || item.description || "N/A"}
                     </td>
-                    <td className="py-4 px-4 text-[10px]">
+                    <td className="py-4 px-4 text-sm">
                       <div className="font-bold text-black font-mono tracking-tighter">
                         {policy?.policy_number || "N/A"}
                       </div>
-                      <div className="text-slate-500 font-mono text-[9px] mt-0.5">
+                      <div className="text-slate-500 font-mono text-xs mt-0.5">
                         {period}
                       </div>
                     </td>
-                    <td className="py-4 text-[12px] font-black text-right font-mono text-black">
+                    <td className="py-4 text-sm font-black text-right font-mono text-black">
                       {(item.amount || 0).toLocaleString(undefined, {
                         minimumFractionDigits: 2,
                       })}
@@ -205,29 +211,27 @@ export const InvoiceTemplate = ({
                 <div className="space-y-1 mt-2">
                   <p className="flex justify-between">
                     <span className="text-slate-500">Business No:</span>
-                    <span className="font-black">555000</span>
+                    <span className="font-black">505800</span>
                   </p>
                   <p className="flex justify-between">
                     <span className="text-slate-500">Account No:</span>
                     <span className="font-black font-mono">
-                      {invoice.invoice_number}
+                      Car Registration / Name
                     </span>
                   </p>
                 </div>
               </div>
-              <div>
+              {/*<div>
                 <p className="font-black uppercase mb-3 border-b border-black/10 pb-1 text-black tracking-widest">
                   Cheque / EFT
                 </p>
                 <div className="space-y-1 mt-2">
-                  <p className="font-black">
-                    HealthWatch Insurance Brokers Ltd
-                  </p>
+                  <p className="font-black">HealthWatch Insurance Agency</p>
                   <p className="italic text-slate-400 font-medium">
                     Bank details available on request
                   </p>
                 </div>
-              </div>
+              </div>*/}
             </div>
           </div>
         </div>

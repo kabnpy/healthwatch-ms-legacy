@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useEffect, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
+import type { MotorFinancialBreakdown } from "@/client"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -13,8 +14,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { useProducts } from "@/hooks/useInsurance"
-import { calculatePremium } from "@/lib/calculator"
+import { useProducts, useQuote } from "@/hooks/useInsurance"
 import type {
   EnhancedProduct,
   WizardExtensions,
@@ -23,8 +23,9 @@ import type {
 
 const financialsSchema = z.object({
   financials: z.object({
-    sumInsured: z.coerce.number().min(0),
     rate: z.coerce.number().min(0),
+    basicRate: z.coerce.number().optional(),
+    isHighEnd: z.boolean().optional(),
     startDate: z.string(),
     duration: z.coerce.number().default(12),
   }),
@@ -44,6 +45,7 @@ interface StepFinancialsProps {
   onNext: (data: any) => void
   onBack: () => void
   productId: string
+  sum_insured: number
 }
 
 export function StepFinancials({
@@ -51,8 +53,10 @@ export function StepFinancials({
   onNext,
   onBack,
   productId,
+  sum_insured,
 }: StepFinancialsProps) {
   const { data: productsData } = useProducts()
+  const quoteMutation = useQuote()
 
   const selectedProduct = useMemo(() => {
     return productsData?.data.find((p) => p.id === productId) as
@@ -64,8 +68,9 @@ export function StepFinancials({
     resolver: zodResolver(financialsSchema),
     defaultValues: {
       financials: {
-        sumInsured: defaultValues.financials?.sumInsured || 0,
         rate: defaultValues.financials?.rate || 0,
+        basicRate: defaultValues.financials?.basicRate || 0,
+        isHighEnd: defaultValues.financials?.isHighEnd || false,
         startDate:
           defaultValues.financials?.startDate ||
           new Date().toISOString().split("T")[0],
@@ -97,50 +102,94 @@ export function StepFinancials({
     ?.toLowerCase()
     .includes("motor private")
 
-  const calculation = calculatePremium({
-    sumInsured: financials.sumInsured || 0,
-    rate: financials.rate || 0,
-    hasPVT: !!extensions.pvt,
-    hasExcessProtector: !!extensions.excessProtector,
-    hasPassengerLiability: !!extensions.passengerLiability,
-    hasOMRescuePlus: !!extensions.omRescuePlus,
-    isMotorPrivate: !!isMotorPrivate,
-  })
+  const isManual = selectedProduct?.pricing_strategy === "Manual"
+
+  // 1. Debounced Backend Quote
+  useEffect(() => {
+    if (!productId) return
+
+    const timer = setTimeout(() => {
+      quoteMutation.mutate({
+        product_id: productId,
+        risk_details: {
+          vehicle: {
+            sum_insured: sum_insured,
+          },
+          financials: {
+            rate: financials.rate || 0,
+          },
+          extensions: {
+            pvt: !!extensions.pvt,
+            excess_protector: !!extensions.excessProtector,
+            om_rescue_plus: !!extensions.omRescuePlus,
+            passenger_liability: !!extensions.passengerLiability,
+          },
+        },
+      })
+    }, 500) // 500ms debounce
+
+    return () => clearTimeout(timer)
+  }, [
+    productId,
+    sum_insured,
+    financials.rate,
+    extensions.pvt,
+    extensions.excessProtector,
+    extensions.omRescuePlus,
+    extensions.passengerLiability,
+    quoteMutation.mutate,
+  ])
+
+  // 2. authoritative source of truth
+  const breakdown = quoteMutation.data?.breakdown as MotorFinancialBreakdown | undefined
 
   // Auto-set rate for Motor Private
   useEffect(() => {
-    if (isMotorPrivate && calculation.breakdown.basic > 0) {
-      // Reverse calculate effective rate for display
-      const effectiveRate =
-        (calculation.breakdown.basic / (financials.sumInsured || 1)) * 100
-      if (effectiveRate !== financials.rate) {
-        form.setValue("financials.rate", Number(effectiveRate.toFixed(3)))
+    if (breakdown) {
+      if (isMotorPrivate && Number(breakdown.net_premium) > 0) {
+        // Reverse calculate effective rate for display (inclusive of non-tax extensions)
+        const siNum = Number(sum_insured) || 1
+        const effectiveRate =
+          (Number(breakdown.net_premium) / siNum) * 100
+        if (Math.abs(effectiveRate - financials.rate) > 0.001) {
+          form.setValue("financials.rate", Number(effectiveRate.toFixed(3)))
+        }
+      }
+
+      if (breakdown.basic_rate !== undefined) {
+        form.setValue("financials.basicRate", Number(breakdown.basic_rate) * 100)
+      }
+      if (breakdown.is_high_end !== undefined) {
+        form.setValue("financials.isHighEnd", breakdown.is_high_end)
       }
     }
   }, [
     isMotorPrivate,
-    calculation.breakdown.basic,
-    financials.sumInsured,
+    breakdown?.net_premium,
+    breakdown?.basic_rate,
+    breakdown?.is_high_end,
+    sum_insured,
     financials.rate,
     form.setValue,
+    breakdown,
   ])
 
   // High-End Logic: Auto-select included benefits
   useEffect(() => {
-    if (isMotorPrivate && (financials.sumInsured || 0) >= 3000000) {
+    if (isMotorPrivate && (Number(sum_insured) || 0) >= 3000000) {
       if (!extensions.pvt) form.setValue("extensions.pvt", true)
       if (!extensions.excessProtector)
         form.setValue("extensions.excessProtector", true)
     }
   }, [
     isMotorPrivate,
-    financials.sumInsured,
+    sum_insured,
     extensions.excessProtector,
     extensions.pvt,
     form.setValue,
   ])
 
-  const isHighEnd = isMotorPrivate && (financials.sumInsured || 0) >= 3000000
+  const isHighEnd = isMotorPrivate && (Number(sum_insured) || 0) >= 3000000
 
   return (
     <Form {...(form as any)}>
@@ -150,23 +199,15 @@ export function StepFinancials({
           <div className="space-y-6">
             <div className="space-y-4">
               {!isPA && (
-                <FormField
-                  control={form.control as any}
-                  name="financials.sumInsured"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Sum Insured</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          {...field}
-                          value={field.value || 0}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="space-y-2">
+                  <FormLabel>Sum Insured</FormLabel>
+                  <div className="h-10 px-3 py-2 rounded-md border border-input bg-muted/50 text-sm font-bold flex items-center">
+                    KES {(Number(sum_insured) || 0).toLocaleString()}
+                  </div>
+                  <p className="text-[10px] text-muted-foreground italic">
+                    Value derived from asset details.
+                  </p>
+                </div>
               )}
               <FormField
                 control={form.control as any}
@@ -182,8 +223,8 @@ export function StepFinancials({
                         step="0.01"
                         {...field}
                         value={field.value || 0}
-                        readOnly={!!isMotorPrivate}
-                        className={isMotorPrivate ? "bg-slate-100" : ""}
+                        readOnly={!!isMotorPrivate && !isManual}
+                        className={isMotorPrivate && !isManual ? "bg-slate-100" : ""}
                       />
                     </FormControl>
                     <FormMessage />
@@ -288,6 +329,25 @@ export function StepFinancials({
                   {isMotorPrivate && (
                     <FormField
                       control={form.control as any}
+                      name="extensions.passengerLiability"
+                      render={({ field }) => (
+                        <FormItem className="flex items-center justify-between space-y-0 rounded-lg p-2 border bg-white">
+                          <FormLabel className="text-sm cursor-pointer w-full">
+                            Passenger Liability (KES 500)
+                          </FormLabel>
+                          <FormControl>
+                            <Checkbox
+                              checked={!!field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                  {isMotorPrivate && (
+                    <FormField
+                      control={form.control as any}
                       name="extensions.omRescuePlus"
                       render={({ field }) => (
                         <FormItem className="flex items-center justify-between space-y-0 rounded-lg p-2 border bg-white">
@@ -315,98 +375,145 @@ export function StepFinancials({
               <h3 className="font-bold text-sm uppercase tracking-widest text-slate-400">
                 Premium Preview
               </h3>
-              <div className="text-right text-[10px] font-mono text-slate-500">
-                Calculated Real-time
+              <div className="text-right text-[10px] font-mono text-slate-500 flex items-center gap-2">
+                {quoteMutation.isPending && (
+                  <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+                )}
+                {breakdown ? "AUTHORITATIVE MATH" : "ESTIMATED"}
               </div>
             </div>
 
             <div className="space-y-6">
-              <div className="space-y-3">
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-slate-400">
-                    {isPA ? "Base Premium" : "Basic Premium"}
-                  </span>
-                  <span className="font-mono font-bold">
-                    {calculation.breakdown.basic.toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                    })}
-                  </span>
+              {!breakdown && !quoteMutation.isPending ? (
+                <div className="py-12 text-center space-y-2">
+                  <p className="text-slate-500 text-xs uppercase tracking-widest font-bold">
+                    Awaiting Input
+                  </p>
+                  <p className="text-slate-600 text-[10px] italic">
+                    Enter sum insured to generate authoritative quote
+                  </p>
                 </div>
-
-                <div className="space-y-1">
-                  <span className="text-[10px] font-bold uppercase text-slate-500 tracking-tight">
-                    Benefits
-                  </span>
-                  {isMotor && calculation.breakdown.extensions.length > 0 ? (
-                    calculation.breakdown.extensions.map((ext) => (
-                      <div
-                        key={ext.name}
-                        className="flex justify-between text-xs py-1 border-b border-slate-800 last:border-0"
-                      >
-                        <span className="text-slate-300 italic">
-                          {ext.name}
+              ) : (
+                <>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center text-sm">
+                      <div className="flex flex-col">
+                        <span className="text-slate-400">
+                          {isPA ? "Base Premium" : "Basic Premium"}
                         </span>
-                        <span
-                          className={
-                            ext.included
-                              ? "font-bold text-emerald-400"
-                              : "font-mono"
-                          }
-                        >
-                          {ext.included
-                            ? "INCLUDED"
-                            : ext.amount.toLocaleString(undefined, {
-                                minimumFractionDigits: 2,
-                              })}
-                        </span>
+                        {isMotorPrivate && (
+                          <span className="text-[10px] text-slate-500 font-mono">
+                            Applied Rate: {(financials as any).basicRate || financials.rate}%
+                          </span>
+                        )}
                       </div>
-                    ))
-                  ) : (
-                    <p className="text-[10px] text-slate-600 italic">
-                      No additional benefits selected.
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-4 border-t border-slate-800 pt-4">
-                <div className="bg-slate-800/50 p-3 rounded space-y-2">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-slate-400">Training Levy (0.2%)</span>
-                    <span className="font-mono text-slate-300">
-                      {calculation.breakdown.levies.trainingLevy.toLocaleString(
-                        undefined,
-                        { minimumFractionDigits: 2 },
-                      )}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-slate-400">PHCF Levy (0.25%)</span>
-                    <span className="font-mono text-slate-300">
-                      {calculation.breakdown.levies.phcf.toLocaleString(
-                        undefined,
-                        { minimumFractionDigits: 2 },
-                      )}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="pt-2 border-t border-slate-700">
-                  <div className="flex justify-between items-baseline">
-                    <span className="text-xs font-bold text-slate-400 uppercase">
-                      Total Amount
-                    </span>
-                    <div className="text-right">
-                      <span className="text-2xl font-black text-emerald-400 font-mono">
-                        <span className="text-sm font-normal mr-1">KES</span>
-                        {calculation.breakdown.total.toLocaleString(undefined, {
-                          minimumFractionDigits: 2,
-                        })}
+                      <span
+                        className={`font-mono font-bold ${
+                          quoteMutation.isPending ? "opacity-40" : ""
+                        }`}
+                      >
+                        {breakdown
+                          ? Number(breakdown.net_premium).toLocaleString(
+                              undefined,
+                              {
+                                minimumFractionDigits: 2,
+                              },
+                            )
+                          : "0.00"}
                       </span>
                     </div>
+
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-bold uppercase text-slate-500 tracking-tight">
+                        Benefits
+                      </span>
+                      {breakdown?.benefits && breakdown.benefits.length > 0 ? (
+                        breakdown.benefits.map((benefit: any) => (
+                          <div
+                            key={benefit.name}
+                            className={`flex justify-between text-xs py-1 border-b border-slate-800 last:border-0 ${
+                              quoteMutation.isPending ? "opacity-40" : ""
+                            }`}
+                          >
+                            <span className="text-slate-300 italic">
+                              {benefit.name}
+                            </span>
+                            <span className="font-mono">
+                              {Number(benefit.amount).toLocaleString(
+                                undefined,
+                                {
+                                  minimumFractionDigits: 2,
+                                },
+                              )}
+                            </span>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-[10px] text-slate-600 italic">
+                          No additional benefits included.
+                        </p>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </div>
+
+                  <div className="space-y-4 border-t border-slate-800 pt-4">
+                    <div className="bg-slate-800/50 p-3 rounded space-y-2">
+                      {breakdown?.taxes ? (
+                        Object.entries(breakdown.taxes).map(
+                          ([name, amount]) => (
+                            <div
+                              key={name}
+                              className={`flex justify-between text-xs ${
+                                quoteMutation.isPending ? "opacity-40" : ""
+                              }`}
+                            >
+                              <span className="text-slate-400">
+                                {name.replace("_", " ").toUpperCase()}
+                              </span>
+                              <span className="font-mono text-slate-300">
+                                {Number(amount).toLocaleString(undefined, {
+                                  minimumFractionDigits: 2,
+                                })}
+                              </span>
+                            </div>
+                          ),
+                        )
+                      ) : (
+                        <div className="text-[10px] text-slate-600 italic py-2">
+                          Taxes will be calculated on quote
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-700">
+                      <div className="flex justify-between items-baseline">
+                        <span className="text-xs font-bold text-slate-400 uppercase">
+                          Total Amount
+                        </span>
+                        <div className="text-right">
+                          <span
+                            className={`text-2xl font-black text-emerald-400 font-mono ${
+                              quoteMutation.isPending ? "opacity-40" : ""
+                            }`}
+                          >
+                            <span className="text-sm font-normal mr-1">
+                              KES
+                            </span>
+                            {breakdown
+                              ? Number(breakdown.total_amount).toLocaleString(
+                                  undefined,
+                                  {
+                                    minimumFractionDigits: 2,
+                                  },
+                                )
+                              : "0.00"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>

@@ -27,23 +27,23 @@ export const RiskNoteTemplate = ({
   isEditable = false,
   onSave,
 }: RiskNoteTemplateProps) => {
-  const [localSnapshot, setLocalSnapshot] = useState<Record<string, any>>(
-    riskNote.policy_snapshot || {},
+  const [localRiskDetails, setLocalRiskDetails] = useState<Record<string, any>>(
+    riskNote.cover_snapshot || {},
   )
 
   // Keep local state in sync with external changes if not editing
   useEffect(() => {
     if (!isEditable) {
-      setLocalSnapshot(riskNote.policy_snapshot || {})
+      setLocalRiskDetails(riskNote.cover_snapshot || {})
     }
-  }, [riskNote.policy_snapshot, isEditable])
+  }, [riskNote.cover_snapshot, isEditable])
 
   const handleSave = () => {
-    onSave?.(localSnapshot)
+    onSave?.(localRiskDetails)
   }
 
   const handleReset = () => {
-    setLocalSnapshot(riskNote.policy_snapshot || {})
+    setLocalRiskDetails(riskNote.cover_snapshot || {})
   }
 
   // --- DATA CONSOLIDATION LOGIC ---
@@ -58,16 +58,22 @@ export const RiskNoteTemplate = ({
           <p className="font-bold text-base leading-tight mb-1">
             {client.name}
           </p>
-          <div className="flex justify-between items-start gap-8">
+          <div className="flex justify-between items-end gap-8">
             <p className="text-[11px] leading-relaxed">
+              {client.physical_address && (
+                <>
+                  {client.physical_address}
+                  <br />
+                </>
+              )}
               {client.postal_number
                 ? `P.O. Box ${client.postal_number}`
-                : "No Address Provided"}
+                : !client.physical_address && "No Address Provided"}
               {client.postal_code && ` - ${client.postal_code}`}
               <br />
               {client.town || "Nairobi"}
             </p>
-            <p className="font-mono text-[11px] font-bold shrink-0">
+            <p className="font-mono text-[12px] font-bold shrink-0 uppercase">
               P.I.N No. {client.kra_pin || "N/A"}
             </p>
           </div>
@@ -79,11 +85,11 @@ export const RiskNoteTemplate = ({
     sections.push({
       name: "CLASS",
       content: (
-        <div className="flex justify-between items-center w-full text-black">
-          <span className="font-bold uppercase tracking-tight">
+        <div className="flex justify-between items-center w-full text-black uppercase">
+          <span className="font-bold tracking-tight text-[11px]">
             {policy.product?.name || "N/A"}
           </span>
-          <span className="font-mono text-[11px] font-bold">
+          <span className="font-mono text-[12px] font-bold">
             [Policy No. {policy.policy_number}]
           </span>
         </div>
@@ -97,7 +103,7 @@ export const RiskNoteTemplate = ({
     sections.push({
       name: "PERIOD",
       content: (
-        <div className="flex items-center gap-12 text-black font-bold uppercase tracking-tight">
+        <div className="flex items-center justify-between text-black font-bold uppercase tracking-tight text-[11px]">
           <span>
             {startDate
               ? new Date(startDate).toLocaleDateString("en-GB", {
@@ -107,9 +113,7 @@ export const RiskNoteTemplate = ({
                 })
               : "N/A"}
           </span>
-          <span className="text-slate-400 normal-case font-normal italic">
-            To
-          </span>
+          <span className="text-slate-700 normal-case">To</span>
           <span>
             {endDate
               ? new Date(endDate).toLocaleDateString("en-GB", {
@@ -137,7 +141,7 @@ export const RiskNoteTemplate = ({
 
     // 5. DYNAMIC RISK SECTIONS (Template + Instance)
     const template: Record<string, any> = policy.product?.product_details || {}
-    const instance: Record<string, any> = localSnapshot.risk_details || {}
+    const instance: Record<string, any> = localRiskDetails || {}
 
     // Merge logic: template provides structure, instance provides values
     // We iterate over the template sections to ensure order and grouping
@@ -175,6 +179,11 @@ export const RiskNoteTemplate = ({
               }
             })
           }
+          
+          // Singular Source Mapping: Map the internal 'sum_insured' to the template's 'Value Kshs.'
+          if (instance.sum_insured !== undefined && instance.sum_insured !== "[ EMPTY ]") {
+            mergedContent["Value Kshs."] = instance.sum_insured
+          }
         } else if (instanceContent && instanceContent !== "[ EMPTY ]") {
           mergedContent = instanceContent
         }
@@ -201,17 +210,27 @@ export const RiskNoteTemplate = ({
     })
 
     // 6. ANNUAL PREMIUM
+    const breakdown = riskNote.financial_breakdown || {}
+    const taxes = (breakdown.taxes as Record<string, number>) || {}
+    const benefits = (breakdown.benefits as any[]) || []
+
     const taxRows: Record<string, RiskNoteContentValue> = {}
-    Object.entries(riskNote.taxes || {}).forEach(([name, amt]) => {
-      taxRows[name.replace(/([A-Z])/g, " $1")] = formatCurrency(
+    Object.entries(taxes).forEach(([name, amt]) => {
+      taxRows[name.replace(/_/g, " ").toUpperCase()] = formatCurrency(
         amt as string | number,
       )
+    })
+
+    const benefitRows: Record<string, RiskNoteContentValue> = {}
+    benefits.forEach((b) => {
+      benefitRows[b.name.toUpperCase()] = formatCurrency(b.amount)
     })
 
     sections.push({
       name: "FINANCIAL SUMMARY",
       content: {
         "Net Premium": formatCurrency(riskNote.net_premium),
+        ...benefitRows,
         ...taxRows,
         "Total Amount Payable": (
           <span className="text-xl font-black text-black tracking-tighter">
@@ -234,15 +253,12 @@ export const RiskNoteTemplate = ({
     })
 
     return sections
-  }, [client, policy, riskNote, localSnapshot.risk_details])
+  }, [client, policy, riskNote, localRiskDetails])
 
   const handleUpdateSection = (sectionName: string, updatedContent: any) => {
-    setLocalSnapshot({
-      ...localSnapshot,
-      risk_details: {
-        ...localSnapshot.risk_details,
-        [sectionName]: updatedContent,
-      },
+    setLocalRiskDetails({
+      ...localRiskDetails,
+      [sectionName]: updatedContent,
     })
   }
 
@@ -270,7 +286,7 @@ export const RiskNoteTemplate = ({
           {/* Document Header Info */}
           <div className="flex justify-between items-start">
             <div>
-              <h1 className="text-5xl font-black uppercase tracking-tighter text-black">
+              <h1 className="text-3xl font-black uppercase tracking-tighter text-black">
                 Risk Note
               </h1>
               <div className="flex items-center gap-3 mt-2">
@@ -288,14 +304,14 @@ export const RiskNoteTemplate = ({
                 </div>
               </div>
             </div>
-            <div className="text-right flex flex-col items-end">
+            {/*<div className="text-right flex flex-col items-end">
               <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground mb-1">
                 Transaction Type
               </p>
               <p className="text-xl font-black uppercase tracking-tighter text-black bg-black text-white px-3 py-1">
                 {riskNote.transaction_type}
               </p>
-            </div>
+            </div>*/}
           </div>
 
           {/* UNIFIED TABLE BODY */}

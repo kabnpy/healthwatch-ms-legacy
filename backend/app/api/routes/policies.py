@@ -25,10 +25,13 @@ from app.models import (
     PolicyCreateExtended,
     PolicyPublic,
     PolicyUpdate,
+    Product,
     RiskNotePublic,
     RiskNotesPublic,
 )
+from app.schemas import QuoteRequest, QuoteResponse
 from app.services.policy import policy_service
+from app.services.rating import RatingService
 
 router = APIRouter()
 
@@ -64,6 +67,27 @@ def read_policy(session: SessionDep, _current_user: CurrentUser, id: uuid.UUID) 
     return prepare_policy_public(policy)
 
 
+@router.post("/quote", response_model=QuoteResponse)
+def get_policy_quote(
+    *,
+    session: SessionDep,
+    _current_user: CurrentUser,
+    quote_in: QuoteRequest,
+) -> Any:
+    """
+    Get a non-persistent premium quote breakdown.
+    """
+    product = session.get(Product, quote_in.product_id)
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+
+    try:
+        breakdown = RatingService.calculate_breakdown(product, quote_in.risk_details)
+        return QuoteResponse(breakdown=breakdown)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
 @router.post("/", response_model=PolicyPublic)
 def create_policy(
     *, session: SessionDep, current_user: StaffUser, policy_in: PolicyCreateExtended
@@ -83,11 +107,13 @@ def create_policy(
     policy = policy_service.create_policy(
         session=session,
         policy_in=policy_in,
-        risk_details=policy_in.risk_details,
+        cover_snapshot=policy_in.risk_details,
         coverage_start=policy_in.coverage_start,
         coverage_end=policy_in.coverage_end,
         current_user_id=current_user.id,
     )
+    session.commit()
+    session.refresh(policy)
     return prepare_policy_public(policy)
 
 
@@ -102,13 +128,17 @@ def create_endorsement(
     """
     Create a policy endorsement.
     """
-    return policy_service.create_endorsement(
+    res = policy_service.create_endorsement(
         session=session,
         policy_id=id,
-        updated_risk_details=endorsement_in.updated_risk_details,
+        updated_cover_snapshot=endorsement_in.updated_risk_details,
         change_description=endorsement_in.change_description,
+        effective_date=endorsement_in.effective_date,
         current_user_id=current_user.id,
     )
+    session.commit()
+    session.refresh(res)
+    return res
 
 
 @router.put("/{id}", response_model=PolicyPublic)

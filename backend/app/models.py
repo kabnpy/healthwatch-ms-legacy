@@ -54,7 +54,7 @@ class TransactionType(str, Enum):
 class RiskNoteStatus(str, Enum):
     DRAFT = "Draft"
     ISSUED = "Issued"
-    REPLACED = "Replaced"
+    REPLACED = "Replaced"  # superseded by a newer note on same policy
     CANCELLED = "Cancelled"
     ACTIVE = "Issued"  # Alias for backward compatibility
 
@@ -225,7 +225,13 @@ class ProductBase(AuditMixin, SQLModel):
     name: str
     class_of_insurance: str  # "Motor Private", "Fire"
     product_details: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
+    pricing_strategy: PricingStrategy = Field(default=PricingStrategy.PERCENTAGE)
+    pricing_rules: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
     default_commission_rate: float = 10.0
+    # Text templates for document terms
+    default_benefits_and_limits: str | None = None
+    default_excesses: str | None = None
+    default_special_clauses: str | None = None
 
 
 class ProductCreate(ProductBase):
@@ -237,6 +243,8 @@ class ProductUpdate(SQLModel):
     name: str | None = None
     class_of_insurance: str | None = None
     product_details: dict[str, Any] | None = None
+    pricing_strategy: PricingStrategy | None = None
+    pricing_rules: dict[str, Any] | None = None
     default_commission_rate: float | None = None
 
 
@@ -254,20 +262,16 @@ class Product(ProductBase, table=True):
         if "motor private" in self.class_of_insurance.lower():
             from app.schemas import MotorPrivateRiskDetails
 
-            risk_data = risk_details
-            if "VEHICLE DETAILS" in risk_details:
-                risk_data = risk_details["VEHICLE DETAILS"]
-            validated = MotorPrivateRiskDetails(**risk_data)
-            return {"VEHICLE DETAILS": validated.model_dump(by_alias=True)}
+            validated = MotorPrivateRiskDetails(**risk_details)
+            
+            # Return a clean, semantic structure that is JSON-serializable
+            return validated.model_dump(mode="python")
         return risk_details
-
     def calculate_premium(self, risk_details: dict[str, Any]) -> Decimal:
-        if "motor private" in self.class_of_insurance.lower():
-            risk_data = risk_details.get("VEHICLE DETAILS", risk_details)
-            value = float(risk_data.get("Value Kshs.", 0))
-            premium = max(15000.0, value * 0.0325)
-            return Decimal(str(premium)).quantize(Decimal("0.01"))
-        return Decimal("0.00")
+        from app.services.rating import RatingService
+
+        breakdown = RatingService.calculate_breakdown(self, risk_details)
+        return breakdown.net_premium
 
 
 class ProductsPublic(SQLModel):
@@ -287,6 +291,7 @@ class ClientBase(AuditMixin, SQLModel):
     kra_pin: str = Field(unique=True, index=True)
     email: str | None = None
     phone: str
+    physical_address: str | None = None
     postal_number: str | None = None
     postal_code: str | None = None
     town: str | None = None
@@ -303,6 +308,7 @@ class ClientUpdate(SQLModel):
     kra_pin: str | None = None
     email: str | None = None
     phone: str | None = None
+    physical_address: str | None = None
     postal_number: str | None = None
     postal_code: str | None = None
     town: str | None = None
@@ -373,7 +379,8 @@ class PolicyBase(AuditMixin, SQLModel):
         default=None, foreign_key="product.id", index=True
     )
     status: PolicyStatus = Field(default=PolicyStatus.ACTIVE)
-    inception_date: date | None = Field(default_factory=date.today)
+    # inception_date = when this policy was first taken out. Never changes.
+    inception_date: date = Field(default_factory=date.today)
 
 
 class PolicyCreate(PolicyBase):
@@ -381,14 +388,15 @@ class PolicyCreate(PolicyBase):
 
 
 class PolicyCreateExtended(PolicyCreate):
-    risk_details: dict[str, Any] = Field(default_factory=dict)
     coverage_start: date = Field(default_factory=date.today)
     coverage_end: date
+    risk_details: dict[str, Any] = Field(default_factory=dict)
 
 
 class EndorsementCreate(SQLModel):
     updated_risk_details: dict[str, Any]
     change_description: str
+    effective_date: date | None = None
 
 
 class PolicyUpdate(SQLModel):
@@ -412,125 +420,11 @@ class Policy(PolicyBase, table=True):
     )
     claims: list["Claim"] = Relationship(back_populates="policy")
 
-    @property
-    def current_risk_note(self) -> Optional["RiskNote"]:
-        active_notes = [
-            rn
-            for rn in self.risk_notes
-            if rn.status in [RiskNoteStatus.ISSUED, RiskNoteStatus.ACTIVE]
-        ]
-        return active_notes[0] if active_notes else None
-
-    @property
-    def current_risk_details(self) -> dict[str, Any]:
-        rn = self.current_risk_note
-        if rn and isinstance(rn.policy_snapshot, dict):
-            return cast(dict[str, Any], rn.policy_snapshot.get("risk_details", {}))
-        return {}
-
-    @property
-    def current_premium(self) -> Decimal:
-        rn = self.current_risk_note
-        return rn.total_amount if rn else Decimal("0")
-
-    @property
-    def current_term_start(self) -> date | None:
-        rn = self.current_risk_note
-        return rn.coverage_start if rn else None
-
-    @property
-    def current_term_end(self) -> date | None:
-        rn = self.current_risk_note
-        return rn.coverage_end if rn else None
-
 
 class PolicyPublic(PolicyBase):
     id: uuid.UUID
     product: ProductPublic | None = None
-
-    @computed_field  # type: ignore
-    @property
-    def current_risk_details(self) -> dict[str, Any]:
-        if not hasattr(self, "risk_notes") or not self.risk_notes:
-            return {}
-        active_notes = [
-            rn
-            for rn in self.risk_notes
-            if rn.status in [RiskNoteStatus.ISSUED, RiskNoteStatus.ACTIVE]
-        ]
-        if not active_notes:
-            return {}
-        return cast(
-            dict[str, Any], active_notes[0].policy_snapshot.get("risk_details", {})
-        )
-
-    @computed_field  # type: ignore
-    @property
-    def total_premium(self) -> Decimal:
-        if not hasattr(self, "risk_notes") or not self.risk_notes:
-            return Decimal("0")
-        active_notes = [
-            rn
-            for rn in self.risk_notes
-            if rn.status in [RiskNoteStatus.ISSUED, RiskNoteStatus.ACTIVE]
-        ]
-        return (
-            cast(Decimal, active_notes[0].total_amount)
-            if active_notes
-            else Decimal("0")
-        )
-
-    @computed_field  # type: ignore
-    @property
-    def start_date(self) -> date | None:
-        if not hasattr(self, "risk_notes") or not self.risk_notes:
-            return None
-        active_notes = [
-            rn
-            for rn in self.risk_notes
-            if rn.status in [RiskNoteStatus.ISSUED, RiskNoteStatus.ACTIVE]
-        ]
-        return active_notes[0].coverage_start if active_notes else None
-
-    @computed_field  # type: ignore
-    @property
-    def end_date(self) -> date | None:
-        if not hasattr(self, "risk_notes") or not self.risk_notes:
-            return None
-        active_notes = [
-            rn
-            for rn in self.risk_notes
-            if rn.status in [RiskNoteStatus.ISSUED, RiskNoteStatus.ACTIVE]
-        ]
-        return active_notes[0].coverage_end if active_notes else None
-
-    @computed_field  # type: ignore
-    @property
-    def display_name(self) -> str:
-        def recursive_search(obj: Any, targets: list[str]) -> str | None:
-            if not isinstance(obj, dict):
-                return None
-            for k, v in obj.items():
-                if any(t.lower() == str(k).lower().strip() for t in targets):
-                    if isinstance(v, str) and v and "<<" not in v:
-                        return v.strip()
-            for v in obj.values():
-                res = recursive_search(v, targets)
-                if res:
-                    return res
-            return None
-
-        if self.product:
-            base_name = self.product.class_of_insurance or self.product.name
-            risk_details = self.current_risk_details
-            if "motor private" in base_name.lower():
-                reg_no = recursive_search(
-                    risk_details, ["reg_no", "Reg No", "Reg. No", "Registration"]
-                )
-                if reg_no:
-                    return f"{base_name} - {reg_no}"
-            return base_name
-        return self.policy_number
+    active_note: Optional["RiskNotePublic"] = None
 
 
 class PoliciesPublic(SQLModel):
@@ -550,18 +444,17 @@ class RiskNoteBase(AuditMixin, SQLModel):
     created_by_id: uuid.UUID | None = Field(
         default=None, foreign_key="user.id", index=True
     )
-    payment_status: str = Field(default="Unpaid")
     effective_date: date = Field(default_factory=date.today, index=True)
     coverage_start: date
     coverage_end: date
     net_premium: Decimal = Field(sa_column=Column(Numeric(precision=15, scale=2)))
     commission_amount: Decimal = Field(sa_column=Column(Numeric(precision=15, scale=2)))
     total_amount: Decimal = Field(sa_column=Column(Numeric(precision=15, scale=2)))
+    cover_snapshot: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
 
 
 class RiskNoteCreate(RiskNoteBase):
-    taxes: dict[str, Any] = Field(default_factory=dict)
-    policy_snapshot: dict[str, Any] = Field(default_factory=dict)
+    financial_breakdown: dict[str, Any] = Field(default_factory=dict)
     special_clauses: list[str] = Field(default_factory=list)
 
 
@@ -571,23 +464,21 @@ class RiskNoteUpdate(SQLModel):
     status: RiskNoteStatus | None = None
     previous_risk_note_id: uuid.UUID | None = None
     invoice_number: str | None = None
-    payment_status: str | None = None
     effective_date: date | None = None
     coverage_start: date | None = None
     coverage_end: date | None = None
     net_premium: Decimal | None = None
-    taxes: dict[str, Any] | None = None
+    financial_breakdown: dict[str, Any] | None = None
     commission_amount: Decimal | None = None
     total_amount: Decimal | None = None
-    policy_snapshot: dict[str, Any] | None = None
     special_clauses: list[str] | None = None
+    cover_snapshot: dict[str, Any] | None = None
 
 
 class RiskNotePublic(RiskNoteBase):
     id: uuid.UUID
     policy: PolicyPublic | None = None
-    taxes: dict[str, Any] = Field(default_factory=dict)
-    policy_snapshot: dict[str, Any] = Field(default_factory=dict)
+    financial_breakdown: dict[str, Any] = Field(default_factory=dict)
     special_clauses: list[str] = Field(default_factory=list)
 
 
@@ -598,8 +489,7 @@ class RiskNote(RiskNoteBase, table=True):
         back_populates="risk_note"
     )
     allocations: list["ReceiptAllocation"] = Relationship(back_populates="risk_note")
-    taxes: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
-    policy_snapshot: dict[str, Any] = Field(
+    financial_breakdown: dict[str, Any] = Field(
         default_factory=dict, sa_column=Column(JSON)
     )
     special_clauses: list[str] = Field(default_factory=list, sa_column=Column(JSON))

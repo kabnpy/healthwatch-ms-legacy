@@ -9,7 +9,7 @@ from app.models import (
     Client,
     Insurer,
     Policy,
-    PolicyCreateExtended,
+    PolicyCreate,
     Product,
 )
 from app.services.policy import policy_service
@@ -40,6 +40,8 @@ def create_mock_data() -> None:
             name: str,
             class_of_insurance: str,
             product_details: dict[str, Any],
+            pricing_strategy: str = "Percentage",
+            pricing_rules: dict[str, Any] = None,
         ) -> Product:
             product = session.exec(select(Product).where(Product.name == name)).first()
             if not product:
@@ -48,61 +50,65 @@ def create_mock_data() -> None:
                     name=name,
                     class_of_insurance=class_of_insurance,
                     product_details=product_details,
+                    pricing_strategy=pricing_strategy,
+                    pricing_rules=pricing_rules or {},
                 )
                 session.add(product)
                 logger.info(f"Created product: {name}")
             else:
                 product.product_details = product_details
                 product.class_of_insurance = class_of_insurance
+                product.pricing_strategy = pricing_strategy
+                product.pricing_rules = pricing_rules or {}
                 session.add(product)
                 logger.info(f"Updated product: {name}")
             session.commit()
             session.refresh(product)
             return product
 
-        # PRODUCT: PERSONAL ACCIDENT
-        pa_details = {
-            "OCCUPATION": {"Occupation": "<<text>>"},
-            "BENEFITS": {
-                "Accidental Death": "Kshs. 500,000/-",
-                "Permanent Total Disablement": "Kshs. 500,000/-",
-                "Hospital Cash": "Kshs. 1,000/-",
-                "Accidental temporary total disability": "Kshs. 5,000/- (Weekly benefits 104 weeks)",
-                "Accidental medical expenses": "Kshs. 70,000/-",
-                "Artificial appliances (Accidental Loss)": "Kshs. 10,000/-",
-                "Last expense (Accidental Death)": "Kshs. 50,000/-",
-            },
-        }
-        upsert_product("Maxpac Personal Accident", "Personal Accident", pa_details)
-
         # PRODUCT: MOTOR PRIVATE
         motor_details = {
-            "VEHICLE DETAILS": {
-                "Reg. No": "<<text>>",
-                "Make": "<<text>>",
-                "Year": "<<number>>",
-                "Value Kshs.": "<<number>>",
+            "vehicle_details": {
+                "registration_number": "<<text>>",
+                "make": "<<text>>",
+                "year_of_manufacture": "<<number>>",
+                "sum_insured": "<<number>>",
             },
-            "EXCESS": {
+            "added_benefits": {
+                "pvt": "<<boolean>>",
+                "excess_protector": "<<boolean>>",
+                "om_rescue_plus": "<<boolean>>",
+                "passenger_liability": "<<boolean>>",
+            },
+            "excesses": {
                 "Own Damage and Partial": "2.5% of value minimum Kshs. 15,000/- Max Kshs. 100,000.00",
                 "Third Party damage claims": "Kshs. 5,000.00",
                 "Third Party Injury": "Nil",
+                "Total Theft losses with antitheft device": "10% of vehicle value minimum Kshs. 20,000/-",
+                "Total Theft losses without antitheft device": "20% of vehicle value minimum Kshs. 20,000/-",
+                "Total Theft losses for vehicles with tracking device": "2.5% of vehicle value minimum Kshs. 20,000/-",
+                "Young and novice drivers": "Additional Kshs. 7,500.00 Each (under 21 years / Less than 1 year)",
             },
+            "special_clauses": [
+                "Including special perils",
+                "Including Kenya jurisdiction",
+            ],
+        }
+        motor_pricing_rules = {
+            "tiers": [
+                {"max": 1500000, "rate": 5.0, "min": 60000},
+                {"max": 2500000, "rate": 4.0, "min": 75000},
+                {"max": 3000000, "rate": 3.5, "min": 100000},
+                {"max": 5000000, "rate": 3.25, "min": 0},
+                {"max": None, "rate": 3.0, "min": 0},
+            ]
         }
         motor_product = upsert_product(
-            "Motor Private - Comprehensive", "Motor Private", motor_details
-        )
-
-        # PRODUCT: DOMESTIC PACKAGE
-        domestic_details = {
-            "LOCATION": {"Location": "<<text>>", "Value Kshs.": "<<number>>"},
-            "INTEREST & SUM INSURED": {
-                "Section B: (Contents)": "Kshs. 6,430,000/- (As per the attached Schedule)",
-                "Section C: (All Risks)": "Kshs. 450,000/- (As per the attached Schedule)",
-            },
-        }
-        upsert_product(
-            "Domestic Package - HomeShield", "Domestic Package", domestic_details
+            "Motor Private - Comprehensive",
+            "Motor Private",
+            motor_details,
+            pricing_strategy="FixedTiered",
+            pricing_rules=motor_pricing_rules,
         )
 
         # 2. CLIENT (Agnes Njoki Mwangi)
@@ -131,30 +137,31 @@ def create_mock_data() -> None:
         if not policy:
             start_date = date(2025, 8, 2)
             end_date = date(2026, 8, 1)
-            risk_details = {
-                "VEHICLE DETAILS": {
-                    "Reg. No": "KCM 780L",
-                    "Make": "Toyota Landcruiser Prado",
-                    "Year": 2016,
-                    "Value Kshs.": 4700000.0,
-                }
+            cover_snapshot = {
+                "vehicle": {
+                    "registration_number": "KCM 780L",
+                    "make": "Toyota",
+                    "year_of_manufacture": 2016,
+                    "sum_insured": 4700000.0,
+                },
+                "extensions": {"pvt": True, "excess_protector": True},
+                "benefits_and_limits": "Standard Comprehensive Benefits...",
+                "excesses": "Standard Motor Private Excesses...",
+                "special_clauses": "Subject to annual valuation...",
             }
 
-            policy_in = PolicyCreateExtended(
+            policy_in = PolicyCreate(
                 policy_number="010/070/1/012473/2017",
                 client_id=client.id,
                 product_id=motor_product.id,
                 status="Active",
                 inception_date=start_date,
-                coverage_start=start_date,
-                coverage_end=end_date,
-                risk_details=risk_details,
             )
 
             policy = policy_service.create_policy(
                 session=session,
                 policy_in=policy_in,
-                risk_details=risk_details,
+                cover_snapshot=cover_snapshot,
                 coverage_start=start_date,
                 coverage_end=end_date,
             )
@@ -164,20 +171,13 @@ def create_mock_data() -> None:
             )
 
             # 4. ADD AN ENDORSEMENT
-            # Increase value 3 months later
-            new_risk_details = {
-                "VEHICLE DETAILS": {
-                    "Reg. No": "KCM 780L",
-                    "Make": "Toyota Landcruiser Prado",
-                    "Year": 2016,
-                    "Value Kshs.": 5000000.0,
-                }
-            }
+            new_cover_snapshot = cover_snapshot.copy()
+            new_cover_snapshot["vehicle"]["sum_insured"] = 5000000.0
 
             endorsement_rn = policy_service.create_endorsement(
                 session=session,
                 policy_id=policy.id,
-                updated_risk_details=new_risk_details,
+                updated_cover_snapshot=new_cover_snapshot,
                 change_description="Increased vehicle value to 5M",
             )
             logger.info(

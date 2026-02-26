@@ -10,7 +10,7 @@ export interface WizardState {
 
   // Step 2: The Money & Coverage
   financials: {
-    sumInsured: number // The base for all math
+    sum_insured: number // The base for all math
     rate: number // e.g. 4.5%
     startDate: string // ISO Date string
     duration: number // Months (usually 12)

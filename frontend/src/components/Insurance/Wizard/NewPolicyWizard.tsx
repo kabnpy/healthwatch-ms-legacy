@@ -14,8 +14,9 @@ import { StepAsset } from "./StepAsset"
 import { StepBlueprint } from "./StepBlueprint"
 import { StepFinancials } from "./StepFinancials"
 import { StepReview } from "./StepReview"
+import { StepTerms } from "./StepTerms"
 
-const steps = ["Product", "Details", "Financials", "Review"]
+const steps = ["Product", "Details", "Terms", "Financials", "Review"]
 
 interface NewPolicyWizardProps {
   clientId: string
@@ -38,9 +39,14 @@ export function NewPolicyWizard({
 
   const [state, setState] = useState<WizardState>({
     product_id: "",
+    sum_insured: 0,
     details: {},
+    terms: {
+      benefits_and_limits: "",
+      excesses: "",
+      special_clauses: "",
+    },
     financials: {
-      sumInsured: 0,
       rate: 4.5,
       startDate: new Date().toISOString().split("T")[0],
       duration: 12,
@@ -64,17 +70,19 @@ export function NewPolicyWizard({
       setState((prev) => ({ ...prev, product_id: data.product_id }))
     } else if (step === 1) {
       // Sync logic: Extract "Value" or "Sum Insured" from details (recursive search)
+      // Now using 'sum_insured' as the semantic key
       const findValue = (obj: any): number => {
         if (!obj || typeof obj !== "object") return 0
         for (const [k, v] of Object.entries(obj)) {
-          if (/value|sum insured/i.test(k) && typeof v !== "object") {
+          // Look for sum_insured, value, or display aliases
+          if (/sum_insured|value|sum insured/i.test(k) && typeof v !== "object") {
             const cleanVal =
               typeof v === "string" ? v.replace(/[^0-9.]/g, "") : v
             return Number(cleanVal) || 0
           }
           if (typeof v === "object") {
             const found = findValue(v)
-            if (found > 0) return found
+            if (found !== 0) return found
           }
         }
         return 0
@@ -85,10 +93,19 @@ export function NewPolicyWizard({
       setState((prev) => ({
         ...prev,
         details: data,
-        financials: {
-          ...prev.financials,
-          sumInsured:
-            extractedValue > 0 ? extractedValue : prev.financials.sumInsured,
+        sum_insured: extractedValue !== 0 ? extractedValue : prev.sum_insured,
+        // Pre-populate terms from Product templates if not already set
+        terms: {
+          benefits_and_limits:
+            prev.terms.benefits_and_limits ||
+            selectedProduct?.default_benefits_and_limits ||
+            "",
+          excesses:
+            prev.terms.excesses || selectedProduct?.default_excesses || "",
+          special_clauses:
+            prev.terms.special_clauses ||
+            selectedProduct?.default_special_clauses ||
+            "",
         },
       }))
     } else {
@@ -107,11 +124,24 @@ export function NewPolicyWizard({
 
       const startDate =
         state.financials?.startDate || new Date().toISOString().split("T")[0]
-      const endDate = new Date(
-        new Date(startDate).setFullYear(new Date(startDate).getFullYear() + 1),
-      )
-        .toISOString()
-        .split("T")[0]
+      
+      const durationMonths = state.financials?.duration || 12
+      const endDateDate = new Date(startDate)
+      
+      // For standard 12-month terms, we use setFullYear to maintain day consistency 
+      // (e.g., Feb 29 logic). For other durations, we use the month-based offset.
+      if (durationMonths === 12) {
+        endDateDate.setFullYear(endDateDate.getFullYear() + 1)
+      } else {
+        const targetMonth = endDateDate.getMonth() + durationMonths
+        endDateDate.setMonth(targetMonth)
+        // If the day of month shifted (e.g. Jan 31 -> March 3), roll back to last day of previous month
+        if (endDateDate.getMonth() % 12 !== targetMonth % 12) {
+          endDateDate.setDate(0)
+        }
+      }
+      
+      const endDate = endDateDate.toISOString().split("T")[0]
 
       // Structure the risk details using the product blueprint
       const structuredRiskDetails = injectWizardData(
@@ -119,14 +149,32 @@ export function NewPolicyWizard({
         state.details,
       )
 
-      // Create Policy atomically (This also creates the issued Risk Note and Invoice in backend)
+      // Align with Atomic Snapshot Schema: Sensible Nesting
+      const coverSnapshot = {
+        vehicle: {
+          ...structuredRiskDetails["VEHICLE DETAILS"],
+          sum_insured: state.sum_insured,
+        },
+        extensions: {
+          pvt: !!state.extensions?.pvt,
+          excess_protector: !!state.extensions?.excessProtector,
+          om_rescue_plus: !!state.extensions?.omRescuePlus,
+          passenger_liability: !!state.extensions?.passengerLiability,
+        },
+        // Use the customized terms from the wizard state
+        benefits_and_limits: state.terms.benefits_and_limits,
+        excesses: state.terms.excesses,
+        special_clauses: state.terms.special_clauses,
+      }
+
+      // Create Policy atomically
       await createPolicy.mutateAsync({
-        policy_number: `P/${Math.floor(Math.random() * 1000000)}`,
+        policy_number: `P/${Date.now()}/${Math.floor(Math.random() * 1000)}`,
         client_id: clientId,
         product_id: state.product_id,
         status: "Active",
         inception_date: startDate,
-        risk_details: structuredRiskDetails,
+        risk_details: coverSnapshot as any, // Pointing to the new structured object
         coverage_start: startDate,
         coverage_end: endDate,
       } as any)
@@ -191,8 +239,16 @@ export function NewPolicyWizard({
             />
           )}
           {step === 2 && (
+            <StepTerms
+              defaultValues={state.terms}
+              onNext={handleNext}
+              onBack={handleBack}
+            />
+          )}
+          {step === 3 && (
             <StepFinancials
               productId={state.product_id || ""}
+              sum_insured={state.sum_insured}
               defaultValues={{
                 financials: state.financials,
                 extensions: state.extensions,
@@ -201,7 +257,7 @@ export function NewPolicyWizard({
               onBack={handleBack}
             />
           )}
-          {step === 3 && (
+          {step === 4 && (
             <StepReview
               state={state}
               onIssue={handleIssuePolicy}
