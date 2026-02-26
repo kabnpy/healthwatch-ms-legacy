@@ -1,11 +1,11 @@
 # Implementation Plan: Streamline New Policy Wizard
 
-## Phase 1: Identity & Structure Refactor
+## Phase 1: Identity & Structure Refactor [checkpoint: dc45eae]
 *   **Goal:** Consolidate product selection and introduce the manual policy number field.
 *   - [x] Task: Update `NewPolicyWizard` state type to include a mandatory `policyNumber` field. d1dc73a
-*   - [x] Task: Refactor `StepAsset` (Step 1) to include the "Policy Number" input field with professional copy.
-*   - [x] Task: Update wizard navigation logic to skip the "Terms" step entirely.
-*   - [ ] Task: Conductor - User Manual Verification 'Identity & Structure' (Protocol in workflow.md)
+*   - [x] Task: Refactor `StepAsset` (Step 1) to include the "Policy Number" input field with professional copy. dc45eae
+*   - [x] Task: Update wizard navigation logic to skip the "Terms" step entirely. dc45eae
+*   - [x] Task: Conductor - User Manual Verification 'Identity & Structure' (Protocol in workflow.md) dc45eae
 
 ## Phase 2: Core Data Simplification
 *   **Goal:** Streamline the risk detail and financial capture steps.
