@@ -7,12 +7,12 @@
 *   - [x] Task: Update wizard navigation logic to skip the "Terms" step entirely. dc45eae
 *   - [x] Task: Conductor - User Manual Verification 'Identity & Structure' (Protocol in workflow.md) dc45eae
 
-## Phase 2: Core Data Simplification
+## Phase 2: Core Data Simplification [checkpoint: 9d0cbb8]
 *   **Goal:** Streamline the risk detail and financial capture steps.
 *   - [x] Task: Update `StepBlueprint` (Step 2) to display only Registration Number, Make, and Year of Manufacture. dc45eae
 *   - [x] Task: Update `StepFinancials` (Step 3) to focus on Sum Insured and Period of Cover. dc45eae
-*   - [x] Task: Remove `StepTerms` component and all references to it within the wizard.
-*   - [ ] Task: Conductor - User Manual Verification 'Core Data Simplification' (Protocol in workflow.md)
+*   - [x] Task: Remove `StepTerms` component and all references to it within the wizard. 9d0cbb8
+*   - [x] Task: Conductor - User Manual Verification 'Core Data Simplification' (Protocol in workflow.md) 9d0cbb8
 
 ## Phase 3: Submission & Copy Overhaul
 *   **Goal:** Finalize submission logic and apply professional tone across the wizard.
