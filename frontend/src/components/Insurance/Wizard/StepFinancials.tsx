@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
+import { ArrowLeft } from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -193,19 +194,26 @@ export function StepFinancials({
 
   return (
     <Form {...(form as any)}>
-      <form onSubmit={form.handleSubmit(onNext)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onNext)} className="space-y-8">
+        <div className="space-y-1">
+          <h3 className="text-lg font-bold tracking-tight">Financials & Coverage</h3>
+          <p className="text-sm text-muted-foreground">
+            Review the insured value and define the duration of protection.
+          </p>
+        </div>
+
         <div className="space-y-8">
           {/* Inputs Section */}
           <div className="space-y-6">
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {!isPA && (
                 <div className="space-y-2">
-                  <FormLabel>Sum Insured</FormLabel>
-                  <div className="h-10 px-3 py-2 rounded-md border border-input bg-muted/50 text-sm font-bold flex items-center">
-                    KES {(Number(sum_insured) || 0).toLocaleString()}
+                  <FormLabel>Sum Insured (KES)</FormLabel>
+                  <div className="h-12 px-4 rounded-md border border-input bg-muted/30 text-base font-bold flex items-center">
+                    {(Number(sum_insured) || 0).toLocaleString()}
                   </div>
-                  <p className="text-[10px] text-muted-foreground italic">
-                    Value derived from asset details.
+                  <p className="text-[10px] text-muted-foreground">
+                    Authoritative value derived from asset specifications.
                   </p>
                 </div>
               )}
@@ -215,7 +223,7 @@ export function StepFinancials({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      {isPA ? "Premium (Flat Amount)" : "Rate (%)"}
+                      {isPA ? "Premium (Flat Amount)" : "Applied Rate (%)"}
                     </FormLabel>
                     <FormControl>
                       <Input
@@ -224,7 +232,7 @@ export function StepFinancials({
                         {...field}
                         value={field.value || 0}
                         readOnly={!!isMotorPrivate && !isManual}
-                        className={isMotorPrivate && !isManual ? "bg-slate-100" : ""}
+                        className={`h-12 text-base ${isMotorPrivate && !isManual ? "bg-muted/50" : ""}`}
                       />
                     </FormControl>
                     <FormMessage />
@@ -233,15 +241,15 @@ export function StepFinancials({
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4 border-t pt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t pt-6">
               <FormField
                 control={form.control as any}
                 name="financials.startDate"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Start Date</FormLabel>
+                    <FormLabel>Coverage Start Date</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} value={field.value || ""} />
+                      <Input type="date" {...field} value={field.value || ""} className="h-12 text-base" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -252,12 +260,13 @@ export function StepFinancials({
                 name="financials.duration"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Duration (Months)</FormLabel>
+                    <FormLabel>Policy Duration (Months)</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
                         {...field}
                         value={field.value || 12}
+                        className="h-12 text-base"
                       />
                     </FormControl>
                     <FormMessage />
@@ -519,10 +528,10 @@ export function StepFinancials({
         </div>
 
         <div className="flex justify-between pt-6 border-t mt-4">
-          <Button type="button" variant="outline" onClick={onBack}>
-            Back: Asset Details
+          <Button type="button" variant="outline" onClick={onBack} size="lg">
+            <ArrowLeft className="h-4 w-4 mr-2" /> Back: Asset Details
           </Button>
-          <Button type="submit" size="lg" className="px-8">
+          <Button type="submit" size="lg" className="px-10">
             Next: Review & Issue
           </Button>
         </div>

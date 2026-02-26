@@ -9,9 +9,9 @@
 
 ## Phase 2: Core Data Simplification
 *   **Goal:** Streamline the risk detail and financial capture steps.
-*   - [ ] Task: Update `StepBlueprint` (Step 2) to display only Registration Number, Make, and Year of Manufacture.
-*   - [ ] Task: Update `StepFinancials` (Step 3) to focus on Sum Insured and Period of Cover.
-*   - [ ] Task: Remove `StepTerms` component and all references to it within the wizard.
+*   - [x] Task: Update `StepBlueprint` (Step 2) to display only Registration Number, Make, and Year of Manufacture. dc45eae
+*   - [x] Task: Update `StepFinancials` (Step 3) to focus on Sum Insured and Period of Cover. dc45eae
+*   - [x] Task: Remove `StepTerms` component and all references to it within the wizard.
 *   - [ ] Task: Conductor - User Manual Verification 'Core Data Simplification' (Protocol in workflow.md)
 
 ## Phase 3: Submission & Copy Overhaul

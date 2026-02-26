@@ -38,7 +38,11 @@ export function StepBlueprint({
 
   const wizardFields = useMemo(() => {
     if (!selectedProduct) return []
-    return extractWizardFields(selectedProduct.product_details)
+    const allFields = extractWizardFields(selectedProduct.product_details)
+    
+    // For Motor Private, we only want essential details as per spec
+    const essentialKeys = ["registration_number", "make", "year_of_manufacture"]
+    return allFields.filter(f => essentialKeys.includes(f.path[f.path.length - 1]))
   }, [selectedProduct])
 
   const form = useForm({
@@ -49,50 +53,40 @@ export function StepBlueprint({
 
   return (
     <Form {...(form as any)}>
-      <form onSubmit={form.handleSubmit(onNext)} className="space-y-6">
-        <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 mb-6">
-          <p className="text-sm text-slate-700 font-medium">
-            {selectedProduct.name}
-          </p>
-          <p className="text-xs text-slate-500 mt-1">
-            Please provide the necessary details below.
+      <form onSubmit={form.handleSubmit(onNext)} className="space-y-8">
+        <div className="space-y-1">
+          <h3 className="text-lg font-bold tracking-tight">Asset Details</h3>
+          <p className="text-sm text-muted-foreground">
+            Provide the technical specifications of the vehicle to be insured.
           </p>
         </div>
 
-        {wizardFields.length === 0 ? (
-          <div className="py-10 text-center border-2 border-dashed rounded-lg">
-            <p className="text-muted-foreground italic">
-              This product requires no additional inputs. Click next to
-              continue.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-6">
-            {wizardFields.map((field) => (
-              <FormField
-                key={field.path.join(".")}
-                control={form.control}
-                name={field.path.join(".")}
-                render={({ field: inputField }) => (
-                  <FormItem>
-                    <FormLabel>{field.label}</FormLabel>
-                    <FormControl>
-                      <Input
-                        type={field.type === "number" ? "number" : "text"}
-                        placeholder={`Enter ${field.label.toLowerCase()}...`}
-                        {...inputField}
-                        value={inputField.value || ""}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            ))}
-          </div>
-        )}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {wizardFields.map((field) => (
+            <FormField
+              key={field.path.join(".")}
+              control={form.control}
+              name={field.path.join(".")}
+              render={({ field: inputField }) => (
+                <FormItem>
+                  <FormLabel className="capitalize">{field.label.replace(/_/g, ' ')}</FormLabel>
+                  <FormControl>
+                    <Input
+                      type={field.type === "number" ? "number" : "text"}
+                      placeholder={`Enter ${field.label.replace(/_/g, ' ').toLowerCase()}...`}
+                      {...inputField}
+                      value={inputField.value || ""}
+                      className="h-11"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          ))}
+        </div>
 
-        <div className="flex justify-between pt-8">
+        <div className="flex justify-between pt-4">
           <Button type="button" variant="outline" onClick={onBack}>
             <ArrowLeft className="h-4 w-4 mr-2" /> Back
           </Button>

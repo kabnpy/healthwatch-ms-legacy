@@ -14,7 +14,6 @@ import { StepAsset } from "./StepAsset"
 import { StepBlueprint } from "./StepBlueprint"
 import { StepFinancials } from "./StepFinancials"
 import { StepReview } from "./StepReview"
-import { StepTerms } from "./StepTerms"
 
 const steps = ["Identity", "Asset", "Financials", "Review"]
 
