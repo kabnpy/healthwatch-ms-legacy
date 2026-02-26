@@ -2,8 +2,8 @@
 
 ## Phase 1: Backend Service Refactoring (Decoupling)
 - [x] Task: Write tests for `PolicyService` to verify Risk Note creation without Invoices. 55aebe2
-- [ ] Task: Refactor `PolicyService.create_policy` and `create_endorsement` to remove automatic invoice generation.
-- [ ] Task: Rename `create_risk_note_with_invoice` to `create_risk_note` and remove internal invoice creation logic.
+- [x] Task: Refactor `PolicyService.create_policy` and `create_endorsement` to remove automatic invoice generation. 04ec18a
+- [x] Task: Rename `create_risk_note_with_invoice` to `create_risk_note` and remove internal invoice creation logic. 04ec18a
 - [ ] Task: Conductor - User Manual Verification 'Backend Decoupling' (Protocol in workflow.md)
 
 ## Phase 2: Data Model & Authoritative Link
