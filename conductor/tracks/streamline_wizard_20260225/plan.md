@@ -14,9 +14,9 @@
 *   - [x] Task: Remove `StepTerms` component and all references to it within the wizard. 9d0cbb8
 *   - [x] Task: Conductor - User Manual Verification 'Core Data Simplification' (Protocol in workflow.md) 9d0cbb8
 
-## Phase 3: Submission & Copy Overhaul
+## Phase 3: Submission & Copy Overhaul [checkpoint: 6804e75]
 *   **Goal:** Finalize submission logic and apply professional tone across the wizard.
 *   - [x] Task: Update `handleIssuePolicy` in `NewPolicyWizard` to correctly map the custom `policyNumber` to the backend request. acdb7a2
-*   - [x] Task: Refactor `StepReview` to show a clean summary of the simplified data.
-*   - [x] Task: Perform a comprehensive copy audit and update all wizard labels/placeholders to "Professional & Minimal" tone.
-*   - [ ] Task: Conductor - User Manual Verification 'Submission & Polish' (Protocol in workflow.md)
+*   - [x] Task: Refactor `StepReview` to show a clean summary of the simplified data. 6804e75
+*   - [x] Task: Perform a comprehensive copy audit and update all wizard labels/placeholders to "Professional & Minimal" tone. 6804e75
+*   - [x] Task: Conductor - User Manual Verification 'Submission & Polish' (Protocol in workflow.md) 6804e75

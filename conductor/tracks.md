@@ -9,5 +9,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: Streamline New Policy Wizard**
+- [x] **Track: Streamline New Policy Wizard**
 *Link: [./tracks/streamline_wizard_20260225/](./tracks/streamline_wizard_20260225/)*
