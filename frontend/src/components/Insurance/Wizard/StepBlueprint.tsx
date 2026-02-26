@@ -40,8 +40,12 @@ export function StepBlueprint({
     if (!selectedProduct) return []
     const allFields = extractWizardFields(selectedProduct.product_details)
     
-    // For Motor Private, we only want essential details as per spec
-    const essentialKeys = ["registration_number", "make", "year_of_manufacture"]
+    // Essential details filter
+    const isMotor = selectedProduct.class_of_insurance.toLowerCase().includes("motor")
+    const essentialKeys = isMotor 
+      ? ["registration_number", "make", "year_of_manufacture"]
+      : allFields.map(f => f.path[f.path.length - 1])
+
     return allFields.filter(f => essentialKeys.includes(f.path[f.path.length - 1]))
   }, [selectedProduct])
 
