@@ -440,7 +440,6 @@ class RiskNoteBase(AuditMixin, SQLModel):
     previous_risk_note_id: uuid.UUID | None = Field(
         default=None, foreign_key="risknote.id", index=True
     )
-    invoice_number: str | None = None
     created_by_id: uuid.UUID | None = Field(
         default=None, foreign_key="user.id", index=True
     )
@@ -463,7 +462,6 @@ class RiskNoteUpdate(SQLModel):
     risk_note_number: str | None = None
     status: RiskNoteStatus | None = None
     previous_risk_note_id: uuid.UUID | None = None
-    invoice_number: str | None = None
     effective_date: date | None = None
     coverage_start: date | None = None
     coverage_end: date | None = None
