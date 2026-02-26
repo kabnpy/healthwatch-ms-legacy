@@ -20,3 +20,6 @@
 *   - [x] Task: Refactor `StepReview` to show a clean summary of the simplified data. 6804e75
 *   - [x] Task: Perform a comprehensive copy audit and update all wizard labels/placeholders to "Professional & Minimal" tone. 6804e75
 *   - [x] Task: Conductor - User Manual Verification 'Submission & Polish' (Protocol in workflow.md) 6804e75
+
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions 9348c23
