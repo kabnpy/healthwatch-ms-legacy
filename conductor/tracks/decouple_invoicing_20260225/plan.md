@@ -7,7 +7,7 @@
 - [x] Task: Conductor - User Manual Verification 'Backend Decoupling' (Protocol in workflow.md) 77bf7ab
 
 ## Phase 2: Data Model & Authoritative Link
-- [ ] Task: Create a database migration to remove/deprecate the `invoice_number` field from the `risknote` table.
+- [x] Task: Create a database migration to remove/deprecate the `invoice_number` field from the `risknote` table. 65646b4
 - [ ] Task: Update the `RiskNote` SQLModel to remove the `invoice_number` field.
 - [ ] Task: Implement a backend utility or service method to fetch "un-invoiced" Risk Notes (filtering by those without `InvoiceLineItem`).
 - [ ] Task: Write tests for the "un-invoiced" detection logic.
