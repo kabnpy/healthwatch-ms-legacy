@@ -17,8 +17,12 @@ depends_on = None
 
 
 def upgrade():
-    # Remove invoice_number from risknote
-    op.drop_column('risknote', 'invoice_number')
+    # Remove invoice_number from risknote if it exists
+    conn = op.get_bind()
+    inspector = sa.inspect(conn)
+    columns = [c['name'] for c in inspector.get_columns('risknote')]
+    if 'invoice_number' in columns:
+        op.drop_column('risknote', 'invoice_number')
 
 
 def downgrade():
