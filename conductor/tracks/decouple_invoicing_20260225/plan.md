@@ -10,7 +10,7 @@
 - [x] Task: Create a database migration to remove/deprecate the `invoice_number` field from the `risknote` table. 65646b4
 - [x] Task: Update the `RiskNote` SQLModel to remove the `invoice_number` field. 3fbe897
 - [x] Task: Implement a backend utility or service method to fetch "un-invoiced" Risk Notes (filtering by those without `InvoiceLineItem`). 3fbe897
-- [ ] Task: Write tests for the "un-invoiced" detection logic.
+- [x] Task: Write tests for the "un-invoiced" detection logic. 9f50d28
 - [ ] Task: Conductor - User Manual Verification 'Data Model & Linking' (Protocol in workflow.md)
 
 ## Phase 3: Frontend & Wizard Integration
