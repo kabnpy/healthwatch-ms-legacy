@@ -16,7 +16,7 @@
 
 ## Phase 3: Submission & Copy Overhaul
 *   **Goal:** Finalize submission logic and apply professional tone across the wizard.
-*   - [ ] Task: Update `handleIssuePolicy` in `NewPolicyWizard` to correctly map the custom `policyNumber` to the backend request.
-*   - [ ] Task: Refactor `StepReview` to show a clean summary of the simplified data.
-*   - [ ] Task: Perform a comprehensive copy audit and update all wizard labels/placeholders to "Professional & Minimal" tone.
+*   - [x] Task: Update `handleIssuePolicy` in `NewPolicyWizard` to correctly map the custom `policyNumber` to the backend request. acdb7a2
+*   - [x] Task: Refactor `StepReview` to show a clean summary of the simplified data.
+*   - [x] Task: Perform a comprehensive copy audit and update all wizard labels/placeholders to "Professional & Minimal" tone.
 *   - [ ] Task: Conductor - User Manual Verification 'Submission & Polish' (Protocol in workflow.md)

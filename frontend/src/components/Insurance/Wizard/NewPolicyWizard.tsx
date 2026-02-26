@@ -179,7 +179,7 @@ export function NewPolicyWizard({
 
       // Create Policy atomically
       await createPolicy.mutateAsync({
-        policy_number: `P/${Date.now()}/${Math.floor(Math.random() * 1000)}`,
+        policy_number: state.policy_number,
         client_id: clientId,
         product_id: state.product_id,
         status: "Active",
@@ -209,7 +209,9 @@ export function NewPolicyWizard({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Issue New Policy - {steps[step]}</DialogTitle>
+          <DialogTitle className="text-xl font-black uppercase tracking-tighter">
+            Policy Issuance: {steps[step]}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="py-4">
@@ -255,6 +257,7 @@ export function NewPolicyWizard({
             <StepFinancials
               productId={state.product_id || ""}
               sum_insured={state.sum_insured}
+              onSumInsuredChange={(val) => setState(prev => ({ ...prev, sum_insured: val }))}
               defaultValues={{
                 financials: state.financials,
                 extensions: state.extensions,

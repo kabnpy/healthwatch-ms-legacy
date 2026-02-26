@@ -45,6 +45,7 @@ interface StepFinancialsProps {
   }
   onNext: (data: any) => void
   onBack: () => void
+  onSumInsuredChange?: (value: number) => void
   productId: string
   sum_insured: number
 }
@@ -53,11 +54,18 @@ export function StepFinancials({
   defaultValues,
   onNext,
   onBack,
+  onSumInsuredChange,
   productId,
   sum_insured,
 }: StepFinancialsProps) {
   const { data: productsData } = useProducts()
   const quoteMutation = useQuote()
+
+  const handleSumInsuredChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/[^0-9]/g, "")
+    const num = Number(raw) || 0
+    onSumInsuredChange?.(num)
+  }
 
   const selectedProduct = useMemo(() => {
     return productsData?.data.find((p) => p.id === productId) as
@@ -209,11 +217,16 @@ export function StepFinancials({
               {!isPA && (
                 <div className="space-y-2">
                   <FormLabel>Sum Insured (KES)</FormLabel>
-                  <div className="h-12 px-4 rounded-md border border-input bg-muted/30 text-base font-bold flex items-center">
-                    {(Number(sum_insured) || 0).toLocaleString()}
-                  </div>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      value={(Number(sum_insured) || 0).toLocaleString()}
+                      onChange={handleSumInsuredChange}
+                      className="h-12 text-base font-bold"
+                    />
+                  </FormControl>
                   <p className="text-[10px] text-muted-foreground">
-                    Authoritative value derived from asset specifications.
+                    Define the authoritative value of the asset.
                   </p>
                 </div>
               )}
@@ -293,7 +306,7 @@ export function StepFinancials({
                     control={form.control as any}
                     name="extensions.pvt"
                     render={({ field }) => (
-                      <FormItem className="flex items-center justify-between space-y-0 rounded-lg p-2 border bg-white">
+                      <FormItem className="flex items-center justify-between space-y-0 rounded-lg p-2 border bg-card">
                         <FormLabel className="text-sm cursor-pointer w-full">
                           Political Violence & Terrorism (0.25%)
                           {isHighEnd && (
@@ -316,7 +329,7 @@ export function StepFinancials({
                     control={form.control as any}
                     name="extensions.excessProtector"
                     render={({ field }) => (
-                      <FormItem className="flex items-center justify-between space-y-0 rounded-lg p-2 border bg-white">
+                      <FormItem className="flex items-center justify-between space-y-0 rounded-lg p-2 border bg-card">
                         <FormLabel className="text-sm cursor-pointer w-full">
                           Excess Protector (0.25%)
                           {isHighEnd && (
@@ -340,7 +353,7 @@ export function StepFinancials({
                       control={form.control as any}
                       name="extensions.passengerLiability"
                       render={({ field }) => (
-                        <FormItem className="flex items-center justify-between space-y-0 rounded-lg p-2 border bg-white">
+                        <FormItem className="flex items-center justify-between space-y-0 rounded-lg p-2 border bg-card">
                           <FormLabel className="text-sm cursor-pointer w-full">
                             Passenger Liability (KES 500)
                           </FormLabel>
@@ -359,7 +372,7 @@ export function StepFinancials({
                       control={form.control as any}
                       name="extensions.omRescuePlus"
                       render={({ field }) => (
-                        <FormItem className="flex items-center justify-between space-y-0 rounded-lg p-2 border bg-white">
+                        <FormItem className="flex items-center justify-between space-y-0 rounded-lg p-2 border bg-card">
                           <FormLabel className="text-sm cursor-pointer w-full">
                             OM Rescue Plus (KES 1,000)
                           </FormLabel>
