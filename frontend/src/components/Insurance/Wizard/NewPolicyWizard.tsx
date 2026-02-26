@@ -16,7 +16,7 @@ import { StepFinancials } from "./StepFinancials"
 import { StepReview } from "./StepReview"
 import { StepTerms } from "./StepTerms"
 
-const steps = ["Product", "Details", "Terms", "Financials", "Review"]
+const steps = ["Identity", "Asset", "Financials", "Review"]
 
 interface NewPolicyWizardProps {
   clientId: string
@@ -39,6 +39,7 @@ export function NewPolicyWizard({
 
   const [state, setState] = useState<WizardState>({
     product_id: "",
+    policy_number: "",
     sum_insured: 0,
     details: {},
     terms: {
@@ -67,7 +68,11 @@ export function NewPolicyWizard({
 
   const handleNext = (data: any) => {
     if (step === 0) {
-      setState((prev) => ({ ...prev, product_id: data.product_id }))
+      setState((prev) => ({ 
+        ...prev, 
+        product_id: data.product_id,
+        policy_number: data.policy_number 
+      }))
     } else if (step === 1) {
       // Sync logic: Extract "Value" or "Sum Insured" from details (recursive search)
       // Now using 'sum_insured' as the semantic key
@@ -150,12 +155,18 @@ export function NewPolicyWizard({
       )
 
       // Align with Atomic Snapshot Schema: Sensible Nesting
+      // We merge the structured details from the blueprint with the explicit state from the wizard.
+      // Note: The blueprint uses "vehicle_details", but the backend expects "vehicle"
+      const vehicleData = structuredRiskDetails["vehicle_details"] || structuredRiskDetails["vehicle"] || {}
+      const extensionData = structuredRiskDetails["added_benefits"] || structuredRiskDetails["extensions"] || {}
+
       const coverSnapshot = {
         vehicle: {
-          ...structuredRiskDetails["VEHICLE DETAILS"],
+          ...vehicleData,
           sum_insured: state.sum_insured,
         },
         extensions: {
+          ...extensionData,
           pvt: !!state.extensions?.pvt,
           excess_protector: !!state.extensions?.excessProtector,
           om_rescue_plus: !!state.extensions?.omRescuePlus,
@@ -226,7 +237,10 @@ export function NewPolicyWizard({
 
           {step === 0 && (
             <StepAsset
-              defaultValues={{ product_id: state.product_id }}
+              defaultValues={{ 
+                product_id: state.product_id,
+                policy_number: state.policy_number 
+              }}
               onNext={handleNext}
             />
           )}
@@ -239,13 +253,6 @@ export function NewPolicyWizard({
             />
           )}
           {step === 2 && (
-            <StepTerms
-              defaultValues={state.terms}
-              onNext={handleNext}
-              onBack={handleBack}
-            />
-          )}
-          {step === 3 && (
             <StepFinancials
               productId={state.product_id || ""}
               sum_insured={state.sum_insured}
@@ -257,7 +264,7 @@ export function NewPolicyWizard({
               onBack={handleBack}
             />
           )}
-          {step === 4 && (
+          {step === 3 && (
             <StepReview
               state={state}
               onIssue={handleIssuePolicy}

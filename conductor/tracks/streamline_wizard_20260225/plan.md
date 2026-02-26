@@ -2,9 +2,9 @@
 
 ## Phase 1: Identity & Structure Refactor
 *   **Goal:** Consolidate product selection and introduce the manual policy number field.
-*   - [ ] Task: Update `NewPolicyWizard` state type to include a mandatory `policyNumber` field.
-*   - [ ] Task: Refactor `StepAsset` (Step 1) to include the "Policy Number" input field with professional copy.
-*   - [ ] Task: Update wizard navigation logic to skip the "Terms" step entirely.
+*   - [x] Task: Update `NewPolicyWizard` state type to include a mandatory `policyNumber` field. d1dc73a
+*   - [x] Task: Refactor `StepAsset` (Step 1) to include the "Policy Number" input field with professional copy.
+*   - [x] Task: Update wizard navigation logic to skip the "Terms" step entirely.
 *   - [ ] Task: Conductor - User Manual Verification 'Identity & Structure' (Protocol in workflow.md)
 
 ## Phase 2: Core Data Simplification
