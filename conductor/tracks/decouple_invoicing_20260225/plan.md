@@ -6,12 +6,12 @@
 - [x] Task: Rename `create_risk_note_with_invoice` to `create_risk_note` and remove internal invoice creation logic. 04ec18a
 - [x] Task: Conductor - User Manual Verification 'Backend Decoupling' (Protocol in workflow.md) 77bf7ab
 
-## Phase 2: Data Model & Authoritative Link
+## Phase 2: Data Model & Authoritative Link [checkpoint: 97b2eed]
 - [x] Task: Create a database migration to remove/deprecate the `invoice_number` field from the `risknote` table. 65646b4
 - [x] Task: Update the `RiskNote` SQLModel to remove the `invoice_number` field. 3fbe897
 - [x] Task: Implement a backend utility or service method to fetch "un-invoiced" Risk Notes (filtering by those without `InvoiceLineItem`). 3fbe897
 - [x] Task: Write tests for the "un-invoiced" detection logic. 9f50d28
-- [ ] Task: Conductor - User Manual Verification 'Data Model & Linking' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Data Model & Linking' (Protocol in workflow.md) 97b2eed
 
 ## Phase 3: Frontend & Wizard Integration
 - [ ] Task: Update the `InvoiceWizard` component to fetch and display only un-invoiced Risk Notes.
