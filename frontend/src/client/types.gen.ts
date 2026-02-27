@@ -262,7 +262,6 @@ export type InvoiceLineItemPublic = {
     description?: (string | null);
     id: string;
     risk_note?: (RiskNotePublic | null);
-    invoice?: (InvoicePublic | null);
 };
 
 export type InvoicePublic = {
@@ -550,8 +549,6 @@ export type RiskNotePublic = {
     financial_breakdown?: {
         [key: string]: unknown;
     };
-    special_clauses?: Array<(string)>;
-    invoice_line_items?: Array<InvoiceLineItemPublic>;
 };
 
 export type RiskNotesPublic = {

@@ -160,7 +160,13 @@ export const RiskNoteTemplate = ({
     Object.entries(template).forEach(([name, templateContent]) => {
       const upperName = name.toUpperCase()
       if (!manualSections.includes(upperName)) {
-        const instanceContent = instance[name] || instance[upperName] || {}
+        // Look for content in top-level OR inside the new 'terms' dictionary
+        const instanceContent = 
+          instance[name] || 
+          instance[upperName] || 
+          (instance.terms?.[name]) ||
+          (instance.terms?.[name.toLowerCase().replace(/ /g, "_")]) ||
+          {}
 
         let mergedContent = templateContent
         if (typeof templateContent === "object" && templateContent !== null) {
@@ -200,6 +206,7 @@ export const RiskNoteTemplate = ({
       const upperName = name.toUpperCase()
       if (
         !manualSections.includes(upperName) &&
+        name !== "terms" &&
         !sections.find((s) => s.name === upperName)
       ) {
         sections.push({
@@ -208,6 +215,19 @@ export const RiskNoteTemplate = ({
         })
       }
     })
+
+    // Finally, add any terms from the 'terms' dictionary that weren't covered by the template
+    if (instance.terms) {
+      Object.entries(instance.terms).forEach(([name, content]) => {
+        const upperName = name.toUpperCase().replace(/_/g, " ")
+        if (!sections.find((s) => s.name === upperName)) {
+          sections.push({
+            name: upperName,
+            content: content as RiskNoteContentValue,
+          })
+        }
+      })
+    }
 
     // 6. ANNUAL PREMIUM
     const breakdown = riskNote.financial_breakdown || {}

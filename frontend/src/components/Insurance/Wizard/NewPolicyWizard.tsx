@@ -148,9 +148,10 @@ export function NewPolicyWizard({
       const endDate = endDateDate.toISOString().split("T")[0]
 
       // Structure the risk details using the product blueprint
+      // We merge details and terms so both are available for placeholder resolution
       const structuredRiskDetails = injectWizardData(
         selectedProduct.product_details,
-        state.details,
+        { ...state.details, ...state.terms },
       )
 
       // Align with Atomic Snapshot Schema: Sensible Nesting
@@ -171,10 +172,12 @@ export function NewPolicyWizard({
           om_rescue_plus: !!state.extensions?.omRescuePlus,
           passenger_liability: !!state.extensions?.passengerLiability,
         },
-        // Use the customized terms from the wizard state
-        benefits_and_limits: state.terms.benefits_and_limits,
-        excesses: state.terms.excesses,
-        special_clauses: state.terms.special_clauses,
+        // Group terms into a nested dictionary for better organization
+        terms: {
+          benefits_and_limits: state.terms.benefits_and_limits,
+          excesses: state.terms.excesses,
+          special_clauses: state.terms.special_clauses,
+        },
       }
 
       // Create Policy atomically

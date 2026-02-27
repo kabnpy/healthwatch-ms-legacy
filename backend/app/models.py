@@ -477,7 +477,6 @@ class RiskNotePublic(RiskNoteBase):
     id: uuid.UUID
     policy: PolicyPublic | None = None
     financial_breakdown: dict[str, Any] = Field(default_factory=dict)
-    special_clauses: list[str] = Field(default_factory=list)
 
 
 class RiskNote(RiskNoteBase, table=True):

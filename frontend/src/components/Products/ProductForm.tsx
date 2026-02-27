@@ -13,6 +13,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { LoadingButton } from "@/components/ui/loading-button"
 import {
   Select,
@@ -29,6 +30,9 @@ const formSchema = z.object({
   class_of_insurance: z.string().min(1, "Class of insurance is required"),
   default_commission_rate: z.coerce.number().min(0).max(100),
   product_details: z.record(z.string(), z.any()).default({}),
+  default_benefits_and_limits: z.string().optional().default(""),
+  default_excesses: z.string().optional().default(""),
+  default_special_clauses: z.string().optional().default(""),
 })
 
 type FormData = z.infer<typeof formSchema>
@@ -66,6 +70,9 @@ export const ProductForm = ({
       class_of_insurance: initialData?.class_of_insurance || "",
       default_commission_rate: initialData?.default_commission_rate ?? 10.0,
       product_details: (initialData?.product_details as any) || {},
+      default_benefits_and_limits: initialData?.default_benefits_and_limits || "",
+      default_excesses: initialData?.default_excesses || "",
+      default_special_clauses: initialData?.default_special_clauses || "",
     },
   })
 
@@ -169,6 +176,63 @@ export const ProductForm = ({
               <FormLabel>Default Commission %</FormLabel>
               <FormControl>
                 <Input type="number" step="0.01" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      <div className="space-y-4 border-t pt-4 mt-4">
+        <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+          Default Document Terms
+        </h3>
+        <FormField
+          control={(form as any).control}
+          name="default_benefits_and_limits"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Benefits & Limits</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Standard benefits for this product..."
+                  className="min-height-[100px]"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={(form as any).control}
+          name="default_excesses"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Excesses</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Standard excesses..."
+                  className="min-height-[100px]"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={(form as any).control}
+          name="default_special_clauses"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Special Clauses</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Standard special clauses..."
+                  className="min-height-[100px]"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

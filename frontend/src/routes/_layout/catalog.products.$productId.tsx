@@ -29,6 +29,9 @@ const productSchema = z.object({
   class_of_insurance: z.string().min(1, "Class of insurance is required"),
   default_commission_rate: z.coerce.number().min(0).max(100),
   product_details: z.record(z.string(), z.any()).default({}),
+  default_benefits_and_limits: z.string().optional().default(""),
+  default_excesses: z.string().optional().default(""),
+  default_special_clauses: z.string().optional().default(""),
 })
 
 type ProductFormData = z.infer<typeof productSchema>
@@ -72,6 +75,9 @@ function ProductDetailContent({ productId }: { productId: string }) {
       class_of_insurance: product.class_of_insurance,
       default_commission_rate: product.default_commission_rate,
       product_details: (product.product_details as any) || {},
+      default_benefits_and_limits: product.default_benefits_and_limits || "",
+      default_excesses: product.default_excesses || "",
+      default_special_clauses: product.default_special_clauses || "",
     },
   })
 

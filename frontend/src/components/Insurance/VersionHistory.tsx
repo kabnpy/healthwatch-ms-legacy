@@ -72,7 +72,7 @@ export function VersionHistory({ riskNotes, onView }: VersionHistoryProps) {
                       {note.transaction_type}
                     </h4>
                     <p className="text-xs text-muted-foreground mt-1 line-clamp-1 italic">
-                      {note.special_clauses?.[0] || "No description provided."}
+                      {(note.cover_snapshot as any)?.terms?.special_clauses || "No description provided."}
                     </p>
                   </div>
 

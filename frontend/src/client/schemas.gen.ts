@@ -1483,16 +1483,6 @@ export const InvoiceLineItemPublicSchema = {
                     type: 'null'
                 }
             ]
-        },
-        invoice: {
-            anyOf: [
-                {
-                    '$ref': '#/components/schemas/InvoicePublic'
-                },
-                {
-                    type: 'null'
-                }
-            ]
         }
     },
     type: 'object',
@@ -3034,21 +3024,6 @@ export const RiskNotePublicSchema = {
             additionalProperties: true,
             type: 'object',
             title: 'Financial Breakdown'
-        },
-        special_clauses: {
-            items: {
-                type: 'string'
-            },
-            type: 'array',
-            title: 'Special Clauses'
-        },
-        invoice_line_items: {
-            items: {
-                '$ref': '#/components/schemas/InvoiceLineItemPublic'
-            },
-            type: 'array',
-            title: 'Invoice Line Items',
-            default: []
         }
     },
     type: 'object',

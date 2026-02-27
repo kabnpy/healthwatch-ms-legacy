@@ -20,21 +20,21 @@
 - [x] Task: Implement changes to ensure tests pass.
 - [x] Task: Conductor - User Manual Verification 'Backend Model Refactor' (Protocol in workflow.md)
 
-## Phase 2: Data Migration [checkpoint: a6593c9]
+## Phase 2: Data Migration [checkpoint: 2c40bee]
 
 - [x] Task: Create an Alembic migration script to convert existing structured terms into the new text-based format for all active policies.
 - [x] Task: Write a test script to verify the migration on a copy of the production-like database.
 - [x] Task: Execute the migration and confirm data integrity.
 - [x] Task: Conductor - User Manual Verification 'Data Migration' (Protocol in workflow.md)
 
-## Phase 3: Frontend UI Updates
+## Phase 3: Frontend UI Updates [checkpoint: 2c40bee]
 
-- [ ] Task: Update the frontend API client using `scripts/generate-client.sh`.
-- [ ] Task: Refactor the Policy Detail and Catalog view pages in `frontend/src/routes/` to correctly render the new `terms` structure.
-- [ ] Task: Update the document generation logic in `frontend/src/utils/documentData.ts` to use the new text-based terms.
-- [ ] Task: Write failing Playwright E2E tests in `frontend/tests/` to verify the UI changes and correct rendering of terms.
-- [ ] Task: Implement UI changes to ensure tests pass.
-- [ ] Task: Conductor - User Manual Verification 'Frontend UI Updates' (Protocol in workflow.md)
+- [x] Task: Update the frontend API client using `scripts/generate-client.sh`.
+- [x] Task: Refactor the Policy Detail and Catalog view pages in `frontend/src/routes/` to correctly render the new `terms` structure.
+- [x] Task: Update the document generation logic in `frontend/src/utils/documentData.ts` to use the new text-based terms.
+- [x] Task: Write failing Playwright E2E tests in `frontend/tests/` to verify the UI changes and correct rendering of terms.
+- [x] Task: Implement UI changes to ensure tests pass.
+- [x] Task: Conductor - User Manual Verification 'Frontend UI Updates' (Protocol in workflow.md)
 
 ## Phase 4: Final Polish & Audit
 

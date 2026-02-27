@@ -202,6 +202,35 @@ export function StepReview({
             </div>
           </CardContent>
         </Card>
+
+        {/* Terms Summary */}
+        <Card className="shadow-sm border-muted/60">
+          <CardHeader className="pb-3 bg-muted/10">
+            <CardTitle className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+              Terms & Conditions
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-4 space-y-4">
+            {state.terms.benefits_and_limits && (
+              <div className="space-y-1">
+                <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Benefits & Limits</span>
+                <p className="text-xs text-slate-600 line-clamp-2 italic">{state.terms.benefits_and_limits}</p>
+              </div>
+            )}
+            {state.terms.excesses && (
+              <div className="space-y-1">
+                <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Excesses</span>
+                <p className="text-xs text-slate-600 line-clamp-2 italic">{state.terms.excesses}</p>
+              </div>
+            )}
+            {state.terms.special_clauses && (
+              <div className="space-y-1">
+                <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Special Clauses</span>
+                <p className="text-xs text-slate-600 line-clamp-2 italic">{state.terms.special_clauses}</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       <div className="bg-slate-50 border border-slate-200 p-4 rounded-lg text-[11px] text-slate-600 leading-relaxed italic">
