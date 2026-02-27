@@ -27,7 +27,7 @@
 - [x] Task: Execute the migration and confirm data integrity.
 - [x] Task: Conductor - User Manual Verification 'Data Migration' (Protocol in workflow.md)
 
-## Phase 3: Frontend UI Updates [checkpoint: 2c40bee]
+## Phase 3: Frontend UI Updates [checkpoint: 9084410]
 
 - [x] Task: Update the frontend API client using `scripts/generate-client.sh`.
 - [x] Task: Refactor the Policy Detail and Catalog view pages in `frontend/src/routes/` to correctly render the new `terms` structure.
@@ -36,8 +36,8 @@
 - [x] Task: Implement UI changes to ensure tests pass.
 - [x] Task: Conductor - User Manual Verification 'Frontend UI Updates' (Protocol in workflow.md)
 
-## Phase 4: Final Polish & Audit
+## Phase 4: Final Polish & Audit [checkpoint: 9084410]
 
-- [ ] Task: Perform a comprehensive audit of all views where terms are displayed to ensure consistency.
-- [ ] Task: Update any remaining documentation or help text related to policy terms.
-- [ ] Task: Conductor - User Manual Verification 'Final Polish & Audit' (Protocol in workflow.md)
+- [x] Task: Perform a comprehensive audit of all views where terms are displayed to ensure consistency.
+- [x] Task: Update any remaining documentation or help text related to policy terms.
+- [x] Task: Conductor - User Manual Verification 'Final Polish & Audit' (Protocol in workflow.md)

@@ -68,7 +68,8 @@ def test_create_policy_atomic_snapshot(db: Session) -> None:
     assert snapshot["vehicle"]["registration_number"] == "KBA 001"
     assert snapshot["vehicle"]["sum_insured"] in [1000000, "1000000", Decimal("1000000")]
     assert snapshot["extensions"]["pvt"] is True
-    assert snapshot["benefits_and_limits"] == "Included"
+    assert snapshot["terms"]["benefits_and_limits"] == "Included"
+    
     assert policy.risk_notes[0].transaction_type == TransactionType.NEW_BUSINESS
 
 def test_create_endorsement_atomic_snapshot(db: Session) -> None:
