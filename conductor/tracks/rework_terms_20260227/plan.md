@@ -12,7 +12,7 @@
 - [x] Task: Fix frontend Vitest configuration to ignore Playwright `.spec.ts` files.
 - [x] Task: Ensure all tests pass.
 
-## Phase 1: Backend Model & Schema Refactor [checkpoint: 7c816be]
+## Phase 1: Backend Model & Schema Refactor [checkpoint: f97fefb]
 
 - [x] Task: Update `RiskNote` and `Policy` schemas in `backend/app/schemas.py` to include the new `terms` object within `cover_snapshot`.
 - [x] Task: Refactor the `Policy` and `RiskNote` models in `backend/app/models.py` to support the new `terms` structure.
@@ -20,12 +20,12 @@
 - [x] Task: Implement changes to ensure tests pass.
 - [x] Task: Conductor - User Manual Verification 'Backend Model Refactor' (Protocol in workflow.md)
 
-## Phase 2: Data Migration
+## Phase 2: Data Migration [checkpoint: a6593c9]
 
-- [ ] Task: Create an Alembic migration script to convert existing structured terms into the new text-based format for all active policies.
-- [ ] Task: Write a test script to verify the migration on a copy of the production-like database.
-- [ ] Task: Execute the migration and confirm data integrity.
-- [ ] Task: Conductor - User Manual Verification 'Data Migration' (Protocol in workflow.md)
+- [x] Task: Create an Alembic migration script to convert existing structured terms into the new text-based format for all active policies.
+- [x] Task: Write a test script to verify the migration on a copy of the production-like database.
+- [x] Task: Execute the migration and confirm data integrity.
+- [x] Task: Conductor - User Manual Verification 'Data Migration' (Protocol in workflow.md)
 
 ## Phase 3: Frontend UI Updates
 
