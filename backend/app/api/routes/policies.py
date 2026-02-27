@@ -82,7 +82,8 @@ def get_policy_quote(
         raise HTTPException(status_code=404, detail="Product not found")
 
     try:
-        breakdown = RatingService.calculate_breakdown(product, quote_in.risk_details)
+        validated_risk = product.validate_risk_details(quote_in.risk_details)
+        breakdown = RatingService.calculate_breakdown(product, validated_risk)
         return QuoteResponse(breakdown=breakdown)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

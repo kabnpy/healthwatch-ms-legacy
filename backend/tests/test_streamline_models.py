@@ -9,33 +9,6 @@ from sqlmodel import Session, create_engine
 
 from app.models import Policy, RiskNote, PolicyStatus, RiskNoteStatus, TransactionType, Client
 
-def test_policy_has_risk_details(db: Session) -> None:
-    """
-    Test that the Policy model has a risk_details field and it can be persisted.
-    """
-    client = Client(
-        name="Test Client",
-        kra_pin="A123456789Z",
-        phone="0712345678",
-        email="test@example.com"
-    )
-    db.add(client)
-    db.commit()
-    db.refresh(client)
-
-    policy = Policy(
-        policy_number="POL-TEST-001",
-        client_id=client.id,
-        risk_details={"reg_no": "KBA 123A", "sum_insured": 1500000},
-        inception_date=date.today(),
-        status=PolicyStatus.ACTIVE
-    )
-    db.add(policy)
-    db.commit()
-    db.refresh(policy)
-    
-    assert policy.risk_details == {"reg_no": "KBA 123A", "sum_insured": 1500000}
-
 def test_risknote_no_longer_has_policy_snapshot(db: Session) -> None:
     """
     Test that RiskNote no longer has the policy_snapshot attribute.

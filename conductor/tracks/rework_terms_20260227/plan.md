@@ -2,8 +2,15 @@
 
 ## Phase 0: Setup & Branching
 
-- [ ] Task: Create a new feature branch for the rework: `feat/rework-cover-terms`.
-- [ ] Task: Confirm current state and ensure all tests pass on the new branch.
+- [x] Task: Create a new feature branch for the rework: `feat/rework-cover-terms`.
+- [~] Task: Confirm current state and ensure all tests pass on the new branch.
+
+## Phase 0.1: Fix Base Tests
+
+- [x] Task: Update backend tests to correctly use `RiskNote.cover_snapshot` instead of `Policy.risk_details`.
+- [x] Task: Resolve `TypeError: PolicyService.create_policy() got an unexpected keyword argument 'risk_details'`.
+- [x] Task: Fix frontend Vitest configuration to ignore Playwright `.spec.ts` files.
+- [x] Task: Ensure all tests pass.
 
 ## Phase 1: Backend Model & Schema Refactor
 

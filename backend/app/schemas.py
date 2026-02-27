@@ -83,11 +83,15 @@ class MotorPrivateRiskDetails(BaseModel):
         if not isinstance(data, dict):
             return data
         
-        # 1. Handle legacy sub-object names
-        if "vehicle_details" in data and "vehicle" not in data:
-            data["vehicle"] = data.pop("vehicle_details")
-        if "added_benefits" in data and "extensions" not in data:
-            data["extensions"] = data.pop("added_benefits")
+        # 1. Handle legacy sub-object names (case-insensitive)
+        for k in list(data.keys()):
+            low_k = k.lower()
+            if low_k == "vehicle_details" or low_k == "vehicle":
+                if "vehicle" not in data or k == "VEHICLE":
+                    data["vehicle"] = data.pop(k)
+            elif low_k == "added_benefits" or low_k == "extensions":
+                if "extensions" not in data or k == "EXTENSIONS":
+                    data["extensions"] = data.pop(k)
 
         # 2. Extract potential sub-objects
         vehicle = data.get("vehicle", {})

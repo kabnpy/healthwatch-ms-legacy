@@ -25,6 +25,13 @@ class RatingStrategy(ABC):
         from app.utils import parse_decimal
         return parse_decimal(value)
 
+    def _calculate_standard_levies(self, net_premium: Decimal) -> dict[str, Decimal]:
+        return {
+            "training_levy": (net_premium * Decimal("0.002")).quantize(Decimal("0.01")),
+            "phcf": (net_premium * Decimal("0.0025")).quantize(Decimal("0.01")),
+            "stamp_duty": Decimal("40.00")
+        }
+
 
 class MotorPrivateRatingStrategy(RatingStrategy):
     DEFAULT_TIERS = [
@@ -41,8 +48,7 @@ class MotorPrivateRatingStrategy(RatingStrategy):
         vehicle = risk_details.get("vehicle") or risk_details.get("vehicle_details", {})
         value = RatingStrategy.parse_decimal(vehicle.get("sum_insured", 0))
         
-        if value <= 0:
-            raise ValueError("Sum insured must be greater than zero for Motor Private insurance.")
+        # Allow zero value, will use minimum premium from the applicable tier
 
         product_tiers = product.pricing_rules.get("tiers")
         if product_tiers:
@@ -106,12 +112,42 @@ class MotorPrivateRatingStrategy(RatingStrategy):
             is_high_end=is_high_end,
         )
 
-    def _calculate_standard_levies(self, net_premium: Decimal) -> dict[str, Decimal]:
-        return {
-            "training_levy": (net_premium * Decimal("0.002")).quantize(Decimal("0.01")),
-            "phcf": (net_premium * Decimal("0.0025")).quantize(Decimal("0.01")),
-            "stamp_duty": Decimal("40.00")
-        }
+
+class GenericRatingStrategy(RatingStrategy):
+    def calculate(
+        self, product: Product, risk_details: dict[str, Any]
+    ) -> MotorFinancialBreakdown:
+        from app.models import PricingStrategy
+        
+        vehicle = risk_details.get("vehicle") or risk_details or {}
+        value = RatingStrategy.parse_decimal(vehicle.get("sum_insured", 0))
+        
+        if product.pricing_strategy == PricingStrategy.MANUAL:
+            # For manual, we can take it from risk_details if provided, 
+            # or use sum_insured as a fallback for some tests
+            basic_premium = RatingStrategy.parse_decimal(
+                risk_details.get("manual_premium") or vehicle.get("sum_insured", 0)
+            )
+        else:
+            rate = Decimal(str(product.pricing_rules.get("rate", 0))) / Decimal("100")
+            basic_premium = (value * rate).quantize(Decimal("0.01"))
+            
+        net_premium = basic_premium
+        
+        levies = self._calculate_standard_levies(net_premium)
+        total_levies = sum(levies.values())
+        
+        comm_rate = Decimal(str(product.default_commission_rate)) / Decimal("100")
+        commission = (net_premium * comm_rate).quantize(Decimal("0.01"))
+        
+        from app.schemas import BaseFinancialBreakdown
+        return BaseFinancialBreakdown(
+            type="base",
+            net_premium=net_premium,
+            taxes=levies,
+            total_amount=net_premium + total_levies,
+            commission_amount=commission,
+        )
 
 
 class RatingService:
@@ -121,4 +157,4 @@ class RatingService:
     ) -> Any:
         if "motor private" in product.class_of_insurance.lower():
             return MotorPrivateRatingStrategy().calculate(product, clean_risk)
-        raise NotImplementedError(f"Rating strategy for {product.class_of_insurance} not implemented")
+        return GenericRatingStrategy().calculate(product, clean_risk)

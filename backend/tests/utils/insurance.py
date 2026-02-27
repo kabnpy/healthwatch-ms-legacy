@@ -32,7 +32,7 @@ def create_random_insurer(db: Session) -> Insurer:
 def create_random_product(
     db: Session, 
     insurer_id: uuid.UUID | None = None,
-    class_of_insurance: str = "Generic"
+    class_of_insurance: str = "Motor Private"
 ) -> Product:
     if not insurer_id:
         insurer = create_random_insurer(db)
@@ -60,12 +60,16 @@ def create_random_policy(db: Session, client_id: uuid.UUID | None = None, produc
         product_id=product_id,
         coverage_start=date.today(),
         coverage_end=date.today() + timedelta(days=365),
-        risk_details={"info": "random details"}
+        risk_details={
+            "registration_number": f"K{random_lower_string()[:2].upper()} {uuid.uuid4().hex[:3].upper()}",
+            "make": "Toyota",
+            "sum_insured": 1500000
+        }
     )
     return policy_service.create_policy(
         session=db,
         policy_in=policy_in,
-        risk_details=policy_in.risk_details,
+        cover_snapshot=policy_in.risk_details,
         coverage_start=policy_in.coverage_start,
         coverage_end=policy_in.coverage_end
     )

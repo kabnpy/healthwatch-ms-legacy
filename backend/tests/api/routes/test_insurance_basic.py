@@ -56,8 +56,13 @@ def test_create_policy(
         "client_id": str(db_client.id),
         "product_id": str(product.id),
         "coverage_end": str(date.today() + timedelta(days=365)),
-        "risk_details": {"info": "some generic info"}
+        "risk_details": {
+            "registration_number": "KCM 123",
+            "make": "Toyota",
+            "sum_insured": 1500000
+        }
     }
+    
     response = client.post(
         f"{settings.API_V1_STR}/policies/",
         headers=superuser_token_headers,

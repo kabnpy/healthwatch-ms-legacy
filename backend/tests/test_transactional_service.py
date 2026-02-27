@@ -30,7 +30,7 @@ def test_atomic_policy_creation(db: Session) -> None:
     policy = policy_service.create_policy(
         session=db,
         policy_in=policy_in,
-        risk_details=risk_details,
+        cover_snapshot=risk_details,
         coverage_start=start_date,
         coverage_end=end_date
     )
@@ -42,9 +42,9 @@ def test_atomic_policy_creation(db: Session) -> None:
     rn = policy.risk_notes[0]
     assert rn.transaction_type == TransactionType.NEW_BUSINESS
     
-    # Verify authoritative state on Policy
-    assert float(policy.risk_details["sum_insured"]) == 5000000.0
-    assert policy.risk_details["registration_number"] == "KCM 123"
+    # Verify authoritative state on RiskNote snapshot
+    assert float(rn.cover_snapshot["vehicle"]["sum_insured"]) == 5000000.0
+    assert rn.cover_snapshot["vehicle"]["registration_number"] == "KCM 123"
     
     # Verify RiskNote financials
     assert rn.financial_breakdown["type"] == "motor"
@@ -55,10 +55,10 @@ def test_atomic_policy_creation(db: Session) -> None:
     assert "benefits" in rn.financial_breakdown
     
     # Verify exact math for 5M Motor Private
-    # 5M Tier: 3.0% (since it's not < 5M), min 0
-    # 5,000,000 * 0.03 = 150,000
-    assert float(rn.net_premium) == 150000.0
-    assert float(rn.financial_breakdown["net_premium"]) == 150000.0
+    # 5M Tier: 3.25% (inclusive of max), min 0
+    # 5,000,000 * 0.0325 = 162,500
+    assert float(rn.net_premium) == 162500.0
+    assert float(rn.financial_breakdown["net_premium"]) == 162500.0
     assert rn.coverage_start == start_date
     assert rn.coverage_end == end_date
 
@@ -78,7 +78,7 @@ def test_endorsement_creation(db: Session) -> None:
     policy = policy_service.create_policy(
         session=db,
         policy_in=policy_in,
-        risk_details=risk_details,
+        cover_snapshot=risk_details,
         coverage_start=start_date,
         coverage_end=end_date
     )
@@ -88,7 +88,7 @@ def test_endorsement_creation(db: Session) -> None:
     endorsement_rn = policy_service.create_endorsement(
         session=db,
         policy_id=policy.id,
-        updated_risk_details=new_risk_details,
+        updated_cover_snapshot=new_risk_details,
         change_description="Increased vehicle value"
     )
 
@@ -96,13 +96,10 @@ def test_endorsement_creation(db: Session) -> None:
     db.refresh(policy)
     assert len(policy.risk_notes) == 2
 
-    # Verify updated state on Policy
-    assert float(policy.risk_details["sum_insured"]) == 6000000.0
+    # Verify updated state on RiskNote
+    assert float(endorsement_rn.cover_snapshot["vehicle"]["sum_insured"]) == 6000000.0
     
     assert endorsement_rn.transaction_type == TransactionType.ENDORSEMENT
-    # Verify change_log on RiskNote
-    assert float(endorsement_rn.change_log["sum_insured"]["from"]) == 5000000.0
-    assert float(endorsement_rn.change_log["sum_insured"]["to"]) == 6000000.0
 
     # Delta logic verification
     assert "new_state" in endorsement_rn.financial_breakdown

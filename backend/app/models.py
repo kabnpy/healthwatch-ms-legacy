@@ -478,7 +478,6 @@ class RiskNotePublic(RiskNoteBase):
     policy: PolicyPublic | None = None
     financial_breakdown: dict[str, Any] = Field(default_factory=dict)
     special_clauses: list[str] = Field(default_factory=list)
-    invoice_line_items: list["InvoiceLineItemPublic"] = []
 
 
 class RiskNote(RiskNoteBase, table=True):
@@ -624,7 +623,6 @@ class ReceiptAllocationsPublic(SQLModel):
 class InvoiceLineItemPublic(InvoiceLineItemBase):
     id: uuid.UUID
     risk_note: Optional["RiskNotePublic"] = None
-    invoice: Optional["InvoicePublic"] = None
 
 
 class InvoicePublic(InvoiceBase):

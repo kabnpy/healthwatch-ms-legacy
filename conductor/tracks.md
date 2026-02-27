@@ -9,5 +9,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Rework Cover Snapshot Terms**
+- [~] **Track: Rework Cover Snapshot Terms**
 *Link: [./tracks/rework_terms_20260227/](./tracks/rework_terms_20260227/)*
