@@ -72,10 +72,8 @@ class MotorPrivateRiskDetails(BaseModel):
 
     vehicle: MotorVehicleDetails
     extensions: MotorExtensions = Field(default_factory=MotorExtensions)
-    # Terms as plain text/markdown
-    benefits_and_limits: str = ""
-    excesses: str = ""
-    special_clauses: str = ""
+    # Reworked terms structure: generic dict of plain text strings
+    terms: dict[str, str] = Field(default_factory=dict)
 
     @pydantic.model_validator(mode="before")
     @classmethod
@@ -101,8 +99,12 @@ class MotorPrivateRiskDetails(BaseModel):
         extensions = data.get("extensions", {})
         if not isinstance(extensions, dict):
             extensions = {}
+            
+        existing_terms = data.get("terms", {})
+        if not isinstance(existing_terms, dict):
+            existing_terms = {}
 
-        # 3. Define key mappings
+        # 3. Define mappings
         vehicle_mapping = {
             "Reg. No": "registration_number",
             "registration_number": "registration_number",
@@ -121,9 +123,12 @@ class MotorPrivateRiskDetails(BaseModel):
             "passenger_liability": "passenger_liability",
         }
 
+        term_keys = ["benefits_and_limits", "excesses", "special_clauses"]
+
         # 4. Pull keys from top-level data AND nested objects into clean normalized structures
         final_vehicle = {}
         final_extensions = {}
+        final_terms = existing_terms.copy()
 
         # Helper to get the best value among candidates
         def get_best_val(*candidates: Any) -> Any:
@@ -132,7 +137,7 @@ class MotorPrivateRiskDetails(BaseModel):
                     return c
             return None
 
-        # Check top-level first, then nested
+        # 5. Execute mappings
         for legacy_key, semantic_key in vehicle_mapping.items():
             top_val = data.get(legacy_key)
             nested_val = vehicle.get(legacy_key)
@@ -140,7 +145,6 @@ class MotorPrivateRiskDetails(BaseModel):
             best = get_best_val(top_val, nested_val)
             if best is not None:
                 final_vehicle[semantic_key] = best
-                # Cleanup top-level if we found it there
                 if legacy_key in data:
                     data.pop(legacy_key)
 
@@ -151,27 +155,25 @@ class MotorPrivateRiskDetails(BaseModel):
             best = get_best_val(top_val, nested_val)
             if best is not None:
                 final_extensions[semantic_key] = best
-                # Cleanup top-level if we found it there
                 if legacy_key in data:
                     data.pop(legacy_key)
 
-        # 5. Handle 'terms' nesting if it exists
-        if "terms" in data and isinstance(data["terms"], dict):
-            terms = data.pop("terms")
-            for k, v in terms.items():
-                if k not in data:
-                    data[k] = v
+        # 6. Group terms into the new dictionary
+        for term_key in term_keys:
+            # Check top level first, then inside existing 'terms' dict
+            val = data.get(term_key) or existing_terms.get(term_key)
+            if val is not None:
+                if isinstance(val, (list, dict)):
+                    final_terms[term_key] = json.dumps(val, indent=2)
+                else:
+                    final_terms[term_key] = str(val)
+                
+                if term_key in data:
+                    data.pop(term_key)
 
-        # 6. Final assignment
+        # 7. Final assignment
         data["vehicle"] = final_vehicle
         data["extensions"] = final_extensions
-            
-        # 7. Handle terms that might be list/dict in legacy data
-        for term_key in ["benefits_and_limits", "excesses", "special_clauses"]:
-            val = data.get(term_key)
-            if isinstance(val, (list, dict)):
-                data[term_key] = json.dumps(val, indent=2)
-            elif val is None:
-                data[term_key] = ""
+        data["terms"] = final_terms
                 
         return data

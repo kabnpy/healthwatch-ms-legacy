@@ -79,3 +79,33 @@ def test_policy_public_contains_active_note(db: Session) -> None:
     assert policy_public.active_note is not None
     assert policy_public.active_note.cover_snapshot == snapshot2
     assert policy_public.active_note.status == RiskNoteStatus.ISSUED
+
+def test_motor_private_risk_details_reworked_terms() -> None:
+    """
+    Test that MotorPrivateRiskDetails correctly groups terms into a dictionary.
+    """
+    from app.schemas import MotorPrivateRiskDetails
+    
+    data = {
+        "vehicle": {
+            "registration_number": "KCM 123",
+            "make": "Toyota",
+            "year_of_manufacture": 2020,
+            "sum_insured": 1500000
+        },
+        "benefits_and_limits": "Standard Benefits",
+        "excesses": "Standard Excesses",
+        "special_clauses": "Annual Valuation Required"
+    }
+    
+    details = MotorPrivateRiskDetails(**data)
+    assert "terms" in details.model_dump()
+    assert details.terms["benefits_and_limits"] == "Standard Benefits"
+    assert details.terms["excesses"] == "Standard Excesses"
+    assert details.terms["special_clauses"] == "Annual Valuation Required"
+    
+    # Verify legacy fields are NOT at the top level of dump
+    dump = details.model_dump()
+    assert "benefits_and_limits" not in dump
+    assert "excesses" not in dump
+    assert "special_clauses" not in dump

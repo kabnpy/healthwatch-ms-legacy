@@ -5,20 +5,20 @@
 - [x] Task: Create a new feature branch for the rework: `feat/rework-cover-terms`.
 - [~] Task: Confirm current state and ensure all tests pass on the new branch.
 
-## Phase 0.1: Fix Base Tests
+## Phase 0.1: Fix Base Tests [checkpoint: dc6e50e]
 
 - [x] Task: Update backend tests to correctly use `RiskNote.cover_snapshot` instead of `Policy.risk_details`.
 - [x] Task: Resolve `TypeError: PolicyService.create_policy() got an unexpected keyword argument 'risk_details'`.
 - [x] Task: Fix frontend Vitest configuration to ignore Playwright `.spec.ts` files.
 - [x] Task: Ensure all tests pass.
 
-## Phase 1: Backend Model & Schema Refactor
+## Phase 1: Backend Model & Schema Refactor [checkpoint: 7c816be]
 
-- [ ] Task: Update `RiskNote` and `Policy` schemas in `backend/app/schemas.py` to include the new `terms` object within `cover_snapshot`.
-- [ ] Task: Refactor the `Policy` and `RiskNote` models in `backend/app/models.py` to support the new `terms` structure.
-- [ ] Task: Write failing unit tests in `backend/tests/` to verify the updated schemas and models.
-- [ ] Task: Implement changes to ensure tests pass.
-- [ ] Task: Conductor - User Manual Verification 'Backend Model Refactor' (Protocol in workflow.md)
+- [x] Task: Update `RiskNote` and `Policy` schemas in `backend/app/schemas.py` to include the new `terms` object within `cover_snapshot`.
+- [x] Task: Refactor the `Policy` and `RiskNote` models in `backend/app/models.py` to support the new `terms` structure.
+- [x] Task: Write failing unit tests in `backend/tests/` to verify the updated schemas and models.
+- [x] Task: Implement changes to ensure tests pass.
+- [x] Task: Conductor - User Manual Verification 'Backend Model Refactor' (Protocol in workflow.md)
 
 ## Phase 2: Data Migration
 
