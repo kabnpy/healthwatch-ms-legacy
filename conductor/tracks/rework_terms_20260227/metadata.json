@@ -1,8 +1,0 @@
-{
-  "track_id": "rework_terms_20260227",
-  "type": "feature",
-  "status": "new",
-  "created_at": "2026-02-27T16:23:45Z",
-  "updated_at": "2026-02-27T16:23:45Z",
-  "description": "have cover terms in the coversapshot stored as text without complex structuring, update the catalog view pages to work with the reworked cover_snapshot and terms."
-}
