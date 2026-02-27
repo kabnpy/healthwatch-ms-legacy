@@ -23,7 +23,7 @@ Out of Scope (For Now):
 ## 3. Core Functional Pillars
 - **Client Hub:** A professional portfolio management center providing a comprehensive view of client active covers and historical data.
 - **Insurance Dashboard:** A deep-dive environment for policy management, versioned history logging, and document storage.
-- **Transaction Engine (Risk Notes):** Every policy change generates an immutable Risk Note snapshot. This replaces incremental deltas with full-state captures, providing instant access to past policy configurations and their corresponding financial breakdowns. This process is atomically linked to financial invoicing through a dedicated **Service Layer**.
+- **Transaction Engine (Risk Notes):** Every policy change generates an immutable Risk Note snapshot. This replaces incremental deltas with full-state captures, providing instant access to past policy configurations and their corresponding financial breakdowns. Snapshots utilize a generic, product-agnostic structure for coverage details and policy terms, ensuring the system can handle any insurance class without schema changes. This process is atomically linked to financial invoicing through a dedicated **Service Layer**.
 - **Flexible Invoicing:** Risk Notes capture the financial breakdown of a transaction, which can then be explicitly converted into tax invoices. This decoupling allows for consolidated billing (one invoice for multiple risk notes) and flexible billing cycles. Access to these financial mutations is restricted via **Simplified RBAC** (Staff vs. Viewer).
 
 ## 4. Immediate Roadmap Focus
