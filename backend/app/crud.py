@@ -446,7 +446,7 @@ def get_risk_notes(
 ) -> list[RiskNote]:
     statement = (
         select(RiskNote)
-        .where(RiskNote.deleted_at == col(None))
+        .where(RiskNote.deleted_at == None)
         .options(
             selectinload(cast(Any, RiskNote.invoice_line_items)).selectinload(
                 cast(Any, InvoiceLineItem.invoice)

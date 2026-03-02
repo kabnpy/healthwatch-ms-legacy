@@ -486,7 +486,29 @@ class RiskNote(RiskNoteBase, table=True):
     financial_breakdown: dict[str, Any] = Field(
         default_factory=dict, sa_column=Column(JSON)
     )
-    special_clauses: list[str] = Field(default_factory=list, sa_column=Column(JSON))
+    # DEPRECATED: special_clauses is now managed within cover_snapshot.terms
+    special_clauses_raw: list[str] = Field(
+        default_factory=list, sa_column=Column("special_clauses", JSON)
+    )
+
+    @property
+    def special_clauses(self) -> list[str]:
+        """
+        Getter for special_clauses that prioritizes the nested terms in cover_snapshot.
+        """
+        snapshot_terms = self.cover_snapshot.get("terms", {})
+        if isinstance(snapshot_terms, dict):
+            snapshot_clauses = snapshot_terms.get("special_clauses")
+            if snapshot_clauses:
+                # If it's a string, wrap it in a list for backward compatibility
+                if isinstance(snapshot_clauses, str):
+                    return [snapshot_clauses]
+                return snapshot_clauses
+        return self.special_clauses_raw
+
+    @special_clauses.setter
+    def special_clauses(self, value: list[str]) -> None:
+        self.special_clauses_raw = value
 
     @property
     def invoice_number(self) -> str | None:

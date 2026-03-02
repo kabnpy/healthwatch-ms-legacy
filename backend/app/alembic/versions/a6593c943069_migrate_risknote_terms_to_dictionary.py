@@ -49,6 +49,14 @@ def downgrade():
     # 1. Pull terms back to top level
     op.execute("""
         UPDATE risknote
-        SET cover_snapshot = ((cover_snapshot::jsonb || (cover_snapshot::jsonb->'terms')) - 'terms')::json
+        SET cover_snapshot = (
+            cover_snapshot::jsonb 
+            || jsonb_build_object(
+                'benefits_and_limits', cover_snapshot::jsonb->'terms'->'benefits_and_limits',
+                'excesses', cover_snapshot::jsonb->'terms'->'excesses',
+                'special_clauses', cover_snapshot::jsonb->'terms'->'special_clauses'
+            ) 
+            - 'terms'
+        )::json
         WHERE cover_snapshot::jsonb ? 'terms';
     """)
