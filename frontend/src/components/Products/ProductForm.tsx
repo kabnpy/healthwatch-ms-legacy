@@ -13,7 +13,6 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { LoadingButton } from "@/components/ui/loading-button"
 import {
   Select,
@@ -22,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
 import { useInsurers } from "@/hooks/useCatalog"
 
 const formSchema = z.object({
@@ -70,7 +70,8 @@ export const ProductForm = ({
       class_of_insurance: initialData?.class_of_insurance || "",
       default_commission_rate: initialData?.default_commission_rate ?? 10.0,
       product_details: (initialData?.product_details as any) || {},
-      default_benefits_and_limits: initialData?.default_benefits_and_limits || "",
+      default_benefits_and_limits:
+        initialData?.default_benefits_and_limits || "",
       default_excesses: initialData?.default_excesses || "",
       default_special_clauses: initialData?.default_special_clauses || "",
     },

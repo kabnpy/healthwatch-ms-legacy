@@ -244,7 +244,7 @@ function RiskNotePrintContent({ id }: { id: string }) {
               </tr>
 
               {/* Taxes/Levies */}
-              <>{riskNote.financial_breakdown?.taxes &&
+              {riskNote.financial_breakdown?.taxes &&
                 Object.entries(riskNote.financial_breakdown.taxes).map(
                   ([key, val]: [string, any], i: number) => (
                     <tr key={i}>
@@ -258,7 +258,7 @@ function RiskNotePrintContent({ id }: { id: string }) {
                       </td>
                     </tr>
                   ),
-                )}</>
+                )}
 
               {/* TOTAL */}
               <tr className="bg-gray-100 font-bold text-lg">

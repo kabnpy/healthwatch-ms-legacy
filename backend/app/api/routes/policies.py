@@ -25,7 +25,6 @@ from app.models import (
     PolicyPublic,
     PolicyUpdate,
     Product,
-    RiskNotePublic,
     RiskNotesPublic,
 )
 from app.schemas import QuoteRequest, QuoteResponse

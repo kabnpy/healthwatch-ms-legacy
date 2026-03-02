@@ -1,6 +1,6 @@
 import logging
 from datetime import date
-from typing import Any, cast
+from typing import Any
 
 from sqlmodel import Session, select
 

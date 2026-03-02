@@ -2,7 +2,7 @@ import uuid
 from datetime import date, datetime
 from decimal import Decimal
 from enum import Enum
-from typing import Any, Optional
+from typing import Any, Optional, cast
 
 from pydantic import ConfigDict, EmailStr
 from sqlalchemy import JSON, Column, Numeric
@@ -503,7 +503,7 @@ class RiskNote(RiskNoteBase, table=True):
                 # If it's a string, wrap it in a list for backward compatibility
                 if isinstance(snapshot_clauses, str):
                     return [snapshot_clauses]
-                return snapshot_clauses
+                return cast(list[str], snapshot_clauses)
         return self.special_clauses_raw
 
     @special_clauses.setter
