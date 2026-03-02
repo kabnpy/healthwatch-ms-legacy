@@ -179,7 +179,6 @@ export const RiskNoteForm = ({
                   <SelectContent>
                     <SelectItem value="New Business">New Business</SelectItem>
                     <SelectItem value="Renewal">Renewal</SelectItem>
-                    <SelectItem value="Endorsement">Endorsement</SelectItem>
                     <SelectItem value="Cancellation">Cancellation</SelectItem>
                   </SelectContent>
                 </Select>

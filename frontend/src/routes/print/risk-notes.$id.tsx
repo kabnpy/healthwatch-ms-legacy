@@ -206,13 +206,13 @@ function RiskNotePrintContent({ id }: { id: string }) {
 
           <div className="mb-8">
             <h2 className="text-xs font-bold uppercase border-b border-gray-300 mb-2">
-              Clauses & Endorsements
+              Clauses
             </h2>
             <ul className="list-disc list-inside text-xs space-y-1">
               <li>Political Violence & Terrorism Included</li>
               <li>Excess Protector Included</li>
               <li>Authorized Repair Limits Clause</li>
-              {riskNote.special_clauses?.map((clause, i) => (
+              {riskNote.special_clauses?.map((clause: string, i: number) => (
                 <li key={i}>{clause}</li>
               ))}
             </ul>

@@ -9,5 +9,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Remove Endorsement Workflow**
+- [x] **Track: Remove Endorsement Workflow**
 *Link: [./tracks/remove_endorsement_workflow_20260302/](./tracks/remove_endorsement_workflow_20260302/)*

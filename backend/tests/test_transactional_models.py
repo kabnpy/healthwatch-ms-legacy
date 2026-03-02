@@ -68,12 +68,12 @@ def test_risknote_chain_and_changelog(db: Session) -> None:
     )
     db.add(rn_old)
 
-    # 4. Create latest RiskNote (Endorsement)
+    # 4. Create latest RiskNote (Renewal)
     new_date = date.today()
     rn_new = RiskNote(
         risk_note_number=random_lower_string(),
         policy_id=policy.id,
-        transaction_type="Endorsement",
+        transaction_type="Renewal",
         status=RiskNoteStatus.ISSUED,
         previous_risk_note_id=rn_old.id,
         effective_date=new_date,

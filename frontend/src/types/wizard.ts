@@ -31,4 +31,4 @@ export interface WizardState {
   }
 }
 
-export type WizardMode = "NEW" | "RENEWAL" | "ENDORSEMENT"
+export type WizardMode = "NEW" | "RENEWAL"

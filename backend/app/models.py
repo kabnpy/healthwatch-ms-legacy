@@ -47,7 +47,6 @@ class PolicyStatus(str, Enum):
 class TransactionType(str, Enum):
     NEW_BUSINESS = "New Business"
     RENEWAL = "Renewal"
-    ENDORSEMENT = "Endorsement"
     CANCELLATION = "Cancellation"
 
 
@@ -394,12 +393,6 @@ class PolicyCreateExtended(PolicyCreate):
     risk_details: dict[str, Any] = Field(default_factory=dict)
 
 
-class EndorsementCreate(SQLModel):
-    updated_risk_details: dict[str, Any]
-    change_description: str
-    effective_date: date | None = None
-
-
 class PolicyUpdate(SQLModel):
     policy_number: str | None = None
     client_id: uuid.UUID | None = None
@@ -478,6 +471,9 @@ class RiskNotePublic(RiskNoteBase):
     id: uuid.UUID
     policy: PolicyPublic | None = None
     financial_breakdown: dict[str, Any] = Field(default_factory=dict)
+    special_clauses: list[str] = Field(default_factory=list)
+    invoice_number: str | None = None
+    invoice_line_items: list["InvoiceLineItemPublic"] = Field(default_factory=list)
 
 
 class RiskNote(RiskNoteBase, table=True):
@@ -491,6 +487,12 @@ class RiskNote(RiskNoteBase, table=True):
         default_factory=dict, sa_column=Column(JSON)
     )
     special_clauses: list[str] = Field(default_factory=list, sa_column=Column(JSON))
+
+    @property
+    def invoice_number(self) -> str | None:
+        if self.invoice_line_items:
+            return self.invoice_line_items[0].invoice.invoice_number
+        return None
 
 
 class RiskNotesPublic(SQLModel):
@@ -623,6 +625,7 @@ class ReceiptAllocationsPublic(SQLModel):
 class InvoiceLineItemPublic(InvoiceLineItemBase):
     id: uuid.UUID
     risk_note: Optional["RiskNotePublic"] = None
+    invoice: Optional["InvoicePublic"] = None
 
 
 class InvoicePublic(InvoiceBase):

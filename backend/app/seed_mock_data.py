@@ -171,22 +171,6 @@ def create_mock_data() -> None:
                 f"Created atomic policy and initial RiskNote: {policy.policy_number}"
             )
 
-            # 4. ADD AN ENDORSEMENT
-            new_cover_snapshot = cover_snapshot.copy()
-            cast(dict[str, Any], new_cover_snapshot["vehicle"])["sum_insured"] = (
-                5000000.0
-            )
-
-            endorsement_rn = policy_service.create_endorsement(
-                session=session,
-                policy_id=policy.id,
-                updated_cover_snapshot=new_cover_snapshot,
-                change_description="Increased vehicle value to 5M",
-            )
-            logger.info(
-                f"Created endorsement RiskNote: {endorsement_rn.risk_note_number}"
-            )
-
         logger.info("✅ Mock Data Seeded & Synchronized Successfully")
 
 

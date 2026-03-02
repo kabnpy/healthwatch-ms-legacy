@@ -59,7 +59,7 @@ def test_policy_public_contains_active_note(db: Session) -> None:
     snapshot2 = {"v": 2}
     rn2 = RiskNote(
         policy_id=policy.id,
-        transaction_type=TransactionType.ENDORSEMENT,
+        transaction_type=TransactionType.RENEWAL,
         status=RiskNoteStatus.ISSUED,
         coverage_start=date.today(),
         coverage_end=date.today(),

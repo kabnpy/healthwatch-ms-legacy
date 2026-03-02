@@ -1,4 +1,4 @@
-import { PlusCircle, RefreshCw } from "lucide-react"
+import { RefreshCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { StatusIndicator } from "../../Common/StatusIndicator"
 
@@ -9,7 +9,6 @@ interface PolicyHeaderProps {
   displayName?: string
   status: string
   onRenew: () => void
-  onEndorse: () => void
 }
 
 export function PolicyHeader({
@@ -18,7 +17,6 @@ export function PolicyHeader({
   displayName,
   status,
   onRenew,
-  onEndorse,
 }: PolicyHeaderProps) {
   return (
     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b pb-6">
@@ -45,14 +43,6 @@ export function PolicyHeader({
         >
           <RefreshCw className="size-4" />
           Renew
-        </Button>
-        <Button
-          size="sm"
-          className="gap-2 h-9 px-4 font-semibold"
-          onClick={onEndorse}
-        >
-          <PlusCircle className="size-4" />
-          Endorse
         </Button>
       </div>
     </div>

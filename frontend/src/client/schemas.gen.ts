@@ -1052,35 +1052,6 @@ export const DocumentsPublicSchema = {
     title: 'DocumentsPublic'
 } as const;
 
-export const EndorsementCreateSchema = {
-    properties: {
-        updated_risk_details: {
-            additionalProperties: true,
-            type: 'object',
-            title: 'Updated Risk Details'
-        },
-        change_description: {
-            type: 'string',
-            title: 'Change Description'
-        },
-        effective_date: {
-            anyOf: [
-                {
-                    type: 'string',
-                    format: 'date'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Effective Date'
-        }
-    },
-    type: 'object',
-    required: ['updated_risk_details', 'change_description'],
-    title: 'EndorsementCreate'
-} as const;
-
 export const HTTPValidationErrorSchema = {
     properties: {
         detail: {
@@ -1478,6 +1449,16 @@ export const InvoiceLineItemPublicSchema = {
             anyOf: [
                 {
                     '$ref': '#/components/schemas/RiskNotePublic'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        invoice: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/InvoicePublic'
                 },
                 {
                     type: 'null'
@@ -3024,6 +3005,31 @@ export const RiskNotePublicSchema = {
             additionalProperties: true,
             type: 'object',
             title: 'Financial Breakdown'
+        },
+        special_clauses: {
+            items: {
+                type: 'string'
+            },
+            type: 'array',
+            title: 'Special Clauses'
+        },
+        invoice_number: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Invoice Number'
+        },
+        invoice_line_items: {
+            items: {
+                '$ref': '#/components/schemas/InvoiceLineItemPublic'
+            },
+            type: 'array',
+            title: 'Invoice Line Items'
         }
     },
     type: 'object',
@@ -3244,7 +3250,7 @@ export const TokenSchema = {
 
 export const TransactionTypeSchema = {
     type: 'string',
-    enum: ['New Business', 'Renewal', 'Endorsement', 'Cancellation'],
+    enum: ['New Business', 'Renewal', 'Cancellation'],
     title: 'TransactionType'
 } as const;
 

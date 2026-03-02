@@ -78,7 +78,7 @@ function PolicyDashboardContent({
 
   // State for Risk Note Form
   const [riskNoteFormOpen, setRiskNoteFormOpen] = useState(false)
-  const [transactionType, setTransactionType] = useState("Endorsement")
+  const [transactionType, setTransactionType] = useState("Renewal")
   const [editingRiskNoteId, setEditingRiskNoteId] = useState<
     string | undefined
   >()
@@ -107,12 +107,6 @@ function PolicyDashboardContent({
     setRiskNoteFormOpen(true)
   }
 
-  const handleEndorse = () => {
-    setTransactionType("Endorsement")
-    setEditingRiskNoteId(undefined)
-    setRiskNoteFormOpen(true)
-  }
-
   if (isLoading || !policy || !client) {
     return <PendingItems />
   }
@@ -135,7 +129,6 @@ function PolicyDashboardContent({
         displayName={displayName}
         status={policy.status || "Unknown"}
         onRenew={handleRenew}
-        onEndorse={handleEndorse}
       />
 
       <Tabs defaultValue="overview" className="w-full">

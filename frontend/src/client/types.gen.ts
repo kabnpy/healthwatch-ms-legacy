@@ -189,14 +189,6 @@ export type DocumentsPublic = {
 
 export type DocumentType = 'Logbook' | 'ID' | 'Valuation' | 'PoliceAbstract' | 'Receipt' | 'Other';
 
-export type EndorsementCreate = {
-    updated_risk_details: {
-        [key: string]: unknown;
-    };
-    change_description: string;
-    effective_date?: (string | null);
-};
-
 export type HTTPValidationError = {
     detail?: Array<ValidationError>;
 };
@@ -262,6 +254,7 @@ export type InvoiceLineItemPublic = {
     description?: (string | null);
     id: string;
     risk_note?: (RiskNotePublic | null);
+    invoice?: (InvoicePublic | null);
 };
 
 export type InvoicePublic = {
@@ -549,6 +542,9 @@ export type RiskNotePublic = {
     financial_breakdown?: {
         [key: string]: unknown;
     };
+    special_clauses?: Array<(string)>;
+    invoice_number?: (string | null);
+    invoice_line_items?: Array<InvoiceLineItemPublic>;
 };
 
 export type RiskNotesPublic = {
@@ -583,7 +579,7 @@ export type Token = {
     token_type?: string;
 };
 
-export type TransactionType = 'New Business' | 'Renewal' | 'Endorsement' | 'Cancellation';
+export type TransactionType = 'New Business' | 'Renewal' | 'Cancellation';
 
 export type UpdatePassword = {
     current_password: string;
@@ -907,13 +903,6 @@ export type PoliciesGetPolicyQuoteData = {
 };
 
 export type PoliciesGetPolicyQuoteResponse = (QuoteResponse);
-
-export type PoliciesCreateEndorsementData = {
-    id: string;
-    requestBody: EndorsementCreate;
-};
-
-export type PoliciesCreateEndorsementResponse = (RiskNotePublic);
 
 export type PoliciesReadPolicyRiskNotesData = {
     id: string;
