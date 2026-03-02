@@ -132,7 +132,7 @@ def parse_decimal(value: Any) -> Decimal:
     """
     if value is None:
         return Decimal("0")
-    if isinstance(value, (int, float, Decimal)):
+    if isinstance(value, int | float | Decimal):
         return Decimal(str(value))
 
     if isinstance(value, str):

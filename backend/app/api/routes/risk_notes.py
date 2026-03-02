@@ -77,7 +77,7 @@ def create_risk_note(
     """
     Create new risk note.
     """
-    risk_note = policy_service.create_risk_note_with_invoice(
+    risk_note = policy_service.create_risk_note(
         session=session, risk_note_in=risk_note_in, created_by_id=_current_user.id
     )
     return risk_note

@@ -4,6 +4,7 @@ from typing import Any
 
 from app.models import Product
 from app.schemas import (
+    BaseFinancialBreakdown,
     BenefitLineItem,
     MotorFinancialBreakdown,
 )
@@ -13,7 +14,7 @@ class RatingStrategy(ABC):
     @abstractmethod
     def calculate(
         self, product: Product, risk_details: dict[str, Any]
-    ) -> MotorFinancialBreakdown:
+    ) -> BaseFinancialBreakdown:
         pass
 
     @staticmethod
@@ -132,7 +133,7 @@ class MotorPrivateRatingStrategy(RatingStrategy):
 class GenericRatingStrategy(RatingStrategy):
     def calculate(
         self, product: Product, risk_details: dict[str, Any]
-    ) -> MotorFinancialBreakdown:
+    ) -> BaseFinancialBreakdown:
         from app.models import PricingStrategy
 
         vehicle = risk_details.get("vehicle") or risk_details or {}
@@ -156,8 +157,6 @@ class GenericRatingStrategy(RatingStrategy):
         comm_rate = Decimal(str(product.default_commission_rate)) / Decimal("100")
         commission = (net_premium * comm_rate).quantize(Decimal("0.01"))
 
-        from app.schemas import BaseFinancialBreakdown
-
         return BaseFinancialBreakdown(
             type="base",
             net_premium=net_premium,
@@ -169,7 +168,9 @@ class GenericRatingStrategy(RatingStrategy):
 
 class RatingService:
     @classmethod
-    def calculate_breakdown(cls, product: Product, clean_risk: dict[str, Any]) -> Any:
+    def calculate_breakdown(
+        cls, product: Product, clean_risk: dict[str, Any]
+    ) -> BaseFinancialBreakdown:
         if "motor private" in product.class_of_insurance.lower():
             return MotorPrivateRatingStrategy().calculate(product, clean_risk)
         return GenericRatingStrategy().calculate(product, clean_risk)

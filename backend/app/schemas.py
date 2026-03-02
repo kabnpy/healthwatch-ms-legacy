@@ -21,7 +21,7 @@ class BaseFinancialBreakdown(BaseModel):
 
 
 class MotorFinancialBreakdown(BaseFinancialBreakdown):
-    type: Literal["motor"] = "motor"
+    type: Literal["motor"] = "motor"  # type: ignore[assignment]
     benefits: list[BenefitLineItem] = Field(default_factory=list)
     basic_rate: Decimal | None = None
     is_high_end: bool = False
@@ -161,7 +161,7 @@ class MotorPrivateRiskDetails(BaseModel):
             # Check top level first, then inside existing 'terms' dict
             val = data.get(term_key) or existing_terms.get(term_key)
             if val is not None:
-                if isinstance(val, (list, dict)):
+                if isinstance(val, list | dict):
                     final_terms[term_key] = json.dumps(val, indent=2)
                 else:
                     final_terms[term_key] = str(val)

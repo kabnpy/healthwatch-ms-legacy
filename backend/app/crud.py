@@ -447,7 +447,7 @@ def get_risk_notes(
     if client_id:
         statement = statement.join(Policy).where(Policy.client_id == client_id)
     if uninvoiced_only:
-        statement = statement.where(~RiskNote.invoice_line_items.any())
+        statement = statement.where(~cast(Any, RiskNote.invoice_line_items).any())
         statement = statement.where(RiskNote.status != RiskNoteStatus.DRAFT)
     statement = statement.offset(skip).limit(limit)
     return list(session.exec(statement).all())
@@ -466,7 +466,7 @@ def count_risk_notes(
     if client_id:
         statement = statement.join(Policy).where(Policy.client_id == client_id)
     if uninvoiced_only:
-        statement = statement.where(~RiskNote.invoice_line_items.any())
+        statement = statement.where(~cast(Any, RiskNote.invoice_line_items).any())
         statement = statement.where(RiskNote.status != RiskNoteStatus.DRAFT)
     count_statement = select(func.count()).select_from(statement.subquery())
     return session.exec(count_statement).one()

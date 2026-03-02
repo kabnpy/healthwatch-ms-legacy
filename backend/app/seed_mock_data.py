@@ -1,6 +1,6 @@
 import logging
 from datetime import date
-from typing import Any
+from typing import Any, cast
 
 from sqlmodel import Session, select
 
@@ -10,6 +10,7 @@ from app.models import (
     Insurer,
     Policy,
     PolicyCreate,
+    PricingStrategy,
     Product,
 )
 from app.services.policy import policy_service
@@ -40,8 +41,8 @@ def create_mock_data() -> None:
             name: str,
             class_of_insurance: str,
             product_details: dict[str, Any],
-            pricing_strategy: str = "Percentage",
-            pricing_rules: dict[str, Any] = None,
+            pricing_strategy: PricingStrategy = PricingStrategy.PERCENTAGE,
+            pricing_rules: dict[str, Any] | None = None,
         ) -> Product:
             product = session.exec(select(Product).where(Product.name == name)).first()
             if not product:
@@ -107,7 +108,7 @@ def create_mock_data() -> None:
             "Motor Private - Comprehensive",
             "Motor Private",
             motor_details,
-            pricing_strategy="FixedTiered",
+            pricing_strategy=PricingStrategy.FIXED_TIERED,
             pricing_rules=motor_pricing_rules,
         )
 
@@ -172,7 +173,9 @@ def create_mock_data() -> None:
 
             # 4. ADD AN ENDORSEMENT
             new_cover_snapshot = cover_snapshot.copy()
-            new_cover_snapshot["vehicle"]["sum_insured"] = 5000000.0
+            cast(dict[str, Any], new_cover_snapshot["vehicle"])["sum_insured"] = (
+                5000000.0
+            )
 
             endorsement_rn = policy_service.create_endorsement(
                 session=session,

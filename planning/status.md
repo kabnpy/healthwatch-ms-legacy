@@ -7,14 +7,16 @@
 - **Financial Hardening & Rating Engine**: Standardized `sum_insured` as the single authoritative source for insured values across the stack. Refactored `RatingService` to use a singular semantic input and implemented `ManualRatingStrategy` for non-motor products.
 - **Prestart Service Stabilization**: The `prestart` service now successfully completes database migrations and mock data seeding.
 - **Client Regeneration**: Successfully regenerated the TypeScript client from the backend OpenAPI schema and verified type integrity with `tsc`.
+- **Backend Linting & Type Hardening**: Resolved all `ruff` and `mypy` issues. Fixed a critical renaming bug in the `risk_notes` API route. Stabilized `seed_mock_data.py` and consolidated `RatingService` return types for better consistency and developer experience.
 
 ## Ongoing
 - **Type Integrity & Stabilization**: Resolving persistent TypeScript errors in the auto-generated client and components.
 
 ## Next Steps
-1. **Audit Traceability**: Finalize the `change_log` implementation for endorsements to ensure full traceability of risk detail modifications.
-2. **Automated Testing**: Expand the backend test suite to cover the new pro-rata endorsement calculations and rating tier logic.
-3. **Frontend Refinement**: Polish the document viewing experience to handle the new `cover_snapshot` structure across all templates.
+1. **Verification of Backend Changes**: Run the backend test suite once a database connection is established to ensure all changes are functional.
+2. **Audit Traceability**: Finalize the `change_log` implementation for endorsements to ensure full traceability of risk detail modifications.
+3. **Automated Testing**: Expand the backend test suite to cover the new pro-rata endorsement calculations and rating tier logic.
+4. **Frontend Refinement**: Polish the document viewing experience to handle the new `cover_snapshot` structure across all templates.
 
 ## Architectural Decisions
 - **Atomic Snapshot Strategy**: We store the full state of the risk (the "Snapshot") on the `RiskNote` issued for each transaction. This ensures that every document (Risk Note, Invoice) refers to the authoritative state of the cover at the exact moment of issuance.
