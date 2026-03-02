@@ -253,7 +253,6 @@ export type InvoiceLineItemPublic = {
     amount: string;
     description?: (string | null);
     id: string;
-    risk_note?: (RiskNotePublic | null);
     invoice?: (InvoicePublic | null);
 };
 

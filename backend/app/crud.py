@@ -336,6 +336,9 @@ def get_policy(session: Session, *, id: uuid.UUID) -> Policy | None:
         .where(Policy.deleted_at == None)
         .options(
             selectinload(cast(Any, Policy.product)),
+            selectinload(cast(Any, Policy.risk_notes))
+            .selectinload(cast(Any, RiskNote.invoice_line_items))
+            .selectinload(cast(Any, InvoiceLineItem.invoice)),
         )
     )
     return session.exec(statement).first()
@@ -441,7 +444,15 @@ def get_risk_notes(
     client_id: uuid.UUID | None = None,
     uninvoiced_only: bool = False,
 ) -> list[RiskNote]:
-    statement = select(RiskNote).where(RiskNote.deleted_at == None)
+    statement = (
+        select(RiskNote)
+        .where(RiskNote.deleted_at == col(None))
+        .options(
+            selectinload(cast(Any, RiskNote.invoice_line_items)).selectinload(
+                cast(Any, InvoiceLineItem.invoice)
+            )
+        )
+    )
     if policy_id:
         statement = statement.where(RiskNote.policy_id == policy_id)
     if client_id:

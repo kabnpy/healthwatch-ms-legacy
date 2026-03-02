@@ -490,7 +490,7 @@ class RiskNote(RiskNoteBase, table=True):
 
     @property
     def invoice_number(self) -> str | None:
-        if self.invoice_line_items:
+        if self.invoice_line_items and self.invoice_line_items[0].invoice:
             return self.invoice_line_items[0].invoice.invoice_number
         return None
 
@@ -624,7 +624,6 @@ class ReceiptAllocationsPublic(SQLModel):
 
 class InvoiceLineItemPublic(InvoiceLineItemBase):
     id: uuid.UUID
-    risk_note: Optional["RiskNotePublic"] = None
     invoice: Optional["InvoicePublic"] = None
 
 

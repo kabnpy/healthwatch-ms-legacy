@@ -1445,16 +1445,6 @@ export const InvoiceLineItemPublicSchema = {
             format: 'uuid',
             title: 'Id'
         },
-        risk_note: {
-            anyOf: [
-                {
-                    '$ref': '#/components/schemas/RiskNotePublic'
-                },
-                {
-                    type: 'null'
-                }
-            ]
-        },
         invoice: {
             anyOf: [
                 {

@@ -28,18 +28,20 @@ def upgrade():
                 'special_clauses', cover_snapshot::jsonb->'special_clauses'
             ))
         ))::json
-        WHERE cover_snapshot::jsonb ? 'benefits_and_limits' 
+        WHERE (cover_snapshot::jsonb ? 'benefits_and_limits' 
            OR cover_snapshot::jsonb ? 'excesses' 
-           OR cover_snapshot::jsonb ? 'special_clauses';
+           OR cover_snapshot::jsonb ? 'special_clauses')
+           AND NOT cover_snapshot::jsonb ? 'terms';
     """)
     
     # 2. Remove legacy top-level keys
     op.execute("""
         UPDATE risknote
         SET cover_snapshot = (cover_snapshot::jsonb - 'benefits_and_limits' - 'excesses' - 'special_clauses')::json
-        WHERE cover_snapshot::jsonb ? 'benefits_and_limits' 
+        WHERE (cover_snapshot::jsonb ? 'benefits_and_limits' 
            OR cover_snapshot::jsonb ? 'excesses' 
-           OR cover_snapshot::jsonb ? 'special_clauses';
+           OR cover_snapshot::jsonb ? 'special_clauses')
+           AND NOT cover_snapshot::jsonb ? 'terms';
     """)
 
 
