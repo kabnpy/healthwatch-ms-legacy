@@ -651,7 +651,6 @@ class InvoiceLineItemPublic(InvoiceLineItemBase):
 
 class InvoicePublic(InvoiceBase):
     id: uuid.UUID
-    line_items: list[InvoiceLineItemPublic] = []
     allocations: list[ReceiptAllocationBase] = []
 
 
