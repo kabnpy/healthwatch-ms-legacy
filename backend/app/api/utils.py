@@ -24,4 +24,9 @@ def prepare_policy_public(policy: Policy) -> PolicyPublic:
 
         res.active_note = RiskNotePublic.model_validate(active_rn)
 
+    if policy.client:
+        from app.models import ClientPublic
+
+        res.client = ClientPublic.model_validate(policy.client)
+
     return res

@@ -35,9 +35,9 @@
 
 ## Phase 3: Frontend Dashboard & Workflow UI
 *   **Goal:** Surface the renewal workflow to agency staff via the dashboard.
-*   - [ ] Task: Implement the "Renewals Due" dashboard view.
-    *   - [ ] Add a new filter or tab to the Insurance Dashboard displaying policies expiring within 30 days.
-    *   - [ ] Include status badges for `Renewal Invited` and `Renewal Confirmed`.
+*   - [x] Task: Implement the "Renewals Due" dashboard view. [d648b42]
+    *   - [x] Add a new filter or tab to the Insurance Dashboard displaying policies expiring within 30 days.
+    *   - [x] Include status badges for `Renewal Invited` and `Renewal Confirmed`.
 *   - [ ] Task: Create the "Record Renewal Invitation" form.
     *   - [ ] Build a UI component to manually input updated terms from an insurer notice.
     *   - [ ] Implement file upload support for the insurer's PDF notice.

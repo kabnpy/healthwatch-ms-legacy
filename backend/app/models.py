@@ -422,6 +422,7 @@ class Policy(PolicyBase, table=True):
 class PolicyPublic(PolicyBase):
     id: uuid.UUID
     product: ProductPublic | None = None
+    client: "ClientPublic" | None = None
     active_note: Optional["RiskNotePublic"] = None
 
 

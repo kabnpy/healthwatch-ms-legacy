@@ -391,7 +391,10 @@ def get_policies(
     statement = (
         select(Policy)
         .where(Policy.deleted_at == None)
-        .options(selectinload(cast(Any, Policy.product)))
+        .options(
+            selectinload(cast(Any, Policy.product)),
+            selectinload(cast(Any, Policy.client)),
+        )
     )
     if expiring_within is not None:
         from app.models import RiskNote, RiskNoteStatus

@@ -24,6 +24,19 @@ import { StatusIndicator } from "../Common/StatusIndicator"
 
 export const columns: ColumnDef<PolicyPublic>[] = [
   {
+    accessorKey: "client.name",
+    header: "Client",
+    cell: ({ row }) => (
+      <Link
+        to="/clients/$clientId"
+        params={{ clientId: row.original.client_id }}
+        className="font-medium hover:underline text-primary"
+      >
+        {row.original.client?.name || "Unknown"}
+      </Link>
+    ),
+  },
+  {
     id: "display_name",
     header: "Policy",
     cell: ({ row }) => {
