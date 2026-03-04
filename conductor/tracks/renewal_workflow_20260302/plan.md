@@ -33,7 +33,7 @@
     *   - [x] Write tests to ensure the job doesn't send duplicate emails for the same policy/period.
 *   - [x] Task: Conductor - User Manual Verification 'Email Automation' (Protocol in workflow.md)
 
-## Phase 3: Frontend Dashboard & Workflow UI
+## Phase 3: Frontend Dashboard & Workflow UI [checkpoint: ff44572]
 *   **Goal:** Surface the renewal workflow to agency staff via the dashboard.
 *   - [x] Task: Implement the "Renewals Due" dashboard view. [d648b42] [af29a1c]
     *   - [x] Add a new filter or tab to the Insurance Dashboard displaying policies expiring within 30 days.
@@ -43,4 +43,4 @@
     *   - [x] Implement file upload support for the insurer's PDF notice.
 *   - [x] Task: Connect frontend actions to backend status transitions. [d648b42] [d8a3d61] [aa3a34c]
     *   - [x] Add buttons to manually trigger a renewal invite email or confirm a renewal.
-*   - [ ] Task: Conductor - User Manual Verification 'Frontend Integration' (Protocol in workflow.md)
+*   - [x] Task: Conductor - User Manual Verification 'Frontend Integration' (Protocol in workflow.md) [ff44572]
