@@ -22,9 +22,9 @@
 
 ## Phase 2: Email Automation & Job Scheduling
 *   **Goal:** Implement the automated email notification system and the scheduling mechanism.
-*   - [ ] Task: Design and implement Renewal Email templates.
-    *   - [ ] Create HTML templates for the 30-day "Renewal Invitation" and 7-day "Reminder".
-    *   - [ ] Include dynamic placeholders for policy number, client name, and premium.
+*   - [x] Task: Design and implement Renewal Email templates. [a07e57c]
+    *   - [x] Create HTML templates for the 30-day "Renewal Invitation" and 7-day "Reminder".
+    *   - [x] Include dynamic placeholders for policy number, client name, and premium.
 *   - [ ] Task: Implement the Email Dispatcher service.
     *   - [ ] Create logic to send emails via the configured SMTP/Mail service.
     *   - [ ] Add error handling and logging for failed dispatches.
