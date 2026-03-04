@@ -4,6 +4,8 @@ import uuid
 from sqlmodel import Session, select, func
 from sqlalchemy.orm import selectinload
 from app.models import Policy, RiskNote, RiskNoteStatus
+from app.utils import send_email, render_email_template
+from app.core.config import settings
 
 class RenewalService:
     @staticmethod
@@ -25,7 +27,7 @@ class RenewalService:
             select(Policy)
             .join(latest_rn_sub, Policy.id == latest_rn_sub.c.policy_id)
             .where(latest_rn_sub.c.max_end == target_date)
-            .options(selectinload(Policy.risk_notes))
+            .options(selectinload(Policy.risk_notes), selectinload(Policy.client))
         )
         return list(session.exec(statement).all())
 
@@ -48,8 +50,75 @@ class RenewalService:
             .join(latest_rn_sub, Policy.id == latest_rn_sub.c.policy_id)
             .where(latest_rn_sub.c.max_end <= target_date)
             .where(latest_rn_sub.c.max_end >= date.today())
-            .options(selectinload(Policy.risk_notes))
+            .options(selectinload(Policy.risk_notes), selectinload(Policy.client))
         )
         return list(session.exec(statement).all())
+
+    @staticmethod
+    def send_renewal_invitation(session: Session, *, policy: Policy) -> None:
+        """
+        Sends a renewal invitation email to the client.
+        """
+        if not policy.client or not policy.client.email:
+            return
+
+        latest_rn = next((rn for rn in policy.risk_notes if rn.status == RiskNoteStatus.ISSUED), None)
+        if not latest_rn:
+            return
+
+        project_name = settings.PROJECT_NAME
+        subject = f"{project_name} - Renewal Invitation for {policy.policy_number}"
+        link = f"{settings.FRONTEND_HOST}/policies/{policy.id}"
+        
+        html_content = render_email_template(
+            template_name="renewal_invitation.html",
+            context={
+                "project_name": project_name,
+                "client_name": policy.client.name,
+                "policy_number": policy.policy_number,
+                "expiry_date": latest_rn.coverage_end.strftime("%d %b %Y"),
+                "premium": f"{latest_rn.total_amount:,.2f}",
+                "link": link,
+            },
+        )
+        
+        send_email(
+            email_to=policy.client.email,
+            subject=subject,
+            html_content=html_content,
+        )
+
+    @staticmethod
+    def send_renewal_reminder(session: Session, *, policy: Policy) -> None:
+        """
+        Sends a 7-day renewal reminder email to the client.
+        """
+        if not policy.client or not policy.client.email:
+            return
+
+        latest_rn = next((rn for rn in policy.risk_notes if rn.status == RiskNoteStatus.ISSUED), None)
+        if not latest_rn:
+            return
+
+        project_name = settings.PROJECT_NAME
+        subject = f"{project_name} - Renewal Reminder: {policy.policy_number}"
+        link = f"{settings.FRONTEND_HOST}/policies/{policy.id}"
+        
+        html_content = render_email_template(
+            template_name="renewal_reminder.html",
+            context={
+                "project_name": project_name,
+                "client_name": policy.client.name,
+                "policy_number": policy.policy_number,
+                "expiry_date": latest_rn.coverage_end.strftime("%d %b %Y"),
+                "link": link,
+            },
+        )
+        
+        send_email(
+            email_to=policy.client.email,
+            subject=subject,
+            html_content=html_content,
+        )
 
 renewal_service = RenewalService()

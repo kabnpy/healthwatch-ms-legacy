@@ -1,4 +1,5 @@
 import pytest
+from unittest.mock import patch
 from datetime import date, timedelta
 from sqlmodel import Session
 from app.models import PolicyStatus, RiskNoteStatus
@@ -59,6 +60,34 @@ def test_get_policies_expiring_within_days(db: Session):
     results_within_30 = renewal_service.get_policies_expiring_within(db, days=30)
     # Note: earlier tests might have left data if db is not cleaned, 
     # but fixtures usually handle it. Assuming clean db.
-    ids = [p.id for p in results_within_30]
     assert len(results_within_30) >= 3
-    # ... checks ...
+
+@patch("app.services.renewal.send_email")
+def test_send_renewal_invitation(mock_send_email, db: Session):
+    from unittest.mock import patch
+    policy = create_random_policy(db)
+    # Ensure client has email
+    policy.client.email = "client@example.com"
+    db.add(policy.client)
+    db.commit()
+
+    renewal_service.send_renewal_invitation(db, policy=policy)
+
+    assert mock_send_email.called
+    kwargs = mock_send_email.call_args[1]
+    assert kwargs["email_to"] == "client@example.com"
+    assert "Renewal Invitation" in kwargs["subject"]
+    assert policy.policy_number in kwargs["html_content"]
+
+@patch("app.services.renewal.send_email")
+def test_send_renewal_reminder(mock_send_email, db: Session):
+    from unittest.mock import patch
+    policy = create_random_policy(db)
+    policy.client.email = "client@example.com"
+    db.add(policy.client)
+    db.commit()
+
+    renewal_service.send_renewal_reminder(db, policy=policy)
+
+    assert mock_send_email.called
+    assert "Renewal Reminder" in mock_send_email.call_args[1]["subject"]
