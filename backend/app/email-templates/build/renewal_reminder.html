@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+  <head>
+    <title>{{ project_name }} - Renewal Reminder</title>
+    <style>
+      body { font-family: Arial, sans-serif; background-color: #fafbfc; padding: 20px; }
+      .container { background-color: #ffffff; padding: 40px; max-width: 600px; margin: 0 auto; border-radius: 8px; }
+      .header { font-size: 20px; color: #333; text-align: center; margin-bottom: 30px; }
+      .content { font-size: 16px; color: #555; line-height: 1.5; text-align: center; }
+      .button { display: inline-block; background-color: #ff9800; color: #ffffff; padding: 15px 30px; text-decoration: none; border-radius: 8px; margin-top: 20px; }
+      .footer { font-size: 12px; color: #999; text-align: center; margin-top: 30px; border-top: 1px solid #ccc; padding-top: 20px; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">{{ project_name }} - Renewal Reminder</div>
+      <div class="content">
+        <p>Dear {{ client_name }},</p>
+        <p>This is a reminder that your policy <strong>{{ policy_number }}</strong> will expire in <strong>7 days</strong> (on {{ expiry_date }}).</p>
+        <p>To ensure continuous coverage, please renew your policy.</p>
+        <a href="{{ link }}" class="button">Renew Now</a>
+      </div>
+      <div class="footer">
+        If you have already processed your renewal, please ignore this email.
+      </div>
+    </div>
+  </body>
+</html>
