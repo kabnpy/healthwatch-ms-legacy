@@ -25,9 +25,9 @@
 *   - [x] Task: Design and implement Renewal Email templates. [a07e57c]
     *   - [x] Create HTML templates for the 30-day "Renewal Invitation" and 7-day "Reminder".
     *   - [x] Include dynamic placeholders for policy number, client name, and premium.
-*   - [ ] Task: Implement the Email Dispatcher service.
-    *   - [ ] Create logic to send emails via the configured SMTP/Mail service.
-    *   - [ ] Add error handling and logging for failed dispatches.
+*   - [x] Task: Implement the Email Dispatcher service. [accd106]
+    *   - [x] Create logic to send emails via the configured SMTP/Mail service.
+    *   - [x] Add error handling and logging for failed dispatches.
 *   - [ ] Task: Setup the automated "Renewal Watcher" job.
     *   - [ ] Implement a daily background task (e.g., via Celery or a script) that runs the expiry check and triggers emails.
     *   - [ ] Write tests to ensure the job doesn't send duplicate emails for the same policy/period.
