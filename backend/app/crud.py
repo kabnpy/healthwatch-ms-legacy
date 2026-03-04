@@ -1,6 +1,6 @@
 import uuid
 from collections.abc import Sequence
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from typing import Any, cast
 
 from sqlalchemy.orm import selectinload
@@ -386,20 +386,54 @@ def get_policies(
     skip: int = 0,
     limit: int = 100,
     client_id: uuid.UUID | None = None,
+    expiring_within: int | None = None,
 ) -> list[Policy]:
     statement = (
         select(Policy)
         .where(Policy.deleted_at == None)
         .options(selectinload(cast(Any, Policy.product)))
     )
+    if expiring_within is not None:
+        from app.models import RiskNote, RiskNoteStatus
+
+        target_date = date.today() + timedelta(days=expiring_within)
+        latest_rn_sub = (
+            select(RiskNote.policy_id, func.max(RiskNote.coverage_end).label("max_end"))
+            .where(RiskNote.status == RiskNoteStatus.ISSUED)
+            .group_by(RiskNote.policy_id)
+            .subquery()
+        )
+        statement = statement.join(latest_rn_sub, Policy.id == latest_rn_sub.c.policy_id)
+        statement = statement.where(latest_rn_sub.c.max_end <= target_date)
+        statement = statement.where(latest_rn_sub.c.max_end >= date.today())
+
     if client_id:
         statement = statement.where(Policy.client_id == client_id)
     statement = statement.offset(skip).limit(limit)
     return list(session.exec(statement).all())
 
 
-def count_policies(session: Session, *, client_id: uuid.UUID | None = None) -> int:
+def count_policies(
+    session: Session,
+    *,
+    client_id: uuid.UUID | None = None,
+    expiring_within: int | None = None,
+) -> int:
     statement = select(Policy).where(Policy.deleted_at == None)
+    if expiring_within is not None:
+        from app.models import RiskNote, RiskNoteStatus
+
+        target_date = date.today() + timedelta(days=expiring_within)
+        latest_rn_sub = (
+            select(RiskNote.policy_id, func.max(RiskNote.coverage_end).label("max_end"))
+            .where(RiskNote.status == RiskNoteStatus.ISSUED)
+            .group_by(RiskNote.policy_id)
+            .subquery()
+        )
+        statement = statement.join(latest_rn_sub, Policy.id == latest_rn_sub.c.policy_id)
+        statement = statement.where(latest_rn_sub.c.max_end <= target_date)
+        statement = statement.where(latest_rn_sub.c.max_end >= date.today())
+
     if client_id:
         statement = statement.where(Policy.client_id == client_id)
     count_statement = select(func.count()).select_from(statement.subquery())

@@ -41,13 +41,20 @@ def read_policies(
     skip: int = 0,
     limit: int = 100,
     client_id: uuid.UUID | None = None,
+    expiring_within: int | None = None,
 ) -> Any:
     """
     Retrieve policies.
     """
-    count = count_policies(session=session, client_id=client_id)
+    count = count_policies(
+        session=session, client_id=client_id, expiring_within=expiring_within
+    )
     policies = get_policies(
-        session=session, skip=skip, limit=limit, client_id=client_id
+        session=session,
+        skip=skip,
+        limit=limit,
+        client_id=client_id,
+        expiring_within=expiring_within,
     )
     return PoliciesPublic(
         data=[prepare_policy_public(p) for p in policies], count=count

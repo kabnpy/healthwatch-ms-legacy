@@ -1,4 +1,5 @@
 import pytest
+from fastapi.testclient import TestClient
 from unittest.mock import patch
 from datetime import date, timedelta
 from sqlmodel import Session
@@ -120,3 +121,31 @@ def test_run_daily_renewal_checks(mock_send_reminder, mock_send_invite, db: Sess
     # Verify status transition
     db.refresh(p30)
     assert p30.status == PolicyStatus.RENEWAL_INVITED
+
+def test_read_policies_expiring_soon(client: "TestClient", superuser_token_headers: dict, db: Session):
+    # 1. Setup policies
+    p_soon = create_random_policy(db)
+    rn = p_soon.risk_notes[0]
+    rn.coverage_end = date.today() + timedelta(days=10)
+    db.add(rn)
+    
+    p_far = create_random_policy(db)
+    rn_far = p_far.risk_notes[0]
+    rn_far.coverage_end = date.today() + timedelta(days=40)
+    db.add(rn_far)
+    
+    db.commit()
+
+    # 2. Call API
+    from app.core.config import settings
+    response = client.get(
+        f"{settings.API_V1_STR}/policies/?expiring_within=30",
+        headers=superuser_token_headers,
+    )
+    assert response.status_code == 200
+    data = response.json()
+    
+    # 3. Verify
+    policy_ids = [p["id"] for p in data["data"]]
+    assert str(p_soon.id) in policy_ids
+    assert str(p_far.id) not in policy_ids
