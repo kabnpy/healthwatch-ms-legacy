@@ -52,6 +52,7 @@ const DOCUMENT_PRESETS: Record<string, string[]> = {
     "Police Abstract",
     "Policy Schedule",
     "Cover Note",
+    "Renewal Notice",
   ],
   Client: [
     "KRA PIN Certificate",

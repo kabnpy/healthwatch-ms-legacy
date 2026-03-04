@@ -22,12 +22,19 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import useCustomToast from "@/hooks/useCustomToast"
-import { usePolicy, useRiskNote, useUpdateRiskNote } from "@/hooks/useInsurance"
+import {
+  useCreateRiskNote,
+  usePolicy,
+  useRiskNote,
+  useUpdateRiskNote,
+} from "@/hooks/useInsurance"
 import { handleError } from "@/utils"
 
 interface RiskNoteFormProps {
   policyId: string
   riskNoteId?: string // If provided, we are editing an existing (likely draft) risk note
+  initialStatus?: string
+  initialTransactionType?: string
   onSuccess?: () => void
   onCancel?: () => void
 }
@@ -35,6 +42,8 @@ interface RiskNoteFormProps {
 export const RiskNoteForm = ({
   policyId,
   riskNoteId,
+  initialStatus,
+  initialTransactionType,
   onSuccess,
   onCancel,
 }: RiskNoteFormProps) => {
@@ -44,6 +53,7 @@ export const RiskNoteForm = ({
     riskNoteId || "",
   )
   const updateRiskNote = useUpdateRiskNote()
+  const createRiskNote = useCreateRiskNote()
 
   const formSchema = z.object({
     transaction_type: z.string().min(1),
@@ -60,14 +70,14 @@ export const RiskNoteForm = ({
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
-      transaction_type: "New Business",
+      transaction_type: initialTransactionType || "New Business",
       coverage_start: new Date().toISOString().split("T")[0],
       coverage_end: new Date(
         new Date().setFullYear(new Date().getFullYear() + 1),
       )
         .toISOString()
         .split("T")[0],
-      status: "Draft",
+      status: initialStatus || "Draft",
       net_premium: 0,
       commission_amount: 0,
       details: {},
@@ -95,7 +105,7 @@ export const RiskNoteForm = ({
     } else if (policy) {
       const activeNote = (policy as any).active_note
       form.reset({
-        transaction_type: "New Business",
+        transaction_type: initialTransactionType || "New Business",
         coverage_start:
           activeNote?.coverage_start || new Date().toISOString().split("T")[0],
         coverage_end:
@@ -103,23 +113,22 @@ export const RiskNoteForm = ({
           new Date(new Date().setFullYear(new Date().getFullYear() + 1))
             .toISOString()
             .split("T")[0],
-        status: "Draft",
+        status: initialStatus || "Draft",
         net_premium: Number(activeNote?.net_premium || 0),
         commission_amount: Number(activeNote?.commission_amount || 0),
         details: activeNote?.cover_snapshot || {},
       })
     }
-  }, [existingRiskNote, policy, form])
+  }, [existingRiskNote, policy, form, initialStatus, initialTransactionType])
 
   const onSubmit: SubmitHandler<FormData> = (data) => {
-    if (!riskNoteId) return
-
     // Basic tax calculation for now (matching seeding logic)
     const trainingLevy = data.net_premium * 0.002
     const phcf = data.net_premium * 0.0025
     const total_amount = data.net_premium + trainingLevy + phcf
 
     const payload = {
+      policy_id: policyId,
       transaction_type: data.transaction_type,
       coverage_start: data.coverage_start,
       coverage_end: data.coverage_end,
@@ -136,18 +145,30 @@ export const RiskNoteForm = ({
       total_amount,
     }
 
-    updateRiskNote.mutate(
-      { id: riskNoteId, data: payload as any },
-      {
+    if (riskNoteId) {
+      updateRiskNote.mutate(
+        { id: riskNoteId, data: payload as any },
+        {
+          onSuccess: () => {
+            showSuccessToast("Risk Note Updated")
+            onSuccess?.()
+          },
+          onError: (err: Error) => {
+            handleError.call(showErrorToast, err as ApiError)
+          },
+        },
+      )
+    } else {
+      createRiskNote.mutate(payload as any, {
         onSuccess: () => {
-          showSuccessToast("Risk Note Updated")
+          showSuccessToast("New Risk Note Created")
           onSuccess?.()
         },
         onError: (err: Error) => {
           handleError.call(showErrorToast, err as ApiError)
         },
-      },
-    )
+      })
+    }
   }
 
   if (isLoadingPolicy || (riskNoteId && isLoadingRiskNote)) {
@@ -203,6 +224,10 @@ export const RiskNoteForm = ({
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="Draft">Draft (Preliminary)</SelectItem>
+                    <SelectItem value="Renewal Invited">Renewal Invited</SelectItem>
+                    <SelectItem value="Renewal Confirmed">
+                      Renewal Confirmed
+                    </SelectItem>
                     <SelectItem value="Active">Active (Finalized)</SelectItem>
                     <SelectItem value="Cancelled">Cancelled</SelectItem>
                   </SelectContent>

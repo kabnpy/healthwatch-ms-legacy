@@ -79,6 +79,7 @@ function PolicyDashboardContent({
   // State for Risk Note Form
   const [riskNoteFormOpen, setRiskNoteFormOpen] = useState(false)
   const [transactionType, setTransactionType] = useState("Renewal")
+  const [initialStatus, setInitialStatus] = useState("Draft")
   const [editingRiskNoteId, setEditingRiskNoteId] = useState<
     string | undefined
   >()
@@ -103,6 +104,14 @@ function PolicyDashboardContent({
 
   const handleRenew = () => {
     setTransactionType("Renewal")
+    setInitialStatus("Draft")
+    setEditingRiskNoteId(undefined)
+    setRiskNoteFormOpen(true)
+  }
+
+  const handleRecordRenewalInvitation = () => {
+    setTransactionType("Renewal")
+    setInitialStatus("Renewal Invited")
     setEditingRiskNoteId(undefined)
     setRiskNoteFormOpen(true)
   }
@@ -129,6 +138,7 @@ function PolicyDashboardContent({
         displayName={displayName}
         status={policy.status || "Unknown"}
         onRenew={handleRenew}
+        onRecordRenewalInvitation={handleRecordRenewalInvitation}
       />
 
       <Tabs defaultValue="overview" className="w-full">
@@ -331,6 +341,8 @@ function PolicyDashboardContent({
           <RiskNoteForm
             policyId={policyId}
             riskNoteId={editingRiskNoteId}
+            initialStatus={initialStatus}
+            initialTransactionType={transactionType}
             onSuccess={() => setRiskNoteFormOpen(false)}
             onCancel={() => setRiskNoteFormOpen(false)}
           />

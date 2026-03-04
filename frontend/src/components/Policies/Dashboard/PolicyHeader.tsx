@@ -9,6 +9,7 @@ interface PolicyHeaderProps {
   displayName?: string
   status: string
   onRenew: () => void
+  onRecordRenewalInvitation: () => void
 }
 
 export function PolicyHeader({
@@ -17,6 +18,7 @@ export function PolicyHeader({
   displayName,
   status,
   onRenew,
+  onRecordRenewalInvitation,
 }: PolicyHeaderProps) {
   return (
     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b pb-6">
@@ -39,6 +41,15 @@ export function PolicyHeader({
           variant="outline"
           size="sm"
           className="gap-2 h-9 px-4 font-semibold"
+          onClick={onRecordRenewalInvitation}
+        >
+          <RefreshCw className="size-4" />
+          Record Renewal Notice
+        </Button>
+        <Button
+          variant="default"
+          size="sm"
+          className="gap-2 h-9 px-4 font-semibold shadow-sm"
           onClick={onRenew}
         >
           <RefreshCw className="size-4" />
