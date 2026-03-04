@@ -23,7 +23,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useClient, usePolicyDashboard } from "@/hooks/useInsurance"
+import {
+  useClient,
+  usePolicyDashboard,
+  useSendRenewalInvitation,
+  useSendRenewalReminder,
+} from "@/hooks/useInsurance"
 import { queryClient } from "@/queryClient"
 import type { EnhancedPolicy, EnhancedRiskNote } from "@/types/insurance"
 import { getPolicyDisplayName } from "@/utils/insurance"
@@ -65,6 +70,9 @@ function PolicyDashboardContent({
 }) {
   const { policy, latestRiskNote, riskNotes, isLoading } =
     usePolicyDashboard(policyId)
+  const sendRenewalInvitation = useSendRenewalInvitation()
+  const sendRenewalReminder = useSendRenewalReminder()
+  const { showSuccessToast, showErrorToast } = useCustomToast()
 
   // We need client name for breadcrumbs
   const { data: client } = useClient(clientId)
@@ -85,6 +93,20 @@ function PolicyDashboardContent({
   >()
 
   // Handlers
+  const handleSendRenewalInvitation = async () => {
+    await sendRenewalInvitation.mutateAsync(policyId, {
+      onSuccess: () => showSuccessToast("Renewal Invitation Sent"),
+      onError: () => showErrorToast("Failed to send invitation"),
+    })
+  }
+
+  const handleSendRenewalReminder = async () => {
+    await sendRenewalReminder.mutateAsync(policyId, {
+      onSuccess: () => showSuccessToast("Renewal Reminder Sent"),
+      onError: () => showErrorToast("Failed to send reminder"),
+    })
+  }
+
   const handleViewRiskNote = useCallback(
     (id: string, type: "risknote" | "invoice" = "risknote") => {
       setSelectedRiskNoteId(id)
@@ -192,10 +214,24 @@ function PolicyDashboardContent({
                   variant="outline"
                   size="sm"
                   className="gap-2 h-9 shadow-sm"
+                  onClick={handleSendRenewalInvitation}
+                  disabled={sendRenewalInvitation.isPending}
                 >
                   <Mail className="size-4" />
-                  Email to Client
+                  {sendRenewalInvitation.isPending ? "Sending..." : "Send Invite"}
                 </Button>
+                {daysToExpiry <= 7 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2 h-9 shadow-sm text-orange-600 border-orange-200 hover:bg-orange-50"
+                    onClick={handleSendRenewalReminder}
+                    disabled={sendRenewalReminder.isPending}
+                  >
+                    <Mail className="size-4" />
+                    {sendRenewalReminder.isPending ? "Sending..." : "Send Reminder"}
+                  </Button>
+                )}
               </div>
             </div>
 

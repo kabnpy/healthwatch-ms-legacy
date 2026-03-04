@@ -102,6 +102,20 @@ export const useUpdatePolicy = () => {
   })
 }
 
+export const useSendRenewalInvitation = () => {
+  return useMutation({
+    mutationFn: (id: string) =>
+      PoliciesService.sendPolicyRenewalInvitation({ id }),
+  })
+}
+
+export const useSendRenewalReminder = () => {
+  return useMutation({
+    mutationFn: (id: string) =>
+      PoliciesService.sendPolicyRenewalReminder({ id }),
+  })
+}
+
 // 3. RISK NOTES
 export const useRiskNotes = (
   policyId?: string,

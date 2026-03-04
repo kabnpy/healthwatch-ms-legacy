@@ -166,3 +166,37 @@ def read_policy_risk_notes(
     count = count_risk_notes(session=session, policy_id=id)
     risk_notes = get_risk_notes(session=session, policy_id=id)
     return RiskNotesPublic(data=risk_notes, count=count)
+
+
+@router.post("/{id}/send-renewal-invitation", response_model=Message)
+def send_policy_renewal_invitation(
+    session: SessionDep, _current_user: StaffUser, id: uuid.UUID
+) -> Any:
+    """
+    Manually trigger a renewal invitation email.
+    """
+    policy = get_policy(session=session, id=id)
+    if not policy:
+        raise HTTPException(status_code=404, detail="Policy not found")
+
+    from app.services.renewal import renewal_service
+
+    renewal_service.send_renewal_invitation(session, policy=policy)
+    return Message(message="Renewal invitation sent successfully")
+
+
+@router.post("/{id}/send-renewal-reminder", response_model=Message)
+def send_policy_renewal_reminder(
+    session: SessionDep, _current_user: StaffUser, id: uuid.UUID
+) -> Any:
+    """
+    Manually trigger a renewal reminder email.
+    """
+    policy = get_policy(session=session, id=id)
+    if not policy:
+        raise HTTPException(status_code=404, detail="Policy not found")
+
+    from app.services.renewal import renewal_service
+
+    renewal_service.send_renewal_reminder(session, policy=policy)
+    return Message(message="Renewal reminder sent successfully")
