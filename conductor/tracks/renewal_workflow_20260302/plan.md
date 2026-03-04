@@ -10,14 +10,14 @@
 
 ## Phase 1: Data Model & Core Logic (Backend)
 *   **Goal:** Enhance the data model to support renewal statuses and implement logic to identify expiring policies.
-*   - [x] Task: Update `PolicyStatus` and `RiskNoteStatus` enums. [6f665a8]
+*   - [x] Task: Update `PolicyStatus` and `RiskNoteStatus` enums. [6f665a8] [fe22d38]
     *   - [x] Add `RENEWAL_INVITED` and `RENEWAL_CONFIRMED` to the status definitions.
     *   - [x] Add `LAPSED` status for expired covers.
-*   - [ ] Task: Implement "Expiring Soon" query logic in the service layer.
-    *   - [ ] Create a service method to retrieve policies expiring in exactly 30 days and 7 days.
-    *   - [ ] Ensure the query accounts for the latest `RiskNote` per `Policy`.
-*   - [ ] Task: Write unit tests for date-based filtering.
-    *   - [ ] Verify that policies are correctly identified for the 30-day and 7-day windows.
+*   - [x] Task: Implement "Expiring Soon" query logic in the service layer. [fe22d38]
+    *   - [x] Create a service method to retrieve policies expiring in exactly 30 days and 7 days.
+    *   - [x] Ensure the query accounts for the latest `RiskNote` per `Policy`.
+*   - [x] Task: Write unit tests for date-based filtering. [fe22d38]
+    *   - [x] Verify that policies are correctly identified for the 30-day and 7-day windows.
 *   - [ ] Task: Conductor - User Manual Verification 'Data Model & Core Logic' (Protocol in workflow.md)
 
 ## Phase 2: Email Automation & Job Scheduling
