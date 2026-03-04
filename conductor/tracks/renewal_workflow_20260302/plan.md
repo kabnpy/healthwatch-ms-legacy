@@ -28,9 +28,9 @@
 *   - [x] Task: Implement the Email Dispatcher service. [accd106]
     *   - [x] Create logic to send emails via the configured SMTP/Mail service.
     *   - [x] Add error handling and logging for failed dispatches.
-*   - [ ] Task: Setup the automated "Renewal Watcher" job.
-    *   - [ ] Implement a daily background task (e.g., via Celery or a script) that runs the expiry check and triggers emails.
-    *   - [ ] Write tests to ensure the job doesn't send duplicate emails for the same policy/period.
+*   - [x] Task: Setup the automated "Renewal Watcher" job. [650013e]
+    *   - [x] Implement a daily background task (e.g., via Celery or a script) that runs the expiry check and triggers emails.
+    *   - [x] Write tests to ensure the job doesn't send duplicate emails for the same policy/period.
 *   - [ ] Task: Conductor - User Manual Verification 'Email Automation' (Protocol in workflow.md)
 
 ## Phase 3: Frontend Dashboard & Workflow UI
