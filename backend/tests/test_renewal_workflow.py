@@ -91,3 +91,32 @@ def test_send_renewal_reminder(mock_send_email, db: Session):
 
     assert mock_send_email.called
     assert "Renewal Reminder" in mock_send_email.call_args[1]["subject"]
+
+@patch("app.services.renewal.renewal_service.send_renewal_invitation")
+@patch("app.services.renewal.renewal_service.send_renewal_reminder")
+def test_run_daily_renewal_checks(mock_send_reminder, mock_send_invite, db: Session):
+    # 1. Setup policies
+    # Expiring in 30 days
+    p30 = create_random_policy(db)
+    rn30 = p30.risk_notes[0]
+    rn30.coverage_end = date.today() + timedelta(days=30)
+    db.add(rn30)
+    
+    # Expiring in 7 days
+    p7 = create_random_policy(db)
+    rn7 = p7.risk_notes[0]
+    rn7.coverage_end = date.today() + timedelta(days=7)
+    db.add(rn7)
+    
+    db.commit()
+
+    # 2. Run checks
+    renewal_service.run_daily_renewal_checks(db)
+
+    # 3. Verify
+    assert mock_send_invite.called
+    assert mock_send_reminder.called
+    
+    # Verify status transition
+    db.refresh(p30)
+    assert p30.status == PolicyStatus.RENEWAL_INVITED

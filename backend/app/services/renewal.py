@@ -3,7 +3,7 @@ from typing import Any
 import uuid
 from sqlmodel import Session, select, func
 from sqlalchemy.orm import selectinload
-from app.models import Policy, RiskNote, RiskNoteStatus
+from app.models import Policy, RiskNote, RiskNoteStatus, PolicyStatus
 from app.utils import send_email, render_email_template
 from app.core.config import settings
 
@@ -120,5 +120,26 @@ class RenewalService:
             subject=subject,
             html_content=html_content,
         )
+
+    @staticmethod
+    def run_daily_renewal_checks(session: Session) -> None:
+        """
+        Runs the daily automated renewal tasks.
+        """
+        # 1. 30-day invitations
+        to_invite = renewal_service.get_policies_expiring_exactly_in(session, days=30)
+        for policy in to_invite:
+            renewal_service.send_renewal_invitation(session, policy=policy)
+            policy.status = PolicyStatus.RENEWAL_INVITED
+            session.add(policy)
+        
+        # 2. 7-day reminders
+        to_remind = renewal_service.get_policies_expiring_exactly_in(session, days=7)
+        for policy in to_remind:
+            # Only remind if not yet renewed/confirmed
+            if policy.status in [PolicyStatus.ACTIVE, PolicyStatus.RENEWAL_INVITED]:
+                renewal_service.send_renewal_reminder(session, policy=policy)
+        
+        session.commit()
 
 renewal_service = RenewalService()
