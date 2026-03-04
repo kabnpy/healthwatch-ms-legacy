@@ -38,7 +38,7 @@
 *   - [x] Task: Implement the "Renewals Due" dashboard view. [d648b42] [af29a1c]
     *   - [x] Add a new filter or tab to the Insurance Dashboard displaying policies expiring within 30 days.
     *   - [x] Include status badges for `Renewal Invited` and `Renewal Confirmed`.
-*   - [x] Task: Create the "Record Renewal Invitation" form. [af29a1c]
+*   - [x] Task: Create the "Record Renewal Invitation" form. [af29a1c] [d8a3d61]
     *   - [x] Build a UI component to manually input updated terms from an insurer notice.
     *   - [x] Implement file upload support for the insurer's PDF notice.
 *   - [ ] Task: Connect frontend actions to backend status transitions.
