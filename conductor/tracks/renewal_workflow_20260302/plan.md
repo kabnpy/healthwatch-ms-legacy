@@ -6,9 +6,9 @@
     - [x] Branch name: `feat/renewal-workflow`.
 
 *   - [x] Task: Ensure the current workspace is synchronized and passing all existing tests.
-*   - [ ] Task: Conductor - User Manual Verification 'Project Setup' (Protocol in workflow.md)
+*   - [x] Task: Conductor - User Manual Verification 'Project Setup' (Protocol in workflow.md)
 
-## Phase 1: Data Model & Core Logic (Backend)
+## Phase 1: Data Model & Core Logic (Backend) [checkpoint: 85ff5ed]
 *   **Goal:** Enhance the data model to support renewal statuses and implement logic to identify expiring policies.
 *   - [x] Task: Update `PolicyStatus` and `RiskNoteStatus` enums. [6f665a8] [fe22d38]
     *   - [x] Add `RENEWAL_INVITED` and `RENEWAL_CONFIRMED` to the status definitions.
@@ -18,7 +18,7 @@
     *   - [x] Ensure the query accounts for the latest `RiskNote` per `Policy`.
 *   - [x] Task: Write unit tests for date-based filtering. [fe22d38]
     *   - [x] Verify that policies are correctly identified for the 30-day and 7-day windows.
-*   - [ ] Task: Conductor - User Manual Verification 'Data Model & Core Logic' (Protocol in workflow.md)
+*   - [x] Task: Conductor - User Manual Verification 'Data Model & Core Logic' (Protocol in workflow.md)
 
 ## Phase 2: Email Automation & Job Scheduling
 *   **Goal:** Implement the automated email notification system and the scheduling mechanism.
