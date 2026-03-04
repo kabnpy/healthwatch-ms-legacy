@@ -42,6 +42,8 @@ class PolicyStatus(str, Enum):
     EXPIRED = "Expired"
     CANCELLED = "Cancelled"
     LAPSED = "Lapsed"
+    RENEWAL_INVITED = "Renewal Invited"
+    RENEWAL_CONFIRMED = "Renewal Confirmed"
 
 
 class TransactionType(str, Enum):
@@ -56,6 +58,8 @@ class RiskNoteStatus(str, Enum):
     REPLACED = "Replaced"  # superseded by a newer note on same policy
     CANCELLED = "Cancelled"
     ACTIVE = "Issued"  # Alias for backward compatibility
+    RENEWAL_INVITED = "Renewal Invited"
+    RENEWAL_CONFIRMED = "Renewal Confirmed"
 
 
 class InvoiceStatus(str, Enum):
