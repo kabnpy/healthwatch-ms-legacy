@@ -41,6 +41,6 @@
 *   - [x] Task: Create the "Record Renewal Invitation" form. [af29a1c] [d8a3d61]
     *   - [x] Build a UI component to manually input updated terms from an insurer notice.
     *   - [x] Implement file upload support for the insurer's PDF notice.
-*   - [x] Task: Connect frontend actions to backend status transitions. [d648b42] [d8a3d61]
+*   - [x] Task: Connect frontend actions to backend status transitions. [d648b42] [d8a3d61] [aa3a34c]
     *   - [x] Add buttons to manually trigger a renewal invite email or confirm a renewal.
 *   - [ ] Task: Conductor - User Manual Verification 'Frontend Integration' (Protocol in workflow.md)
