@@ -10,9 +10,9 @@
 
 ## Phase 1: Data Model & Core Logic (Backend)
 *   **Goal:** Enhance the data model to support renewal statuses and implement logic to identify expiring policies.
-*   - [ ] Task: Update `PolicyStatus` and `RiskNoteStatus` enums.
-    *   - [ ] Add `RENEWAL_INVITED` and `RENEWAL_CONFIRMED` to the status definitions.
-    *   - [ ] Add `LAPSED` status for expired covers.
+*   - [x] Task: Update `PolicyStatus` and `RiskNoteStatus` enums. [6f665a8]
+    *   - [x] Add `RENEWAL_INVITED` and `RENEWAL_CONFIRMED` to the status definitions.
+    *   - [x] Add `LAPSED` status for expired covers.
 *   - [ ] Task: Implement "Expiring Soon" query logic in the service layer.
     *   - [ ] Create a service method to retrieve policies expiring in exactly 30 days and 7 days.
     *   - [ ] Ensure the query accounts for the latest `RiskNote` per `Policy`.
