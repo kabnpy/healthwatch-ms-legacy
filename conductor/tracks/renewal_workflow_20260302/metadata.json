@@ -1,0 +1,8 @@
+{
+  "track_id": "renewal_workflow_20260302",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-03-02T10:00:00Z",
+  "updated_at": "2026-03-02T10:00:00Z",
+  "description": "renewal workflow, we want to consider how to do handle renewals for the agency. from automated emails to texts. what time window should we do it on. what statuses should we use for covers we ask for renewals about. how about do we handle renewal invitations from the insurers?"
+}
