@@ -245,7 +245,7 @@ function RiskNotePrintContent({ id }: { id: string }) {
 
               {/* Taxes/Levies */}
               {riskNote.financial_breakdown?.taxes &&
-                Object.entries(riskNote.financial_breakdown.taxes).map(
+                Object.entries(riskNote.financial_breakdown.taxes as any).map(
                   ([key, val]: [string, any], i: number) => (
                     <tr key={i}>
                       <td className="py-2 pl-2 text-gray-600 capitalize">

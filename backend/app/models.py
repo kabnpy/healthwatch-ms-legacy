@@ -419,114 +419,6 @@ class Policy(PolicyBase, table=True):
     claims: list["Claim"] = Relationship(back_populates="policy")
 
 
-class PolicyPublic(PolicyBase):
-    id: uuid.UUID
-    product: ProductPublic | None = None
-    client: "ClientPublic" | None = None
-    active_note: Optional["RiskNotePublic"] = None
-
-
-class PoliciesPublic(SQLModel):
-    data: list[PolicyPublic]
-    count: int
-
-
-class RiskNoteBase(AuditMixin, SQLModel):
-    policy_id: uuid.UUID = Field(foreign_key="policy.id", index=True)
-    risk_note_number: str | None = Field(default=None, unique=True, index=True)
-    transaction_type: TransactionType
-    status: RiskNoteStatus = Field(default=RiskNoteStatus.DRAFT)
-    previous_risk_note_id: uuid.UUID | None = Field(
-        default=None, foreign_key="risknote.id", index=True
-    )
-    created_by_id: uuid.UUID | None = Field(
-        default=None, foreign_key="user.id", index=True
-    )
-    effective_date: date = Field(default_factory=date.today, index=True)
-    coverage_start: date
-    coverage_end: date
-    net_premium: Decimal = Field(sa_column=Column(Numeric(precision=15, scale=2)))
-    commission_amount: Decimal = Field(sa_column=Column(Numeric(precision=15, scale=2)))
-    total_amount: Decimal = Field(sa_column=Column(Numeric(precision=15, scale=2)))
-    cover_snapshot: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
-
-
-class RiskNoteCreate(RiskNoteBase):
-    financial_breakdown: dict[str, Any] = Field(default_factory=dict)
-    special_clauses: list[str] = Field(default_factory=list)
-
-
-class RiskNoteUpdate(SQLModel):
-    transaction_type: TransactionType | None = None
-    risk_note_number: str | None = None
-    status: RiskNoteStatus | None = None
-    previous_risk_note_id: uuid.UUID | None = None
-    effective_date: date | None = None
-    coverage_start: date | None = None
-    coverage_end: date | None = None
-    net_premium: Decimal | None = None
-    financial_breakdown: dict[str, Any] | None = None
-    commission_amount: Decimal | None = None
-    total_amount: Decimal | None = None
-    special_clauses: list[str] | None = None
-    cover_snapshot: dict[str, Any] | None = None
-
-
-class RiskNotePublic(RiskNoteBase):
-    id: uuid.UUID
-    policy: PolicyPublic | None = None
-    financial_breakdown: dict[str, Any] = Field(default_factory=dict)
-    special_clauses: list[str] = Field(default_factory=list)
-    invoice_number: str | None = None
-    invoice_line_items: list["InvoiceLineItemPublic"] = Field(default_factory=list)
-
-
-class RiskNote(RiskNoteBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    policy: Policy = Relationship(back_populates="risk_notes")
-    invoice_line_items: list["InvoiceLineItem"] = Relationship(
-        back_populates="risk_note"
-    )
-    allocations: list["ReceiptAllocation"] = Relationship(back_populates="risk_note")
-    financial_breakdown: dict[str, Any] = Field(
-        default_factory=dict, sa_column=Column(JSON)
-    )
-    # DEPRECATED: special_clauses is now managed within cover_snapshot.terms
-    special_clauses_raw: list[str] = Field(
-        default_factory=list, sa_column=Column("special_clauses", JSON)
-    )
-
-    @property
-    def special_clauses(self) -> list[str]:
-        """
-        Getter for special_clauses that prioritizes the nested terms in cover_snapshot.
-        """
-        snapshot_terms = self.cover_snapshot.get("terms", {})
-        if isinstance(snapshot_terms, dict):
-            snapshot_clauses = snapshot_terms.get("special_clauses")
-            if snapshot_clauses:
-                # If it's a string, wrap it in a list for backward compatibility
-                if isinstance(snapshot_clauses, str):
-                    return [snapshot_clauses]
-                return cast(list[str], snapshot_clauses)
-        return self.special_clauses_raw
-
-    @special_clauses.setter
-    def special_clauses(self, value: list[str]) -> None:
-        self.special_clauses_raw = value
-
-    @property
-    def invoice_number(self) -> str | None:
-        if self.invoice_line_items and self.invoice_line_items[0].invoice:
-            return self.invoice_line_items[0].invoice.invoice_number
-        return None
-
-
-class RiskNotesPublic(SQLModel):
-    data: list[RiskNotePublic]
-    count: int
-
-
 # ==========================================
 # Financial Models
 # ==========================================
@@ -649,21 +541,6 @@ class ReceiptAllocationsPublic(SQLModel):
     count: int
 
 
-class InvoiceLineItemPublic(InvoiceLineItemBase):
-    id: uuid.UUID
-    invoice: Optional["InvoicePublic"] = None
-
-
-class InvoicePublic(InvoiceBase):
-    id: uuid.UUID
-    allocations: list[ReceiptAllocationBase] = []
-
-
-class InvoicesPublic(SQLModel):
-    data: list[InvoicePublic]
-    count: int
-
-
 class ReceiptPublic(ReceiptBase):
     id: uuid.UUID
     allocations: list[ReceiptAllocationBase] = []
@@ -729,6 +606,135 @@ class ClaimsPublic(SQLModel):
 class ClaimEventBase(SQLModel):
     claim_id: uuid.UUID = Field(foreign_key="claim.id", index=True)
     event_type: ClaimEventType
+class PolicyPublic(PolicyBase):
+    id: uuid.UUID
+    product: ProductPublic | None = None
+    client: Optional["ClientPublic"] = None
+    active_note: Optional["RiskNotePublic"] = None
+
+
+class PoliciesPublic(SQLModel):
+    data: list[PolicyPublic]
+    count: int
+
+
+class RiskNoteBase(AuditMixin, SQLModel):
+    policy_id: uuid.UUID = Field(foreign_key="policy.id", index=True)
+    risk_note_number: str | None = Field(default=None, unique=True, index=True)
+    transaction_type: TransactionType
+    status: RiskNoteStatus = Field(default=RiskNoteStatus.DRAFT)
+    previous_risk_note_id: uuid.UUID | None = Field(
+        default=None, foreign_key="risknote.id", index=True
+    )
+    created_by_id: uuid.UUID | None = Field(
+        default=None, foreign_key="user.id", index=True
+    )
+    effective_date: date = Field(default_factory=date.today, index=True)
+    coverage_start: date
+    coverage_end: date
+    net_premium: Decimal = Field(sa_column=Column(Numeric(precision=15, scale=2)))
+    commission_amount: Decimal = Field(sa_column=Column(Numeric(precision=15, scale=2)))
+    total_amount: Decimal = Field(sa_column=Column(Numeric(precision=15, scale=2)))
+    cover_snapshot: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
+
+
+class RiskNoteCreate(RiskNoteBase):
+    financial_breakdown: dict[str, Any] = Field(default_factory=dict)
+    special_clauses: list[str] = Field(default_factory=list)
+
+
+class RiskNoteUpdate(SQLModel):
+    transaction_type: TransactionType | None = None
+    risk_note_number: str | None = None
+    status: RiskNoteStatus | None = None
+    previous_risk_note_id: uuid.UUID | None = None
+    effective_date: date | None = None
+    coverage_start: date | None = None
+    coverage_end: date | None = None
+    net_premium: Decimal | None = None
+    financial_breakdown: dict[str, Any] | None = None
+    commission_amount: Decimal | None = None
+    total_amount: Decimal | None = None
+    special_clauses: list[str] | None = None
+    cover_snapshot: dict[str, Any] | None = None
+
+
+class InvoiceLineItemPublic(InvoiceLineItemBase):
+    id: uuid.UUID
+
+
+class InvoicePublic(InvoiceBase):
+    id: uuid.UUID
+    line_items: list[InvoiceLineItemPublic] = []
+    allocations: list[ReceiptAllocationBase] = []
+
+
+class InvoiceLineItemDetailedPublic(InvoiceLineItemPublic):
+    invoice: Optional[InvoicePublic] = None
+
+
+class InvoicesPublic(SQLModel):
+    data: list[InvoicePublic]
+    count: int
+
+
+class RiskNotePublic(RiskNoteBase):
+    id: uuid.UUID
+    policy: PolicyPublic | None = None
+    financial_breakdown: dict[str, Any] = Field(default_factory=dict)
+    special_clauses: list[str] = Field(default_factory=list)
+    invoice_number: str | None = None
+    invoice_line_items: list[InvoiceLineItemDetailedPublic] = Field(
+        default_factory=list
+    )
+
+
+class RiskNote(RiskNoteBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    policy: Policy = Relationship(back_populates="risk_notes")
+    invoice_line_items: list["InvoiceLineItem"] = Relationship(
+        back_populates="risk_note"
+    )
+    allocations: list["ReceiptAllocation"] = Relationship(back_populates="risk_note")
+    financial_breakdown: dict[str, Any] = Field(
+        default_factory=dict, sa_column=Column(JSON)
+    )
+    # DEPRECATED: special_clauses is now managed within cover_snapshot.terms
+    special_clauses_raw: list[str] = Field(
+        default_factory=list, sa_column=Column("special_clauses", JSON)
+    )
+
+    @property
+    def special_clauses(self) -> list[str]:
+        """
+        Getter for special_clauses that prioritizes the nested terms in cover_snapshot.
+        """
+        snapshot_terms = self.cover_snapshot.get("terms", {})
+        if isinstance(snapshot_terms, dict):
+            snapshot_clauses = snapshot_terms.get("special_clauses")
+            if snapshot_clauses:
+                # If it's a string, wrap it in a list for backward compatibility
+                if isinstance(snapshot_clauses, str):
+                    return [snapshot_clauses]
+                return cast(list[str], snapshot_clauses)
+        return self.special_clauses_raw
+
+    @special_clauses.setter
+    def special_clauses(self, value: list[str]) -> None:
+        self.special_clauses_raw = value
+
+    @property
+    def invoice_number(self) -> str | None:
+        if self.invoice_line_items and self.invoice_line_items[0].invoice:
+            return self.invoice_line_items[0].invoice.invoice_number
+        return None
+
+
+class RiskNotesPublic(SQLModel):
+    data: list[RiskNotePublic]
+    count: int
+
+
     description: str
     created_by_id: uuid.UUID | None = Field(
         default=None, foreign_key="user.id", index=True
@@ -804,6 +810,7 @@ class DocumentsPublic(SQLModel):
 # ==========================================
 
 InvoiceLineItemPublic.model_rebuild()
+InvoiceLineItemDetailedPublic.model_rebuild()
 InvoicePublic.model_rebuild()
 InvoicesPublic.model_rebuild()
 ReceiptPublic.model_rebuild()

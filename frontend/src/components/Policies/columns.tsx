@@ -67,6 +67,23 @@ export const columns: ColumnDef<PolicyPublic>[] = [
     ),
   },
   {
+    id: "expiry_date",
+    header: "Expiry Date",
+    cell: ({ row }) => {
+      const expiry = row.original.active_note?.coverage_end
+      if (!expiry) return <span className="text-muted-foreground italic text-xs">N/A</span>
+      
+      const expiryDate = new Date(expiry)
+      const isExpired = expiryDate < new Date()
+      
+      return (
+        <span className={isExpired ? "text-red-600 font-semibold" : ""}>
+          {expiryDate.toLocaleDateString()}
+        </span>
+      )
+    },
+  },
+  {
     id: "actions",
     header: () => <span className="sr-only">Actions</span>,
     cell: ({ row }) => {

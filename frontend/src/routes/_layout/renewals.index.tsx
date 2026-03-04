@@ -1,6 +1,6 @@
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import { RefreshCw, ShieldOff } from "lucide-react"
+import { RefreshCw } from "lucide-react"
 import { Suspense } from "react"
 
 import { PoliciesService } from "@/client"

@@ -18,6 +18,7 @@ import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
 import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
 import { Route as LayoutCatalogRouteImport } from './routes/_layout/catalog'
 import { Route as LayoutAdminRouteImport } from './routes/_layout/admin'
+import { Route as LayoutRenewalsIndexRouteImport } from './routes/_layout/renewals.index'
 import { Route as LayoutClientsIndexRouteImport } from './routes/_layout/clients.index'
 import { Route as LayoutCatalogIndexRouteImport } from './routes/_layout/catalog.index'
 import { Route as PrintRiskNotesIdRouteImport } from './routes/print/risk-notes.$id'
@@ -76,6 +77,11 @@ const LayoutCatalogRoute = LayoutCatalogRouteImport.update({
 const LayoutAdminRoute = LayoutAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutRenewalsIndexRoute = LayoutRenewalsIndexRouteImport.update({
+  id: '/renewals/',
+  path: '/renewals/',
   getParentRoute: () => LayoutRoute,
 } as any)
 const LayoutClientsIndexRoute = LayoutClientsIndexRouteImport.update({
@@ -178,6 +184,7 @@ export interface FileRoutesByFullPath {
   '/print/risk-notes/$id': typeof PrintRiskNotesIdRoute
   '/catalog/': typeof LayoutCatalogIndexRoute
   '/clients': typeof LayoutClientsIndexRoute
+  '/renewals': typeof LayoutRenewalsIndexRoute
   '/catalog/insurers/$insurerId': typeof LayoutCatalogInsurersInsurerIdRoute
   '/catalog/products/$productId': typeof LayoutCatalogProductsProductIdRoute
   '/clients/$clientId/documents': typeof LayoutClientsClientIdDocumentsRoute
@@ -201,6 +208,7 @@ export interface FileRoutesByTo {
   '/print/risk-notes/$id': typeof PrintRiskNotesIdRoute
   '/catalog': typeof LayoutCatalogIndexRoute
   '/clients': typeof LayoutClientsIndexRoute
+  '/renewals': typeof LayoutRenewalsIndexRoute
   '/catalog/insurers/$insurerId': typeof LayoutCatalogInsurersInsurerIdRoute
   '/catalog/products/$productId': typeof LayoutCatalogProductsProductIdRoute
   '/clients/$clientId/documents': typeof LayoutClientsClientIdDocumentsRoute
@@ -228,6 +236,7 @@ export interface FileRoutesById {
   '/print/risk-notes/$id': typeof PrintRiskNotesIdRoute
   '/_layout/catalog/': typeof LayoutCatalogIndexRoute
   '/_layout/clients/': typeof LayoutClientsIndexRoute
+  '/_layout/renewals/': typeof LayoutRenewalsIndexRoute
   '/_layout/catalog/insurers/$insurerId': typeof LayoutCatalogInsurersInsurerIdRoute
   '/_layout/catalog/products/$productId': typeof LayoutCatalogProductsProductIdRoute
   '/_layout/clients/$clientId/documents': typeof LayoutClientsClientIdDocumentsRoute
@@ -255,6 +264,7 @@ export interface FileRouteTypes {
     | '/print/risk-notes/$id'
     | '/catalog/'
     | '/clients'
+    | '/renewals'
     | '/catalog/insurers/$insurerId'
     | '/catalog/products/$productId'
     | '/clients/$clientId/documents'
@@ -278,6 +288,7 @@ export interface FileRouteTypes {
     | '/print/risk-notes/$id'
     | '/catalog'
     | '/clients'
+    | '/renewals'
     | '/catalog/insurers/$insurerId'
     | '/catalog/products/$productId'
     | '/clients/$clientId/documents'
@@ -304,6 +315,7 @@ export interface FileRouteTypes {
     | '/print/risk-notes/$id'
     | '/_layout/catalog/'
     | '/_layout/clients/'
+    | '/_layout/renewals/'
     | '/_layout/catalog/insurers/$insurerId'
     | '/_layout/catalog/products/$productId'
     | '/_layout/clients/$clientId/documents'
@@ -389,6 +401,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof LayoutAdminRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/renewals/': {
+      id: '/_layout/renewals/'
+      path: '/renewals'
+      fullPath: '/renewals'
+      preLoaderRoute: typeof LayoutRenewalsIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/clients/': {
@@ -553,6 +572,7 @@ interface LayoutRouteChildren {
   LayoutIndexRoute: typeof LayoutIndexRoute
   LayoutClientsClientIdRoute: typeof LayoutClientsClientIdRouteWithChildren
   LayoutClientsIndexRoute: typeof LayoutClientsIndexRoute
+  LayoutRenewalsIndexRoute: typeof LayoutRenewalsIndexRoute
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
@@ -562,6 +582,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutIndexRoute: LayoutIndexRoute,
   LayoutClientsClientIdRoute: LayoutClientsClientIdRouteWithChildren,
   LayoutClientsIndexRoute: LayoutClientsIndexRoute,
+  LayoutRenewalsIndexRoute: LayoutRenewalsIndexRoute,
 }
 
 const LayoutRouteWithChildren =

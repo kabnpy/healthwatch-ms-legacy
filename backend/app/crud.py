@@ -336,6 +336,7 @@ def get_policy(session: Session, *, id: uuid.UUID) -> Policy | None:
         .where(Policy.deleted_at == None)
         .options(
             selectinload(cast(Any, Policy.product)),
+            selectinload(cast(Any, Policy.client)),
             selectinload(cast(Any, Policy.risk_notes))
             .selectinload(cast(Any, RiskNote.invoice_line_items))
             .selectinload(cast(Any, InvoiceLineItem.invoice)),
@@ -394,6 +395,9 @@ def get_policies(
         .options(
             selectinload(cast(Any, Policy.product)),
             selectinload(cast(Any, Policy.client)),
+            selectinload(cast(Any, Policy.risk_notes))
+            .selectinload(cast(Any, RiskNote.invoice_line_items))
+            .selectinload(cast(Any, InvoiceLineItem.invoice)),
         )
     )
     if expiring_within is not None:
