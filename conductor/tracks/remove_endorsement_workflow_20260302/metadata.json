@@ -1,8 +1,0 @@
-{
-  "track_id": "remove_endorsement_workflow_20260302",
-  "type": "refactor",
-  "status": "new",
-  "created_at": "2026-03-02T12:00:00Z",
-  "updated_at": "2026-03-02T12:00:00Z",
-  "description": "remove the endorsement workflow, endorsments are not required since that falls to the insurance company, we can just make a new risknote to show the change"
-}

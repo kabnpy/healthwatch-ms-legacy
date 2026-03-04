@@ -2,9 +2,10 @@
 
 ## Phase 0: Project Setup & Branching
 *   **Goal:** Initialize the development environment for the new feature.
-*   - [ ] Task: Create a new git branch for the renewal workflow.
-    *   - [ ] Branch name: `feat/renewal-workflow`.
-*   - [ ] Task: Ensure the current workspace is synchronized and passing all existing tests.
+- [x] Task: Create a new git branch for the renewal workflow.
+    - [x] Branch name: `feat/renewal-workflow`.
+
+*   - [x] Task: Ensure the current workspace is synchronized and passing all existing tests.
 *   - [ ] Task: Conductor - User Manual Verification 'Project Setup' (Protocol in workflow.md)
 
 ## Phase 1: Data Model & Core Logic (Backend)
