@@ -1,6 +1,6 @@
 # Implementation Plan: Renewal Workflow Management
 
-## Phase 0: Project Setup & Branching
+## Phase 0: Project Setup & Branching [checkpoint: bd0e43d]
 *   **Goal:** Initialize the development environment for the new feature.
 - [x] Task: Create a new git branch for the renewal workflow.
     - [x] Branch name: `feat/renewal-workflow`.
