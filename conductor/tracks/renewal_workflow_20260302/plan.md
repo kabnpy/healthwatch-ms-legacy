@@ -20,7 +20,7 @@
     *   - [x] Verify that policies are correctly identified for the 30-day and 7-day windows.
 *   - [x] Task: Conductor - User Manual Verification 'Data Model & Core Logic' (Protocol in workflow.md)
 
-## Phase 2: Email Automation & Job Scheduling
+## Phase 2: Email Automation & Job Scheduling [checkpoint: 922f9c7]
 *   **Goal:** Implement the automated email notification system and the scheduling mechanism.
 *   - [x] Task: Design and implement Renewal Email templates. [a07e57c]
     *   - [x] Create HTML templates for the 30-day "Renewal Invitation" and 7-day "Reminder".
@@ -31,7 +31,7 @@
 *   - [x] Task: Setup the automated "Renewal Watcher" job. [650013e]
     *   - [x] Implement a daily background task (e.g., via Celery or a script) that runs the expiry check and triggers emails.
     *   - [x] Write tests to ensure the job doesn't send duplicate emails for the same policy/period.
-*   - [ ] Task: Conductor - User Manual Verification 'Email Automation' (Protocol in workflow.md)
+*   - [x] Task: Conductor - User Manual Verification 'Email Automation' (Protocol in workflow.md)
 
 ## Phase 3: Frontend Dashboard & Workflow UI
 *   **Goal:** Surface the renewal workflow to agency staff via the dashboard.
