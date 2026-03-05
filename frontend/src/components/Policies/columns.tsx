@@ -73,7 +73,8 @@ export const columns: ColumnDef<PolicyPublic>[] = [
       const expiry = row.original.active_note?.coverage_end
       if (!expiry) return <span className="text-muted-foreground italic text-xs">N/A</span>
       
-      const expiryDate = new Date(expiry)
+      const [year, month, day] = expiry.split("-").map(Number)
+      const expiryDate = new Date(year, month - 1, day)
       const isExpired = expiryDate < new Date()
       
       return (

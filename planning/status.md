@@ -8,6 +8,13 @@
 - **Prestart Service Stabilization**: The `prestart` service now successfully completes database migrations and mock data seeding.
 - **Client Regeneration**: Successfully regenerated the TypeScript client from the backend OpenAPI schema and verified type integrity with `tsc`.
 - **Backend Linting & Type Hardening**: Resolved all `ruff` and `mypy` issues. Fixed a critical renaming bug in the `risk_notes` API route. Stabilized `seed_mock_data.py` and consolidated `RatingService` return types for better consistency and developer experience.
+- **Renewal Workflow Implementation**: Implemented a comprehensive end-to-end policy renewal system.
+    - **Status Workflow**: Added `RENEWAL_INVITED` and `RENEWAL_CONFIRMED` statuses to Policies and Risk Notes.
+    - **Automated Notifications**: Created a daily background task to send invitations (30 days before expiry) and reminders (7 days before expiry).
+    - **Manual Triggers**: Added API endpoints and UI buttons to manually trigger renewal notifications.
+    - **Correspondence Logging**: Implemented automated logging of all renewal-related emails into the client correspondence history.
+    - **Performance Optimization**: Fixed N+1 query issues in policy list views using SQLAlchemy `selectinload`.
+    - **Frontend Dashboard**: Added a "Renewals" dashboard with expiry tracking and hardened date parsing for timezone consistency.
 
 ## Ongoing
 - **Type Integrity & Stabilization**: Resolving persistent TypeScript errors in the auto-generated client and components.

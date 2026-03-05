@@ -1,9 +1,9 @@
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from typing import Any
 import uuid
 from sqlmodel import Session, select, func
 from sqlalchemy.orm import selectinload
-from app.models import Policy, RiskNote, RiskNoteStatus, PolicyStatus
+from app.models import Policy, RiskNote, RiskNoteStatus, PolicyStatus, Correspondence, CorrespondenceCreate
 from app.utils import send_email, render_email_template
 from app.core.config import settings
 
@@ -68,7 +68,8 @@ class RenewalService:
 
         project_name = settings.PROJECT_NAME
         subject = f"{project_name} - Renewal Invitation for {policy.policy_number}"
-        link = f"{settings.FRONTEND_HOST}/policies/{policy.id}"
+        # Task 1.2: Correct Deep-Link URL Structure
+        link = f"{settings.FRONTEND_HOST}/clients/{policy.client_id}/policies/{policy.id}"
         
         html_content = render_email_template(
             template_name="renewal_invitation.html",
@@ -88,6 +89,19 @@ class RenewalService:
             html_content=html_content,
         )
 
+        # Task 2.1: Implement Notification Logging via Correspondence
+        from app.crud import create_correspondence
+        create_correspondence(
+            session=session,
+            correspondence_in=CorrespondenceCreate(
+                client_id=policy.client_id,
+                subject=subject,
+                summary=f"Automated renewal invitation sent for policy {policy.policy_number}. Expiry: {latest_rn.coverage_end}.",
+                file_path="Email",  # Placeholder for required field
+                date_logged=datetime.now()
+            )
+        )
+
     @staticmethod
     def send_renewal_reminder(session: Session, *, policy: Policy) -> None:
         """
@@ -102,7 +116,8 @@ class RenewalService:
 
         project_name = settings.PROJECT_NAME
         subject = f"{project_name} - Renewal Reminder: {policy.policy_number}"
-        link = f"{settings.FRONTEND_HOST}/policies/{policy.id}"
+        # Task 1.2: Correct Deep-Link URL Structure
+        link = f"{settings.FRONTEND_HOST}/clients/{policy.client_id}/policies/{policy.id}"
         
         html_content = render_email_template(
             template_name="renewal_reminder.html",
@@ -121,6 +136,19 @@ class RenewalService:
             html_content=html_content,
         )
 
+        # Task 2.1: Implement Notification Logging via Correspondence
+        from app.crud import create_correspondence
+        create_correspondence(
+            session=session,
+            correspondence_in=CorrespondenceCreate(
+                client_id=policy.client_id,
+                subject=subject,
+                summary=f"Automated 7-day renewal reminder sent for policy {policy.policy_number}. Expiry: {latest_rn.coverage_end}.",
+                file_path="Email",  # Placeholder for required field
+                date_logged=datetime.now()
+            )
+        )
+
     @staticmethod
     def run_daily_renewal_checks(session: Session) -> None:
         """
@@ -129,15 +157,28 @@ class RenewalService:
         # 1. 30-day invitations
         to_invite = renewal_service.get_policies_expiring_exactly_in(session, days=30)
         for policy in to_invite:
-            renewal_service.send_renewal_invitation(session, policy=policy)
-            policy.status = PolicyStatus.RENEWAL_INVITED
-            session.add(policy)
+            # Task 2.2: Add Idempotency Check (status is already a good check for invitations)
+            if policy.status != PolicyStatus.RENEWAL_INVITED:
+                renewal_service.send_renewal_invitation(session, policy=policy)
+                policy.status = PolicyStatus.RENEWAL_INVITED
+                session.add(policy)
         
         # 2. 7-day reminders
         to_remind = renewal_service.get_policies_expiring_exactly_in(session, days=7)
         for policy in to_remind:
-            # Only remind if not yet renewed/confirmed
-            if policy.status in [PolicyStatus.ACTIVE, PolicyStatus.RENEWAL_INVITED]:
+            # Task 2.2: Add Idempotency Check for Automated Reminders
+            # Check if a reminder has already been sent today
+            today_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+            reminder_subject = f"{settings.PROJECT_NAME} - Renewal Reminder: {policy.policy_number}"
+            statement = (
+                select(Correspondence)
+                .where(Correspondence.client_id == policy.client_id)
+                .where(Correspondence.subject == reminder_subject)
+                .where(Correspondence.date_logged >= today_start)
+            )
+            already_sent = session.exec(statement).first()
+
+            if not already_sent and policy.status in [PolicyStatus.ACTIVE, PolicyStatus.RENEWAL_INVITED]:
                 renewal_service.send_renewal_reminder(session, policy=policy)
         
         session.commit()

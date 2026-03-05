@@ -401,8 +401,6 @@ def get_policies(
         )
     )
     if expiring_within is not None:
-        from app.models import RiskNote, RiskNoteStatus
-
         target_date = date.today() + timedelta(days=expiring_within)
         latest_rn_sub = (
             select(RiskNote.policy_id, func.max(RiskNote.coverage_end).label("max_end"))
@@ -428,8 +426,6 @@ def count_policies(
 ) -> int:
     statement = select(Policy).where(Policy.deleted_at == None)
     if expiring_within is not None:
-        from app.models import RiskNote, RiskNoteStatus
-
         target_date = date.today() + timedelta(days=expiring_within)
         latest_rn_sub = (
             select(RiskNote.policy_id, func.max(RiskNote.coverage_end).label("max_end"))

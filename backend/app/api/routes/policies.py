@@ -182,6 +182,13 @@ def send_policy_renewal_invitation(
     from app.services.renewal import renewal_service
 
     renewal_service.send_renewal_invitation(session, policy=policy)
+
+    # Task 1.3: Align Manual Invitation with Status Workflow
+    from app.models import PolicyStatus
+    policy.status = PolicyStatus.RENEWAL_INVITED
+    session.add(policy)
+    session.commit()
+
     return Message(message="Renewal invitation sent successfully")
 
 

@@ -557,67 +557,6 @@ class ReceiptsPublic(SQLModel):
     count: int
 
 
-# ==========================================
-# Claim Models
-# ==========================================
-
-
-class ClaimBase(AuditMixin, SQLModel):
-    claim_number: str = Field(unique=True, index=True)
-    policy_id: uuid.UUID = Field(foreign_key="policy.id", index=True)
-    date_of_loss: date
-    date_reported: date = Field(default_factory=date.today)
-    description: str
-    status: ClaimStatus = Field(default=ClaimStatus.REPORTED)
-    reserve_amount: Decimal = Field(
-        default=Decimal("0.0"), sa_column=Column(Numeric(precision=15, scale=2))
-    )
-
-
-class ClaimCreate(ClaimBase):
-    pass
-
-
-class ClaimUpdate(SQLModel):
-    claim_number: str | None = None
-    policy_id: uuid.UUID | None = None
-    date_of_loss: date | None = None
-    date_reported: date | None = None
-    description: str | None = None
-    status: ClaimStatus | None = None
-    reserve_amount: Decimal | None = None
-
-
-class ClaimPublic(ClaimBase):
-    id: uuid.UUID
-
-
-class Claim(ClaimBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    policy: "Policy" = Relationship(back_populates="claims")
-    events: list["ClaimEvent"] = Relationship(back_populates="claim")
-
-
-class ClaimsPublic(SQLModel):
-    data: list[ClaimPublic]
-    count: int
-
-
-class ClaimEventBase(SQLModel):
-    claim_id: uuid.UUID = Field(foreign_key="claim.id", index=True)
-    event_type: ClaimEventType
-class PolicyPublic(PolicyBase):
-    id: uuid.UUID
-    product: ProductPublic | None = None
-    client: Optional["ClientPublic"] = None
-    active_note: Optional["RiskNotePublic"] = None
-
-
-class PoliciesPublic(SQLModel):
-    data: list[PolicyPublic]
-    count: int
-
-
 class RiskNoteBase(AuditMixin, SQLModel):
     policy_id: uuid.UUID = Field(foreign_key="policy.id", index=True)
     risk_note_number: str | None = Field(default=None, unique=True, index=True)
@@ -678,6 +617,18 @@ class InvoicesPublic(SQLModel):
     count: int
 
 
+class PolicyPublic(PolicyBase):
+    id: uuid.UUID
+    product: ProductPublic | None = None
+    client: Optional["ClientPublic"] = None
+    active_note: Optional["RiskNotePublic"] = None
+
+
+class PoliciesPublic(SQLModel):
+    data: list[PolicyPublic]
+    count: int
+
+
 class RiskNotePublic(RiskNoteBase):
     id: uuid.UUID
     policy: PolicyPublic | None = None
@@ -735,6 +686,55 @@ class RiskNotesPublic(SQLModel):
     count: int
 
 
+# ==========================================
+# Claim Models
+# ==========================================
+
+
+class ClaimBase(AuditMixin, SQLModel):
+    claim_number: str = Field(unique=True, index=True)
+    policy_id: uuid.UUID = Field(foreign_key="policy.id", index=True)
+    date_of_loss: date
+    date_reported: date = Field(default_factory=date.today)
+    description: str
+    status: ClaimStatus = Field(default=ClaimStatus.REPORTED)
+    reserve_amount: Decimal = Field(
+        default=Decimal("0.0"), sa_column=Column(Numeric(precision=15, scale=2))
+    )
+
+
+class ClaimCreate(ClaimBase):
+    pass
+
+
+class ClaimUpdate(SQLModel):
+    claim_number: str | None = None
+    policy_id: uuid.UUID | None = None
+    date_of_loss: date | None = None
+    date_reported: date | None = None
+    description: str | None = None
+    status: ClaimStatus | None = None
+    reserve_amount: Decimal | None = None
+
+
+class ClaimPublic(ClaimBase):
+    id: uuid.UUID
+
+
+class Claim(ClaimBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    policy: "Policy" = Relationship(back_populates="claims")
+    events: list["ClaimEvent"] = Relationship(back_populates="claim")
+
+
+class ClaimsPublic(SQLModel):
+    data: list[ClaimPublic]
+    count: int
+
+
+class ClaimEventBase(SQLModel):
+    claim_id: uuid.UUID = Field(foreign_key="claim.id", index=True)
+    event_type: ClaimEventType
     description: str
     created_by_id: uuid.UUID | None = Field(
         default=None, foreign_key="user.id", index=True

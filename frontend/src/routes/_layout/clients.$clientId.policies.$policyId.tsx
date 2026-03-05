@@ -143,12 +143,15 @@ function PolicyDashboardContent({
     return <PendingItems />
   }
 
-  const daysToExpiry = latestRiskNote?.coverage_end
-    ? Math.ceil(
-        (new Date(latestRiskNote.coverage_end).getTime() - Date.now()) /
-          (1000 * 60 * 60 * 24),
-      )
-    : 0
+  const daysToExpiry = (() => {
+    const expiry = latestRiskNote?.coverage_end
+    if (!expiry) return 0
+    const [year, month, day] = expiry.split("-").map(Number)
+    const expiryDate = new Date(year, month - 1, day)
+    return Math.ceil(
+      (expiryDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
+    )
+  })()
 
   const displayName = getPolicyDisplayName(policy)
 
