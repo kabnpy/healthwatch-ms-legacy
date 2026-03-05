@@ -347,8 +347,7 @@ export const RiskNoteForm = ({
           </Button>
           <LoadingButton
             type="submit"
-            loading={updateRiskNote.isPending}
-            disabled={!riskNoteId}
+            loading={updateRiskNote.isPending || createRiskNote.isPending}
             className="font-bold"
           >
             {form.watch("status") === "Active"

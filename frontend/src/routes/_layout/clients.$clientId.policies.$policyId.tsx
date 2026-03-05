@@ -96,14 +96,20 @@ function PolicyDashboardContent({
   // Handlers
   const handleSendRenewalInvitation = async () => {
     await sendRenewalInvitation.mutateAsync(policyId, {
-      onSuccess: () => showSuccessToast("Renewal Invitation Sent"),
+      onSuccess: () => {
+        showSuccessToast("Renewal Invitation Sent")
+        queryClient.invalidateQueries({ queryKey: ["policies", policyId] })
+      },
       onError: () => showErrorToast("Failed to send invitation"),
     })
   }
 
   const handleSendRenewalReminder = async () => {
     await sendRenewalReminder.mutateAsync(policyId, {
-      onSuccess: () => showSuccessToast("Renewal Reminder Sent"),
+      onSuccess: () => {
+        showSuccessToast("Renewal Reminder Sent")
+        queryClient.invalidateQueries({ queryKey: ["policies", policyId] })
+      },
       onError: () => showErrorToast("Failed to send reminder"),
     })
   }
@@ -128,14 +134,14 @@ function PolicyDashboardContent({
   const handleRenew = () => {
     setTransactionType("Renewal")
     setInitialStatus("Draft")
-    setEditingRiskNoteId(undefined)
+    if (editingRiskNoteId) setEditingRiskNoteId(undefined)
     setRiskNoteFormOpen(true)
   }
 
   const handleRecordRenewalInvitation = () => {
     setTransactionType("Renewal")
     setInitialStatus("Renewal Invited")
-    setEditingRiskNoteId(undefined)
+    if (editingRiskNoteId) setEditingRiskNoteId(undefined)
     setRiskNoteFormOpen(true)
   }
 
@@ -148,8 +154,10 @@ function PolicyDashboardContent({
     if (!expiry) return 0
     const [year, month, day] = expiry.split("-").map(Number)
     const expiryDate = new Date(year, month - 1, day)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
     return Math.ceil(
-      (expiryDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
+      (expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
     )
   })()
 
@@ -185,13 +193,29 @@ function PolicyDashboardContent({
                     Coverage Status
                   </p>
                   <div className="flex items-center gap-2">
-                    <div className="text-3xl font-bold tracking-tight">
-                      {daysToExpiry}
+                    <div className={`text-3xl font-bold tracking-tight ${daysToExpiry <= 0 ? "text-destructive" : ""}`}>
+                      {daysToExpiry < 0 ? "!" : daysToExpiry}
                     </div>
                     <div className="text-[10px] text-muted-foreground uppercase leading-tight font-semibold">
-                      Days until
-                      <br />
-                      Expiry
+                      {daysToExpiry === 0 ? (
+                        <span className="text-destructive font-bold">
+                          Expires
+                          <br />
+                          Today
+                        </span>
+                      ) : daysToExpiry < 0 ? (
+                        <span className="text-destructive font-bold">
+                          Policy
+                          <br />
+                          Expired
+                        </span>
+                      ) : (
+                        <>
+                          Days until
+                          <br />
+                          Expiry
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -199,7 +223,26 @@ function PolicyDashboardContent({
                   <div
                     className={`h-full ${daysToExpiry < 30 ? "bg-destructive" : "bg-blue-500"}`}
                     style={{
-                      width: `${Math.min(100, (daysToExpiry / 365) * 100)}%`,
+                      width: (() => {
+                        if (
+                          !latestRiskNote?.coverage_start ||
+                          !latestRiskNote?.coverage_end
+                        )
+                          return 0
+                        const [sY, sM, sD] = latestRiskNote.coverage_start
+                          .split("-")
+                          .map(Number)
+                        const [eY, eM, eD] = latestRiskNote.coverage_end
+                          .split("-")
+                          .map(Number)
+                        const start = new Date(sY, sM - 1, sD).getTime()
+                        const end = new Date(eY, eM - 1, eD).getTime()
+                        const total = end - start
+                        const today = new Date()
+                        today.setHours(0, 0, 0, 0)
+                        const elapsed = today.getTime() - start
+                        return `${Math.max(0, Math.min(100, 100 - (elapsed / total) * 100))}%`
+                      })(),
                     }}
                   />
                 </div>
