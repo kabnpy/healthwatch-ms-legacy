@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ClaimsReadClaimsData, ClaimsReadClaimsResponse, ClaimsCreateClaimData, ClaimsCreateClaimResponse, ClaimsReadClaimData, ClaimsReadClaimResponse, ClaimsUpdateClaimData, ClaimsUpdateClaimResponse, ClaimsDeleteClaimData, ClaimsDeleteClaimResponse, ClientsReadClientsData, ClientsReadClientsResponse, ClientsCreateClientData, ClientsCreateClientResponse, ClientsReadClientData, ClientsReadClientResponse, ClientsUpdateClientData, ClientsUpdateClientResponse, ClientsDeleteClientData, ClientsDeleteClientResponse, ClientsReadClientCorrespondencesData, ClientsReadClientCorrespondencesResponse, ClientsCreateClientCorrespondenceData, ClientsCreateClientCorrespondenceResponse, DocumentsReadDocumentsData, DocumentsReadDocumentsResponse, DocumentsUploadDocumentData, DocumentsUploadDocumentResponse, DocumentsReadDocumentByIdData, DocumentsReadDocumentByIdResponse, DocumentsRemoveDocumentData, DocumentsRemoveDocumentResponse, DocumentsDownloadDocumentData, DocumentsDownloadDocumentResponse, FinancialsReadInvoicesData, FinancialsReadInvoicesResponse, FinancialsCreateNewInvoiceData, FinancialsCreateNewInvoiceResponse, FinancialsReadInvoiceData, FinancialsReadInvoiceResponse, FinancialsCreateBulkInvoiceData, FinancialsCreateBulkInvoiceResponse, FinancialsReadReceiptsData, FinancialsReadReceiptsResponse, FinancialsCreateNewReceiptData, FinancialsCreateNewReceiptResponse, FinancialsReadReceiptByIdData, FinancialsReadReceiptByIdResponse, FinancialsDeleteReceiptData, FinancialsDeleteReceiptResponse, FinancialsAllocateReceiptData, FinancialsAllocateReceiptResponse, InsurersReadInsurersData, InsurersReadInsurersResponse, InsurersCreateInsurerData, InsurersCreateInsurerResponse, InsurersReadInsurerData, InsurersReadInsurerResponse, InsurersUpdateInsurerData, InsurersUpdateInsurerResponse, InsurersDeleteInsurerData, InsurersDeleteInsurerResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PoliciesReadPoliciesData, PoliciesReadPoliciesResponse, PoliciesCreatePolicyData, PoliciesCreatePolicyResponse, PoliciesReadPolicyData, PoliciesReadPolicyResponse, PoliciesUpdatePolicyData, PoliciesUpdatePolicyResponse, PoliciesDeletePolicyData, PoliciesDeletePolicyResponse, PoliciesGetPolicyQuoteData, PoliciesGetPolicyQuoteResponse, PoliciesReadPolicyRiskNotesData, PoliciesReadPolicyRiskNotesResponse, PrivateCreateUserData, PrivateCreateUserResponse, ProductsReadProductsData, ProductsReadProductsResponse, ProductsCreateProductData, ProductsCreateProductResponse, ProductsReadProductData, ProductsReadProductResponse, ProductsUpdateProductData, ProductsUpdateProductResponse, ProductsDeleteProductData, ProductsDeleteProductResponse, RiskNotesReadRiskNotesData, RiskNotesReadRiskNotesResponse, RiskNotesCreateRiskNoteData, RiskNotesCreateRiskNoteResponse, RiskNotesReadRiskNoteData, RiskNotesReadRiskNoteResponse, RiskNotesUpdateRiskNoteData, RiskNotesUpdateRiskNoteResponse, RiskNotesDeleteRiskNoteData, RiskNotesDeleteRiskNoteResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { ClaimsReadClaimsData, ClaimsReadClaimsResponse, ClaimsCreateClaimData, ClaimsCreateClaimResponse, ClaimsReadClaimData, ClaimsReadClaimResponse, ClaimsUpdateClaimData, ClaimsUpdateClaimResponse, ClaimsDeleteClaimData, ClaimsDeleteClaimResponse, ClientsReadClientsData, ClientsReadClientsResponse, ClientsCreateClientData, ClientsCreateClientResponse, ClientsReadClientData, ClientsReadClientResponse, ClientsUpdateClientData, ClientsUpdateClientResponse, ClientsDeleteClientData, ClientsDeleteClientResponse, ClientsReadClientCorrespondencesData, ClientsReadClientCorrespondencesResponse, ClientsCreateClientCorrespondenceData, ClientsCreateClientCorrespondenceResponse, DocumentsReadDocumentsData, DocumentsReadDocumentsResponse, DocumentsUploadDocumentData, DocumentsUploadDocumentResponse, DocumentsReadDocumentByIdData, DocumentsReadDocumentByIdResponse, DocumentsRemoveDocumentData, DocumentsRemoveDocumentResponse, DocumentsDownloadDocumentData, DocumentsDownloadDocumentResponse, FinancialsReadInvoicesData, FinancialsReadInvoicesResponse, FinancialsCreateNewInvoiceData, FinancialsCreateNewInvoiceResponse, FinancialsReadInvoiceData, FinancialsReadInvoiceResponse, FinancialsCreateBulkInvoiceData, FinancialsCreateBulkInvoiceResponse, FinancialsReadReceiptsData, FinancialsReadReceiptsResponse, FinancialsCreateNewReceiptData, FinancialsCreateNewReceiptResponse, FinancialsReadReceiptByIdData, FinancialsReadReceiptByIdResponse, FinancialsDeleteReceiptData, FinancialsDeleteReceiptResponse, FinancialsAllocateReceiptData, FinancialsAllocateReceiptResponse, InsurersReadInsurersData, InsurersReadInsurersResponse, InsurersCreateInsurerData, InsurersCreateInsurerResponse, InsurersReadInsurerData, InsurersReadInsurerResponse, InsurersUpdateInsurerData, InsurersUpdateInsurerResponse, InsurersDeleteInsurerData, InsurersDeleteInsurerResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PoliciesReadPoliciesData, PoliciesReadPoliciesResponse, PoliciesCreatePolicyData, PoliciesCreatePolicyResponse, PoliciesReadPolicyData, PoliciesReadPolicyResponse, PoliciesUpdatePolicyData, PoliciesUpdatePolicyResponse, PoliciesDeletePolicyData, PoliciesDeletePolicyResponse, PoliciesGetPolicyQuoteData, PoliciesGetPolicyQuoteResponse, PoliciesReadPolicyRiskNotesData, PoliciesReadPolicyRiskNotesResponse, PoliciesSendPolicyRenewalInvitationData, PoliciesSendPolicyRenewalInvitationResponse, PoliciesSendPolicyRenewalReminderData, PoliciesSendPolicyRenewalReminderResponse, PrivateCreateUserData, PrivateCreateUserResponse, ProductsReadProductsData, ProductsReadProductsResponse, ProductsCreateProductData, ProductsCreateProductResponse, ProductsReadProductData, ProductsReadProductResponse, ProductsUpdateProductData, ProductsUpdateProductResponse, ProductsDeleteProductData, ProductsDeleteProductResponse, RiskNotesReadRiskNotesData, RiskNotesReadRiskNotesResponse, RiskNotesCreateRiskNoteData, RiskNotesCreateRiskNoteResponse, RiskNotesReadRiskNoteData, RiskNotesReadRiskNoteResponse, RiskNotesUpdateRiskNoteData, RiskNotesUpdateRiskNoteResponse, RiskNotesDeleteRiskNoteData, RiskNotesDeleteRiskNoteResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
 
 export class ClaimsService {
     /**
@@ -801,6 +801,7 @@ export class PoliciesService {
      * @param data.skip
      * @param data.limit
      * @param data.clientId
+     * @param data.expiringWithin
      * @returns PoliciesPublic Successful Response
      * @throws ApiError
      */
@@ -811,7 +812,8 @@ export class PoliciesService {
             query: {
                 skip: data.skip,
                 limit: data.limit,
-                client_id: data.clientId
+                client_id: data.clientId,
+                expiring_within: data.expiringWithin
             },
             errors: {
                 422: 'Validation Error'
@@ -937,6 +939,48 @@ export class PoliciesService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/policies/{id}/risk-notes',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Send Policy Renewal Invitation
+     * Manually trigger a renewal invitation email.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static sendPolicyRenewalInvitation(data: PoliciesSendPolicyRenewalInvitationData): CancelablePromise<PoliciesSendPolicyRenewalInvitationResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/policies/{id}/send-renewal-invitation',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Send Policy Renewal Reminder
+     * Manually trigger a renewal reminder email.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static sendPolicyRenewalReminder(data: PoliciesSendPolicyRenewalReminderData): CancelablePromise<PoliciesSendPolicyRenewalReminderResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/policies/{id}/send-renewal-reminder',
             path: {
                 id: data.id
             },

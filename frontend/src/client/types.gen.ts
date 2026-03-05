@@ -247,13 +247,21 @@ export type InvoiceCreate = {
     notes?: (string | null);
 };
 
-export type InvoiceLineItemPublic = {
+export type InvoiceLineItemDetailedPublic = {
     invoice_id: string;
     risk_note_id: string;
     amount: string;
     description?: (string | null);
     id: string;
     invoice?: (InvoicePublic | null);
+};
+
+export type InvoiceLineItemPublic = {
+    invoice_id: string;
+    risk_note_id: string;
+    amount: string;
+    description?: (string | null);
+    id: string;
 };
 
 export type InvoicePublic = {
@@ -337,10 +345,11 @@ export type PolicyPublic = {
     inception_date?: string;
     id: string;
     product?: (ProductPublic | null);
+    client?: (ClientPublic | null);
     active_note?: (RiskNotePublic | null);
 };
 
-export type PolicyStatus = 'Active' | 'Expired' | 'Cancelled' | 'Lapsed';
+export type PolicyStatus = 'Active' | 'Expired' | 'Cancelled' | 'Lapsed' | 'Renewal Invited' | 'Renewal Confirmed';
 
 export type PolicyUpdate = {
     policy_number?: (string | null);
@@ -543,7 +552,7 @@ export type RiskNotePublic = {
     };
     special_clauses?: Array<(string)>;
     invoice_number?: (string | null);
-    invoice_line_items?: Array<InvoiceLineItemPublic>;
+    invoice_line_items?: Array<InvoiceLineItemDetailedPublic>;
 };
 
 export type RiskNotesPublic = {
@@ -551,7 +560,7 @@ export type RiskNotesPublic = {
     count: number;
 };
 
-export type RiskNoteStatus = 'Draft' | 'Issued' | 'Replaced' | 'Cancelled';
+export type RiskNoteStatus = 'Draft' | 'Issued' | 'Replaced' | 'Cancelled' | 'Renewal Invited' | 'Renewal Confirmed';
 
 export type RiskNoteUpdate = {
     transaction_type?: (TransactionType | null);
@@ -866,6 +875,7 @@ export type LoginRecoverPasswordHtmlContentResponse = (string);
 
 export type PoliciesReadPoliciesData = {
     clientId?: (string | null);
+    expiringWithin?: (number | null);
     limit?: number;
     skip?: number;
 };
@@ -908,6 +918,18 @@ export type PoliciesReadPolicyRiskNotesData = {
 };
 
 export type PoliciesReadPolicyRiskNotesResponse = (RiskNotesPublic);
+
+export type PoliciesSendPolicyRenewalInvitationData = {
+    id: string;
+};
+
+export type PoliciesSendPolicyRenewalInvitationResponse = (Message);
+
+export type PoliciesSendPolicyRenewalReminderData = {
+    id: string;
+};
+
+export type PoliciesSendPolicyRenewalReminderResponse = (Message);
 
 export type PrivateCreateUserData = {
     requestBody: PrivateUserCreate;

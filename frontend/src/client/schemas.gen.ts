@@ -1412,7 +1412,7 @@ export const InvoiceCreateSchema = {
     title: 'InvoiceCreate'
 } as const;
 
-export const InvoiceLineItemPublicSchema = {
+export const InvoiceLineItemDetailedPublicSchema = {
     properties: {
         invoice_id: {
             type: 'string',
@@ -1454,6 +1454,45 @@ export const InvoiceLineItemPublicSchema = {
                     type: 'null'
                 }
             ]
+        }
+    },
+    type: 'object',
+    required: ['invoice_id', 'risk_note_id', 'amount', 'id'],
+    title: 'InvoiceLineItemDetailedPublic'
+} as const;
+
+export const InvoiceLineItemPublicSchema = {
+    properties: {
+        invoice_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Invoice Id'
+        },
+        risk_note_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Risk Note Id'
+        },
+        amount: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$',
+            title: 'Amount'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
         }
     },
     type: 'object',
@@ -1880,6 +1919,16 @@ export const PolicyPublicSchema = {
                 }
             ]
         },
+        client: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/ClientPublic'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
         active_note: {
             anyOf: [
                 {
@@ -1898,7 +1947,7 @@ export const PolicyPublicSchema = {
 
 export const PolicyStatusSchema = {
     type: 'string',
-    enum: ['Active', 'Expired', 'Cancelled', 'Lapsed'],
+    enum: ['Active', 'Expired', 'Cancelled', 'Lapsed', 'Renewal Invited', 'Renewal Confirmed'],
     title: 'PolicyStatus'
 } as const;
 
@@ -3016,7 +3065,7 @@ export const RiskNotePublicSchema = {
         },
         invoice_line_items: {
             items: {
-                '$ref': '#/components/schemas/InvoiceLineItemPublic'
+                '$ref': '#/components/schemas/InvoiceLineItemDetailedPublic'
             },
             type: 'array',
             title: 'Invoice Line Items'
@@ -3029,7 +3078,7 @@ export const RiskNotePublicSchema = {
 
 export const RiskNoteStatusSchema = {
     type: 'string',
-    enum: ['Draft', 'Issued', 'Replaced', 'Cancelled', 'Issued'],
+    enum: ['Draft', 'Issued', 'Replaced', 'Cancelled', 'Issued', 'Renewal Invited', 'Renewal Confirmed'],
     title: 'RiskNoteStatus'
 } as const;
 
