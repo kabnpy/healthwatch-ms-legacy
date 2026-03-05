@@ -365,6 +365,10 @@ def get_policies_by_client_id(
         .where(Policy.deleted_at == None)
         .options(
             selectinload(cast(Any, Policy.product)),
+            selectinload(cast(Any, Policy.client)),
+            selectinload(cast(Any, Policy.risk_notes))
+            .selectinload(cast(Any, RiskNote.invoice_line_items))
+            .selectinload(cast(Any, InvoiceLineItem.invoice)),
         )
     )
     return session.exec(statement).all()
@@ -379,6 +383,26 @@ def update_policy(
     session.commit()
     session.refresh(db_policy)
     return db_policy
+
+
+def _apply_expiry_filter(
+    statement: Any, expiring_within: int
+) -> Any:
+    """
+    Applies a filter to only include policies expiring within the given days.
+    """
+    from app.models import RiskNote, RiskNoteStatus
+    target_date = date.today() + timedelta(days=expiring_within)
+    latest_rn_sub = (
+        select(RiskNote.policy_id, func.max(RiskNote.coverage_end).label("max_end"))
+        .where(RiskNote.status == RiskNoteStatus.ISSUED)
+        .group_by(RiskNote.policy_id)
+        .subquery()
+    )
+    statement = statement.join(latest_rn_sub, Policy.id == latest_rn_sub.c.policy_id)
+    statement = statement.where(latest_rn_sub.c.max_end <= target_date)
+    statement = statement.where(latest_rn_sub.c.max_end >= date.today())
+    return statement
 
 
 def get_policies(
@@ -401,16 +425,7 @@ def get_policies(
         )
     )
     if expiring_within is not None:
-        target_date = date.today() + timedelta(days=expiring_within)
-        latest_rn_sub = (
-            select(RiskNote.policy_id, func.max(RiskNote.coverage_end).label("max_end"))
-            .where(RiskNote.status == RiskNoteStatus.ISSUED)
-            .group_by(RiskNote.policy_id)
-            .subquery()
-        )
-        statement = statement.join(latest_rn_sub, Policy.id == latest_rn_sub.c.policy_id)
-        statement = statement.where(latest_rn_sub.c.max_end <= target_date)
-        statement = statement.where(latest_rn_sub.c.max_end >= date.today())
+        statement = _apply_expiry_filter(statement, expiring_within)
 
     if client_id:
         statement = statement.where(Policy.client_id == client_id)
@@ -426,16 +441,7 @@ def count_policies(
 ) -> int:
     statement = select(Policy).where(Policy.deleted_at == None)
     if expiring_within is not None:
-        target_date = date.today() + timedelta(days=expiring_within)
-        latest_rn_sub = (
-            select(RiskNote.policy_id, func.max(RiskNote.coverage_end).label("max_end"))
-            .where(RiskNote.status == RiskNoteStatus.ISSUED)
-            .group_by(RiskNote.policy_id)
-            .subquery()
-        )
-        statement = statement.join(latest_rn_sub, Policy.id == latest_rn_sub.c.policy_id)
-        statement = statement.where(latest_rn_sub.c.max_end <= target_date)
-        statement = statement.where(latest_rn_sub.c.max_end >= date.today())
+        statement = _apply_expiry_filter(statement, expiring_within)
 
     if client_id:
         statement = statement.where(Policy.client_id == client_id)

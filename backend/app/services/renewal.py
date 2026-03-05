@@ -1,4 +1,5 @@
-from datetime import date, datetime, timedelta
+import logging
+from datetime import date, datetime, timedelta, timezone
 from typing import Any
 import uuid
 from sqlmodel import Session, select, func
@@ -36,23 +37,8 @@ class RenewalService:
         """
         Retrieves policies whose latest issued Risk Note expires within 'days' from today.
         """
-        target_date = date.today() + timedelta(days=days)
-        
-        latest_rn_sub = (
-            select(RiskNote.policy_id, func.max(RiskNote.coverage_end).label("max_end"))
-            .where(RiskNote.status == RiskNoteStatus.ISSUED)
-            .group_by(RiskNote.policy_id)
-            .subquery()
-        )
-        
-        statement = (
-            select(Policy)
-            .join(latest_rn_sub, Policy.id == latest_rn_sub.c.policy_id)
-            .where(latest_rn_sub.c.max_end <= target_date)
-            .where(latest_rn_sub.c.max_end >= date.today())
-            .options(selectinload(Policy.risk_notes), selectinload(Policy.client))
-        )
-        return list(session.exec(statement).all())
+        from app.crud import get_policies
+        return get_policies(session, expiring_within=days)
 
     @staticmethod
     def send_renewal_invitation(session: Session, *, policy: Policy) -> None:
@@ -62,13 +48,17 @@ class RenewalService:
         if not policy.client or not policy.client.email:
             return
 
-        latest_rn = next((rn for rn in policy.risk_notes if rn.status == RiskNoteStatus.ISSUED), None)
+        # Prioritize the invitation note if it exists, otherwise fallback to the current issued note
+        latest_rn = next(
+            (rn for rn in policy.risk_notes if rn.status == RiskNoteStatus.RENEWAL_INVITED),
+            next((rn for rn in policy.risk_notes if rn.status == RiskNoteStatus.ISSUED), None)
+        )
         if not latest_rn:
             return
 
         project_name = settings.PROJECT_NAME
         subject = f"{project_name} - Renewal Invitation for {policy.policy_number}"
-        # Task 1.2: Correct Deep-Link URL Structure
+        # Point to the specific policy view in the frontend
         link = f"{settings.FRONTEND_HOST}/clients/{policy.client_id}/policies/{policy.id}"
         
         html_content = render_email_template(
@@ -89,18 +79,21 @@ class RenewalService:
             html_content=html_content,
         )
 
-        # Task 2.1: Implement Notification Logging via Correspondence
-        from app.crud import create_correspondence
-        create_correspondence(
-            session=session,
-            correspondence_in=CorrespondenceCreate(
+        # Update policy status to reflect invitation
+        policy.status = PolicyStatus.RENEWAL_INVITED
+        session.add(policy)
+
+        # Log notification in client correspondence history
+        db_correspondence = Correspondence.model_validate(
+            CorrespondenceCreate(
                 client_id=policy.client_id,
                 subject=subject,
-                summary=f"Automated renewal invitation sent for policy {policy.policy_number}. Expiry: {latest_rn.coverage_end}.",
-                file_path="Email",  # Placeholder for required field
+                summary=f"Renewal invitation dispatched for policy {policy.policy_number}. Coverage Expiry: {latest_rn.coverage_end}.",
+                file_path="SYSTEM_GENERATED_EMAIL",
                 date_logged=datetime.now()
             )
         )
+        session.add(db_correspondence)
 
     @staticmethod
     def send_renewal_reminder(session: Session, *, policy: Policy) -> None:
@@ -116,7 +109,7 @@ class RenewalService:
 
         project_name = settings.PROJECT_NAME
         subject = f"{project_name} - Renewal Reminder: {policy.policy_number}"
-        # Task 1.2: Correct Deep-Link URL Structure
+        # Point to the specific policy view in the frontend
         link = f"{settings.FRONTEND_HOST}/clients/{policy.client_id}/policies/{policy.id}"
         
         html_content = render_email_template(
@@ -136,51 +129,77 @@ class RenewalService:
             html_content=html_content,
         )
 
-        # Task 2.1: Implement Notification Logging via Correspondence
-        from app.crud import create_correspondence
-        create_correspondence(
-            session=session,
-            correspondence_in=CorrespondenceCreate(
+        # Log notification in client correspondence history
+        db_correspondence = Correspondence.model_validate(
+            CorrespondenceCreate(
                 client_id=policy.client_id,
                 subject=subject,
-                summary=f"Automated 7-day renewal reminder sent for policy {policy.policy_number}. Expiry: {latest_rn.coverage_end}.",
-                file_path="Email",  # Placeholder for required field
+                summary=f"7-day renewal reminder dispatched for policy {policy.policy_number}. Coverage Expiry: {latest_rn.coverage_end}.",
+                file_path="SYSTEM_GENERATED_EMAIL",
                 date_logged=datetime.now()
             )
         )
+        session.add(db_correspondence)
 
     @staticmethod
     def run_daily_renewal_checks(session: Session) -> None:
         """
         Runs the daily automated renewal tasks.
         """
+        today_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+
         # 1. 30-day invitations
         to_invite = renewal_service.get_policies_expiring_exactly_in(session, days=30)
-        for policy in to_invite:
-            # Task 2.2: Add Idempotency Check (status is already a good check for invitations)
-            if policy.status != PolicyStatus.RENEWAL_INVITED:
-                renewal_service.send_renewal_invitation(session, policy=policy)
-                policy.status = PolicyStatus.RENEWAL_INVITED
-                session.add(policy)
+        if to_invite:
+            # Collect subjects to check for idempotency in bulk
+            invitation_subjects = {
+                f"{settings.PROJECT_NAME} - Renewal Invitation for {p.policy_number}" 
+                for p in to_invite
+            }
+            
+            existing_invitations_statement = (
+                select(Correspondence.subject)
+                .where(Correspondence.subject.in_(list(invitation_subjects)))
+                .where(Correspondence.date_logged >= today_start)
+            )
+            sent_invitation_subjects = set(session.exec(existing_invitations_statement).all())
+
+            for policy in to_invite:
+                subject = f"{settings.PROJECT_NAME} - Renewal Invitation for {policy.policy_number}"
+                if subject not in sent_invitation_subjects and policy.status != PolicyStatus.RENEWAL_INVITED:
+                    try:
+                        renewal_service.send_renewal_invitation(session, policy=policy)
+                        # Commit per-item to ensure recovery even on partial failure
+                        session.commit()
+                    except Exception as e:
+                        logging.error(f"Failed to send invitation for {policy.policy_number}: {e}")
+                        session.rollback()
         
         # 2. 7-day reminders
         to_remind = renewal_service.get_policies_expiring_exactly_in(session, days=7)
-        for policy in to_remind:
-            # Task 2.2: Add Idempotency Check for Automated Reminders
-            # Check if a reminder has already been sent today
-            today_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-            reminder_subject = f"{settings.PROJECT_NAME} - Renewal Reminder: {policy.policy_number}"
-            statement = (
-                select(Correspondence)
-                .where(Correspondence.client_id == policy.client_id)
-                .where(Correspondence.subject == reminder_subject)
+        if to_remind:
+            # Collect subjects to check for idempotency in bulk
+            reminder_subjects = {
+                f"{settings.PROJECT_NAME} - Renewal Reminder: {p.policy_number}" 
+                for p in to_remind
+            }
+            
+            existing_reminders_statement = (
+                select(Correspondence.subject)
+                .where(Correspondence.subject.in_(list(reminder_subjects)))
                 .where(Correspondence.date_logged >= today_start)
             )
-            already_sent = session.exec(statement).first()
+            sent_reminder_subjects = set(session.exec(existing_reminders_statement).all())
 
-            if not already_sent and policy.status in [PolicyStatus.ACTIVE, PolicyStatus.RENEWAL_INVITED]:
-                renewal_service.send_renewal_reminder(session, policy=policy)
-        
-        session.commit()
+            for policy in to_remind:
+                subject = f"{settings.PROJECT_NAME} - Renewal Reminder: {policy.policy_number}"
+                if subject not in sent_reminder_subjects and policy.status in [PolicyStatus.ACTIVE, PolicyStatus.RENEWAL_INVITED]:
+                    try:
+                        renewal_service.send_renewal_reminder(session, policy=policy)
+                        # Commit per-item to ensure recovery even on partial failure
+                        session.commit()
+                    except Exception as e:
+                        logging.error(f"Failed to send reminder for {policy.policy_number}: {e}")
+                        session.rollback()
 
 renewal_service = RenewalService()

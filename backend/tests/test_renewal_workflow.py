@@ -93,9 +93,8 @@ def test_send_renewal_reminder(mock_send_email, db: Session):
     assert mock_send_email.called
     assert "Renewal Reminder" in mock_send_email.call_args[1]["subject"]
 
-@patch("app.services.renewal.renewal_service.send_renewal_invitation")
-@patch("app.services.renewal.renewal_service.send_renewal_reminder")
-def test_run_daily_renewal_checks(mock_send_reminder, mock_send_invite, db: Session):
+@patch("app.services.renewal.send_email")
+def test_run_daily_renewal_checks(mock_send_email, db: Session):
     # 1. Setup policies
     # Expiring in 30 days
     p30 = create_random_policy(db)
@@ -115,8 +114,12 @@ def test_run_daily_renewal_checks(mock_send_reminder, mock_send_invite, db: Sess
     renewal_service.run_daily_renewal_checks(db)
 
     # 3. Verify
-    assert mock_send_invite.called
-    assert mock_send_reminder.called
+    # Extract all HTML contents from mock calls
+    sent_htmls = [call.kwargs["html_content"] for call in mock_send_email.call_args_list]
+    
+    # Verify our specific policies were notified
+    assert any(p30.policy_number in html for html in sent_htmls)
+    assert any(p7.policy_number in html for html in sent_htmls)
     
     # Verify status transition
     db.refresh(p30)
