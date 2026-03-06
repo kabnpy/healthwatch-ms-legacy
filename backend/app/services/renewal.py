@@ -13,8 +13,8 @@ from app.models import (
     RiskNote,
     RiskNoteStatus,
 )
-from app.utils.links import get_policy_view_url
 from app.utils import render_email_template, send_email
+from app.utils.links import get_policy_view_url
 
 
 class RenewalService:
@@ -38,6 +38,7 @@ class RenewalService:
             select(Policy)
             .join(latest_rn_sub, Policy.id == latest_rn_sub.c.policy_id)
             .where(latest_rn_sub.c.max_end == target_date)
+            .where(Policy.deleted_at == None)
             .options(selectinload(Policy.risk_notes), selectinload(Policy.client))
         )
         return list(session.exec(statement).all())
@@ -160,7 +161,7 @@ class RenewalService:
         today_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
 
         # 1. 30-day invitations
-        to_invite = renewal_service.get_policies_expiring_exactly_in(session, days=30)
+        to_invite = RenewalService.get_policies_expiring_exactly_in(session, days=30)
         if to_invite:
             # Collect subjects to check for idempotency in bulk
             invitation_subjects = {
@@ -179,7 +180,7 @@ class RenewalService:
                 subject = f"{settings.PROJECT_NAME} - Renewal Invitation for {policy.policy_number}"
                 if subject not in sent_invitation_subjects and policy.status != PolicyStatus.RENEWAL_INVITED:
                     try:
-                        renewal_service.send_renewal_invitation(session, policy=policy)
+                        RenewalService.send_renewal_invitation(session, policy=policy)
                         # Commit per-item to ensure recovery even on partial failure
                         session.commit()
                     except Exception as e:
@@ -187,7 +188,7 @@ class RenewalService:
                         session.rollback()
 
         # 2. 7-day reminders
-        to_remind = renewal_service.get_policies_expiring_exactly_in(session, days=7)
+        to_remind = RenewalService.get_policies_expiring_exactly_in(session, days=7)
         if to_remind:
             # Collect subjects to check for idempotency in bulk
             reminder_subjects = {
@@ -206,7 +207,7 @@ class RenewalService:
                 subject = f"{settings.PROJECT_NAME} - Renewal Reminder: {policy.policy_number}"
                 if subject not in sent_reminder_subjects and policy.status in [PolicyStatus.ACTIVE, PolicyStatus.RENEWAL_INVITED]:
                     try:
-                        renewal_service.send_renewal_reminder(session, policy=policy)
+                        RenewalService.send_renewal_reminder(session, policy=policy)
                         # Commit per-item to ensure recovery even on partial failure
                         session.commit()
                     except Exception as e:
