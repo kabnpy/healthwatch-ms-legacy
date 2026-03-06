@@ -62,7 +62,7 @@ def test_create_policy(
             "sum_insured": 1500000
         }
     }
-    
+
     response = client.post(
         f"{settings.API_V1_STR}/policies/",
         headers=superuser_token_headers,

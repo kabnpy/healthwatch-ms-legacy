@@ -1,7 +1,7 @@
-import pytest
 from datetime import date, timedelta
 from decimal import Decimal
 
+import pytest
 from sqlmodel import Session
 
 from app.models import Policy, PolicyStatus, RiskNote, RiskNoteStatus
@@ -85,7 +85,7 @@ def test_risknote_chain_and_changelog(db: Session) -> None:
         cover_snapshot={"vehicle": {"value": 1200000}}
     )
     db.add(rn_new)
-    
+
     db.commit()
     db.refresh(rn_new)
     db.refresh(policy)

@@ -1,10 +1,20 @@
-import uuid
 from datetime import date
 from decimal import Decimal
-import pytest
+
 from sqlmodel import Session
-from app.models import Policy, RiskNote, PolicyStatus, RiskNoteStatus, TransactionType, Client, Product, Insurer, PolicyPublic
+
 from app.api.utils import prepare_policy_public
+from app.models import (
+    Client,
+    Insurer,
+    Policy,
+    PolicyStatus,
+    Product,
+    RiskNote,
+    RiskNoteStatus,
+    TransactionType,
+)
+
 
 def test_policy_public_contains_active_note(db: Session) -> None:
     """
@@ -14,7 +24,7 @@ def test_policy_public_contains_active_note(db: Session) -> None:
     insurer = Insurer(name="API Insurer")
     db.add(insurer)
     db.commit()
-    
+
     product = Product(
         name="API Product",
         class_of_insurance="Motor Private",
@@ -55,7 +65,7 @@ def test_policy_public_contains_active_note(db: Session) -> None:
         cover_snapshot=snapshot1
     )
     db.add(rn1)
-    
+
     snapshot2 = {"v": 2}
     rn2 = RiskNote(
         policy_id=policy.id,
@@ -74,7 +84,7 @@ def test_policy_public_contains_active_note(db: Session) -> None:
 
     # Validate PolicyPublic
     policy_public = prepare_policy_public(policy)
-    
+
     assert hasattr(policy_public, "active_note")
     assert policy_public.active_note is not None
     assert policy_public.active_note.cover_snapshot == snapshot2
@@ -85,7 +95,7 @@ def test_motor_private_risk_details_reworked_terms() -> None:
     Test that MotorPrivateRiskDetails correctly groups terms into a dictionary.
     """
     from app.schemas import MotorPrivateRiskDetails
-    
+
     data = {
         "vehicle": {
             "registration_number": "KCM 123",
@@ -97,13 +107,13 @@ def test_motor_private_risk_details_reworked_terms() -> None:
         "excesses": "Standard Excesses",
         "special_clauses": "Annual Valuation Required"
     }
-    
+
     details = MotorPrivateRiskDetails(**data)
     assert "terms" in details.model_dump()
     assert details.terms["benefits_and_limits"] == "Standard Benefits"
     assert details.terms["excesses"] == "Standard Excesses"
     assert details.terms["special_clauses"] == "Annual Valuation Required"
-    
+
     # Verify legacy fields are NOT at the top level of dump
     dump = details.model_dump()
     assert "benefits_and_limits" not in dump

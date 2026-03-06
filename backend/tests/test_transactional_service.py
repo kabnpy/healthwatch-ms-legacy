@@ -41,11 +41,11 @@ def test_atomic_policy_creation(db: Session) -> None:
     assert len(policy.risk_notes) == 1
     rn = policy.risk_notes[0]
     assert rn.transaction_type == TransactionType.NEW_BUSINESS
-    
+
     # Verify authoritative state on RiskNote snapshot
     assert float(rn.cover_snapshot["vehicle"]["sum_insured"]) == 5000000.0
     assert rn.cover_snapshot["vehicle"]["registration_number"] == "KCM 123"
-    
+
     # Verify RiskNote financials
     assert rn.financial_breakdown["type"] == "motor"
     assert "net_premium" in rn.financial_breakdown
@@ -53,7 +53,7 @@ def test_atomic_policy_creation(db: Session) -> None:
     assert "total_amount" in rn.financial_breakdown
     assert "commission_amount" in rn.financial_breakdown
     assert "benefits" in rn.financial_breakdown
-    
+
     # Verify exact math for 5M Motor Private
     # 5M Tier: 3.25% (inclusive of max), min 0
     # 5,000,000 * 0.0325 = 162,500

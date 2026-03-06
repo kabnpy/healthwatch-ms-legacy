@@ -1,7 +1,11 @@
-import pytest
 from decimal import Decimal
-from pydantic import ValidationError
-from app.schemas import BaseFinancialBreakdown, MotorFinancialBreakdown, FinancialBreakdown
+
+from app.schemas import (
+    BaseFinancialBreakdown,
+    FinancialBreakdown,
+    MotorFinancialBreakdown,
+)
+
 
 def test_base_financial_breakdown_valid():
     data = {

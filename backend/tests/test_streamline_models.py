@@ -1,13 +1,16 @@
 import uuid
 from datetime import date
 from decimal import Decimal
-from typing import Any
 
 import pytest
-from sqlalchemy import select
-from sqlmodel import Session, create_engine
+from sqlmodel import Session
 
-from app.models import Policy, RiskNote, PolicyStatus, RiskNoteStatus, TransactionType, Client
+from app.models import (
+    Policy,
+    RiskNote,
+    TransactionType,
+)
+
 
 def test_risknote_no_longer_has_policy_snapshot(db: Session) -> None:
     """
@@ -48,7 +51,7 @@ def test_policy_no_longer_has_computed_traversal_properties() -> None:
     Test that Policy model no longer has the redundant computed properties.
     """
     policy = Policy(policy_number="POL-TEST-002")
-    
+
     redundant_props = [
         "current_risk_details",
         "total_premium",
@@ -56,7 +59,7 @@ def test_policy_no_longer_has_computed_traversal_properties() -> None:
         "end_date",
         "display_name"
     ]
-    
+
     for prop in redundant_props:
         with pytest.raises(AttributeError):
             getattr(policy, prop)

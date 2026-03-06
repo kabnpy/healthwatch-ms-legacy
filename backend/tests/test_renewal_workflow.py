@@ -1,11 +1,13 @@
-import pytest
-from fastapi.testclient import TestClient
-from unittest.mock import patch
 from datetime import date, timedelta
+from unittest.mock import patch
+
+from fastapi.testclient import TestClient
 from sqlmodel import Session
+
 from app.models import PolicyStatus, RiskNoteStatus
 from app.services.renewal import renewal_service
 from tests.utils.insurance import create_random_policy
+
 
 def test_new_policy_statuses_exist():
     # These should exist once implemented
@@ -25,19 +27,19 @@ def test_get_policies_expiring_exactly_in_days(db: Session):
     rn30 = p30.risk_notes[0]
     rn30.coverage_end = date.today() + timedelta(days=30)
     db.add(rn30)
-    
+
     # Expiring in 7 days
     p7 = create_random_policy(db)
     rn7 = p7.risk_notes[0]
     rn7.coverage_end = date.today() + timedelta(days=7)
     db.add(rn7)
-    
+
     # Expiring in 31 days (should not be caught)
     p31 = create_random_policy(db)
     rn31 = p31.risk_notes[0]
     rn31.coverage_end = date.today() + timedelta(days=31)
     db.add(rn31)
-    
+
     db.commit()
 
     # 2. Test queries
@@ -59,13 +61,12 @@ def test_get_policies_expiring_within_days(db: Session):
 
     # Within 30 days should catch p30, p7, p15 but not p31
     results_within_30 = renewal_service.get_policies_expiring_within(db, days=30)
-    # Note: earlier tests might have left data if db is not cleaned, 
+    # Note: earlier tests might have left data if db is not cleaned,
     # but fixtures usually handle it. Assuming clean db.
     assert len(results_within_30) >= 3
 
 @patch("app.services.renewal.send_email")
 def test_send_renewal_invitation(mock_send_email, db: Session):
-    from unittest.mock import patch
     policy = create_random_policy(db)
     # Ensure client has email
     policy.client.email = "client@example.com"
@@ -82,7 +83,6 @@ def test_send_renewal_invitation(mock_send_email, db: Session):
 
 @patch("app.services.renewal.send_email")
 def test_send_renewal_reminder(mock_send_email, db: Session):
-    from unittest.mock import patch
     policy = create_random_policy(db)
     policy.client.email = "client@example.com"
     db.add(policy.client)
@@ -101,13 +101,13 @@ def test_run_daily_renewal_checks(mock_send_email, db: Session):
     rn30 = p30.risk_notes[0]
     rn30.coverage_end = date.today() + timedelta(days=30)
     db.add(rn30)
-    
+
     # Expiring in 7 days
     p7 = create_random_policy(db)
     rn7 = p7.risk_notes[0]
     rn7.coverage_end = date.today() + timedelta(days=7)
     db.add(rn7)
-    
+
     db.commit()
 
     # 2. Run checks
@@ -116,11 +116,11 @@ def test_run_daily_renewal_checks(mock_send_email, db: Session):
     # 3. Verify
     # Extract all HTML contents from mock calls
     sent_htmls = [call.kwargs["html_content"] for call in mock_send_email.call_args_list]
-    
+
     # Verify our specific policies were notified
     assert any(p30.policy_number in html for html in sent_htmls)
     assert any(p7.policy_number in html for html in sent_htmls)
-    
+
     # Verify status transition
     db.refresh(p30)
     assert p30.status == PolicyStatus.RENEWAL_INVITED
@@ -131,12 +131,12 @@ def test_read_policies_expiring_soon(client: "TestClient", superuser_token_heade
     rn = p_soon.risk_notes[0]
     rn.coverage_end = date.today() + timedelta(days=10)
     db.add(rn)
-    
+
     p_far = create_random_policy(db)
     rn_far = p_far.risk_notes[0]
     rn_far.coverage_end = date.today() + timedelta(days=40)
     db.add(rn_far)
-    
+
     db.commit()
 
     # 2. Call API
@@ -147,7 +147,7 @@ def test_read_policies_expiring_soon(client: "TestClient", superuser_token_heade
     )
     assert response.status_code == 200
     data = response.json()
-    
+
     # 3. Verify
     policy_ids = [p["id"] for p in data["data"]]
     assert str(p_soon.id) in policy_ids

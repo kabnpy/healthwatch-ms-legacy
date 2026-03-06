@@ -1,10 +1,18 @@
-import uuid
 from datetime import date
 from decimal import Decimal
-import pytest
+
 from sqlmodel import Session
-from app.models import Policy, RiskNote, PolicyStatus, RiskNoteStatus, TransactionType, Client, Product, Insurer, PolicyCreate
+
+from app.models import (
+    Client,
+    Insurer,
+    PolicyCreate,
+    PolicyStatus,
+    Product,
+    TransactionType,
+)
 from app.services.policy import policy_service
+
 
 def test_create_policy_atomic_snapshot(db: Session) -> None:
     """
@@ -13,7 +21,7 @@ def test_create_policy_atomic_snapshot(db: Session) -> None:
     insurer = Insurer(name="Service Insurer")
     db.add(insurer)
     db.commit()
-    
+
     product = Product(
         name="Service Product",
         class_of_insurance="Motor Private",
@@ -69,5 +77,5 @@ def test_create_policy_atomic_snapshot(db: Session) -> None:
     assert snapshot["vehicle"]["sum_insured"] in [1000000, "1000000", Decimal("1000000")]
     assert snapshot["extensions"]["pvt"] is True
     assert snapshot["terms"]["benefits_and_limits"] == "Included"
-    
+
     assert policy.risk_notes[0].transaction_type == TransactionType.NEW_BUSINESS
