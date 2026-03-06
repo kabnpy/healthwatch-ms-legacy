@@ -3,7 +3,7 @@
 This plan follows the modularization strategy for `backend/app/models.py` and `backend/app/crud.py` into domain-specific modules with unified exports.
 
 ## Phase 0: Setup and Branching
-- [ ] Task: Create a new git branch for the refactoring: `git checkout -b refactor/modularize-crud-models`.
+- [x] Task: Create a new git branch for the refactoring: `git checkout -b refactor/modularize-crud-models`. f7b7654
 - [ ] Task: Conductor - User Manual Verification 'Phase 0: Setup and Branching' (Protocol in workflow.md)
 
 ## Phase 1: Models Modularization
