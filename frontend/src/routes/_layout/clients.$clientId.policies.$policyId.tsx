@@ -152,10 +152,9 @@ function PolicyDashboardContent({
   const daysToExpiry = (() => {
     const expiry = latestRiskNote?.coverage_end
     if (!expiry) return 0
-    const [year, month, day] = expiry.split("-").map(Number)
-    const expiryDate = new Date(year, month - 1, day)
+    const expiryDate = new Date(`${expiry}T00:00:00Z`)
     const today = new Date()
-    today.setHours(0, 0, 0, 0)
+    today.setUTCHours(0, 0, 0, 0)
     return Math.ceil(
       (expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
     )
