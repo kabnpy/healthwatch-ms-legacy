@@ -181,8 +181,11 @@ def send_policy_renewal_invitation(
 
     from app.services.renewal import renewal_service
 
-    renewal_service.send_renewal_invitation(session, policy=policy)
-    session.commit()
+    try:
+        renewal_service.send_renewal_invitation(session, policy=policy)
+        session.commit()
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
     return Message(message="Renewal invitation sent successfully")
 

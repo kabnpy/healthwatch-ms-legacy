@@ -5,23 +5,12 @@ from sqlmodel import Session, func, select
 from app.models import (
     Document,
     DocumentCreate,
-    DocumentEntityType,
     DocumentUpdate,
 )
 
 
 def create_document(*, session: Session, document_in: DocumentCreate) -> Document:
-    update_data = {}
-    if document_in.entity_type == DocumentEntityType.CLIENT:
-        update_data["client_id"] = document_in.entity_id
-    elif document_in.entity_type == DocumentEntityType.POLICY:
-        update_data["policy_id"] = document_in.entity_id
-    elif document_in.entity_type == DocumentEntityType.CLAIM:
-        update_data["claim_id"] = document_in.entity_id
-    elif document_in.entity_type == DocumentEntityType.RISK_NOTE:
-        update_data["risk_note_id"] = document_in.entity_id
-
-    db_obj = Document.model_validate(document_in, update=update_data)
+    db_obj = Document.model_validate(document_in)
     session.add(db_obj)
     session.commit()
     session.refresh(db_obj)

@@ -66,8 +66,7 @@ class RenewalService:
             None
         )
         if not latest_rn:
-            logging.info(f"Skipping auto-invite for {policy.policy_number}: No 'Renewal Invited' draft found.")
-            return
+            raise ValueError(f"No 'Renewal Invited' draft found for policy {policy.policy_number}. Please prepare a renewal draft first.")
 
         project_name = settings.PROJECT_NAME
         subject = f"{project_name} - Renewal Invitation for {policy.policy_number}"
