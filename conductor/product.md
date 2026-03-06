@@ -17,7 +17,7 @@ Out of Scope (For Now):
 
 ## 2. Product Quality & Evolution
 - **Design Philosophy:** Grounded in a "Modern and Minimal" identity, the product prioritizes professional structural patterns, such as inset layouts and layered navigation. We emphasize high-quality typography and consistent component treatments to create a focused, high-trust user experience.
-- **Technical Excellence:** We prioritize **Data Integrity and Architectural Rigor**. All financial calculations are implemented with decimal precision to eliminate rounding errors. The system employs an **Atomic Snapshot** pattern where every transaction (New Business, Renewal) creates an immutable record of the entire cover state, ensuring a perfect audit trail without the complexity of state reconstruction.
+- **Technical Excellence:** We prioritize **Data Integrity and Architectural Rigor**. The codebase follows a strict **Modular Domain Architecture**, where models and business logic (CRUD) are organized into specialized domain-specific modules (Clients, Policies, Claims, Auth) to ensure maintainability and prevent monolithic coupling. All financial calculations are implemented with decimal precision to eliminate rounding errors. The system employs an **Atomic Snapshot** pattern where every transaction (New Business, Renewal) creates an immutable record of the entire cover state, ensuring a perfect audit trail without the complexity of state reconstruction.
 - **Development Priority:** We utilize a **Versioned Truth** architecture. The Policy entity acts as a stable anchor, while individual Risk Notes serve as atomic snapshots of both the risk data and the financial breakdown at a specific point in time.
 
 ## 3. Core Functional Pillars

@@ -10,6 +10,7 @@
 - **Testing:** Pytest (TDD driven with focus on precision and state filtering)
 - **Financial Precision:** Python `Decimal` with fixed-point arithmetic for all premium math.
 - **Data Patterns:**
+    - **Modular Domain Architecture:** Models and CRUD logic are organized into specialized domain-specific modules (Clients, Policies, Claims, Auth) with a unified export pattern for maintainability.
     - **Atomic Snapshots:** Every policy transaction (New Business, Renewal) is stored
  as a 100% complete snapshot of the cover in the `RiskNote` table.
     - **Dynamic Snapshot Storage:** Flexible JSON schemas are used for product-specific cover data within snapshots, ensuring the system can support multiple insurance classes without migrations.
