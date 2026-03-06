@@ -215,6 +215,7 @@ def _apply_expiry_filter(
     latest_rn_sub = (
         select(RiskNote.policy_id, func.max(RiskNote.coverage_end).label("max_end"))
         .where(RiskNote.status == RiskNoteStatus.ISSUED)
+        .where(RiskNote.deleted_at == None)
         .group_by(RiskNote.policy_id)
         .subquery()
     )
@@ -431,7 +432,6 @@ def create_invoice_bulk(*, session: Session, bulk_in: InvoiceBulkCreate) -> Invo
             description=f"{rn.transaction_type} - RN {rn.risk_note_number}",
         )
         create_invoice_line_item(session=session, line_item_in=line_item_in)
-        session.add(rn)
     session.commit()
     session.refresh(invoice)
     return invoice

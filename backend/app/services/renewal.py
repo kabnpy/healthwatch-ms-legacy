@@ -28,6 +28,7 @@ class RenewalService:
         latest_rn_sub = (
             select(RiskNote.policy_id, func.max(RiskNote.coverage_end).label("max_end"))
             .where(RiskNote.status == RiskNoteStatus.ISSUED)
+            .where(RiskNote.deleted_at == None)
             .group_by(RiskNote.policy_id)
             .subquery()
         )
@@ -56,12 +57,13 @@ class RenewalService:
         if not policy.client or not policy.client.email:
             return
 
-        # Prioritize the invitation note if it exists, otherwise fallback to the current issued note
+        # Only proceed if a manually prepped invitation note exists
         latest_rn = next(
             (rn for rn in policy.risk_notes if rn.status == RiskNoteStatus.RENEWAL_INVITED),
-            next((rn for rn in policy.risk_notes if rn.status == RiskNoteStatus.ISSUED), None)
+            None
         )
         if not latest_rn:
+            logging.info(f"Skipping auto-invite for {policy.policy_number}: No 'Renewal Invited' draft found.")
             return
 
         project_name = settings.PROJECT_NAME

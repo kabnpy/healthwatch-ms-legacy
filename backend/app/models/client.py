@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from pydantic import ConfigDict
 from sqlalchemy import JSON
@@ -9,7 +9,7 @@ from sqlmodel import Field, Relationship, SQLModel
 from .audit import AuditMixin
 
 if TYPE_CHECKING:
-    from .policy import Policy, Invoice, Receipt
+    from .policy import Invoice, Policy, Receipt
 
 
 class ClientBase(AuditMixin, SQLModel):

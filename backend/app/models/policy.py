@@ -1,8 +1,8 @@
 import uuid
-from datetime import date, datetime
+from datetime import date
 from decimal import Decimal
 from enum import Enum
-from typing import Any, Optional, cast, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional, cast
 
 from pydantic import ConfigDict
 from sqlalchemy import JSON, Column, Numeric
@@ -12,8 +12,8 @@ from .audit import AuditMixin
 from .client import ClientPublic
 
 if TYPE_CHECKING:
-    from .client import Client
     from .claim import Claim
+    from .client import Client
 
 
 

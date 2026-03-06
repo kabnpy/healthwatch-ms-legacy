@@ -4,7 +4,13 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 
-from app.models import PolicyStatus, RiskNoteStatus
+from app.models import (
+    PolicyStatus,
+    RiskNote,
+    RiskNoteCreate,
+    RiskNoteStatus,
+    TransactionType,
+)
 from app.services.renewal import renewal_service
 from tests.utils.insurance import create_random_policy
 
@@ -71,7 +77,24 @@ def test_send_renewal_invitation(mock_send_email, db: Session):
     # Ensure client has email
     policy.client.email = "client@example.com"
     db.add(policy.client)
+
+    # Create the required RENEWAL_INVITED note for the gate
+    rn_invite = RiskNote.model_validate(
+        RiskNoteCreate(
+            policy_id=policy.id,
+            transaction_type=TransactionType.RENEWAL,
+            status=RiskNoteStatus.RENEWAL_INVITED,
+            coverage_start=date.today(),
+            coverage_end=date.today() + timedelta(days=365),
+            net_premium=100.0,
+            commission_amount=10.0,
+            total_amount=110.0,
+        )
+    )
+    rn_invite.risk_note_number = "RN-INVITE-TEST"
+    db.add(rn_invite)
     db.commit()
+    db.refresh(policy)
 
     renewal_service.send_renewal_invitation(db, policy=policy)
 
@@ -102,6 +125,22 @@ def test_run_daily_renewal_checks(mock_send_email, db: Session):
     rn30.coverage_end = date.today() + timedelta(days=30)
     db.add(rn30)
 
+    # Create the required RENEWAL_INVITED note for p30
+    rn_invite = RiskNote.model_validate(
+        RiskNoteCreate(
+            policy_id=p30.id,
+            transaction_type=TransactionType.RENEWAL,
+            status=RiskNoteStatus.RENEWAL_INVITED,
+            coverage_start=rn30.coverage_end,
+            coverage_end=rn30.coverage_end + timedelta(days=365),
+            net_premium=100.0,
+            commission_amount=10.0,
+            total_amount=110.0,
+        )
+    )
+    rn_invite.risk_note_number = "RN-INVITE-P30"
+    db.add(rn_invite)
+
     # Expiring in 7 days
     p7 = create_random_policy(db)
     rn7 = p7.risk_notes[0]
@@ -109,6 +148,7 @@ def test_run_daily_renewal_checks(mock_send_email, db: Session):
     db.add(rn7)
 
     db.commit()
+    db.refresh(p30)
 
     # 2. Run checks
     renewal_service.run_daily_renewal_checks(db)
