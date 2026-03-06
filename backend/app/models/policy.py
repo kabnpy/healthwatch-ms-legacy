@@ -2,7 +2,7 @@ import uuid
 from datetime import date, datetime
 from decimal import Decimal
 from enum import Enum
-from typing import Any, Optional, cast
+from typing import Any, Optional, cast, TYPE_CHECKING
 
 from pydantic import ConfigDict
 from sqlalchemy import JSON, Column, Numeric
@@ -10,6 +10,11 @@ from sqlmodel import Field, Relationship, SQLModel
 
 from .audit import AuditMixin
 from .client import ClientPublic
+
+if TYPE_CHECKING:
+    from .client import Client
+    from .claim import Claim
+
 
 
 class PolicyStatus(str, Enum):
@@ -297,13 +302,6 @@ class RiskNotesPublic(SQLModel):
 # ==========================================
 
 
-class InvoiceStatus(str, Enum):
-    UNPAID = "Unpaid"
-    PARTIAL = "Partial"
-    PAID = "Paid"
-    CANCELLED = "Cancelled"
-
-
 class InvoiceBase(AuditMixin, SQLModel):
     model_config = ConfigDict(validate_assignment=True)  # type: ignore
     invoice_number: str = Field(unique=True, index=True)
@@ -448,7 +446,7 @@ class InvoicePublic(InvoiceBase):
 
 
 class InvoiceLineItemDetailedPublic(InvoiceLineItemPublic):
-    invoice: Optional[InvoicePublic] = None
+    invoice: InvoicePublic | None = None
 
 
 class InvoicesPublic(SQLModel):
@@ -458,7 +456,7 @@ class InvoicesPublic(SQLModel):
 
 class PolicyPublic(PolicyBase):
     id: uuid.UUID
-    product: Optional[ProductPublic] = None
+    product: ProductPublic | None = None
     client: Optional["ClientPublic"] = None
     active_note: Optional["RiskNotePublic"] = None
 

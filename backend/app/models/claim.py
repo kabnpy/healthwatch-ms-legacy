@@ -2,12 +2,16 @@ import uuid
 from datetime import date, datetime
 from decimal import Decimal
 from enum import Enum
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 from sqlalchemy import Column, Numeric
 from sqlmodel import Field, Relationship, SQLModel
 
 from .audit import AuditMixin
+
+if TYPE_CHECKING:
+    from .policy import Policy
+
 
 
 class ClaimStatus(str, Enum):

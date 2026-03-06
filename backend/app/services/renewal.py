@@ -1,12 +1,20 @@
 import logging
-from datetime import date, datetime, timedelta, timezone
-from typing import Any
-import uuid
-from sqlmodel import Session, select, func
+from datetime import date, datetime, timedelta
+
 from sqlalchemy.orm import selectinload
-from app.models import Policy, RiskNote, RiskNoteStatus, PolicyStatus, Correspondence, CorrespondenceCreate
-from app.utils import send_email, render_email_template
+from sqlmodel import Session, func, select
+
 from app.core.config import settings
+from app.models import (
+    Correspondence,
+    CorrespondenceCreate,
+    Policy,
+    PolicyStatus,
+    RiskNote,
+    RiskNoteStatus,
+)
+from app.utils import render_email_template, send_email
+
 
 class RenewalService:
     @staticmethod
@@ -15,7 +23,7 @@ class RenewalService:
         Retrieves policies whose latest issued Risk Note expires exactly 'days' from today.
         """
         target_date = date.today() + timedelta(days=days)
-        
+
         # Subquery to get the latest coverage_end for each policy's issued risk notes
         latest_rn_sub = (
             select(RiskNote.policy_id, func.max(RiskNote.coverage_end).label("max_end"))
@@ -23,7 +31,7 @@ class RenewalService:
             .group_by(RiskNote.policy_id)
             .subquery()
         )
-        
+
         statement = (
             select(Policy)
             .join(latest_rn_sub, Policy.id == latest_rn_sub.c.policy_id)
@@ -60,7 +68,7 @@ class RenewalService:
         subject = f"{project_name} - Renewal Invitation for {policy.policy_number}"
         # Point to the specific policy view in the frontend
         link = f"{settings.FRONTEND_HOST}/clients/{policy.client_id}/policies/{policy.id}"
-        
+
         html_content = render_email_template(
             template_name="renewal_invitation.html",
             context={
@@ -72,7 +80,7 @@ class RenewalService:
                 "link": link,
             },
         )
-        
+
         send_email(
             email_to=policy.client.email,
             subject=subject,
@@ -111,7 +119,7 @@ class RenewalService:
         subject = f"{project_name} - Renewal Reminder: {policy.policy_number}"
         # Point to the specific policy view in the frontend
         link = f"{settings.FRONTEND_HOST}/clients/{policy.client_id}/policies/{policy.id}"
-        
+
         html_content = render_email_template(
             template_name="renewal_reminder.html",
             context={
@@ -122,7 +130,7 @@ class RenewalService:
                 "link": link,
             },
         )
-        
+
         send_email(
             email_to=policy.client.email,
             subject=subject,
@@ -153,10 +161,10 @@ class RenewalService:
         if to_invite:
             # Collect subjects to check for idempotency in bulk
             invitation_subjects = {
-                f"{settings.PROJECT_NAME} - Renewal Invitation for {p.policy_number}" 
+                f"{settings.PROJECT_NAME} - Renewal Invitation for {p.policy_number}"
                 for p in to_invite
             }
-            
+
             existing_invitations_statement = (
                 select(Correspondence.subject)
                 .where(Correspondence.subject.in_(list(invitation_subjects)))
@@ -174,16 +182,16 @@ class RenewalService:
                     except Exception as e:
                         logging.error(f"Failed to send invitation for {policy.policy_number}: {e}")
                         session.rollback()
-        
+
         # 2. 7-day reminders
         to_remind = renewal_service.get_policies_expiring_exactly_in(session, days=7)
         if to_remind:
             # Collect subjects to check for idempotency in bulk
             reminder_subjects = {
-                f"{settings.PROJECT_NAME} - Renewal Reminder: {p.policy_number}" 
+                f"{settings.PROJECT_NAME} - Renewal Reminder: {p.policy_number}"
                 for p in to_remind
             }
-            
+
             existing_reminders_statement = (
                 select(Correspondence.subject)
                 .where(Correspondence.subject.in_(list(reminder_subjects)))
