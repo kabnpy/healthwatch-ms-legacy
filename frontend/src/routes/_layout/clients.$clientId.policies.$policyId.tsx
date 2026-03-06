@@ -13,6 +13,7 @@ import { VersionHistory } from "@/components/Insurance/VersionHistory"
 import PendingItems from "@/components/Pending/PendingItems"
 import { PolicyDashboardSkeleton } from "@/components/Policies/Dashboard/PolicyDashboardSkeleton"
 import { PolicyHeader } from "@/components/Policies/Dashboard/PolicyHeader"
+import { ExpiryStatusLabel } from "@/components/Policies/ExpiryStatusLabel"
 import { getColumns as getRiskNoteColumns } from "@/components/RiskNotes/columns"
 import { Button } from "@/components/ui/button"
 import {
@@ -192,29 +193,13 @@ function PolicyDashboardContent({
                     Coverage Status
                   </p>
                   <div className="flex items-center gap-2">
-                    <div className={`text-3xl font-bold tracking-tight ${daysToExpiry <= 0 ? "text-destructive" : ""}`}>
+                    <div
+                      className={`text-3xl font-bold tracking-tight ${daysToExpiry <= 0 ? "text-destructive" : ""}`}
+                    >
                       {daysToExpiry < 0 ? "!" : daysToExpiry}
                     </div>
                     <div className="text-[10px] text-muted-foreground uppercase leading-tight font-semibold">
-                      {daysToExpiry === 0 ? (
-                        <span className="text-destructive font-bold">
-                          Expires
-                          <br />
-                          Today
-                        </span>
-                      ) : daysToExpiry < 0 ? (
-                        <span className="text-destructive font-bold">
-                          Policy
-                          <br />
-                          Expired
-                        </span>
-                      ) : (
-                        <>
-                          Days until
-                          <br />
-                          Expiry
-                        </>
-                      )}
+                      <ExpiryStatusLabel days={daysToExpiry} />
                     </div>
                   </div>
                 </div>
@@ -264,7 +249,9 @@ function PolicyDashboardContent({
                   disabled={sendRenewalInvitation.isPending}
                 >
                   <Mail className="size-4" />
-                  {sendRenewalInvitation.isPending ? "Sending..." : "Send Invite"}
+                  {sendRenewalInvitation.isPending
+                    ? "Sending..."
+                    : "Send Invite"}
                 </Button>
                 {daysToExpiry <= 7 && (
                   <Button
@@ -275,7 +262,9 @@ function PolicyDashboardContent({
                     disabled={sendRenewalReminder.isPending}
                   >
                     <Mail className="size-4" />
-                    {sendRenewalReminder.isPending ? "Sending..." : "Send Reminder"}
+                    {sendRenewalReminder.isPending
+                      ? "Sending..."
+                      : "Send Reminder"}
                   </Button>
                 )}
               </div>

@@ -11,7 +11,8 @@ import { columns } from "@/components/Policies/columns"
 
 function getRenewalsQueryOptions() {
   return {
-    queryFn: () => PoliciesService.readPolicies({ expiringWithin: 30, skip: 0, limit: 100 }),
+    queryFn: () =>
+      PoliciesService.readPolicies({ expiringWithin: 30, skip: 0, limit: 100 }),
     queryKey: ["renewals"],
   }
 }

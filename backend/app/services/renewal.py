@@ -13,6 +13,7 @@ from app.models import (
     RiskNote,
     RiskNoteStatus,
 )
+from app.utils.links import get_policy_view_url
 from app.utils import render_email_template, send_email
 
 
@@ -69,7 +70,7 @@ class RenewalService:
         project_name = settings.PROJECT_NAME
         subject = f"{project_name} - Renewal Invitation for {policy.policy_number}"
         # Point to the specific policy view in the frontend
-        link = f"{settings.FRONTEND_HOST}/clients/{policy.client_id}/policies/{policy.id}"
+        link = get_policy_view_url(policy.id, policy.client_id)
 
         html_content = render_email_template(
             template_name="renewal_invitation.html",
@@ -120,7 +121,7 @@ class RenewalService:
         project_name = settings.PROJECT_NAME
         subject = f"{project_name} - Renewal Reminder: {policy.policy_number}"
         # Point to the specific policy view in the frontend
-        link = f"{settings.FRONTEND_HOST}/clients/{policy.client_id}/policies/{policy.id}"
+        link = get_policy_view_url(policy.id, policy.client_id)
 
         html_content = render_email_template(
             template_name="renewal_reminder.html",

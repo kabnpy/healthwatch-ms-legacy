@@ -224,7 +224,9 @@ export const RiskNoteForm = ({
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="Draft">Draft (Preliminary)</SelectItem>
-                    <SelectItem value="Renewal Invited">Renewal Invited</SelectItem>
+                    <SelectItem value="Renewal Invited">
+                      Renewal Invited
+                    </SelectItem>
                     <SelectItem value="Renewal Confirmed">
                       Renewal Confirmed
                     </SelectItem>
