@@ -6,16 +6,16 @@ This plan follows the modularization strategy for `backend/app/models.py` and `b
 - [x] Task: Create a new git branch for the refactoring: `git checkout -b refactor/modularize-crud-models`. f7b7654
 - [x] Task: Conductor - User Manual Verification 'Phase 0: Setup and Branching' (Protocol in workflow.md)
 
-## Phase 1: Models Modularization
-- [ ] Task: Create `backend/app/models/` directory and `__init__.py`.
-- [ ] Task: Create `backend/app/models/audit.py` and move shared audit fields/base models.
-- [ ] Task: Create `backend/app/models/user.py` and move Auth/User/Item models.
-- [ ] Task: Create `backend/app/models/client.py` and move Client-related models.
-- [ ] Task: Create `backend/app/models/policy.py` and move Policy/RiskNote/Finance models.
-- [ ] Task: Create `backend/app/models/claim.py` and move Claim models.
-- [ ] Task: Update `backend/app/models/__init__.py` with unified exports.
-- [ ] Task: Verify models refactor with existing tests.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Models Modularization' (Protocol in workflow.md)
+## Phase 1: Models Modularization [checkpoint: 814e63c]
+- [x] Task: Create `backend/app/models/` directory and `__init__.py`. f7b7654
+- [x] Task: Create `backend/app/models/audit.py` and move shared audit fields/base models. f7b7654
+- [x] Task: Create `backend/app/models/user.py` and move Auth/User/Item models. f7b7654
+- [x] Task: Create `backend/app/models/client.py` and move Client-related models. f7b7654
+- [x] Task: Create `backend/app/models/policy.py` and move Policy/RiskNote/Finance models. f7b7654
+- [x] Task: Create `backend/app/models/claim.py` and move Claim models. f7b7654
+- [x] Task: Update `backend/app/models/__init__.py` with unified exports. f7b7654
+- [x] Task: Verify models refactor with existing tests. f7b7654
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Models Modularization' (Protocol in workflow.md)
 
 ## Phase 2: CRUD Modularization
 - [ ] Task: Create `backend/app/crud/` directory and `__init__.py`.
