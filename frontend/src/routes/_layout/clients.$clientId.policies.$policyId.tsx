@@ -161,7 +161,19 @@ function PolicyDashboardContent({
     )
   })()
 
-  const displayName = getPolicyDisplayName(policy)
+  const calculatePolicyProgress = (note: EnhancedRiskNote | undefined) => {
+    if (!note?.coverage_start || !note?.coverage_end) return "0%"
+    const [sY, sM, sD] = note.coverage_start.split("-").map(Number)
+    const [eY, eM, eD] = note.coverage_end.split("-").map(Number)
+    const start = new Date(sY, sM - 1, sD).getTime()
+    const end = new Date(eY, eM - 1, eD).getTime()
+    const total = end - start
+    const today = new Date()
+    today.setUTCHours(0, 0, 0, 0)
+    const elapsed = today.getTime() - start
+
+    return `${Math.max(0, Math.min(100, 100 - (elapsed / total) * 100))}%`
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -207,27 +219,7 @@ function PolicyDashboardContent({
                   <div
                     className={`h-full ${daysToExpiry < 30 ? "bg-destructive" : "bg-blue-500"}`}
                     style={{
-                      width: (() => {
-                        if (
-                          !latestRiskNote?.coverage_start ||
-                          !latestRiskNote?.coverage_end
-                        )
-                          return 0
-                        const [sY, sM, sD] = latestRiskNote.coverage_start
-                          .split("-")
-                          .map(Number)
-                        const [eY, eM, eD] = latestRiskNote.coverage_end
-                          .split("-")
-                          .map(Number)
-                        const start = new Date(sY, sM - 1, sD).getTime()
-                        const end = new Date(eY, eM - 1, eD).getTime()
-                        const total = end - start
-                        const today = new Date()
-                        today.setUTCHours(0, 0, 0, 0)
-                        const elapsed = today.getTime() - start
-
-                        return `${Math.max(0, Math.min(100, 100 - (elapsed / total) * 100))}%`
-                      })(),
+                      width: calculatePolicyProgress(latestRiskNote),
                     }}
                   />
                 </div>
