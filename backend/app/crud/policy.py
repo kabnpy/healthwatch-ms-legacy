@@ -223,7 +223,9 @@ def _apply_expiry_filter(
     statement = statement.join(latest_rn_sub, Policy.id == latest_rn_sub.c.policy_id)
     statement = statement.where(latest_rn_sub.c.max_end <= target_date)
     statement = statement.where(latest_rn_sub.c.max_end >= date.today())
-    statement = statement.where(Policy.status != PolicyStatus.CANCELLED)
+    statement = statement.where(
+        Policy.status.in_([PolicyStatus.ACTIVE, PolicyStatus.RENEWAL_INVITED])
+    )
     return statement
 
 

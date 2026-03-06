@@ -38,7 +38,7 @@ class RenewalService:
             select(Policy)
             .join(latest_rn_sub, Policy.id == latest_rn_sub.c.policy_id)
             .where(latest_rn_sub.c.max_end == target_date)
-            .where(Policy.status != PolicyStatus.CANCELLED)
+            .where(Policy.status.in_([PolicyStatus.ACTIVE, PolicyStatus.RENEWAL_INVITED]))
             .where(Policy.deleted_at == None)
             .options(selectinload(Policy.risk_notes), selectinload(Policy.client))
         )

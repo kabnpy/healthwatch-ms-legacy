@@ -225,6 +225,7 @@ function PolicyDashboardContent({
                         const today = new Date()
                         today.setUTCHours(0, 0, 0, 0)
                         const elapsed = today.getTime() - start
+
                         return `${Math.max(0, Math.min(100, 100 - (elapsed / total) * 100))}%`
                       })(),
                     }}
