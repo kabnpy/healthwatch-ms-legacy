@@ -2,7 +2,7 @@
 
 ## Finished (Key Milestones)
 - **Database & Model Reconciliation**: Synchronized the database schema with the backend models. Updated Alembic migration `c5c580ca4b1f` to correctly implement `RiskNote.cover_snapshot` as the source of truth for risk details, replacing the redundant `Policy.risk_details` approach.
-- **Service Layer Hardening**: Refactored `PolicyService` to improve temporal precision in endorsements and optimized the `RatingService` by consolidating tier sorting logic.
+- **Service Layer Hardening**: Refactored `PolicyService` to improve temporal precision and optimized the `RatingService` by consolidating tier sorting logic.
 - **Wizard Data Flow Alignment**: Enhanced the frontend `NewPolicyWizard` to calculate dynamic coverage periods based on selected duration, eliminating hardcoded 1-year assumptions.
 - **Financial Hardening & Rating Engine**: Standardized `sum_insured` as the single authoritative source for insured values across the stack. Refactored `RatingService` to use a singular semantic input and implemented `ManualRatingStrategy` for non-motor products.
 - **Prestart Service Stabilization**: The `prestart` service now successfully completes database migrations and mock data seeding.
@@ -25,14 +25,12 @@
 
 ## Next Steps
 1. **Verification of Backend Changes**: Run the backend test suite once a database connection is established to ensure all changes are functional.
-2. **Audit Traceability**: Finalize the `change_log` implementation for endorsements to ensure full traceability of risk detail modifications.
-3. **Automated Testing**: Expand the backend test suite to cover the new pro-rata endorsement calculations and rating tier logic.
-4. **Frontend Refinement**: Polish the document viewing experience to handle the new `cover_snapshot` structure across all templates.
+2. **Automated Testing**: Expand the backend test suite to cover the new renewal logic and rating tier logic.
+3. **Frontend Refinement**: Polish the document viewing experience to handle the new `cover_snapshot` structure across all templates.
 
 ## Architectural Decisions
 - **Atomic Snapshot Strategy**: We store the full state of the risk (the "Snapshot") on the `RiskNote` issued for each transaction. This ensures that every document (Risk Note, Invoice) refers to the authoritative state of the cover at the exact moment of issuance.
 - **Policy as the Contract Container**: The `Policy` model remains the long-lived container for the contract, but coverage-specific data (dates, values) is derived from its related `RiskNotes`.
-- **Pro-rata Endorsements**: Premium adjustments for mid-term modifications are calculated pro-rata based on the remaining coverage period relative to the original term.
 
 ## Future Optimizations
 - **Policy Expiry Denormalization**: Consider denormalizing `current_coverage_end` onto the `Policy` model. This would replace the current subquery-based filtering in policy list views with a simple indexed column lookup, significantly improving performance as the database grows.

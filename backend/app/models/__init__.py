@@ -99,9 +99,6 @@ from .document import (
     DocumentUpdate as DocumentUpdate,
 )
 from .policy import (
-    EndorsementCreate as EndorsementCreate,
-)
-from .policy import (
     Insurer as Insurer,
 )
 from .policy import (

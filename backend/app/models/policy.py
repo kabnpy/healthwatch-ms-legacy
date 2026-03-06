@@ -29,7 +29,6 @@ class PolicyStatus(str, Enum):
 class TransactionType(str, Enum):
     NEW_BUSINESS = "New Business"
     RENEWAL = "Renewal"
-    ENDORSEMENT = "Endorsement"
     CANCELLATION = "Cancellation"
 
 
@@ -184,12 +183,6 @@ class PolicyUpdate(SQLModel):
     product_id: uuid.UUID | None = None
     status: PolicyStatus | None = None
     inception_date: date | None = None
-
-
-class EndorsementCreate(SQLModel):
-    updated_risk_details: dict[str, Any]
-    change_description: str
-    effective_date: date | None = None
 
 
 class Policy(PolicyBase, table=True):
