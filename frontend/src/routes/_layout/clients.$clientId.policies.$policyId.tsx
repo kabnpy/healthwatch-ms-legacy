@@ -223,7 +223,7 @@ function PolicyDashboardContent({
                         const end = new Date(eY, eM - 1, eD).getTime()
                         const total = end - start
                         const today = new Date()
-                        today.setHours(0, 0, 0, 0)
+                        today.setUTCHours(0, 0, 0, 0)
                         const elapsed = today.getTime() - start
                         return `${Math.max(0, Math.min(100, 100 - (elapsed / total) * 100))}%`
                       })(),

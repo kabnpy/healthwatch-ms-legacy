@@ -18,6 +18,7 @@ from app.crud import (
     update_policy as crud_update_policy,
 )
 from app.models import (
+    EndorsementCreate,
     Message,
     PoliciesPublic,
     Policy,
@@ -25,6 +26,7 @@ from app.models import (
     PolicyPublic,
     PolicyUpdate,
     Product,
+    RiskNotePublic,
     RiskNotesPublic,
 )
 from app.schemas import QuoteRequest, QuoteResponse
@@ -121,6 +123,31 @@ def create_policy(
     session.commit()
     session.refresh(policy)
     return prepare_policy_public(policy)
+
+
+@router.post("/{id}/endorsements", response_model=RiskNotePublic)
+def create_endorsement(
+    *,
+    session: SessionDep,
+    current_user: StaffUser,
+    id: uuid.UUID,
+    endorsement_in: EndorsementCreate,
+) -> Any:
+    """
+    Create a policy endorsement.
+    """
+
+    res = policy_service.create_endorsement(
+        session=session,
+        policy_id=id,
+        updated_cover_snapshot=endorsement_in.updated_risk_details,
+        change_description=endorsement_in.change_description,
+        effective_date=endorsement_in.effective_date,
+        current_user_id=current_user.id,
+    )
+    session.commit()
+    session.refresh(res)
+    return RiskNotePublic.model_validate(res)
 
 
 @router.put("/{id}", response_model=PolicyPublic)
