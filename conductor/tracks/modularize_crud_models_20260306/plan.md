@@ -17,15 +17,15 @@ This plan follows the modularization strategy for `backend/app/models.py` and `b
 - [x] Task: Verify models refactor with existing tests. f7b7654
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Models Modularization' (Protocol in workflow.md)
 
-## Phase 2: CRUD Modularization
-- [ ] Task: Create `backend/app/crud/` directory and `__init__.py`.
-- [ ] Task: Create `backend/app/crud/user.py` and move User/Auth CRUD logic.
-- [ ] Task: Create `backend/app/crud/client.py` and move Client CRUD logic.
-- [ ] Task: Create `backend/app/crud/policy.py` and move Policy/RiskNote CRUD logic.
-- [ ] Task: Create `backend/app/crud/claim.py` and move Claim CRUD logic.
-- [ ] Task: Update `backend/app/crud/__init__.py` with unified exports.
-- [ ] Task: Verify CRUD refactor with existing tests.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: CRUD Modularization' (Protocol in workflow.md)
+## Phase 2: CRUD Modularization [checkpoint: 373961b]
+- [x] Task: Create `backend/app/crud/` directory and `__init__.py`. f7b7654
+- [x] Task: Create `backend/app/crud/user.py` and move User/Auth CRUD logic. f7b7654
+- [x] Task: Create `backend/app/crud/client.py` and move Client CRUD logic. f7b7654
+- [x] Task: Create `backend/app/crud/policy.py` and move Policy/RiskNote CRUD logic. f7b7654
+- [x] Task: Create `backend/app/crud/claim.py` and move Claim CRUD logic. f7b7654
+- [x] Task: Update `backend/app/crud/__init__.py` with unified exports. f7b7654
+- [x] Task: Verify CRUD refactor with existing tests. f7b7654
+- [x] Task: Conductor - User Manual Verification 'Phase 2: CRUD Modularization' (Protocol in workflow.md)
 
 ## Phase 3: Cleanup and Final Integration
 - [ ] Task: Update all import sites in `backend/app/api/`, `backend/app/core/`, and `backend/app/tests/` to use the new modular structure where direct imports are used.
