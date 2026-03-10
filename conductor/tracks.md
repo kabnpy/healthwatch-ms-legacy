@@ -14,6 +14,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: One-page A4 Risk Note PDF Generation**
+- [~] **Track: One-page A4 Risk Note PDF Generation**
 *Link: [./tracks/one_page_risknote_20260310/](./tracks/one_page_risknote_20260310/)*
 

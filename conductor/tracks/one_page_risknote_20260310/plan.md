@@ -23,6 +23,6 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md) 7711fd7
 
 ## Phase 4: Validation & Merge
-- [ ] Task: Perform "Stress Test" with various data volumes to verify the single-page constraint.
-- [ ] Task: Finalize the branch and prepare for merge into `main`.
+- [x] Task: Perform "Stress Test" with various data volumes to verify the single-page constraint. 24ad694
+- [~] Task: Finalize the branch and prepare for merge into `main`.
 - [ ] Task: Conductor - User Manual Verification 'Phase 4' (Protocol in workflow.md)
