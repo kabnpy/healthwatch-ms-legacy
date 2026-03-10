@@ -146,3 +146,13 @@ def parse_decimal(value: Any) -> Decimal:
             return Decimal("0")
 
     return Decimal("0")
+
+
+def format_currency(amount: Any) -> str:
+    """
+    Format a value as Kenyan Shillings currency.
+    Matches frontend formatCurrency logic.
+    Example: 1234.56 -> Kshs 1,234.56
+    """
+    val = parse_decimal(amount)
+    return f"Kshs {val:,.2f}"

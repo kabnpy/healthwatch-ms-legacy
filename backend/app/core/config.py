@@ -94,6 +94,11 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
 
+    @property
+    def TEMPLATES_DIR(self) -> str:
+        import os
+        return os.path.join(os.path.dirname(os.path.dirname(__file__)), "templates")
+
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
         if value == "changethis":
             message = (

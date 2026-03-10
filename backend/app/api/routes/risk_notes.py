@@ -1,7 +1,7 @@
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Response
 
 from app.api.deps import CurrentUser, SessionDep, StaffUser
 from app.crud import (
@@ -22,6 +22,7 @@ from app.models import (
     RiskNotesPublic,
     RiskNoteUpdate,
 )
+from app.services.document_service import generate_risknote_pdf
 from app.services.policy import policy_service
 
 router = APIRouter()
@@ -68,6 +69,41 @@ def read_risk_note(
     if not risk_note:
         raise HTTPException(status_code=404, detail="Risk note not found")
     return risk_note
+
+
+@router.get("/{id}/pdf")
+def read_risk_note_pdf(
+    session: SessionDep, _current_user: CurrentUser, id: uuid.UUID
+) -> Any:
+    """
+    Generate and return Risk Note as PDF.
+    """
+    risk_note = session.get(RiskNote, id)
+    if not risk_note:
+        raise HTTPException(status_code=404, detail="Risk note not found")
+
+    # Get associated policy and client
+    policy = risk_note.policy
+    client = policy.client
+
+    # Check if there's an invoice
+    invoice = None
+    if risk_note.invoice_line_items:
+        invoice = risk_note.invoice_line_items[0].invoice
+
+    pdf_bytes = generate_risknote_pdf(
+        risk_note=risk_note,
+        client=client,
+        policy=policy,
+        invoice=invoice
+    )
+
+    filename = f"RiskNote_{risk_note.risk_note_number or str(id)}.pdf"
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
 
 
 @router.post("/", response_model=RiskNotePublic)
