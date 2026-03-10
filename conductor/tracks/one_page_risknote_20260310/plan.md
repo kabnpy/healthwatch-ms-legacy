@@ -4,10 +4,10 @@
 - [x] Task: Create a new git branch for the track: `feat/one-page-risknote`. 23fdb0e
 - [x] Task: Conductor - User Manual Verification 'Phase 0' (Protocol in workflow.md) 3ca4147
 
-## Phase 1: Setup & Tooling Selection
+## Phase 1: Setup & Tooling Selection [checkpoint: 3e95a72]
 - [x] Task: Evaluate and install HTML-to-PDF library (e.g., WeasyPrint or Playwright). 550d3fc
-- [ ] Task: Create a base PDF layout template with A4 dimensions and standard print margins.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)
+- [x] Task: Create a base PDF layout template with A4 dimensions and standard print margins. 1e327e0
+- [x] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md) 3e95a72
 
 ## Phase 2: HTML/CSS Template Design
 - [ ] Task: Implement multi-column CSS layout for Policy Terms and Coverage Details.
