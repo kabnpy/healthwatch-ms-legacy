@@ -5,7 +5,7 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 0' (Protocol in workflow.md) 3ca4147
 
 ## Phase 1: Setup & Tooling Selection
-- [ ] Task: Evaluate and install HTML-to-PDF library (e.g., WeasyPrint or Playwright).
+- [x] Task: Evaluate and install HTML-to-PDF library (e.g., WeasyPrint or Playwright). 550d3fc
 - [ ] Task: Create a base PDF layout template with A4 dimensions and standard print margins.
 - [ ] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)
 
