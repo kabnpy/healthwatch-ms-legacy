@@ -2,10 +2,34 @@
 
 {% block extra_style %}
 <style>
+    {% set ns = namespace(term_count=0) %}
+    {% for section in dynamic_sections %}
+        {% if section.content is mapping %}
+            {% set ns.term_count = ns.term_count + section.content|length %}
+        {% else %}
+            {% set ns.term_count = ns.term_count + 1 %}
+        {% endif %}
+    {% endfor %}
+
     .risknote-header {
         margin-bottom: 15px;
         overflow: hidden;
     }
+    
+    /* Dynamic Scaling Based on Term Count ({{ ns.term_count }} terms detected) */
+    {% if ns.term_count > 15 %}
+        .section-content { font-size: 8pt; padding: 3px 0; }
+        .grid-item { font-size: 7pt; margin-bottom: 1px; }
+        .insured-details, .cover-info, .period-info, .auth-info, .financial-row td { font-size: 7.5pt; }
+        .insured-name { font-size: 9pt; }
+        .total-value { font-size: 11pt; }
+        .section-label { padding: 3px 0; font-size: 7pt; }
+    {% elif ns.term_count > 10 %}
+        .section-content { font-size: 8.5pt; padding: 4px 0; }
+        .grid-item { font-size: 8pt; margin-bottom: 2px; }
+        .section-label { padding: 4px 0; font-size: 7pt; }
+    {% endif %}
+
     .risknote-title {
         float: left;
     }
