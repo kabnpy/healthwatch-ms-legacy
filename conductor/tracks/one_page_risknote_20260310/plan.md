@@ -1,7 +1,7 @@
 # Implementation Plan: One-page A4 Risk Note PDF Generation
 
 ## Phase 0: Setup & Branching
-- [ ] Task: Create a new git branch for the track: `feat/one-page-risknote`.
+- [x] Task: Create a new git branch for the track: `feat/one-page-risknote`. 23fdb0e
 - [ ] Task: Conductor - User Manual Verification 'Phase 0' (Protocol in workflow.md)
 
 ## Phase 1: Setup & Tooling Selection
