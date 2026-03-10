@@ -1,0 +1,8 @@
+{
+  "track_id": "one_page_risknote_20260310",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-03-10T11:45:00Z",
+  "updated_at": "2026-03-10T11:45:00Z",
+  "description": "Ensure generated Risk Note documents fit on a single A4 page using HTML-to-PDF with multi-column layout and dynamic scaling."
+}
