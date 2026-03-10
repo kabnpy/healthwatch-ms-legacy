@@ -8,6 +8,7 @@
 - **Migrations:** Alembic
 - **Authentication:** JWT (PyJWT) with Passlib (bcrypt) and **Simplified RBAC**
 - **Testing:** Pytest (TDD driven with focus on precision and state filtering)
+- **PDF Generation:** WeasyPrint (High-fidelity HTML-to-PDF conversion for A4 documents)
 - **Financial Precision:** Python `Decimal` with fixed-point arithmetic for all premium math.
 - **Data Patterns:**
     - **Modular Domain Architecture:** Models and CRUD logic are organized into specialized domain-specific modules (Clients, Policies, Claims, Auth) with a unified export pattern for maintainability.
