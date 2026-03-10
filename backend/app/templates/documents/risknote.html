@@ -1,0 +1,251 @@
+{% extends "documents/base.html" %}
+
+{% block extra_style %}
+<style>
+    .risknote-header {
+        margin-bottom: 15px;
+        overflow: hidden;
+    }
+    .risknote-title {
+        float: left;
+    }
+    .risknote-title h2 {
+        font-weight: 900;
+        font-size: 20pt;
+        text-transform: uppercase;
+        margin: 0;
+        letter-spacing: -0.05em;
+        line-height: 1;
+    }
+    .risknote-ref {
+        font-size: 8pt;
+        font-family: monospace;
+        color: #64748b;
+        background: #f1f5f9;
+        padding: 1px 5px;
+        border-radius: 3px;
+        display: inline-block;
+        margin-top: 3px;
+    }
+    .risknote-status {
+        float: right;
+        font-size: 7pt;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        padding: 2px 8px;
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+        margin-top: 5px;
+    }
+    .status-draft { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+    .status-final { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+
+    .section-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 5px;
+    }
+    .section-row {
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .section-label {
+        width: 20%;
+        font-size: 7.5pt;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        vertical-align: top;
+        padding: 6px 0;
+    }
+    .section-content {
+        width: 80%;
+        font-size: 9.5pt;
+        padding: 6px 0;
+        vertical-align: top;
+    }
+    
+    .insured-name { font-weight: 700; font-size: 10pt; margin-bottom: 2px; }
+    .insured-details { font-size: 8.5pt; color: #334155; line-height: 1.2; }
+    .insured-pin { float: right; font-family: monospace; font-weight: 700; font-size: 8.5pt; }
+
+    .period-info { font-weight: 700; text-transform: uppercase; font-size: 8.5pt; }
+    .period-separator { color: #64748b; font-weight: 400; margin: 0 8px; text-transform: none; }
+
+    .cover-info { font-style: italic; font-size: 8.5pt; line-height: 1.2; color: #1e293b; }
+
+    /* Multi-column grid for dynamic sections */
+    .grid-container {
+        width: 100%;
+        overflow: hidden;
+    }
+    .grid-item {
+        float: left;
+        width: 50%;
+        margin-bottom: 2px;
+        font-size: 8.5pt;
+    }
+    .grid-label { font-weight: 700; color: #64748b; margin-right: 3px; }
+    .grid-value { font-weight: 500; color: #000; }
+
+    /* Financial Summary Table */
+    .financial-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .financial-row td { padding: 2px 0; font-size: 8.5pt; }
+    .financial-label { color: #475569; }
+    .financial-value { text-align: right; font-weight: 600; font-family: monospace; }
+    .total-row { border-top: 1.5px solid #000; }
+    .total-row td { padding-top: 5px; }
+    .total-label { font-weight: 800; font-size: 9pt; text-transform: uppercase; }
+    .total-value { font-weight: 900; font-size: 13pt; letter-spacing: -0.05em; text-align: right; }
+
+    .auth-row { overflow: hidden; }
+    .auth-date { float: right; font-family: monospace; font-size: 7.5pt; font-weight: 700; color: #64748b; }
+    .auth-info { font-weight: 700; text-transform: uppercase; font-size: 8.5pt; }
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="risknote-header">
+    <div class="risknote-title">
+        <h2>Risk Note</h2>
+        <div class="risknote-ref">Ref: {{ risk_note.risk_note_number or "DRAFT" }}</div>
+    </div>
+    <div class="risknote-status status-{{ risk_note.status|lower }}">
+        {{ risk_note.status }}
+    </div>
+</div>
+
+<table class="section-table">
+    <!-- 1. INSURED -->
+    <tr class="section-row">
+        <td class="section-label">Insured</td>
+        <td class="section-content">
+            <div class="insured-pin">P.I.N No. {{ client.kra_pin or "N/A" }}</div>
+            <div class="insured-name">{{ client.name }}</div>
+            <div class="insured-details">
+                {% if client.physical_address %}{{ client.physical_address }}<br>{% endif %}
+                {% if client.postal_number %}P.O. Box {{ client.postal_number }}{% else %}{% if not client.physical_address %}No Address Provided{% endif %}{% endif %}
+                {% if client.postal_code %} - {{ client.postal_code }}{% endif %}
+                <br>
+                {{ client.town or "Nairobi" }}
+            </div>
+        </td>
+    </tr>
+
+    <!-- 2. CLASS -->
+    <tr class="section-row">
+        <td class="section-label">Class</td>
+        <td class="section-content">
+            <div style="float: right; font-family: monospace; font-weight: 700; font-size: 8.5pt;">[Policy No. {{ policy.policy_number }}]</div>
+            <div style="font-weight: 700; text-transform: uppercase; font-size: 8.5pt;">{{ policy.product.name }}</div>
+        </td>
+    </tr>
+
+    <!-- 3. PERIOD -->
+    <tr class="section-row">
+        <td class="section-label">Period</td>
+        <td class="section-content">
+            <div class="period-info">
+                {{ risk_note.coverage_start.strftime('%d %B %Y') }}
+                <span class="period-separator">To</span>
+                {{ risk_note.coverage_end.strftime('%d %B %Y') }}
+            </div>
+        </td>
+    </tr>
+
+    <!-- 4. COVER -->
+    <tr class="section-row">
+        <td class="section-label">Cover</td>
+        <td class="section-content">
+            <div class="cover-info">
+                {{ policy.product.class_of_insurance }}: Accidental loss or damage to insured property and / or death, bodily injury or loss or damage to property of third parties.
+            </div>
+        </td>
+    </tr>
+
+    <!-- 5. DYNAMIC SECTIONS -->
+    {% for section in dynamic_sections %}
+    <tr class="section-row">
+        <td class="section-label">{{ section.name }}</td>
+        <td class="section-content">
+            {% if section.content is mapping %}
+                <div class="grid-container">
+                    {% for key, value in section.content.items() %}
+                        <div class="grid-item">
+                            <span class="grid-label">{{ key }}:</span>
+                            <span class="grid-value">{{ value }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div style="font-size: 8.5pt;">{{ section.content }}</div>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+
+    <!-- 6. FINANCIAL SUMMARY -->
+    <tr class="section-row">
+        <td class="section-label">Financial Summary</td>
+        <td class="section-content">
+            <table class="financial-table">
+                <tr class="financial-row">
+                    <td class="financial-label">Net Premium</td>
+                    <td class="financial-value">{{ risk_note.net_premium|format_currency }}</td>
+                </tr>
+                {% for benefit in financial_breakdown.benefits %}
+                <tr class="financial-row">
+                    <td class="financial-label">{{ benefit.name|upper }}</td>
+                    <td class="financial-value">{{ benefit.amount|format_currency }}</td>
+                </tr>
+                {% endfor %}
+                {% if financial_breakdown.taxes %}
+                    {% for tax_name, tax_amt in financial_breakdown.taxes.items() %}
+                    <tr class="financial-row">
+                        <td class="financial-label">{{ tax_name|replace('_', ' ')|upper }}</td>
+                        <td class="financial-value">{{ tax_amt|format_currency }}</td>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
+                <tr class="total-row">
+                    <td class="total-label">Total Amount Payable</td>
+                    <td class="total-value">{{ risk_note.total_amount|format_currency }}</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+
+    <!-- 7. INSURER -->
+    <tr class="section-row">
+        <td class="section-label">Insurer</td>
+        <td class="section-content">
+            <div style="font-weight: 700; text-transform: uppercase; font-size: 8.5pt;">{{ policy.product.insurer.name }}</div>
+        </td>
+    </tr>
+
+    <!-- 8. AUTHENTICATION -->
+    <tr class="section-row">
+        <td class="section-label">Authentication</td>
+        <td class="section-content">
+            <div class="auth-row">
+                <div class="auth-date">
+                    [Risk Note Issued: {{ risk_note.created_at.strftime('%d/%m/%Y') }}]
+                </div>
+                <div class="auth-info">
+                    {% if invoice %}
+                        Invoiced: {{ invoice.invoice_number }}
+                    {% else %}
+                        Pending Invoicing
+                    {% endif %}
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+{% endblock %}
