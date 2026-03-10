@@ -1,8 +1,8 @@
 # Implementation Plan: One-page A4 Risk Note PDF Generation
 
-## Phase 0: Setup & Branching
+## Phase 0: Setup & Branching [checkpoint: 3ca4147]
 - [x] Task: Create a new git branch for the track: `feat/one-page-risknote`. 23fdb0e
-- [ ] Task: Conductor - User Manual Verification 'Phase 0' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 0' (Protocol in workflow.md) 3ca4147
 
 ## Phase 1: Setup & Tooling Selection
 - [ ] Task: Evaluate and install HTML-to-PDF library (e.g., WeasyPrint or Playwright).
