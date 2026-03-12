@@ -1,4 +1,4 @@
-# Project Status (Session End: 2026-02-20)
+# Project Status (Current Session: 2026-03-12)
 
 ## Finished (Key Milestones)
 - **Database & Model Reconciliation**: Synchronized the database schema with the backend models. Updated Alembic migration `c5c580ca4b1f` to correctly implement `RiskNote.cover_snapshot` as the source of truth for risk details, replacing the redundant `Policy.risk_details` approach.
@@ -9,28 +9,26 @@
 - **Client Regeneration**: Successfully regenerated the TypeScript client from the backend OpenAPI schema and verified type integrity with `tsc`.
 - **Backend Linting & Type Hardening**: Resolved all `ruff` and `mypy` issues. Fixed a critical renaming bug in the `risk_notes` API route. Stabilized `seed_mock_data.py` and consolidated `RatingService` return types for better consistency and developer experience.
 - **Renewal Workflow Implementation**: Implemented a comprehensive end-to-end policy renewal system.
-    - **Status Workflow**: Added `RENEWAL_INVITED` and `RENEWAL_CONFIRMED` statuses to Policies and Risk Notes.
-    - **Automated Notifications**: Created a daily background task to send invitations (30 days before expiry) and reminders (7 days before expiry).
-    - **Manual Triggers**: Added API endpoints and UI buttons to manually trigger renewal notifications.
-    - **Correspondence Logging**: Implemented automated logging of all renewal-related emails into the client correspondence history with consistent audit-friendly summaries.
-    - **Performance Optimization**: Fixed N+1 query issues in policy list views using SQLAlchemy `selectinload`.
-    - **Frontend Dashboard**: Added a "Renewals" dashboard with expiry tracking and hardened date parsing for timezone consistency, including normalized "days to expiry" logic.
-- **Bug Fixes (Renewals 404)**:
-    - Regenerated frontend SDK to include `expiring_within` parameter mapping.
-    - Switched frontend to use relative API paths to leverage the Vite proxy, ensuring more robust routing and avoiding CORS edge cases in local development.
-    - Fixed TypeScript error in Risk Note print view regarding `unknown` type in financial breakdown rendering.
+- **Modularization of Models & CRUD**: Refactored `backend/app/models.py` and `backend/app/crud.py` into domain-specific modules with unified exports.
+- **One-page A4 Risk Note PDF Generation**:
+    - Integrated **WeasyPrint** for high-fidelity PDF generation from HTML/Jinja2 templates.
+    - Designed a dense, single-page A4 layout optimized for insurance risk notes.
+    - Implemented `DocumentService` in the backend for automated PDF production.
+    - **Frontend Polish**: Fixed `displayName` regression and added a "Digital vs PDF" view toggle in the Policy Dashboard.
+    - **History Integration**: Added PDF view/download actions to the transaction history timeline and table.
 
 ## Ongoing
-- **Type Integrity & Stabilization**: Resolving persistent TypeScript errors in the auto-generated client and components.
+- **Type Integrity & Stabilization**: Finalizing TypeScript type refinements across the modularized models.
 
 ## Next Steps
-1. **Verification of Backend Changes**: Run the backend test suite once a database connection is established to ensure all changes are functional.
-2. **Automated Testing**: Expand the backend test suite to cover the new renewal logic and rating tier logic.
-3. **Frontend Refinement**: Polish the document viewing experience to handle the new `cover_snapshot` structure across all templates.
+1. **Merge `feat/one-page-risknote`**: Finalize and merge the PDF generation track into `main`.
+2. **Financial Hardening (Invoices)**: Extend PDF generation to Invoices (similar to Risk Notes).
+3. **Audit Trail Reinforcement**: Re-evaluate requirements for the postponed audit hardening track.
 
 ## Architectural Decisions
 - **Atomic Snapshot Strategy**: We store the full state of the risk (the "Snapshot") on the `RiskNote` issued for each transaction. This ensures that every document (Risk Note, Invoice) refers to the authoritative state of the cover at the exact moment of issuance.
 - **Policy as the Contract Container**: The `Policy` model remains the long-lived container for the contract, but coverage-specific data (dates, values) is derived from its related `RiskNotes`.
+- **Hybrid Document Viewing**: We maintain both an interactive "Digital View" (for editing drafts) and a "PDF View" (for official documentation) within the frontend.
 
 ## Future Optimizations
-- **Policy Expiry Denormalization**: Consider denormalizing `current_coverage_end` onto the `Policy` model. This would replace the current subquery-based filtering in policy list views with a simple indexed column lookup, significantly improving performance as the database grows.
+- **Policy Expiry Denormalization**: Consider denormalizing `current_coverage_end` onto the `Policy` model to improve query performance.

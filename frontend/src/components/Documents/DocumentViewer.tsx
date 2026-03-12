@@ -5,7 +5,7 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query"
 import { AlertCircle, FileText, Loader2 } from "lucide-react"
-import { Suspense } from "react"
+import { Suspense, useState } from "react"
 
 import {
   type ClientPublic,
@@ -20,9 +20,11 @@ import {
   type RiskNotePublic,
   RiskNotesService,
 } from "@/client"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import useCustomToast from "@/hooks/useCustomToast"
 import type { EnhancedPolicy, EnhancedRiskNote } from "@/types/insurance"
 import { handleError } from "@/utils"
+import { BlobPDFViewer } from "../Common/BlobPDFViewer"
 import { InvoiceTemplate } from "./templates/InvoiceTemplate"
 import { RiskNoteTemplate } from "./templates/RiskNoteTemplate"
 
@@ -33,6 +35,7 @@ type DocumentType = "risknote" | "invoice" | "receipt" | "external"
 interface DocumentViewerProps {
   id: string
   type: DocumentType
+  initialViewMode?: "digital" | "pdf"
 }
 
 // --- Shared Components ---
@@ -132,6 +135,23 @@ function RiskNoteLoader({ id }: { id: string }) {
       isEditable={riskNote.status === "Draft"}
       onSave={(snap) => mutation.mutate(snap)}
     />
+  )
+}
+
+function PDFLoader({
+  id,
+  type,
+}: {
+  id: string
+  type: "risknote" | "invoice"
+}) {
+  const endpoint = type === "risknote" ? "risk-notes" : "financials/invoices"
+  const pdfUrl = `${(OpenAPI.BASE || "").replace(/\/$/, "")}/api/v1/${endpoint}/${id}/pdf`
+
+  return (
+    <div className="w-full h-full bg-zinc-100 flex items-center justify-center p-4">
+      <BlobPDFViewer url={pdfUrl} title={`${type} PDF`} />
+    </div>
   )
 }
 
@@ -276,6 +296,8 @@ function FileLoader({ id, receiptId }: { id?: string; receiptId?: string }) {
           className="max-w-full h-auto shadow-2xl rounded-sm border bg-white"
           onError={() => console.error("Image failed to load:", downloadUrl)}
         />
+      ) : document.mime_type === "application/pdf" ? (
+        <BlobPDFViewer url={downloadUrl} title="Document Viewer" />
       ) : (
         <iframe
           src={downloadUrl}
@@ -289,26 +311,64 @@ function FileLoader({ id, receiptId }: { id?: string; receiptId?: string }) {
 
 // --- Main Component ---
 
-export function DocumentViewer({ id, type }: DocumentViewerProps) {
+export function DocumentViewer({
+  id,
+  type,
+  initialViewMode = "digital",
+}: DocumentViewerProps) {
+  const [viewMode, setViewMode] = useState<"digital" | "pdf">(initialViewMode)
+
+  const showTabs = type === "risknote"
+
   return (
-    <div className="w-full h-full animate-in fade-in zoom-in-95 duration-300">
-      {/* Templates use Suspense */}
-      {(type === "risknote" || type === "invoice") && (
-        <Suspense
-          fallback={
-            <div className="flex items-center justify-center p-24">
-              <Loader2 className="size-8 animate-spin text-primary" />
-            </div>
-          }
-        >
-          {type === "risknote" && <RiskNoteLoader id={id} />}
-          {type === "invoice" && <InvoiceLoader id={id} />}
-        </Suspense>
+    <div className="w-full h-full animate-in fade-in zoom-in-95 duration-300 flex flex-col gap-4">
+      {showTabs && (
+        <div className="flex justify-center">
+          <Tabs
+            value={viewMode}
+            onValueChange={(v) => setViewMode(v as any)}
+            className="w-auto"
+          >
+            <TabsList>
+              <TabsTrigger value="digital" className="text-xs font-bold uppercase">
+                Digital Version
+              </TabsTrigger>
+              <TabsTrigger value="pdf" className="text-xs font-bold uppercase">
+                PDF Version (Official)
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
       )}
 
-      {/* External Files use internal state for better error handling */}
-      {type === "receipt" && <FileLoader receiptId={id} />}
-      {type === "external" && <FileLoader id={id} />}
+      <div className="flex-1">
+        {/* Templates use Suspense */}
+        {(type === "risknote" || type === "invoice") && (
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center p-24">
+                <Loader2 className="size-8 animate-spin text-primary" />
+              </div>
+            }
+          >
+            {type === "risknote" && (
+              <>
+                {viewMode === "digital" ? (
+                  <RiskNoteLoader id={id} />
+                ) : (
+                  <PDFLoader id={id} type="risknote" />
+                )}
+              </>
+            )}
+            {type === "invoice" && <InvoiceLoader id={id} />}
+          </Suspense>
+        )}
+
+        {/* External Files use internal state for better error handling */}
+        {type === "receipt" && <FileLoader receiptId={id} />}
+        {type === "external" && <FileLoader id={id} />}
+      </div>
     </div>
   )
 }
+

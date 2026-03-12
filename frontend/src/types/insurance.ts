@@ -18,6 +18,7 @@ export interface EnhancedProduct extends ProductPublic {
 export interface EnhancedPolicy extends PolicyPublic {
   product?: EnhancedProduct
   client?: ClientPublic
+  active_note?: EnhancedRiskNote | null
 }
 
 export interface EnhancedRiskNote extends RiskNotePublic {

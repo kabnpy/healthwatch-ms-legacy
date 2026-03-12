@@ -16,6 +16,8 @@ import { getPolicyDisplayName } from "@/utils/insurance"
 
 export const getColumns = (
   onView: (riskNote: RiskNotePublic) => void,
+  onViewPdf?: (riskNote: RiskNotePublic) => void,
+  onDownloadPdf?: (riskNote: RiskNotePublic) => void,
 ): ColumnDef<RiskNotePublic>[] => [
   {
     id: "display_name",
@@ -95,12 +97,21 @@ export const getColumns = (
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => onView(riskNote)}>
               <Eye className="mr-2 h-4 w-4" />
-              View Document
+              Digital View
             </DropdownMenuItem>
-            <DropdownMenuItem disabled>
-              <FileDown className="mr-2 h-4 w-4" />
-              Download PDF
-            </DropdownMenuItem>
+            {onViewPdf && (
+              <DropdownMenuItem onClick={() => onViewPdf(riskNote)}>
+                <FileText className="mr-2 h-4 w-4" />
+                PDF View
+              </DropdownMenuItem>
+            )}
+            {onDownloadPdf && (
+              <DropdownMenuItem onClick={() => onDownloadPdf(riskNote)}>
+                <FileDown className="mr-2 h-4 w-4" />
+                Download PDF
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuSeparator />
             <DropdownMenuItem disabled>
               <Mail className="mr-2 h-4 w-4" />
               Email to Client

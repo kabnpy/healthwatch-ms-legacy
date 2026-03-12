@@ -26,3 +26,12 @@
 - [x] Task: Perform "Stress Test" with various data volumes to verify the single-page constraint. 24ad694
 - [x] Task: Finalize the branch and prepare for merge into `main`. bc658e23
 - [x] Task: Conductor - User Manual Verification 'Phase 4' (Protocol in workflow.md) eec8fc3
+
+## Phase 5: Frontend Integration & Polish [checkpoint: ]
+- [x] Task: Fix `displayName` regression in Policy Dashboard.
+- [x] Task: Implement "Digital" vs "PDF" view toggle in Policy Overview.
+- [x] Task: Add "PDF View" action to Transaction History table and timeline.
+- [x] Task: Update `DocumentViewer` to support official PDF rendering via iframe.
+- [x] Task: Implement `BlobPDFViewer` for authenticated PDF fetching.
+- [x] Task: Implement `downloadAuthenticatedFile` for secure PDF downloads.
+- [ ] Task: Conductor - User Manual Verification 'Phase 5' (Protocol in workflow.md)
