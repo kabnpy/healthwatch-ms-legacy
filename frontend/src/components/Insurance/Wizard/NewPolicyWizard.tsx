@@ -77,16 +77,17 @@ export function NewPolicyWizard({
       // Now using 'sum_insured' as the semantic key
       const findValue = (obj: any): number => {
         if (!obj || typeof obj !== "object") return 0
-        for (const [k, v] of Object.entries(obj)) {
-          // Look for sum_insured, value, or display aliases
-          if (
-            /sum_insured|value|sum insured/i.test(k) &&
-            typeof v !== "object"
-          ) {
-            const cleanVal =
-              typeof v === "string" ? v.replace(/[^0-9.]/g, "") : v
+        // Priority keys for sum insured
+        const priorityKeys = ["sum_insured", "value", "sum insured", "Value Kshs."]
+        for (const key of priorityKeys) {
+          if (obj[key] !== undefined && typeof obj[key] !== "object") {
+            const v = obj[key]
+            const cleanVal = typeof v === "string" ? v.replace(/[^0-9.]/g, "") : v
             return Number(cleanVal) || 0
           }
+        }
+        
+        for (const [k, v] of Object.entries(obj)) {
           if (typeof v === "object") {
             const found = findValue(v)
             if (found !== 0) return found
@@ -96,6 +97,7 @@ export function NewPolicyWizard({
       }
 
       const extractedValue = findValue(data)
+      console.log("Extracted sum_insured from Step 1:", extractedValue)
 
       setState((prev) => ({
         ...prev,

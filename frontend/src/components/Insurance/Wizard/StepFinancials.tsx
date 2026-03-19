@@ -15,7 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { useProducts, useQuote } from "@/hooks/useInsurance"
+import { useProducts, useQuoteQuery } from "@/hooks/useInsurance"
 import type {
   EnhancedProduct,
   WizardExtensions,
@@ -59,7 +59,6 @@ export function StepFinancials({
   sum_insured,
 }: StepFinancialsProps) {
   const { data: productsData } = useProducts()
-  const quoteMutation = useQuote()
 
   const handleSumInsuredChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value.replace(/[^0-9]/g, "")
@@ -113,31 +112,27 @@ export function StepFinancials({
 
   const isManual = selectedProduct?.pricing_strategy === "Manual"
 
-  // 1. Debounced Backend Quote
-  useEffect(() => {
-    if (!productId) return
+  // 1. Authoritative Backend Quote via Query
+  const quoteParams = useMemo(() => {
+    if (!productId || !sum_insured || sum_insured <= 0) return null
 
-    const timer = setTimeout(() => {
-      quoteMutation.mutate({
-        product_id: productId,
-        risk_details: {
-          vehicle: {
-            sum_insured: sum_insured,
-          },
-          financials: {
-            rate: financials.rate || 0,
-          },
-          extensions: {
-            pvt: !!extensions.pvt,
-            excess_protector: !!extensions.excessProtector,
-            om_rescue_plus: !!extensions.omRescuePlus,
-            passenger_liability: !!extensions.passengerLiability,
-          },
+    return {
+      product_id: productId,
+      risk_details: {
+        vehicle: {
+          sum_insured: sum_insured,
         },
-      })
-    }, 500) // 500ms debounce
-
-    return () => clearTimeout(timer)
+        financials: {
+          rate: financials.rate || 0,
+        },
+        extensions: {
+          pvt: !!extensions.pvt,
+          excess_protector: !!extensions.excessProtector,
+          om_rescue_plus: !!extensions.omRescuePlus,
+          passenger_liability: !!extensions.passengerLiability,
+        },
+      },
+    }
   }, [
     productId,
     sum_insured,
@@ -146,22 +141,30 @@ export function StepFinancials({
     extensions.excessProtector,
     extensions.omRescuePlus,
     extensions.passengerLiability,
-    quoteMutation.mutate,
   ])
 
-  // 2. authoritative source of truth
-  const breakdown = quoteMutation.data?.breakdown as
+  const quoteQuery = useQuoteQuery(quoteParams)
+  const breakdown = quoteQuery.data?.breakdown as
     | MotorFinancialBreakdown
     | undefined
 
-  // Auto-set rate for Motor Private
+  useEffect(() => {
+    if (quoteQuery.data) {
+      console.log("Authoritative Quote Received:", quoteQuery.data)
+    }
+    if (quoteQuery.error) {
+      console.error("Quote Fetch Error:", quoteQuery.error)
+    }
+  }, [quoteQuery.data, quoteQuery.error])
+
+  // 2. Synchronize rate and high-end logic from the authoritative source
   useEffect(() => {
     if (breakdown) {
       if (isMotorPrivate && Number(breakdown.net_premium) > 0) {
         // Reverse calculate effective rate for display (inclusive of non-tax extensions)
         const siNum = Number(sum_insured) || 1
         const effectiveRate = (Number(breakdown.net_premium) / siNum) * 100
-        if (Math.abs(effectiveRate - financials.rate) > 0.001) {
+        if (Math.abs(effectiveRate - (financials.rate || 0)) > 0.001) {
           form.setValue("financials.rate", Number(effectiveRate.toFixed(3)))
         }
       }
@@ -409,7 +412,7 @@ export function StepFinancials({
                 Premium Preview
               </h3>
               <div className="text-right text-[10px] font-mono text-slate-500 flex items-center gap-2">
-                {quoteMutation.isPending && (
+                {quoteQuery.isLoading && (
                   <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
                 )}
                 {breakdown ? "AUTHORITATIVE MATH" : "ESTIMATED"}
@@ -417,7 +420,7 @@ export function StepFinancials({
             </div>
 
             <div className="space-y-6">
-              {!breakdown && !quoteMutation.isPending ? (
+              {!breakdown && !quoteQuery.isLoading ? (
                 <div className="py-12 text-center space-y-2">
                   <p className="text-slate-500 text-xs uppercase tracking-widest font-bold">
                     Awaiting Input
@@ -437,13 +440,13 @@ export function StepFinancials({
                         {isMotorPrivate && (
                           <span className="text-[10px] text-slate-500 font-mono">
                             Applied Rate:{" "}
-                            {(financials as any).basicRate || financials.rate}%
+                            {((financials as any).basicRate || financials.rate).toFixed(2)}%
                           </span>
                         )}
                       </div>
                       <span
                         className={`font-mono font-bold ${
-                          quoteMutation.isPending ? "opacity-40" : ""
+                          quoteQuery.isLoading ? "opacity-40" : ""
                         }`}
                       >
                         {breakdown
@@ -466,7 +469,7 @@ export function StepFinancials({
                           <div
                             key={benefit.name}
                             className={`flex justify-between text-xs py-1 border-b border-slate-800 last:border-0 ${
-                              quoteMutation.isPending ? "opacity-40" : ""
+                              quoteQuery.isLoading ? "opacity-40" : ""
                             }`}
                           >
                             <span className="text-slate-300 italic">
@@ -498,7 +501,7 @@ export function StepFinancials({
                             <div
                               key={name}
                               className={`flex justify-between text-xs ${
-                                quoteMutation.isPending ? "opacity-40" : ""
+                                quoteQuery.isLoading ? "opacity-40" : ""
                               }`}
                             >
                               <span className="text-slate-400">
@@ -527,7 +530,7 @@ export function StepFinancials({
                         <div className="text-right">
                           <span
                             className={`text-2xl font-black text-emerald-400 font-mono ${
-                              quoteMutation.isPending ? "opacity-40" : ""
+                              quoteQuery.isLoading ? "opacity-40" : ""
                             }`}
                           >
                             <span className="text-sm font-normal mr-1">
