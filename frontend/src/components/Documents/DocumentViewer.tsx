@@ -166,11 +166,33 @@ function InvoiceLoader({ id }: { id: string }) {
     queryKey: ["clients", invoice.client_id],
   }) as { data: ClientPublic }
 
+  // Since InvoicePublic.line_items doesn't include the full risk_note object,
+  // we fetch them manually here to enrich the template data.
+  const { data: enrichedLineItems } = useSuspenseQuery({
+    queryKey: ["invoices", id, "enriched-items"],
+    queryFn: async () => {
+      const items = invoice.line_items || []
+      return Promise.all(
+        items.map(async (item) => {
+          try {
+            const riskNote = await RiskNotesService.readRiskNote({
+              id: item.risk_note_id,
+            })
+            return { ...item, risk_note: riskNote }
+          } catch (e) {
+            console.error(`Failed to fetch risk note for item ${item.id}`, e)
+            return item
+          }
+        }),
+      )
+    },
+  })
+
   return (
     <InvoiceTemplate
       invoice={invoice}
       client={client}
-      lineItems={invoice.line_items || []}
+      lineItems={enrichedLineItems}
     />
   )
 }
