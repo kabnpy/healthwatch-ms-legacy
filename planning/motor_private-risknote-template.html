@@ -1,0 +1,456 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Risk Note</title>
+        <style>
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                font-family: Georgia, serif;
+                font-size: 11px;
+                color: #000;
+                background: #fff;
+                padding: 32px;
+                max-width: 900px;
+                margin: 0 auto;
+            }
+
+            /* ── Letterhead ── */
+            .letterhead {
+                margin-bottom: 16px;
+                text-align: center;
+            }
+
+            .agency-name {
+                font-size: 16px;
+                font-weight: 700;
+                letter-spacing: 0.5px;
+            }
+
+            .agency-meta {
+                font-size: 10px;
+                color: #333;
+                line-height: 1.6;
+            }
+
+            .doc-title-bar {
+                text-align: center;
+                font-size: 13px;
+                font-weight: 700;
+                padding: 5px 0;
+                margin-bottom: 0;
+                text-decoration: underline;
+            }
+
+            /* ── Main table ── */
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                border: 1.5px solid #000;
+            }
+
+            th,
+            td {
+                border: 1px solid #000;
+                padding: 6px 8px;
+                vertical-align: top;
+                line-height: 1.55;
+            }
+
+            th[scope="row"] {
+                width: 16%;
+                font-weight: 700;
+                font-size: 10px;
+                letter-spacing: 0.2px;
+                text-transform: uppercase;
+                white-space: nowrap;
+                text-align: left;
+            }
+
+            td {
+                font-size: 11px;
+            }
+
+            /* ── Insured ── */
+            .client-name {
+                font-size: 12px;
+                display: block;
+            }
+            .client-kra-pin {
+                font-size: 10px;
+                color: #333;
+            }
+            .client-address,
+            .client-town {
+                display: block;
+                font-size: 10px;
+                color: #444;
+            }
+
+            .space-between {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            /* ── Inner tables (benefits, excess, special clauses, premium) ── */
+            .inner-row td {
+                padding: 0;
+            }
+
+            .inner-table {
+                width: 100%;
+                border: none;
+                border-collapse: collapse;
+            }
+
+            .inner-table td {
+                border: none;
+                padding: 0 8px;
+                vertical-align: top;
+            }
+
+            /* two-col inner tables: label | value */
+            .inner-table.two-col td:first-child {
+                width: 55%;
+            }
+            .inner-table.two-col td:last-child {
+                width: 45%;
+            }
+
+            /* two-col inner tables: left list | right list */
+            .inner-table.split td {
+                width: 50%;
+            }
+
+            /* premium specifics */
+            .inner-table.premium td:nth-child(2) {
+                font-weight: 600;
+            }
+            .premium-total td {
+                border-top: 1.5px solid #000 !important;
+                border-bottom: none !important;
+                font-weight: 700;
+            }
+
+            /* ── Footer ── */
+            .doc-footer {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 12px;
+                font-size: 10px;
+                color: #444;
+            }
+
+            /* ── Print ── */
+            @media print {
+                @page {
+                    size: A4;
+                    margin: 10mm 15mm;
+                }
+
+                * {
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }
+
+                body {
+                    padding: 0;
+                    max-width: 100%;
+                    font-size: 11px;
+                }
+
+                table,
+                th,
+                td {
+                    border-color: #000 !important;
+                }
+
+                tr {
+                    page-break-inside: avoid;
+                }
+
+                .doc-footer {
+                    position: fixed;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    padding: 0 15mm;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="letterhead">
+            <div class="agency-name">HealthWatch Insurance Agency</div>
+            <div class="agency-meta">
+                1st Floor, Bishop Garden Towers, Bishop Road - 1st Ngong
+                Avenue<br />
+                P O Box 1966-00502 Nairobi &nbsp;|&nbsp; Mobile: 0746 129521 /
+                0733 980566<br />
+                Email: info@healthwatch.co.ke
+            </div>
+        </div>
+
+        <div class="doc-title-bar">RISK NOTE</div>
+
+        <table>
+            <!-- Insured -->
+            <tr>
+                <th scope="row">Insured</th>
+                <td colspan="4">
+                    <div class="space-between">
+                        <span class="client-name">John Doe</span>
+                        <span class="client-kra-pin">P.I.N: 1234567890</span>
+                    </div>
+                    <span class="client-address">P.O.BOX 12345 - 678</span>
+                    <span class="client-town">Nairobi</span>
+                </td>
+            </tr>
+
+            <!-- Class -->
+            <tr>
+                <th scope="row">Class</th>
+                <td colspan="4">
+                    <div class="space-between">
+                        <span>Motor Private</span>
+                        <span>[Policy No. 010/030/1/004071/2000]</span>
+                    </div>
+                </td>
+            </tr>
+
+            <!-- Period -->
+            <tr>
+                <th scope="row">Period</th>
+                <td colspan="4">
+                    27th July 2025 &nbsp;&mdash;&nbsp; 26th July 2026
+                </td>
+            </tr>
+
+            <!-- Cover -->
+            <tr>
+                <th scope="row">Cover</th>
+                <td colspan="4">
+                    Comprehensive Cover - This protects you against losses
+                    and/or damages to your vehicle due to accidental fire, theft
+                    or an accident. It also covers third party's death, bodily
+                    injury and/or property damage as well as damage to your
+                    vehicle due to accidental fire, theft or an accident.
+                </td>
+            </tr>
+
+            <!-- Vehicle Details -->
+            <tr>
+                <th scope="row">Vehicle<br />Details</th>
+                <td>Reg No: KDH 519E</td>
+                <td>Make: Toyota Hilux</td>
+                <td>Year: 2020</td>
+                <td>Value: Kshs. 2,700,000.00</td>
+            </tr>
+
+            <!-- Benefits & Limits -->
+            <tr class="inner-row">
+                <th scope="row">Benefits &amp;<br />Limits</th>
+                <td colspan="4">
+                    <table class="inner-table two-col">
+                        <tr>
+                            <td>Third Party Persons</td>
+                            <td>Kshs. 3,000,000.00</td>
+                        </tr>
+                        <tr>
+                            <td>Third Party Property</td>
+                            <td>Kshs. 20,000,000.00</td>
+                        </tr>
+                        <tr>
+                            <td>Passengers Legal Liability</td>
+                            <td>
+                                Kshs. 5,000,000 per person and Kshs.
+                                20,000,000.00 per event
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Towing &amp; Recovery</td>
+                            <td>Kshs. 100,000.00</td>
+                        </tr>
+                        <tr>
+                            <td>Authorized Repair Limit</td>
+                            <td>Kshs. 100,000.00</td>
+                        </tr>
+                        <tr>
+                            <td>Emergency Medical Expenses</td>
+                            <td>Kshs. 50,000.00</td>
+                        </tr>
+                        <tr>
+                            <td>Car Entertainment Systems</td>
+                            <td>Replacement Cost Max Kshs. 50,000.00</td>
+                        </tr>
+                        <tr>
+                            <td>Windscreen/Window Glass</td>
+                            <td>Replacement Cost Max Kshs. 50,000.00</td>
+                        </tr>
+                        <tr>
+                            <td>Personal Accident (Driver &amp; Loader)</td>
+                            <td>
+                                Kshs. 100,000.00 on Death and Permanent Total
+                                Disability (Accumulation Limit – Kshs.
+                                200,000.00)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Key Retrieval / Replacement</td>
+                            <td>Kshs. 50,000.00</td>
+                        </tr>
+                        <tr>
+                            <td>Starter / Alternator</td>
+                            <td>Kshs. 50,000.00</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+
+            <!-- Excess -->
+            <tr class="inner-row">
+                <th scope="row">Excess</th>
+                <td colspan="4">
+                    <table class="inner-table two-col">
+                        <tr>
+                            <td>Own Damage and Partial</td>
+                            <td>
+                                5% of value minimum Kshs. 20,000/- Max Kshs.
+                                100,000.00
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Third Party Property Damage</td>
+                            <td>Kshs. 10,000.00</td>
+                        </tr>
+                        <tr>
+                            <td>Third Party Injury</td>
+                            <td>Nil</td>
+                        </tr>
+                        <tr>
+                            <td>Total Theft losses with anti-theft device</td>
+                            <td>
+                                10% of vehicle value minimum Kshs. 20,000.00
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Total Theft losses without anti-theft device
+                            </td>
+                            <td>
+                                20% of vehicle value minimum Kshs. 20,000.00
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Total Theft losses for vehicles with tracking
+                                device
+                            </td>
+                            <td>5% of vehicle value minimum Kshs. 20,000.00</td>
+                        </tr>
+                        <tr>
+                            <td>Young and novice driver</td>
+                            <td>
+                                Additional Kshs. 7,500.00 (under 21 years / less
+                                than 1 year)
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+
+            <!-- Drivers -->
+            <tr>
+                <th scope="row">Drivers</th>
+                <td colspan="4">
+                    Any authorised driver with a valid driver's license
+                </td>
+            </tr>
+
+            <!-- Special Clauses -->
+            <tr class="inner-row">
+                <th scope="row">Special<br />Clauses</th>
+                <td colspan="4">
+                    <table class="inner-table split">
+                        <tr>
+                            <td>
+                                Including Special Perils<br />
+                                Including Kenya jurisdiction<br />
+                                Including riot, strike and civil commotion<br />
+                                Including cover whilst the vehicle is in custody
+                                of motor trader<br />
+                                Legal liability of passengers<br />
+                                PVT – 010/044/1/005149/2018
+                            </td>
+                            <td>
+                                Replacement parts clause<br />
+                                Cancellation clause – 30 days<br />
+                                Warranted approved anti-theft device is fitted
+                                in the vehicle<br />
+                                Excluding terrorism and political violence<br />
+                                No blame no excess – applicable to valid
+                                collision accidents and confirmation on police
+                                abstract blaming an identifiable third party
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+
+            <!-- Premium -->
+            <tr class="inner-row">
+                <th scope="row">Annual<br />Premium</th>
+                <td colspan="4">
+                    <table class="inner-table two-col premium">
+                        <tr>
+                            <td>Premium</td>
+                            <td>Kshs. 50,500.00</td>
+                        </tr>
+                        <tr>
+                            <td>Excess Waiver</td>
+                            <td>Kshs. 5,050.00</td>
+                        </tr>
+                        <tr>
+                            <td>PVT</td>
+                            <td>Kshs. 4,545.00</td>
+                        </tr>
+                        <tr>
+                            <td>PLL</td>
+                            <td>Kshs. 1,000.00</td>
+                        </tr>
+                        <tr>
+                            <td>Training Levy</td>
+                            <td>Kshs. 122.00</td>
+                        </tr>
+                        <tr>
+                            <td>PHCF Levy</td>
+                            <td>Kshs. 153.00</td>
+                        </tr>
+                        <tr class="premium-total">
+                            <td>Total</td>
+                            <td>Kshs. 61,370.00</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+
+            <!-- Insurer -->
+            <tr>
+                <th scope="row">Insurer</th>
+                <td colspan="4">Old Mutual General Insurance (K) Ltd</td>
+            </tr>
+        </table>
+
+        <div class="doc-footer">
+            <span>Issued on: 16th March 2026</span>
+            <span>Prepared by: Paul Kabiru</span>
+        </div>
+    </body>
+</html>

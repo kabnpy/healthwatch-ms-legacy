@@ -1,0 +1,365 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Risk Note</title>
+        <style>
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                font-family: Georgia, serif;
+                font-size: 11px;
+                color: #000;
+                background: #fff;
+                padding: 32px;
+                max-width: 900px;
+                margin: 0 auto;
+            }
+
+            /* ── Letterhead ── */
+            .letterhead {
+                margin-bottom: 16px;
+                gap: 16px;
+                text-align: center;
+            }
+
+            .letterhead-details .agency-name {
+                font-size: 16px;
+                font-weight: 700;
+                letter-spacing: 0.5px;
+            }
+
+            .letterhead-details .agency-meta {
+                font-size: 10px;
+                color: #333;
+            }
+
+            .doc-title-bar {
+                text-align: center;
+                font-size: 13px;
+                font-weight: 700;
+                letter-spacing: -0.2px;
+                padding: 5px 0;
+                margin-bottom: 0;
+                text-decoration: underline;
+            }
+
+            /* ── Main table ── */
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                border: 1.5px solid #000;
+            }
+
+            th,
+            td {
+                border: 1px solid #000;
+                padding: 6px 8px;
+                vertical-align: top;
+                line-height: 1.55;
+            }
+
+            th[scope="row"] {
+                width: 16%;
+                font-weight: 700;
+                font-size: 10px;
+                letter-spacing: 0.2px;
+                text-transform: uppercase;
+                white-space: nowrap;
+                text-align: left;
+            }
+
+            td {
+                font-size: 11px;
+            }
+
+            /* ── Insured row ── */
+            .client-name {
+                font-size: 12px;
+                display: block;
+            }
+            .client-kra-pin {
+                font-size: 10px;
+                color: #333;
+                margin-left: 8px;
+            }
+            .client-address,
+            .client-town {
+                display: block;
+                font-size: 10px;
+                color: #444;
+            }
+
+            .space-between {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            /* ── Premium sub-table ── */
+            tr.premium-row td {
+                padding: 4px;
+            }
+
+            .premium-inner {
+                width: 100%;
+                border: none;
+                border-collapse: collapse;
+            }
+
+            .premium-inner td {
+                border: none;
+                border-bottom: 1px solid #ddd;
+                vertical-align: top;
+            }
+
+            .premium-inner tr:last-child td {
+                border-bottom: none;
+            }
+
+            .premium-inner td:first-child {
+                width: 55%;
+            }
+            .premium-inner td:nth-child(2) {
+                width: 35%;
+                font-weight: 600;
+            }
+
+            .premium-total td {
+                border-bottom: none !important;
+                border-top: 1.5px solid #000 !important;
+                font-weight: 700;
+            }
+
+            /* ── Footer ── */
+            .doc-footer {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 12px;
+                font-size: 10px;
+                color: #444;
+            }
+
+            /* ── Print ── */
+            @media print {
+                @page {
+                    size: A4;
+                    margin: 10mm 15mm;
+                }
+
+                * {
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }
+
+                body {
+                    padding: 0;
+                    max-width: 100%;
+                    font-size: 11px;
+                }
+
+                table,
+                th,
+                td {
+                    border-color: #000 !important;
+                }
+
+                /* prevent rows from splitting across pages */
+                tr {
+                    page-break-inside: avoid;
+                }
+
+                .doc-footer {
+                    position: fixed;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    padding: 0 20mm;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Letterhead -->
+        <div class="letterhead">
+            <div class="letterhead-details">
+                <div class="agency-name">HealthWatch Insurance Agency</div>
+                <div class="agency-meta">
+                    1st Floor, Bishop Garden Towers, Bishop Road - 1st Ngong
+                    Avenue<br />
+                    P O Box 1966-00502 Nairobi &nbsp;|&nbsp; Mobile: 0746 129521
+                    / 0733 980566<br />
+                    Email: info@healthwatch.co.ke
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-title-bar">RISK NOTE</div>
+
+        <table>
+            <tr>
+                <th scope="row">Insured</th>
+                <td colspan="3">
+                    <div class="space-between">
+                        <span class="client-name">John Doe</span>
+                        <span class="client-kra-pin">P.I.N: 1234567890</span>
+                    </div>
+                    <span class="client-address">P.O.BOX 12345 - 678</span>
+                    <span class="client-town">Nairobi</span>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Class</th>
+                <td colspan="3">
+                    <div class="space-between">
+                        <span>Domestic Package</span>
+                        <span>[Policy No. 010/030/1/004071/2000]</span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Period</th>
+                <td colspan="3">
+                    <div class="space-between">
+                        <span>27th July 2025</span>
+                        <span>&nbsp;&mdash;&nbsp;</span>
+                        <span>26th July 2026</span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Cover</th>
+                <td colspan="3">
+                    For loss or damage to building and/or contents by fire,
+                    lighting, explosion, storm, flood, overflowing of water
+                    tanks, earthquake, riot, strike, malicious act, burglary,
+                    theft, larceny and special perils all as per policy.
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Location</th>
+                <td colspan="3">
+                    Plot No. 7785/660 Pan African Insurance Lane, Runda,
+                    Nairobi<br />
+                    <span>Construction: First Class</span>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Interest &amp;<br />Sum Insured</th>
+                <td colspan="3">
+                    <strong>Section B (Contents):</strong> Kshs. 6,430,000/-
+                    <em style="font-size: 10px"
+                        >(As per the attached Schedule)</em
+                    ><br />
+                    Note: Items over 5% of total sum insured must be declared
+                    separately except furniture, household appliances, pianos
+                    and organs.<br />
+                    Unoccupancy Period: 7 days<br /><br />
+                    <strong>Section C (All Risks):</strong> Kshs. 450,000/-
+                    <em style="font-size: 10px"
+                        >(As per the attached Schedule)</em
+                    ><br />
+                    Mobile Phones: Kshs. 295,000/-
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Domestic<br />Employees</th>
+                <td colspan="3">
+                    Number of employees irrespective of occupation – Three (3)
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Liabilities</th>
+                <td colspan="3">
+                    Owners Liability: Kshs. 1,000,000.00<br />
+                    Occupiers Liability: Kshs. 1,000,000.00
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Basis of<br />Valuation</th>
+                <td colspan="3">
+                    Content Section: Reinstatement other than clothing/linen<br />
+                    Domestic Employees Claims: Indemnity<br />
+                    Liability Claims: Indemnity<br />
+                    <em style="font-size: 10px"
+                        >Important Notice: Sums insured under building, contents
+                        and All Risks Sections must be sufficient to cover
+                        reinstatement/replacement costs.</em
+                    >
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Special<br />Clauses</th>
+                <td>
+                    Automatic reinstatement of loss<br />
+                    Gold/Silver limited to one third of contents sum insured<br />
+                    Excluding currency, cheques and securities<br />
+                    Fire brigade<br />
+                    Excluding nuclear fission, war and kindred risks<br />
+                    Landlords furniture, fixtures and fittings<br />
+                    Alternative Premises<br />
+                    Temporary removal of contents (internal)<br />
+                    Temporary removal of contents (external)
+                </td>
+                <td colspan="2">
+                    Alterations and repair<br />
+                    Architects, Quantity surveyors<br />
+                    Cost of re-election<br />
+                    Breach of warranties<br />
+                    Public utilities<br />
+                    Public authorities<br />
+                    Municipal plans security fees<br />
+                    Designation of property<br />
+                    Larceny<br />
+                    Other contents Kshs. 20,000/-<br />
+                    Other fees
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Excess</th>
+                <td colspan="3">
+                    Storm, Larceny and theft (each loss) Kshs. 500/-<br />
+                    Excess 10% of loss minimum Kshs. 5,000/- applicable to All
+                    Risks Section only.
+                </td>
+            </tr>
+            <tr class="premium-row">
+                <th scope="row">Annual<br />Premium</th>
+                <td colspan="3">
+                    <table class="premium-inner">
+                        <tr>
+                            <td>Premium</td>
+                            <td>Kshs. 81,325.00</td>
+                        </tr>
+                        <tr>
+                            <td>Training Levy</td>
+                            <td>Kshs. 163.00</td>
+                        </tr>
+                        <tr>
+                            <td>PHCF Levy</td>
+                            <td>Kshs. 203.00</td>
+                        </tr>
+                        <tr class="premium-total">
+                            <td>Total</td>
+                            <td>Kshs. 81,691.00</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Insurer</th>
+                <td colspan="3">Old Mutual General Insurance (K) Ltd</td>
+            </tr>
+        </table>
+
+        <div class="doc-footer">
+            <span>Issued on: 16th March 2026</span>
+            <span>Prepared by: Paul Kabiru</span>
+        </div>
+    </body>
+</html>
