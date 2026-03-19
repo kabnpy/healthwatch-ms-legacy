@@ -14,6 +14,7 @@ from .client import ClientPublic
 if TYPE_CHECKING:
     from .claim import Claim
     from .client import Client
+    from .user import User
 
 
 
@@ -248,6 +249,9 @@ class RiskNoteUpdate(SQLModel):
 class RiskNote(RiskNoteBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     policy: Policy = Relationship(back_populates="risk_notes")
+    created_by: "User" = Relationship(
+        sa_relationship_kwargs={"foreign_keys": "[RiskNote.created_by_id]"}
+    )
     invoice_line_items: list["InvoiceLineItem"] = Relationship(
         back_populates="risk_note"
     )
