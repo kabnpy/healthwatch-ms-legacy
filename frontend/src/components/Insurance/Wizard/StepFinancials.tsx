@@ -112,7 +112,7 @@ export function StepFinancials({
 
   const isManual = selectedProduct?.pricing_strategy === "Manual"
 
-  // 1. Authoritative Backend Quote via Query
+  // 1. authoritative backend quote via query
   const quoteParams = useMemo(() => {
     if (!productId || !sum_insured || sum_insured <= 0) return null
 
@@ -148,64 +148,41 @@ export function StepFinancials({
     | MotorFinancialBreakdown
     | undefined
 
-  useEffect(() => {
-    if (quoteQuery.data) {
-      console.log("Authoritative Quote Received:", quoteQuery.data)
-    }
-    if (quoteQuery.error) {
-      console.error("Quote Fetch Error:", quoteQuery.error)
-    }
-  }, [quoteQuery.data, quoteQuery.error])
-
-  // 2. Synchronize rate and high-end logic from the authoritative source
+  // 2. Synchronize ALL financial fields strictly from the backend breakdown
   useEffect(() => {
     if (breakdown) {
-      if (isMotorPrivate && Number(breakdown.net_premium) > 0) {
-        // Reverse calculate effective rate for display (inclusive of non-tax extensions)
-        const siNum = Number(sum_insured) || 1
-        const effectiveRate = (Number(breakdown.net_premium) / siNum) * 100
-        if (Math.abs(effectiveRate - (financials.rate || 0)) > 0.001) {
-          form.setValue("financials.rate", Number(effectiveRate.toFixed(3)))
+      console.log("Syncing form with authoritative backend data:", breakdown)
+      
+      // Update basic rate from backend if present (Motor Private)
+      if (breakdown.basic_rate !== undefined) {
+        const backendRate = Number(breakdown.basic_rate) * 100
+        form.setValue("financials.basicRate", backendRate)
+        
+        // If it's Motor Private, the "Applied Rate" should reflect the tiered rate from backend
+        if (isMotorPrivate && !isManual) {
+          form.setValue("financials.rate", Number(backendRate.toFixed(3)))
         }
       }
 
-      if (breakdown.basic_rate !== undefined) {
-        form.setValue(
-          "financials.basicRate",
-          Number(breakdown.basic_rate) * 100,
-        )
-      }
+      // Sync high-end status
       if (breakdown.is_high_end !== undefined) {
         form.setValue("financials.isHighEnd", breakdown.is_high_end)
+        
+        // Auto-enable benefits for high-end as per backend rules
+        if (breakdown.is_high_end) {
+          if (!extensions.pvt) form.setValue("extensions.pvt", true)
+          if (!extensions.excessProtector) form.setValue("extensions.excessProtector", true)
+        }
       }
     }
   }, [
-    isMotorPrivate,
-    breakdown?.net_premium,
-    breakdown?.basic_rate,
-    breakdown?.is_high_end,
-    sum_insured,
-    financials.rate,
-    form.setValue,
     breakdown,
-  ])
-
-  // High-End Logic: Auto-select included benefits
-  useEffect(() => {
-    if (isMotorPrivate && (Number(sum_insured) || 0) >= 3000000) {
-      if (!extensions.pvt) form.setValue("extensions.pvt", true)
-      if (!extensions.excessProtector)
-        form.setValue("extensions.excessProtector", true)
-    }
-  }, [
     isMotorPrivate,
-    sum_insured,
-    extensions.excessProtector,
-    extensions.pvt,
+    isManual,
     form.setValue,
+    extensions.pvt,
+    extensions.excessProtector
   ])
-
-  const isHighEnd = isMotorPrivate && (Number(sum_insured) || 0) >= 3000000
 
   return (
     <Form {...(form as any)}>
@@ -220,7 +197,6 @@ export function StepFinancials({
         </div>
 
         <div className="space-y-8">
-          {/* Inputs Section */}
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {!isPA && (
@@ -308,7 +284,7 @@ export function StepFinancials({
                   <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">
                     Benefits (Extensions)
                   </h3>
-                  {isHighEnd && (
+                  {financials.isHighEnd && (
                     <span className="text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold uppercase tracking-wider">
                       High-End: All Inclusive
                     </span>
@@ -323,7 +299,7 @@ export function StepFinancials({
                       <FormItem className="flex items-center justify-between space-y-0 rounded-lg p-2 border bg-card">
                         <FormLabel className="text-sm cursor-pointer w-full">
                           Political Violence & Terrorism (0.25%)
-                          {isHighEnd && (
+                          {financials.isHighEnd && (
                             <span className="ml-2 text-[10px] font-bold text-emerald-600 block">
                               (INCLUDED)
                             </span>
@@ -333,7 +309,7 @@ export function StepFinancials({
                           <Checkbox
                             checked={!!field.value}
                             onCheckedChange={field.onChange}
-                            disabled={isHighEnd}
+                            disabled={financials.isHighEnd}
                           />
                         </FormControl>
                       </FormItem>
@@ -346,7 +322,7 @@ export function StepFinancials({
                       <FormItem className="flex items-center justify-between space-y-0 rounded-lg p-2 border bg-card">
                         <FormLabel className="text-sm cursor-pointer w-full">
                           Excess Protector (0.25%)
-                          {isHighEnd && (
+                          {financials.isHighEnd && (
                             <span className="ml-2 text-[10px] font-bold text-emerald-600 block">
                               (INCLUDED)
                             </span>
@@ -356,7 +332,7 @@ export function StepFinancials({
                           <Checkbox
                             checked={!!field.value}
                             onCheckedChange={field.onChange}
-                            disabled={isHighEnd}
+                            disabled={financials.isHighEnd}
                           />
                         </FormControl>
                       </FormItem>
@@ -405,14 +381,13 @@ export function StepFinancials({
             )}
           </div>
 
-          {/* Preview Section */}
           <div className="bg-slate-900 text-white rounded-lg p-6 shadow-xl border border-slate-800">
             <div className="flex items-center justify-between border-b border-slate-700 pb-4 mb-4">
               <h3 className="font-bold text-sm uppercase tracking-widest text-slate-400">
                 Premium Preview
               </h3>
               <div className="text-right text-[10px] font-mono text-slate-500 flex items-center gap-2">
-                {quoteQuery.isLoading && (
+                {quoteQuery.isFetching && (
                   <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
                 )}
                 {breakdown ? "AUTHORITATIVE MATH" : "ESTIMATED"}
@@ -420,7 +395,7 @@ export function StepFinancials({
             </div>
 
             <div className="space-y-6">
-              {!breakdown && !quoteQuery.isLoading ? (
+              {!breakdown && !quoteQuery.isFetching ? (
                 <div className="py-12 text-center space-y-2">
                   <p className="text-slate-500 text-xs uppercase tracking-widest font-bold">
                     Awaiting Input
@@ -440,13 +415,13 @@ export function StepFinancials({
                         {isMotorPrivate && (
                           <span className="text-[10px] text-slate-500 font-mono">
                             Applied Rate:{" "}
-                            {((financials as any).basicRate || financials.rate).toFixed(2)}%
+                            {(financials.basicRate || financials.rate || 0).toFixed(2)}%
                           </span>
                         )}
                       </div>
                       <span
                         className={`font-mono font-bold ${
-                          quoteQuery.isLoading ? "opacity-40" : ""
+                          quoteQuery.isFetching ? "opacity-40" : ""
                         }`}
                       >
                         {breakdown
@@ -469,7 +444,7 @@ export function StepFinancials({
                           <div
                             key={benefit.name}
                             className={`flex justify-between text-xs py-1 border-b border-slate-800 last:border-0 ${
-                              quoteQuery.isLoading ? "opacity-40" : ""
+                              quoteQuery.isFetching ? "opacity-40" : ""
                             }`}
                           >
                             <span className="text-slate-300 italic">
@@ -501,7 +476,7 @@ export function StepFinancials({
                             <div
                               key={name}
                               className={`flex justify-between text-xs ${
-                                quoteQuery.isLoading ? "opacity-40" : ""
+                                quoteQuery.isFetching ? "opacity-40" : ""
                               }`}
                             >
                               <span className="text-slate-400">
@@ -530,7 +505,7 @@ export function StepFinancials({
                         <div className="text-right">
                           <span
                             className={`text-2xl font-black text-emerald-400 font-mono ${
-                              quoteQuery.isLoading ? "opacity-40" : ""
+                              quoteQuery.isFetching ? "opacity-40" : ""
                             }`}
                           >
                             <span className="text-sm font-normal mr-1">
