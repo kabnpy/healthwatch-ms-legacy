@@ -2,6 +2,7 @@
 
 ## 1. Visual Identity & Design Principles
 - **Aesthetic Core:** Prioritize **Modern Minimalism**. Use high-quality typography and intentional whitespace to create a clean, professional workspace. The design should feel airy and efficient, removing all unnecessary metaphors or "boxed-in" containers.
+- **Document Fidelity:** While the application UI prioritizes minimalism, **External Documents (Risk Notes, Invoices)** may employ a **Traditional High-Density** grid-based layout using serif typography (e.g., Georgia) to maintain industry-standard trust and professional information density.
 - **Brand Palette:** Employ **Subtle Neutrals**. Use a soft palette of grays and off-whites consistently across the entire system. Reserve professional accents (like corporate blue or green) for primary actions and system feedback.
 - **Visual Weight:** Let spacing and type scale carry the design. Use borders and dividers sparingly to define structure without adding visual clutter.
 
