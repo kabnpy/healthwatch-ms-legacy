@@ -17,7 +17,6 @@ if TYPE_CHECKING:
     from .user import User
 
 
-
 class PolicyStatus(str, Enum):
     ACTIVE = "Active"
     EXPIRED = "Expired"
@@ -137,12 +136,14 @@ class Product(ProductBase, table=True):
     def validate_risk_details(self, risk_details: dict[str, Any]) -> dict[str, Any]:
         if "motor private" in self.class_of_insurance.lower():
             from app.schemas import MotorPrivateRiskDetails
+
             validated = MotorPrivateRiskDetails(**risk_details)
             return validated.model_dump(mode="python")
         return risk_details
 
     def calculate_premium(self, risk_details: dict[str, Any]) -> Decimal:
         from app.services.rating import RatingService
+
         breakdown = RatingService.calculate_breakdown(self, risk_details)
         return breakdown.net_premium
 

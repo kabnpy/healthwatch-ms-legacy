@@ -1,29 +1,35 @@
-{% extends "documents/base.html" %}
-
-{% block extra_style %}
+{% extends "documents/base.html" %} {% block extra_style %}
 <style>
     body {
-        font-family: Georgia, 'Times New Roman', Times, serif;
-        font-size: 11px;
+        font-family: Georgia, serif;
+        font-size: 10px;
+    }
+
+    .doc-title-bar {
+        text-align: center;
+        font-size: 13px;
+        font-weight: 700;
+        padding: 5px 0;
+        margin-bottom: 0;
+        text-decoration: underline;
     }
 
     /* ── Main table ── */
-    .section-table {
+    .risknote-table {
         width: 100%;
         border-collapse: collapse;
         border: 1.5px solid #000;
-        margin-top: 10px;
     }
 
-    .section-table th,
-    .section-table td {
+    .risknote-table th,
+    .risknote-table td {
         border: 1px solid #000;
         padding: 6px 8px;
         vertical-align: top;
         line-height: 1.55;
     }
 
-    .section-table th[scope="row"] {
+    .risknote-table th[scope="row"] {
         width: 16%;
         font-weight: 700;
         font-size: 10px;
@@ -33,20 +39,27 @@
         text-align: left;
     }
 
-    /* ── Row Details ── */
+    /* ── Insured ── */
+    .client-name {
+        font-size: 12px;
+        font-weight: 700;
+        display: block;
+    }
+    .client-kra-pin {
+        font-size: 10px;
+        color: #333;
+    }
+    .client-address,
+    .client-town {
+        display: block;
+        font-size: 10px;
+        color: #444;
+    }
+
     .space-between {
         display: flex;
         justify-content: space-between;
         align-items: center;
-    }
-
-    .client-name {
-        font-size: 12px;
-        font-weight: 700;
-    }
-    .client-kra-pin, .policy-num {
-        font-size: 10px;
-        font-family: monospace;
     }
 
     /* ── Inner tables (benefits, excess, special clauses, premium) ── */
@@ -90,55 +103,45 @@
         font-weight: 700;
     }
 
-    .risknote-header {
-        margin-bottom: 10px;
-        text-align: center;
-    }
-
-    .risknote-title {
-        font-size: 13px;
-        font-weight: 700;
-        text-decoration: underline;
-        text-transform: uppercase;
-    }
-
-    .risknote-ref {
-        font-size: 9px;
-        color: #666;
-        margin-top: 2px;
+    .doc-footer {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 12px;
+        font-size: 10px;
+        color: #444;
     }
 
     @media print {
         tr {
             page-break-inside: avoid;
         }
-        .section-table {
+        .risknote-table {
             page-break-inside: auto;
         }
     }
 </style>
-{% endblock %}
+{% endblock %} {% block content %} {% set snapshot = risk_note.cover_snapshot or
+{} %}
+<div class="doc-title-bar">RISK NOTE</div>
 
-{% block content %}
-<div class="risknote-header">
-    <div class="risknote-title">RISK NOTE</div>
-    <div class="risknote-ref">Ref: {{ risk_note.risk_note_number or "DRAFT" }}</div>
-</div>
-
-<table class="section-table">
+<table class="risknote-table">
     <!-- Insured -->
     <tr>
         <th scope="row">Insured</th>
         <td colspan="4">
             <div class="space-between">
                 <span class="client-name">{{ client.name }}</span>
-                <span class="client-kra-pin">P.I.N: {{ client.kra_pin or "N/A" }}</span>
+                <span class="client-kra-pin"
+                    >P.I.N: {{ client.kra_pin or "N/A" }}</span
+                >
             </div>
-            <span class="client-address" style="display: block; font-size: 10px; color: #444;">
-                {% if client.physical_address %}{{ client.physical_address }}{% elif client.postal_number %}P.O. Box {{ client.postal_number }}{% else %}No Address Provided{% endif %}
-                {% if client.postal_code %} - {{ client.postal_code }}{% endif %}
+            <span class="client-address">
+                {% if client.physical_address %}{{ client.physical_address }}{%
+                elif client.postal_number %}P.O. Box {{ client.postal_number
+                }}{% else %}No Address Provided{% endif %} {% if
+                client.postal_code %} - {{ client.postal_code }}{% endif %}
             </span>
-            <span class="client-town" style="display: block; font-size: 10px; color: #444;">{{ client.town or "Nairobi" }}</span>
+            <span class="client-town">{{ client.town or "Nairobi" }}</span>
         </td>
     </tr>
 
@@ -148,7 +151,7 @@
         <td colspan="4">
             <div class="space-between">
                 <span>Motor Private</span>
-                <span class="policy-num">[Policy No. {{ policy.policy_number }}]</span>
+                <span>[Policy No. {{ policy.policy_number }}]</span>
             </div>
         </td>
     </tr>
@@ -157,7 +160,9 @@
     <tr>
         <th scope="row">Period</th>
         <td colspan="4">
-            {{ risk_note.coverage_start.strftime('%d %B %Y') }} &nbsp;&mdash;&nbsp; {{ risk_note.coverage_end.strftime('%d %B %Y') }}
+            {{ risk_note.coverage_start.strftime('%d %B %Y') }}
+            &nbsp;&mdash;&nbsp; {{ risk_note.coverage_end.strftime('%d %B %Y')
+            }}
         </td>
     </tr>
 
@@ -165,21 +170,24 @@
     <tr>
         <th scope="row">Cover</th>
         <td colspan="4">
-            Comprehensive Cover - This protects you against losses
-            and/or damages to your vehicle due to accidental fire, theft
-            or an accident. It also covers third party's death, bodily
-            injury and/or property damage as well as damage to your
-            vehicle due to accidental fire, theft or an accident.
+            Comprehensive Cover - This protects you against losses and/or
+            damages to your vehicle due to accidental fire, theft or an
+            accident. It also covers third party's death, bodily injury and/or
+            property damage as well as damage to your vehicle due to accidental
+            fire, theft or an accident.
         </td>
     </tr>
 
     <!-- Vehicle Details -->
     <tr>
         <th scope="row">Vehicle<br />Details</th>
-        <td>Reg No: {{ risk_note.cover_snapshot.VEHICLE.get('Reg No', risk_note.cover_snapshot.VEHICLE.get('Reg. No', 'N/A')) }}</td>
-        <td>Make: {{ risk_note.cover_snapshot.VEHICLE.Make }}</td>
-        <td>Year: {{ risk_note.cover_snapshot.VEHICLE.Year or "N/A" }}</td>
-        <td>Value: {{ risk_note.cover_snapshot.sum_insured|format_currency }}</td>
+        {% set vehicle = snapshot.get('VEHICLE', {}) %}
+        <td>
+            Reg No: {{ vehicle.get('Reg No', vehicle.get('Reg. No', 'N/A')) }}
+        </td>
+        <td>Make: {{ vehicle.get('Make', 'N/A') }}</td>
+        <td>Year: {{ vehicle.get('Year', 'N/A') }}</td>
+        <td>Value: {{ (snapshot.get('sum_insured') or 0)|format_currency }}</td>
     </tr>
 
     <!-- Benefits & Limits -->
@@ -198,8 +206,8 @@
                 <tr>
                     <td>Passengers Legal Liability</td>
                     <td>
-                        Kshs. 5,000,000 per person and Kshs.
-                        20,000,000.00 per event
+                        Kshs. 5,000,000 per person and Kshs. 20,000,000.00 per
+                        event
                     </td>
                 </tr>
                 <tr>
@@ -225,9 +233,8 @@
                 <tr>
                     <td>Personal Accident (Driver &amp; Loader)</td>
                     <td>
-                        Kshs. 100,000.00 on Death and Permanent Total
-                        Disability (Accumulation Limit – Kshs.
-                        200,000.00)
+                        Kshs. 100,000.00 on Death and Permanent Total Disability
+                        (Accumulation Limit – Kshs. 200,000.00)
                     </td>
                 </tr>
                 <tr>
@@ -250,8 +257,7 @@
                 <tr>
                     <td>Own Damage and Partial</td>
                     <td>
-                        5% of value minimum Kshs. 20,000/- Max Kshs.
-                        100,000.00
+                        5% of value minimum Kshs. 20,000/- Max Kshs. 100,000.00
                     </td>
                 </tr>
                 <tr>
@@ -264,30 +270,23 @@
                 </tr>
                 <tr>
                     <td>Total Theft losses with anti-theft device</td>
-                    <td>
-                        10% of vehicle value minimum Kshs. 20,000.00
-                    </td>
+                    <td>10% of vehicle value minimum Kshs. 20,000.00</td>
+                </tr>
+                <tr>
+                    <td>Total Theft losses without anti-theft device</td>
+                    <td>20% of vehicle value minimum Kshs. 20,000.00</td>
                 </tr>
                 <tr>
                     <td>
-                        Total Theft losses without anti-theft device
-                    </td>
-                    <td>
-                        20% of vehicle value minimum Kshs. 20,000.00
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Total Theft losses for vehicles with tracking
-                        device
+                        Total Theft losses for vehicles with tracking device
                     </td>
                     <td>5% of vehicle value minimum Kshs. 20,000.00</td>
                 </tr>
                 <tr>
                     <td>Young and novice driver</td>
                     <td>
-                        Additional Kshs. 7,500.00 (under 21 years / less
-                        than 1 year)
+                        Additional Kshs. 7,500.00 (under 21 years / less than 1
+                        year)
                     </td>
                 </tr>
             </table>
@@ -297,9 +296,7 @@
     <!-- Drivers -->
     <tr>
         <th scope="row">Drivers</th>
-        <td colspan="4">
-            Any authorised driver with a valid driver's license
-        </td>
+        <td colspan="4">Any authorised driver with a valid driver's license</td>
     </tr>
 
     <!-- Special Clauses -->
@@ -312,25 +309,26 @@
                         Including Special Perils<br />
                         Including Kenya jurisdiction<br />
                         Including riot, strike and civil commotion<br />
-                        Including cover whilst the vehicle is in custody
-                        of motor trader<br />
+                        Including cover whilst the vehicle is in custody of
+                        motor trader<br />
                         Legal liability of passengers<br />
                         PVT – 010/044/1/005149/2018
                     </td>
                     <td>
                         Replacement parts clause<br />
                         Cancellation clause – 30 days<br />
-                        Warranted approved anti-theft device is fitted
-                        in the vehicle<br />
+                        Warranted approved anti-theft device is fitted in the
+                        vehicle<br />
                         Excluding terrorism and political violence<br />
-                        No blame no excess – applicable to valid
-                        collision accidents and confirmation on police
-                        abstract blaming an identifiable third party
+                        No blame no excess – applicable to valid collision
+                        accidents and confirmation on police abstract blaming an
+                        identifiable third party
                     </td>
                 </tr>
             </table>
         </td>
     </tr>
+
     <!-- Premium -->
     <tr class="inner-row">
         <th scope="row">Annual<br />Premium</th>
@@ -345,15 +343,13 @@
                     <td>{{ benefit.name }}</td>
                     <td>{{ benefit.amount|format_currency }}</td>
                 </tr>
-                {% endfor %}
-                {% if financial_breakdown.taxes %}
-                    {% for tax_name, tax_amt in financial_breakdown.taxes.items() %}
-                    <tr>
-                        <td>{{ tax_name|replace('_', ' ')|title }}</td>
-                        <td>{{ tax_amt|format_currency }}</td>
-                    </tr>
-                    {% endfor %}
-                {% endif %}
+                {% endfor %} {% if financial_breakdown.taxes %} {% for tax_name,
+                tax_amt in financial_breakdown.taxes.items() %}
+                <tr>
+                    <td>{{ tax_name|replace('_', ' ')|title }}</td>
+                    <td>{{ tax_amt|format_currency }}</td>
+                </tr>
+                {% endfor %} {% endif %}
                 <tr class="premium-total">
                     <td>Total</td>
                     <td>{{ risk_note.total_amount|format_currency }}</td>
@@ -371,6 +367,9 @@
 
 <div class="doc-footer">
     <span>Issued on: {{ current_date }}</span>
-    <span>Prepared by: {{ risk_note.created_by.full_name if risk_note.created_by else "HealthWatch System" }}</span>
+    <span
+        >Prepared by: {{ risk_note.created_by.full_name if risk_note.created_by
+        else "HealthWatch System" }}</span
+    >
 </div>
 {% endblock %}

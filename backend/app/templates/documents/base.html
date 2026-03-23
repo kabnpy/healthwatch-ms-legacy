@@ -1,105 +1,107 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <style>
-        @page {
-            size: A4;
-            margin: 15mm;
-        }
-        body {
-            font-family: 'Helvetica', 'Arial', sans-serif;
-            font-size: 11pt;
-            line-height: 1.4;
-            color: #000;
-            margin: 0;
-            padding: 0;
-        }
-        .letterhead {
-            border-bottom: 4px solid #000;
-            padding-bottom: 15px;
-            margin-bottom: 30px;
-            overflow: hidden; /* Clearfix for floats */
-        }
-        .letterhead-logo {
-            float: left;
-        }
-        .letterhead-logo h1 {
-            font-weight: 900;
-            font-size: 24pt;
-            text-transform: uppercase;
-            margin: 0;
-            line-height: 1;
-        }
-        .letterhead-logo p {
-            font-size: 8pt;
-            text-transform: uppercase;
-            letter-spacing: 0.2em;
-            font-weight: 700;
-            color: #64748b;
-            margin: 2px 0 0 0;
-        }
-        .letterhead-contact {
-            float: right;
-            text-align: right;
-            font-size: 8pt;
-            font-weight: 500;
-            color: #475569;
-            line-height: 1.2;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        .letterhead-contact p {
-            margin: 1px 0;
-        }
-        .letterhead-contact .email {
-            font-weight: 700;
-            color: #000;
-        }
-        .content {
-            min-height: 700px;
-            clear: both;
-        }
-        .footer {
-            margin-top: 40px;
-            padding-top: 15px;
-            border-top: 1px solid #e2e8f0;
-            font-size: 7pt;
-            color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            font-weight: 700;
-            overflow: hidden;
-        }
-        .footer-left {
-            float: left;
-        }
-        .footer-right {
-            float: right;
-        }
-    </style>
-    {% block extra_style %}{% endblock %}
-</head>
-<body>
-    <div class="letterhead">
-        <div class="letterhead-logo">
-            <h1>HealthWatch</h1>
-            <p>Insurance Agency</p>
+    <head>
+        <meta charset="UTF-8" />
+        <style>
+            @page {
+                size: A4;
+                margin: 15mm;
+            }
+            body {
+                font-family: "Helvetica", "Arial", sans-serif;
+                font-size: 10pt;
+                line-height: 1.4;
+                color: #000;
+                margin: 0;
+                padding: 0;
+            }
+            .letterhead {
+                border-bottom: 4px solid #000;
+                padding-bottom: 15px;
+                margin-bottom: 30px;
+                overflow: hidden; /* Clearfix for floats */
+            }
+            .letterhead-logo {
+                float: left;
+            }
+            .letterhead-logo h1 {
+                font-weight: 900;
+                font-size: 24pt;
+                text-transform: uppercase;
+                margin: 0;
+                line-height: 1;
+            }
+            .letterhead-logo p {
+                font-size: 8pt;
+                text-transform: uppercase;
+                letter-spacing: 0.2em;
+                font-weight: 700;
+                color: #64748b;
+                margin: 2px 0 0 0;
+            }
+            .letterhead-contact {
+                float: right;
+                text-align: right;
+                font-size: 8pt;
+                font-weight: 500;
+                color: #475569;
+                line-height: 1.2;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            }
+            .letterhead-contact p {
+                margin: 1px 0;
+            }
+            .letterhead-contact .email {
+                font-weight: 700;
+                color: #000;
+            }
+            .content {
+                min-height: 700px;
+                clear: both;
+            }
+            .footer {
+                margin-top: 40px;
+                padding-top: 15px;
+                border-top: 1px solid #e2e8f0;
+                font-size: 7pt;
+                color: #94a3b8;
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                font-weight: 700;
+                overflow: hidden;
+            }
+            .footer-left {
+                float: left;
+            }
+            .footer-right {
+                float: right;
+            }
+        </style>
+        {% block extra_style %}{% endblock %}
+    </head>
+    <body>
+        <div class="letterhead">
+            <div class="letterhead-logo">
+                <h1>HealthWatch</h1>
+                <p>Insurance Agency</p>
+            </div>
+            <div class="letterhead-contact">
+                <p>1st Floor, Bishop Garden Towers, Nairobi</p>
+                <p>P.O. Box 1966 - 00502 | +254 746 129 521</p>
+                <p class="email">info@healthwatch.co.ke</p>
+            </div>
         </div>
-        <div class="letterhead-contact">
-            <p>1st Floor, Bishop Garden Towers, Nairobi</p>
-            <p>P.O. Box 1966 - 00502 | +254 746 129 521</p>
-            <p class="email">info@healthwatch.co.ke</p>
+
+        <div class="content">{% block content %}{% endblock %}</div>
+
+        <div class="footer">
+            <div class="footer-left">
+                Computer generated &bull; Valid without signature
+            </div>
+            <div class="footer-right">
+                HealthWatch MS &bull; {{ current_date }}
+            </div>
         </div>
-    </div>
-
-    <div class="content">
-        {% block content %}{% endblock %}
-    </div>
-
-    <div class="footer">
-        <div class="footer-left">Computer generated &bull; Valid without signature</div>
-        <div class="footer-right">HealthWatch MS &bull; {{ current_date }}</div>
-    </div>
-</body>
+    </body>
 </html>

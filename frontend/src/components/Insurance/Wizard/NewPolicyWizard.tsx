@@ -78,16 +78,22 @@ export function NewPolicyWizard({
       const findValue = (obj: any): number => {
         if (!obj || typeof obj !== "object") return 0
         // Priority keys for sum insured
-        const priorityKeys = ["sum_insured", "value", "sum insured", "Value Kshs."]
+        const priorityKeys = [
+          "sum_insured",
+          "value",
+          "sum insured",
+          "Value Kshs.",
+        ]
         for (const key of priorityKeys) {
           if (obj[key] !== undefined && typeof obj[key] !== "object") {
             const v = obj[key]
-            const cleanVal = typeof v === "string" ? v.replace(/[^0-9.]/g, "") : v
+            const cleanVal =
+              typeof v === "string" ? v.replace(/[^0-9.]/g, "") : v
             return Number(cleanVal) || 0
           }
         }
-        
-        for (const [k, v] of Object.entries(obj)) {
+
+        for (const [_k, v] of Object.entries(obj)) {
           if (typeof v === "object") {
             const found = findValue(v)
             if (found !== 0) return found

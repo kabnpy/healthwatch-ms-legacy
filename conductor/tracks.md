@@ -19,7 +19,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Unify Risk Note digital and PDF views using a shared HTML source and fix PDF loading bug.**
+- [~] **Track: Unify Risk Note digital and PDF views using a shared HTML source and fix PDF loading bug.**
 *Link: [./tracks/risknote_view_unification_20260323/](./tracks/risknote_view_unification_20260323/)*
 
 

@@ -1,8 +1,10 @@
 import logging
 from datetime import date, datetime, timedelta
 
+from typing import Any, cast
+
 from sqlalchemy.orm import selectinload
-from sqlmodel import Session, func, select
+from sqlmodel import Session, col, func, select
 
 from app.core.config import settings
 from app.models import (
@@ -30,17 +32,19 @@ class RenewalService:
             select(RiskNote.policy_id, func.max(RiskNote.coverage_end).label("max_end"))
             .where(RiskNote.status == RiskNoteStatus.ISSUED)
             .where(RiskNote.deleted_at == None)
-            .group_by(RiskNote.policy_id)
+            .group_by(col(RiskNote.policy_id))
             .subquery()
         )
 
         statement = (
             select(Policy)
-            .join(latest_rn_sub, Policy.id == latest_rn_sub.c.policy_id)
+            .join(latest_rn_sub, col(Policy.id) == latest_rn_sub.c.policy_id)
             .where(latest_rn_sub.c.max_end == target_date)
-            .where(Policy.status.in_([PolicyStatus.ACTIVE, PolicyStatus.RENEWAL_INVITED]))
-            .where(Policy.deleted_at == None)
-            .options(selectinload(Policy.risk_notes), selectinload(Policy.client))
+            .where(
+                col(Policy.status).in_([PolicyStatus.ACTIVE, PolicyStatus.RENEWAL_INVITED])
+            )
+            .where(col(Policy.deleted_at) == None)
+            .options(selectinload(cast(Any, Policy.risk_notes)), selectinload(cast(Any, Policy.client)))
         )
         return list(session.exec(statement).all())
 
@@ -50,6 +54,7 @@ class RenewalService:
         Retrieves policies whose latest issued Risk Note expires within 'days' from today.
         """
         from app.crud import get_policies
+
         return get_policies(session, expiring_within=days)
 
     @staticmethod
@@ -62,11 +67,17 @@ class RenewalService:
 
         # Only proceed if a manually prepped invitation note exists
         latest_rn = next(
-            (rn for rn in policy.risk_notes if rn.status == RiskNoteStatus.RENEWAL_INVITED),
-            None
+            (
+                rn
+                for rn in policy.risk_notes
+                if rn.status == RiskNoteStatus.RENEWAL_INVITED
+            ),
+            None,
         )
         if not latest_rn:
-            raise ValueError(f"No 'Renewal Invited' draft found for policy {policy.policy_number}. Please prepare a renewal draft first.")
+            raise ValueError(
+                f"No 'Renewal Invited' draft found for policy {policy.policy_number}. Please prepare a renewal draft first."
+            )
 
         project_name = settings.PROJECT_NAME
         subject = f"{project_name} - Renewal Invitation for {policy.policy_number}"
@@ -102,7 +113,7 @@ class RenewalService:
                 subject=subject,
                 summary=f"Renewal invitation dispatched for policy {policy.policy_number}. Coverage Expiry: {latest_rn.coverage_end}.",
                 file_path="SYSTEM_GENERATED_EMAIL",
-                date_logged=datetime.now()
+                date_logged=datetime.now(),
             )
         )
         session.add(db_correspondence)
@@ -115,7 +126,9 @@ class RenewalService:
         if not policy.client or not policy.client.email:
             return
 
-        latest_rn = next((rn for rn in policy.risk_notes if rn.status == RiskNoteStatus.ISSUED), None)
+        latest_rn = next(
+            (rn for rn in policy.risk_notes if rn.status == RiskNoteStatus.ISSUED), None
+        )
         if not latest_rn:
             return
 
@@ -148,7 +161,7 @@ class RenewalService:
                 subject=subject,
                 summary=f"7-day renewal reminder dispatched for policy {policy.policy_number}. Coverage Expiry: {latest_rn.coverage_end}.",
                 file_path="SYSTEM_GENERATED_EMAIL",
-                date_logged=datetime.now()
+                date_logged=datetime.now(),
             )
         )
         session.add(db_correspondence)
@@ -171,20 +184,27 @@ class RenewalService:
 
             existing_invitations_statement = (
                 select(Correspondence.subject)
-                .where(Correspondence.subject.in_(list(invitation_subjects)))
+                .where(col(Correspondence.subject).in_(list(invitation_subjects)))
                 .where(Correspondence.date_logged >= today_start)
             )
-            sent_invitation_subjects = set(session.exec(existing_invitations_statement).all())
+            sent_invitation_subjects = set(
+                session.exec(existing_invitations_statement).all()
+            )
 
             for policy in to_invite:
                 subject = f"{settings.PROJECT_NAME} - Renewal Invitation for {policy.policy_number}"
-                if subject not in sent_invitation_subjects and policy.status != PolicyStatus.RENEWAL_INVITED:
+                if (
+                    subject not in sent_invitation_subjects
+                    and policy.status != PolicyStatus.RENEWAL_INVITED
+                ):
                     try:
                         RenewalService.send_renewal_invitation(session, policy=policy)
                         # Commit per-item to ensure recovery even on partial failure
                         session.commit()
                     except Exception as e:
-                        logging.error(f"Failed to send invitation for {policy.policy_number}: {e}")
+                        logging.error(
+                            f"Failed to send invitation for {policy.policy_number}: {e}"
+                        )
                         session.rollback()
 
         # 2. 7-day reminders
@@ -198,20 +218,28 @@ class RenewalService:
 
             existing_reminders_statement = (
                 select(Correspondence.subject)
-                .where(Correspondence.subject.in_(list(reminder_subjects)))
+                .where(col(Correspondence.subject).in_(list(reminder_subjects)))
                 .where(Correspondence.date_logged >= today_start)
             )
-            sent_reminder_subjects = set(session.exec(existing_reminders_statement).all())
+            sent_reminder_subjects = set(
+                session.exec(existing_reminders_statement).all()
+            )
 
             for policy in to_remind:
                 subject = f"{settings.PROJECT_NAME} - Renewal Reminder: {policy.policy_number}"
-                if subject not in sent_reminder_subjects and policy.status in [PolicyStatus.ACTIVE, PolicyStatus.RENEWAL_INVITED]:
+                if subject not in sent_reminder_subjects and policy.status in [
+                    PolicyStatus.ACTIVE,
+                    PolicyStatus.RENEWAL_INVITED,
+                ]:
                     try:
                         RenewalService.send_renewal_reminder(session, policy=policy)
                         # Commit per-item to ensure recovery even on partial failure
                         session.commit()
                     except Exception as e:
-                        logging.error(f"Failed to send reminder for {policy.policy_number}: {e}")
+                        logging.error(
+                            f"Failed to send reminder for {policy.policy_number}: {e}"
+                        )
                         session.rollback()
+
 
 renewal_service = RenewalService()

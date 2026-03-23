@@ -20,7 +20,7 @@ import {
   type RiskNotePublic,
   RiskNotesService,
 } from "@/client"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import useCustomToast from "@/hooks/useCustomToast"
 import type { EnhancedPolicy, EnhancedRiskNote } from "@/types/insurance"
 import { handleError } from "@/utils"
@@ -138,13 +138,7 @@ function RiskNoteLoader({ id }: { id: string }) {
   )
 }
 
-function PDFLoader({
-  id,
-  type,
-}: {
-  id: string
-  type: "risknote" | "invoice"
-}) {
+function PDFLoader({ id, type }: { id: string; type: "risknote" | "invoice" }) {
   const endpoint = type === "risknote" ? "risk-notes" : "financials/invoices"
   const pdfUrl = `${(OpenAPI.BASE || "").replace(/\/$/, "")}/api/v1/${endpoint}/${id}/pdf`
 
@@ -352,7 +346,10 @@ export function DocumentViewer({
             className="w-auto"
           >
             <TabsList>
-              <TabsTrigger value="digital" className="text-xs font-bold uppercase">
+              <TabsTrigger
+                value="digital"
+                className="text-xs font-bold uppercase"
+              >
                 Digital Version
               </TabsTrigger>
               <TabsTrigger value="pdf" className="text-xs font-bold uppercase">
@@ -373,15 +370,12 @@ export function DocumentViewer({
               </div>
             }
           >
-            {type === "risknote" && (
-              <>
-                {viewMode === "digital" ? (
-                  <RiskNoteLoader id={id} />
-                ) : (
-                  <PDFLoader id={id} type="risknote" />
-                )}
-              </>
-            )}
+            {type === "risknote" &&
+              (viewMode === "digital" ? (
+                <RiskNoteLoader id={id} />
+              ) : (
+                <PDFLoader id={id} type="risknote" />
+              ))}
             {type === "invoice" && <InvoiceLoader id={id} />}
           </Suspense>
         )}
@@ -393,4 +387,3 @@ export function DocumentViewer({
     </div>
   )
 }
-

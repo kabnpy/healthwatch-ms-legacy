@@ -1,14 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { FileDown, Mail } from "lucide-react"
 import { Suspense, useCallback, useState } from "react"
-import { OpenAPI, PoliciesService } from "@/client"
+import { OpenAPI, PoliciesService, type RiskNotePublic } from "@/client"
+import { BlobPDFViewer } from "@/components/Common/BlobPDFViewer"
 import { DataTable } from "@/components/Common/DataTable"
 import { DocumentManager } from "@/components/Common/DocumentManager"
 import { DocumentViewerModal } from "@/components/Common/DocumentViewerModal"
-import { BlobPDFViewer } from "@/components/Common/BlobPDFViewer"
 import ErrorComponent from "@/components/Common/ErrorComponent"
 import { DocumentViewer } from "@/components/Documents/DocumentViewer"
 import { RiskNoteTemplate } from "@/components/Documents/templates/RiskNoteTemplate"
+import { HTMLRiskNoteViewer } from "@/components/Insurance/HTMLRiskNoteViewer"
 import { RiskNoteForm } from "@/components/Insurance/RiskNoteForm"
 import { VersionHistory } from "@/components/Insurance/VersionHistory"
 import PendingItems from "@/components/Pending/PendingItems"
@@ -140,7 +141,7 @@ function PolicyDashboardContent({
       const filename = `RiskNote_${riskNote.risk_note_number || riskNote.id}.pdf`
       try {
         await downloadAuthenticatedFile(url, filename)
-      } catch (error) {
+      } catch (_error) {
         showErrorToast("Failed to download PDF")
       }
     },
@@ -186,7 +187,7 @@ function PolicyDashboardContent({
     )
   })()
 
-  const calculatePolicyProgress = (note: EnhancedRiskNote | undefined) => {
+  const calculatePolicyProgress = (note: RiskNotePublic | undefined) => {
     if (!note?.coverage_start || !note?.coverage_end) return "0%"
     const [sY, sM, sD] = note.coverage_start.split("-").map(Number)
     const [eY, eM, eD] = note.coverage_end.split("-").map(Number)
@@ -333,20 +334,24 @@ function PolicyDashboardContent({
                       className="h-7"
                     >
                       <TabsList className="h-7 p-0.5 bg-muted">
-                        <TabsTrigger value="digital" className="text-[10px] h-6 px-2">
+                        <TabsTrigger
+                          value="digital"
+                          className="text-[10px] h-6 px-2"
+                        >
                           Digital View
                         </TabsTrigger>
-                        <TabsTrigger value="pdf" className="text-[10px] h-6 px-2">
+                        <TabsTrigger
+                          value="pdf"
+                          className="text-[10px] h-6 px-2"
+                        >
                           PDF View
                         </TabsTrigger>
                       </TabsList>
                     </Tabs>
                   </div>
                   {viewMode === "digital" ? (
-                    <RiskNoteTemplate
-                      riskNote={latestRiskNote as EnhancedRiskNote}
-                      client={client}
-                      policy={policy as EnhancedPolicy}
+                    <HTMLRiskNoteViewer
+                      riskNoteId={latestRiskNote.id}
                     />
                   ) : (
                     <div className="w-full bg-zinc-100 flex items-center justify-center p-4">
@@ -402,8 +407,12 @@ function PolicyDashboardContent({
               >
                 <VersionHistory
                   riskNotes={riskNotes}
-                  onView={(rn) => handleViewRiskNote(rn.id, "risknote", "digital")}
-                  onViewPdf={(rn) => handleViewRiskNote(rn.id, "risknote", "pdf")}
+                  onView={(rn) =>
+                    handleViewRiskNote(rn.id, "risknote", "digital")
+                  }
+                  onViewPdf={(rn) =>
+                    handleViewRiskNote(rn.id, "risknote", "pdf")
+                  }
                 />
               </TabsContent>
 

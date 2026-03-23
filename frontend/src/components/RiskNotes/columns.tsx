@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import { Copy, Eye, FileDown, Mail, MoreHorizontal } from "lucide-react"
+import { Copy, Eye, FileDown, FileText, Mail, MoreHorizontal } from "lucide-react"
 import { toast } from "sonner"
 
 import type { RiskNotePublic } from "@/client"

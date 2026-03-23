@@ -22,7 +22,7 @@ from app.models import (
     RiskNotesPublic,
     RiskNoteUpdate,
 )
-from app.services.document_service import generate_risknote_pdf
+from app.services.document_service import generate_risknote_html, generate_risknote_pdf
 from app.services.policy import policy_service
 
 router = APIRouter()
@@ -92,18 +92,42 @@ def read_risk_note_pdf(
         invoice = risk_note.invoice_line_items[0].invoice
 
     pdf_bytes = generate_risknote_pdf(
-        risk_note=risk_note,
-        client=client,
-        policy=policy,
-        invoice=invoice
+        risk_note=risk_note, client=client, policy=policy, invoice=invoice
     )
 
     filename = f"RiskNote_{risk_note.risk_note_number or str(id)}.pdf"
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
-        headers={"Content-Disposition": f"attachment; filename={filename}"}
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
     )
+
+
+@router.get("/{id}/html")
+def read_risk_note_html(
+    session: SessionDep, _current_user: CurrentUser, id: uuid.UUID
+) -> Any:
+    """
+    Generate and return Risk Note as HTML.
+    """
+    risk_note = session.get(RiskNote, id)
+    if not risk_note:
+        raise HTTPException(status_code=404, detail="Risk note not found")
+
+    # Get associated policy and client
+    policy = risk_note.policy
+    client = policy.client
+
+    # Check if there's an invoice
+    invoice = None
+    if risk_note.invoice_line_items:
+        invoice = risk_note.invoice_line_items[0].invoice
+
+    html_content = generate_risknote_html(
+        risk_note=risk_note, client=client, policy=policy, invoice=invoice
+    )
+
+    return Response(content=html_content, media_type="text/html")
 
 
 @router.post("/", response_model=RiskNotePublic)

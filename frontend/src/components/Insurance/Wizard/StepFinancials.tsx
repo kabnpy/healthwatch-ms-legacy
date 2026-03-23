@@ -152,12 +152,12 @@ export function StepFinancials({
   useEffect(() => {
     if (breakdown) {
       console.log("Syncing form with authoritative backend data:", breakdown)
-      
+
       // Update basic rate from backend if present (Motor Private)
       if (breakdown.basic_rate !== undefined) {
         const backendRate = Number(breakdown.basic_rate) * 100
         form.setValue("financials.basicRate", backendRate)
-        
+
         // If it's Motor Private, the "Applied Rate" should reflect the tiered rate from backend
         if (isMotorPrivate && !isManual) {
           form.setValue("financials.rate", Number(backendRate.toFixed(3)))
@@ -167,11 +167,12 @@ export function StepFinancials({
       // Sync high-end status
       if (breakdown.is_high_end !== undefined) {
         form.setValue("financials.isHighEnd", breakdown.is_high_end)
-        
+
         // Auto-enable benefits for high-end as per backend rules
         if (breakdown.is_high_end) {
           if (!extensions.pvt) form.setValue("extensions.pvt", true)
-          if (!extensions.excessProtector) form.setValue("extensions.excessProtector", true)
+          if (!extensions.excessProtector)
+            form.setValue("extensions.excessProtector", true)
         }
       }
     }
@@ -181,7 +182,7 @@ export function StepFinancials({
     isManual,
     form.setValue,
     extensions.pvt,
-    extensions.excessProtector
+    extensions.excessProtector,
   ])
 
   return (
@@ -415,7 +416,12 @@ export function StepFinancials({
                         {isMotorPrivate && (
                           <span className="text-[10px] text-slate-500 font-mono">
                             Applied Rate:{" "}
-                            {(financials.basicRate || financials.rate || 0).toFixed(2)}%
+                            {(
+                              financials.basicRate ||
+                              financials.rate ||
+                              0
+                            ).toFixed(2)}
+                            %
                           </span>
                         )}
                       </div>

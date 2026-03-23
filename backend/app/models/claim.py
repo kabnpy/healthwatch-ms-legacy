@@ -13,7 +13,6 @@ if TYPE_CHECKING:
     from .policy import Policy
 
 
-
 class ClaimStatus(str, Enum):
     REPORTED = "Reported"
     ASSESSED = "Assessed"

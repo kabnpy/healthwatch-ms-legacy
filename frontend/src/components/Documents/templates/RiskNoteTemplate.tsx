@@ -1,23 +1,23 @@
-import { RefreshCcw, Save } from "lucide-react"
-import { useEffect, useMemo, useState } from "react"
-import type { ClientPublic } from "@/client"
-import { Button } from "@/components/ui/button"
+import { RefreshCcw, Save } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import type { ClientPublic } from "@/client";
+import { Button } from "@/components/ui/button";
 import type {
   EnhancedPolicy,
   EnhancedRiskNote,
   RiskNoteContentValue,
   RiskNoteSection,
-} from "@/types/insurance"
-import { formatCurrency } from "@/utils"
-import { BaseDocument } from "../BaseDocument"
-import { RiskNoteTable } from "./RiskNote/RiskNoteTable"
+} from "@/types/insurance";
+import { formatCurrency } from "@/utils";
+import { BaseDocument } from "../BaseDocument";
+import { RiskNoteTable } from "./RiskNote/RiskNoteTable";
 
 interface RiskNoteTemplateProps {
-  riskNote: EnhancedRiskNote
-  client: ClientPublic
-  policy: EnhancedPolicy
-  isEditable?: boolean
-  onSave?: (updatedSnapshot: any) => void
+  riskNote: EnhancedRiskNote;
+  client: ClientPublic;
+  policy: EnhancedPolicy;
+  isEditable?: boolean;
+  onSave?: (updatedSnapshot: any) => void;
 }
 
 export const RiskNoteTemplate = ({
@@ -29,26 +29,26 @@ export const RiskNoteTemplate = ({
 }: RiskNoteTemplateProps) => {
   const [localRiskDetails, setLocalRiskDetails] = useState<Record<string, any>>(
     riskNote.cover_snapshot || {},
-  )
+  );
 
   // Keep local state in sync with external changes if not editing
   useEffect(() => {
     if (!isEditable) {
-      setLocalRiskDetails(riskNote.cover_snapshot || {})
+      setLocalRiskDetails(riskNote.cover_snapshot || {});
     }
-  }, [riskNote.cover_snapshot, isEditable])
+  }, [riskNote.cover_snapshot, isEditable]);
 
   const handleSave = () => {
-    onSave?.(localRiskDetails)
-  }
+    onSave?.(localRiskDetails);
+  };
 
   const handleReset = () => {
-    setLocalRiskDetails(riskNote.cover_snapshot || {})
-  }
+    setLocalRiskDetails(riskNote.cover_snapshot || {});
+  };
 
   // --- DATA CONSOLIDATION LOGIC ---
   const tableSections = useMemo(() => {
-    const sections: RiskNoteSection[] = []
+    const sections: RiskNoteSection[] = [];
 
     // 1. INSURED
     sections.push({
@@ -79,7 +79,7 @@ export const RiskNoteTemplate = ({
           </div>
         </div>
       ),
-    })
+    });
 
     // 2. CLASS
     sections.push({
@@ -94,11 +94,11 @@ export const RiskNoteTemplate = ({
           </span>
         </div>
       ),
-    })
+    });
 
     // 3. PERIOD
-    const startDate = riskNote.coverage_start
-    const endDate = riskNote.coverage_end
+    const startDate = riskNote.coverage_start;
+    const endDate = riskNote.coverage_end;
 
     sections.push({
       name: "PERIOD",
@@ -125,7 +125,7 @@ export const RiskNoteTemplate = ({
           </span>
         </div>
       ),
-    })
+    });
 
     // 4. COVER
     sections.push({
@@ -137,11 +137,11 @@ export const RiskNoteTemplate = ({
           property of third parties.
         </div>
       ),
-    })
+    });
 
     // 5. DYNAMIC RISK SECTIONS (Template + Instance)
-    const template: Record<string, any> = policy.product?.product_details || {}
-    const instance: Record<string, any> = localRiskDetails || {}
+    const template: Record<string, any> = policy.product?.product_details || {};
+    const instance: Record<string, any> = localRiskDetails || {};
 
     // Merge logic: template provides structure, instance provides values
     // We iterate over the template sections to ensure order and grouping
@@ -154,11 +154,11 @@ export const RiskNoteTemplate = ({
       "FINANCIAL SUMMARY",
       "INSURER",
       "AUTHENTICATION",
-    ]
+    ];
 
     // First, handle sections defined in the template
     Object.entries(template).forEach(([name, templateContent]) => {
-      const upperName = name.toUpperCase()
+      const upperName = name.toUpperCase();
       if (!manualSections.includes(upperName)) {
         // Look for content in top-level OR inside the new 'terms' dictionary
         const instanceContent =
@@ -166,12 +166,12 @@ export const RiskNoteTemplate = ({
           instance[upperName] ||
           instance.terms?.[name] ||
           instance.terms?.[name.toLowerCase().replace(/ /g, "_")] ||
-          {}
+          {};
 
-        let mergedContent = templateContent
+        let mergedContent = templateContent;
         if (typeof templateContent === "object" && templateContent !== null) {
           // If it's a structured section (like VEHICLE DETAILS)
-          mergedContent = { ...templateContent }
+          mergedContent = { ...templateContent };
           if (typeof instanceContent === "object" && instanceContent !== null) {
             Object.entries(instanceContent).forEach(([k, v]) => {
               // Only override if the value is not a placeholder or if it has actual data
@@ -181,9 +181,9 @@ export const RiskNoteTemplate = ({
                 v !== "" &&
                 v !== "[ EMPTY ]"
               ) {
-                mergedContent[k] = v
+                mergedContent[k] = v;
               }
-            })
+            });
           }
 
           // Singular Source Mapping: Map the internal 'sum_insured' to the template's 'Value Kshs.'
@@ -191,22 +191,22 @@ export const RiskNoteTemplate = ({
             instance.sum_insured !== undefined &&
             instance.sum_insured !== "[ EMPTY ]"
           ) {
-            mergedContent["Value Kshs."] = instance.sum_insured
+            mergedContent["Value Kshs."] = instance.sum_insured;
           }
         } else if (instanceContent && instanceContent !== "[ EMPTY ]") {
-          mergedContent = instanceContent
+          mergedContent = instanceContent;
         }
 
         sections.push({
           name: upperName,
           content: mergedContent as RiskNoteContentValue,
-        })
+        });
       }
-    })
+    });
 
     // Then, add any sections from instance that weren't in template (fallback for legacy/custom)
     Object.entries(instance).forEach(([name, content]) => {
-      const upperName = name.toUpperCase()
+      const upperName = name.toUpperCase();
       if (
         !manualSections.includes(upperName) &&
         name !== "terms" &&
@@ -215,39 +215,39 @@ export const RiskNoteTemplate = ({
         sections.push({
           name: upperName,
           content: content as RiskNoteContentValue,
-        })
+        });
       }
-    })
+    });
 
     // Finally, add any terms from the 'terms' dictionary that weren't covered by the template
     if (instance.terms) {
       Object.entries(instance.terms).forEach(([name, content]) => {
-        const upperName = name.toUpperCase().replace(/_/g, " ")
+        const upperName = name.toUpperCase().replace(/_/g, " ");
         if (!sections.find((s) => s.name === upperName)) {
           sections.push({
             name: upperName,
             content: content as RiskNoteContentValue,
-          })
+          });
         }
-      })
+      });
     }
 
     // 6. ANNUAL PREMIUM
-    const breakdown = riskNote.financial_breakdown || {}
-    const taxes = (breakdown.taxes as Record<string, number>) || {}
-    const benefits = (breakdown.benefits as any[]) || []
+    const breakdown = riskNote.financial_breakdown || {};
+    const taxes = (breakdown.taxes as Record<string, number>) || {};
+    const benefits = (breakdown.benefits as any[]) || [];
 
-    const taxRows: Record<string, RiskNoteContentValue> = {}
+    const taxRows: Record<string, RiskNoteContentValue> = {};
     Object.entries(taxes).forEach(([name, amt]) => {
       taxRows[name.replace(/_/g, " ").toUpperCase()] = formatCurrency(
         amt as string | number,
-      )
-    })
+      );
+    });
 
-    const benefitRows: Record<string, RiskNoteContentValue> = {}
+    const benefitRows: Record<string, RiskNoteContentValue> = {};
     benefits.forEach((b) => {
-      benefitRows[b.name.toUpperCase()] = formatCurrency(b.amount)
-    })
+      benefitRows[b.name.toUpperCase()] = formatCurrency(b.amount);
+    });
 
     sections.push({
       name: "FINANCIAL SUMMARY",
@@ -261,7 +261,7 @@ export const RiskNoteTemplate = ({
           </span>
         ),
       },
-    })
+    });
 
     // 7. INSURER
     sections.push({
@@ -273,36 +273,17 @@ export const RiskNoteTemplate = ({
           </span>
         </div>
       ),
-    })
+    });
 
-    // 8. AUTHENTICATION
-    const invoice = riskNote.invoice_line_items?.[0]?.invoice
-    sections.push({
-      name: "AUTHENTICATION",
-      content: (
-        <div className="flex justify-between items-center text-black uppercase">
-          <span className="font-bold tracking-tight text-[11px]">
-            {invoice
-              ? `Invoiced: ${invoice.invoice_number}`
-              : "Pending Invoicing"}
-          </span>
-          <span className="font-mono text-[12px] font-bold">
-            [Risk Note Issued:{" "}
-            {new Date(riskNote.created_at || "").toLocaleDateString()}]
-          </span>
-        </div>
-      ),
-    })
-
-    return sections
-  }, [client, policy, riskNote, localRiskDetails])
+    return sections;
+  }, [client, policy, riskNote, localRiskDetails]);
 
   const handleUpdateSection = (sectionName: string, updatedContent: any) => {
     setLocalRiskDetails({
       ...localRiskDetails,
       [sectionName]: updatedContent,
-    })
-  }
+    });
+  };
 
   return (
     <div className="relative group">
@@ -367,5 +348,5 @@ export const RiskNoteTemplate = ({
         </div>
       </BaseDocument>
     </div>
-  )
-}
+  );
+};

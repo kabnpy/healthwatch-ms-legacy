@@ -150,11 +150,18 @@ export const InvoiceTemplate = ({
                     </td>
                     <td className="py-4 px-4 text-[11px] font-black text-black uppercase tracking-tight">
                       <div>
-                        {product?.class_of_insurance || item.description || "N/A"}
+                        {product?.class_of_insurance ||
+                          item.description ||
+                          "N/A"}
                       </div>
                       {riskNote?.cover_snapshot?.VEHICLE && (
                         <div className="text-[9px] font-bold text-slate-500 mt-1">
-                          REG NO: {(riskNote.cover_snapshot.VEHICLE as any)["Reg No"] || (riskNote.cover_snapshot.VEHICLE as any)["Reg. No"] || "N/A"}
+                          REG NO:{" "}
+                          {(riskNote.cover_snapshot.VEHICLE as any)["Reg No"] ||
+                            (riskNote.cover_snapshot.VEHICLE as any)[
+                              "Reg. No"
+                            ] ||
+                            "N/A"}
                         </div>
                       )}
                     </td>

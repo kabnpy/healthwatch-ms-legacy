@@ -97,6 +97,7 @@ class Settings(BaseSettings):
     @property
     def TEMPLATES_DIR(self) -> str:
         import os
+
         return os.path.join(os.path.dirname(os.path.dirname(__file__)), "templates")
 
     def _check_default_secret(self, var_name: str, value: str | None) -> None:

@@ -4,7 +4,8 @@ from datetime import date, datetime, timedelta
 from typing import Any, cast
 
 from sqlalchemy.orm import selectinload
-from sqlmodel import Session, col, func, select
+from sqlmodel import Session, col, delete, func, select
+
 
 from app.models import (
     Insurer,
@@ -209,22 +210,20 @@ def update_policy(
     return db_policy
 
 
-def _apply_expiry_filter(
-    statement: Any, expiring_within: int
-) -> Any:
+def _apply_expiry_filter(statement: Any, expiring_within: int) -> Any:
     target_date = date.today() + timedelta(days=expiring_within)
     latest_rn_sub = (
         select(RiskNote.policy_id, func.max(RiskNote.coverage_end).label("max_end"))
         .where(RiskNote.status == RiskNoteStatus.ISSUED)
         .where(RiskNote.deleted_at == None)
-        .group_by(RiskNote.policy_id)
+        .group_by(col(RiskNote.policy_id))
         .subquery()
     )
-    statement = statement.join(latest_rn_sub, Policy.id == latest_rn_sub.c.policy_id)
+    statement = statement.join(latest_rn_sub, col(Policy.id) == latest_rn_sub.c.policy_id)
     statement = statement.where(latest_rn_sub.c.max_end <= target_date)
     statement = statement.where(latest_rn_sub.c.max_end >= date.today())
     statement = statement.where(
-        Policy.status.in_([PolicyStatus.ACTIVE, PolicyStatus.RENEWAL_INVITED])
+        col(Policy.status).in_([PolicyStatus.ACTIVE, PolicyStatus.RENEWAL_INVITED])
     )
     return statement
 
@@ -283,6 +282,7 @@ def create_risk_note(*, session: Session, risk_note_in: RiskNoteCreate) -> RiskN
     db_obj = RiskNote.model_validate(risk_note_in)
     if not db_obj.risk_note_number:
         from app.services.policy import generate_risk_note_number
+
         db_obj.risk_note_number = generate_risk_note_number()
     session.add(db_obj)
     session.commit()
