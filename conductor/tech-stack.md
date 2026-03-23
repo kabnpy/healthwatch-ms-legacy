@@ -14,7 +14,7 @@
     - **Modular Domain Architecture:** Models and CRUD logic are organized into specialized domain-specific modules (Clients, Policies, Claims, Auth) with a unified export pattern for maintainability.
     - **Atomic Snapshots:** Every policy transaction (New Business, Renewal) is stored
  as a 100% complete snapshot of the cover in the `RiskNote` table.
-    - **Dynamic Snapshot Storage:** Flexible JSON schemas are used for product-specific cover data within snapshots, ensuring the system can support multiple insurance classes without migrations.
+    - **Hybrid Snapshot Storage:** Flexible JSON schemas are used for product-specific cover data, complemented by a static template selection engine in the backend to ensure precise document layouts for different insurance classes.
     - **Clean Container Pattern:** The `Policy` table is a stable identity container, free of temporal state, which instead resides in the versioned `RiskNote` snapshots.
 
 ## Frontend
