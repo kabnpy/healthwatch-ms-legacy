@@ -10,5 +10,6 @@
 - [Code Style Guides](./code_styleguides/)
 
 ## Management
-- [Tracks Registry](./tracks.md)
+- [Active Tracks](./tracks.md)
+- [Tracks Archive](./tracks_archive.md)
 - [Tracks Directory](./tracks/)

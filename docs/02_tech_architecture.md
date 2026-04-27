@@ -44,3 +44,13 @@ We use a local config file to manage complexity and gate incomplete features.
     RENEWALS: false,        // Future (Requires Batch Logic)
     CLAIMS: false           // Future (Requires Workflow Engine)
   };
+  ```
+
+## 5. Architectural Decisions
+- **Atomic Snapshot Strategy**: The system stores the full state of a risk (the "Snapshot") on the `RiskNote` issued for each transaction. This ensures that every document (Risk Note, Invoice) refers to the authoritative state of the cover at the exact moment of issuance.
+- **Policy as the Contract Container**: The `Policy` model remains the long-lived container for the contract, but coverage-specific data (dates, values) is derived from its related `RiskNotes`.
+- **Hybrid Document Viewing**: We maintain both an interactive "Digital View" (for editing drafts) and a "PDF View" (for official documentation) within the frontend.
+
+## 6. Future Optimizations
+- **Policy Expiry Denormalization**: Consider denormalizing `current_coverage_end` onto the `Policy` model to improve query performance.
+- **Reporting Engine**: Implement a consolidated reporting view using Materialized Views for complex financial aggregates.
