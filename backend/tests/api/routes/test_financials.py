@@ -8,6 +8,7 @@ from app.core.config import settings
 from tests.utils.client import create_random_client
 from tests.utils.insurance import (
     create_random_invoice,
+    create_random_policy,
     create_random_receipt,
 )
 from tests.utils.utils import random_lower_string
@@ -97,3 +98,54 @@ def test_allocate_receipt(
     assert response.status_code == 200
     content = response.json()
     assert content["message"] == "Allocation successful"
+
+
+def test_read_invoice_pdf(
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+) -> None:
+    db_policy = create_random_policy(db)
+    rn = db_policy.risk_notes[0]
+
+    # Create an invoice for this risk note
+    from app.crud import create_invoice_bulk
+    from app.models import InvoiceBulkCreate
+
+    bulk_in = InvoiceBulkCreate(
+        client_id=db_policy.client_id,
+        risk_note_ids=[rn.id],
+        notes="Test PDF invoice",
+    )
+    invoice = create_invoice_bulk(session=db, bulk_in=bulk_in)
+
+    response = client.get(
+        f"{settings.API_V1_STR}/financials/invoices/{invoice.id}/pdf",
+        headers=superuser_token_headers,
+    )
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/pdf"
+    assert response.content.startswith(b"%PDF-")
+
+
+def test_read_invoice_html(
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+) -> None:
+    db_policy = create_random_policy(db)
+    rn = db_policy.risk_notes[0]
+
+    from app.crud import create_invoice_bulk
+    from app.models import InvoiceBulkCreate
+
+    bulk_in = InvoiceBulkCreate(
+        client_id=db_policy.client_id,
+        risk_note_ids=[rn.id],
+        notes="Test HTML invoice",
+    )
+    invoice = create_invoice_bulk(session=db, bulk_in=bulk_in)
+
+    response = client.get(
+        f"{settings.API_V1_STR}/financials/invoices/{invoice.id}/html",
+        headers=superuser_token_headers,
+    )
+    assert response.status_code == 200
+    assert "text/html" in response.headers["content-type"]
+    assert b"<html" in response.content.lower()
