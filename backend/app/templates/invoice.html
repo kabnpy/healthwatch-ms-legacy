@@ -1,0 +1,269 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Invoice - {{ invoice.invoice_number }}</title>
+        <style>
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                font-family: Georgia, serif;
+                font-size: 11px;
+                color: #000;
+                background: #fff;
+                padding: 32px;
+                max-width: 900px;
+                margin: 0 auto;
+            }
+
+            /* ── Letterhead ── */
+            .letterhead {
+                margin-bottom: 16px;
+                text-align: center;
+            }
+
+            .agency-name {
+                font-size: 16px;
+                font-weight: 700;
+                letter-spacing: 0.5px;
+            }
+
+            .agency-meta {
+                font-size: 10px;
+                color: #333;
+                line-height: 1.6;
+            }
+
+            .doc-title-bar {
+                text-align: center;
+                font-size: 13px;
+                font-weight: 700;
+                padding: 5px 0;
+                margin-bottom: 10px;
+                text-decoration: underline;
+            }
+
+            /* ── Main table ── */
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                border: 1.5px solid #000;
+                margin-bottom: 20px;
+            }
+
+            th,
+            td {
+                border: 1px solid #000;
+                padding: 6px 8px;
+                vertical-align: top;
+                line-height: 1.55;
+            }
+
+            th[scope="row"] {
+                width: 20%;
+                font-weight: 700;
+                font-size: 10px;
+                letter-spacing: 0.2px;
+                text-transform: uppercase;
+                white-space: nowrap;
+                text-align: left;
+            }
+
+            td {
+                font-size: 11px;
+            }
+
+            /* ── Client ── */
+            .client-name {
+                font-size: 12px;
+                font-weight: 700;
+                display: block;
+            }
+            .client-kra-pin {
+                font-size: 10px;
+                color: #333;
+            }
+            .client-address {
+                display: block;
+                font-size: 10px;
+                color: #444;
+            }
+
+            .space-between {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            /* ── Items Table ── */
+            .items-header {
+                background-color: #f2f2f2;
+                font-weight: 700;
+                text-transform: uppercase;
+                font-size: 10px;
+            }
+
+            .text-right {
+                text-align: right;
+            }
+
+            .font-bold {
+                font-weight: 700;
+            }
+
+            /* ── Totals ── */
+            .totals-container {
+                width: 40%;
+                margin-left: auto;
+            }
+
+            /* ── Payment Info ── */
+            .payment-info {
+                margin-top: 30px;
+                padding: 10px;
+                border: 1px dashed #666;
+                font-size: 10px;
+            }
+
+            .payment-info h3 {
+                font-size: 11px;
+                margin-bottom: 5px;
+                text-decoration: underline;
+            }
+
+            /* ── Footer ── */
+            .doc-footer {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 40px;
+                font-size: 10px;
+                color: #444;
+                border-top: 1px solid #ccc;
+                padding-top: 10px;
+            }
+
+            /* ── Print ── */
+            @media print {
+                @page {
+                    size: A4;
+                    margin: 10mm 15mm;
+                }
+                body {
+                    padding: 0;
+                    max-width: 100%;
+                }
+                tr {
+                    page-break-inside: avoid;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="letterhead">
+            <div class="agency-name">HealthWatch Insurance Agency</div>
+            <div class="agency-meta">
+                1st Floor, Bishop Garden Towers, Bishop Road - 1st Ngong Avenue<br />
+                P O Box 1966-00502 Nairobi &nbsp;|&nbsp; Mobile: 0746 129521 / 0733 980566<br />
+                Email: info@healthwatch.co.ke
+            </div>
+        </div>
+
+        <div class="doc-title-bar">INVOICE</div>
+
+        <table>
+            <tr>
+                <th scope="row">Invoice To:</th>
+                <td>
+                    <div class="space-between">
+                        <span class="client-name">{{ client.name }}</span>
+                        <span class="client-kra-pin">P.I.N: {{ client.kra_pin }}</span>
+                    </div>
+                    {% if client.physical_address %}
+                    <span class="client-address">{{ client.physical_address }}</span>
+                    {% endif %}
+                    <span class="client-address">
+                        {% if client.postal_number %}P.O.BOX {{ client.postal_number }}{% endif %}
+                        {% if client.postal_code %}- {{ client.postal_code }}{% endif %}
+                        {% if client.town %}, {{ client.town }}{% endif %}
+                    </span>
+                </td>
+                <th scope="row">Invoice Details:</th>
+                <td>
+                    <div>No: <strong>{{ invoice.invoice_number }}</strong></div>
+                    <div>Date: {{ invoice.date_issued.strftime('%d/%m/%Y') }}</div>
+                    {% if invoice.due_date %}
+                    <div>Due: {{ invoice.due_date.strftime('%d/%m/%Y') }}</div>
+                    {% endif %}
+                </td>
+            </tr>
+        </table>
+
+        <table>
+            <thead>
+                <tr class="items-header">
+                    <th style="width: 15%; text-align: left;">Risk Note #</th>
+                    <th style="width: 55%; text-align: left;">Description</th>
+                    <th style="width: 30%; text-align: right;">Amount (KES)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in line_items %}
+                <tr>
+                    <td>{{ item.risk_note_number }}</td>
+                    <td>
+                        {{ item.description }}<br/>
+                        <small style="color: #666;">
+                            Policy: {{ item.policy_number }} | 
+                            Period: {{ item.coverage_start.strftime('%d/%m/%Y') }} to {{ item.coverage_end.strftime('%d/%m/%Y') }}
+                        </small>
+                    </td>
+                    <td class="text-right">{{ "{:,.2f}".format(item.amount) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="totals-container">
+            <table style="border: none;">
+                <tr style="border: none;">
+                    <td style="border: none; text-align: right; width: 60%;"><strong>Total Amount:</strong></td>
+                    <td style="border: 1px solid #000; text-align: right; width: 40%;" class="font-bold">
+                        KES {{ "{:,.2f}".format(invoice.total_amount) }}
+                    </td>
+                </tr>
+                {% if invoice.balance_due < invoice.total_amount %}
+                <tr style="border: none;">
+                    <td style="border: none; text-align: right;"><strong>Balance Due:</strong></td>
+                    <td style="border: 1px solid #000; text-align: right;" class="font-bold text-destructive">
+                        KES {{ "{:,.2f}".format(invoice.balance_due) }}
+                    </td>
+                </tr>
+                {% endif %}
+            </table>
+        </div>
+
+        <div class="payment-info">
+            <h3>PAYMENT INSTRUCTIONS</h3>
+            <p>Please make payments through the following options:</p>
+            <p style="margin-top: 5px;">
+                <strong>1. MPESA Paybill:</strong><br/>
+                Business No: <strong>123456</strong> | Account No: <strong>{{ invoice.invoice_number }}</strong>
+            </p>
+            <p style="margin-top: 5px;">
+                <strong>2. Bank Transfer:</strong><br/>
+                Bank: <strong>KCB Bank</strong> | Branch: <strong>Nairobi</strong><br/>
+                Account Name: <strong>HealthWatch Insurance Agency</strong> | Account No: <strong>1100223344</strong>
+            </p>
+        </div>
+
+        <div class="doc-footer">
+            <span>Generated on: {{ current_date }}</span>
+            <span>All amounts are in Kenya Shillings (KES)</span>
+        </div>
+    </body>
+</html>

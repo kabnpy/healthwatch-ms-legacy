@@ -1,0 +1,8 @@
+{
+  "id": "qol_architecture_20260427",
+  "title": "Document Generation & QoL Hardening",
+  "description": "Hardening the architecture for document generation and implementing production QoL features like indexing, logging, and error handling.",
+  "status": "planned",
+  "priority": "high",
+  "created_at": "2026-04-27T10:00:00Z"
+}

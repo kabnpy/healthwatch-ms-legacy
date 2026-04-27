@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any
+from typing import Any, cast
 
 from jinja2 import Environment, FileSystemLoader
 from weasyprint import HTML  # type: ignore[import-untyped]
@@ -119,13 +119,47 @@ def generate_risknote_pdf(
 ) -> bytes:
     """
     Generates a Risk Note PDF using WeasyPrint and Jinja2.
-    Mirrors the data consolidation logic from the frontend RiskNoteTemplate.tsx.
     """
     html_content = generate_risknote_html(risk_note, client, policy, invoice)
+    return cast(bytes, HTML(string=html_content).write_pdf())
 
-    from typing import cast
-    # Generate PDF bytes
-    # base_url allows WeasyPrint to resolve relative paths if needed
-    pdf_bytes = cast(bytes, HTML(string=html_content).write_pdf())
 
-    return pdf_bytes
+def generate_invoice_html(invoice: Any, client: Any) -> str:
+    """
+    Generates the HTML content for an Invoice using Jinja2.
+    """
+    env = Environment(loader=FileSystemLoader(settings.TEMPLATES_DIR))
+    env.filters["format_currency"] = format_currency
+    template = env.get_template("invoice.html")
+
+    # Prepare line items with extra context from risk notes
+    line_items = []
+    for li in invoice.line_items:
+        rn = li.risk_note
+        line_items.append(
+            {
+                "risk_note_number": rn.risk_note_number,
+                "description": li.description or f"Insurance Premium for {rn.transaction_type.value}",
+                "amount": li.amount,
+                "policy_number": rn.policy.policy_number,
+                "coverage_start": rn.coverage_start,
+                "coverage_end": rn.coverage_end,
+            }
+        )
+
+    context = {
+        "invoice": invoice,
+        "client": client,
+        "line_items": line_items,
+        "current_date": datetime.now().strftime("%d/%m/%Y"),
+    }
+
+    return template.render(context)
+
+
+def generate_invoice_pdf(invoice: Any, client: Any) -> bytes:
+    """
+    Generates an Invoice PDF using WeasyPrint and Jinja2.
+    """
+    html_content = generate_invoice_html(invoice, client)
+    return cast(bytes, HTML(string=html_content).write_pdf())

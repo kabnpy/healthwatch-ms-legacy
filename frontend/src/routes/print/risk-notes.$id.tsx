@@ -41,7 +41,7 @@ export const Route = createFileRoute("/print/risk-notes/$id")({
   validateSearch: (search) => searchSchema.parse(search),
 })
 
-import { RiskNoteTemplate } from "@/components/Documents/templates/RiskNoteTemplate"
+import { HTMLRiskNoteViewer } from "@/components/Insurance/HTMLRiskNoteViewer"
 
 function RiskNotePrintContent({ id }: { id: string }) {
   const { mode } = Route.useSearch()
@@ -61,10 +61,8 @@ function RiskNotePrintContent({ id }: { id: string }) {
   if (isInvoice) {
     return (
       <div className="max-w-[800px] mx-auto bg-white shadow-lg print:shadow-none min-h-screen relative">
-        <RiskNoteTemplate
-          riskNote={riskNote as EnhancedRiskNote}
-          client={client}
-          policy={policy as EnhancedPolicy}
+        <HTMLRiskNoteViewer
+          riskNoteId={id}
         />
 
         <div className="fixed bottom-8 right-8 print:hidden flex flex-col gap-2">

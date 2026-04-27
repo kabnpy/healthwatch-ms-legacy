@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 class ClientBase(AuditMixin, SQLModel):
     model_config = ConfigDict(validate_assignment=True)  # type: ignore
-    client_type: str = Field(default="Individual")
+    client_type: str = Field(default="Individual", index=True)
     name: str = Field(index=True)
     kra_pin: str = Field(unique=True, index=True)
     email: str | None = None

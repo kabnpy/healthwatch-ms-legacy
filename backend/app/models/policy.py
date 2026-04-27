@@ -5,7 +5,7 @@ from enum import Enum
 from typing import TYPE_CHECKING, Any, Optional, cast
 
 from pydantic import ConfigDict
-from sqlalchemy import JSON, Column, Numeric
+from sqlalchemy import JSON, Column, Index, Numeric
 from sqlmodel import Field, Relationship, SQLModel
 
 from .audit import AuditMixin
@@ -165,7 +165,7 @@ class PolicyBase(AuditMixin, SQLModel):
     product_id: uuid.UUID | None = Field(
         default=None, foreign_key="product.id", index=True
     )
-    status: PolicyStatus = Field(default=PolicyStatus.ACTIVE)
+    status: PolicyStatus = Field(default=PolicyStatus.ACTIVE, index=True)
     inception_date: date = Field(default_factory=date.today)
 
 
@@ -188,6 +188,9 @@ class PolicyUpdate(SQLModel):
 
 
 class Policy(PolicyBase, table=True):
+    __table_args__ = (
+        Index("ix_policy_client_status", "client_id", "status"),
+    )
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     client: "Client" = Relationship(back_populates="policies")
     product: Optional["Product"] = Relationship(back_populates="policies")
@@ -209,8 +212,8 @@ class Policy(PolicyBase, table=True):
 class RiskNoteBase(AuditMixin, SQLModel):
     policy_id: uuid.UUID = Field(foreign_key="policy.id", index=True)
     risk_note_number: str | None = Field(default=None, unique=True, index=True)
-    transaction_type: TransactionType
-    status: RiskNoteStatus = Field(default=RiskNoteStatus.DRAFT)
+    transaction_type: TransactionType = Field(index=True)
+    status: RiskNoteStatus = Field(default=RiskNoteStatus.DRAFT, index=True)
     previous_risk_note_id: uuid.UUID | None = Field(
         default=None, foreign_key="risknote.id", index=True
     )
@@ -248,6 +251,9 @@ class RiskNoteUpdate(SQLModel):
 
 
 class RiskNote(RiskNoteBase, table=True):
+    __table_args__ = (
+        Index("ix_risknote_policy_created", "policy_id", "created_at"),
+    )
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     policy: Policy = Relationship(back_populates="risk_notes")
     created_by: "User" = Relationship(
@@ -313,7 +319,7 @@ class InvoiceBase(AuditMixin, SQLModel):
     client_id: uuid.UUID = Field(foreign_key="client.id", index=True)
     date_issued: date = Field(default_factory=date.today)
     due_date: date | None = None
-    status: InvoiceStatus = Field(default=InvoiceStatus.UNPAID)
+    status: InvoiceStatus = Field(default=InvoiceStatus.UNPAID, index=True)
     total_amount: Decimal = Field(
         default=Decimal("0.0"), sa_column=Column(Numeric(precision=15, scale=2))
     )
@@ -344,6 +350,10 @@ class InvoiceUpdate(SQLModel):
 
 
 class Invoice(InvoiceBase, table=True):
+    __table_args__ = (
+        Index("ix_invoice_client_status", "client_id", "status"),
+        Index("ix_invoice_client_date", "client_id", "date_issued"),
+    )
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     client: "Client" = Relationship(back_populates="invoices")
     line_items: list["InvoiceLineItem"] = Relationship(back_populates="invoice")
@@ -378,7 +388,7 @@ class ReceiptBase(AuditMixin, SQLModel):
     mode: str
     reference: str
     notes: str | None = None
-    status: ReceiptStatus = Field(default=ReceiptStatus.ACTIVE)
+    status: ReceiptStatus = Field(default=ReceiptStatus.ACTIVE, index=True)
     created_by_id: uuid.UUID | None = Field(
         default=None, foreign_key="user.id", index=True
     )

@@ -51,11 +51,17 @@ export function BlobPDFViewer({
 
     return () => {
       active = false
+    }
+  }, [url])
+
+  // Cleanup blob URL when component unmounts or blobUrl changes
+  useEffect(() => {
+    return () => {
       if (blobUrl) {
         URL.revokeObjectURL(blobUrl)
       }
     }
-  }, [url, blobUrl])
+  }, [blobUrl])
 
   if (isLoading) {
     return (

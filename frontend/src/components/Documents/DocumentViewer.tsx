@@ -24,9 +24,9 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import useCustomToast from "@/hooks/useCustomToast"
 import type { EnhancedPolicy, EnhancedRiskNote } from "@/types/insurance"
 import { handleError } from "@/utils"
+import { HTMLRiskNoteViewer } from "../Insurance/HTMLRiskNoteViewer"
 import { BlobPDFViewer } from "../Common/BlobPDFViewer"
 import { InvoiceTemplate } from "./templates/InvoiceTemplate"
-import { RiskNoteTemplate } from "./templates/RiskNoteTemplate"
 
 // --- Types ---
 
@@ -95,47 +95,7 @@ function ErrorDisplay({ id, message }: { id: string; message?: string }) {
 // --- Loader Components (Internal) ---
 
 function RiskNoteLoader({ id }: { id: string }) {
-  const { showSuccessToast, showErrorToast } = useCustomToast()
-  const qClient = useQueryClient()
-
-  const { data: riskNote } = useSuspenseQuery({
-    queryFn: () => RiskNotesService.readRiskNote({ id }),
-    queryKey: ["risk-notes", id],
-  }) as { data: RiskNotePublic }
-
-  const { data: policy } = useSuspenseQuery({
-    queryFn: () => PoliciesService.readPolicy({ id: riskNote.policy_id }),
-    queryKey: ["policies", riskNote.policy_id],
-  }) as { data: PolicyPublic }
-
-  const { data: client } = useSuspenseQuery({
-    queryFn: () => ClientsService.readClient({ id: policy.client_id }),
-    queryKey: ["clients", policy.client_id],
-  }) as { data: ClientPublic }
-
-  const mutation = useMutation({
-    mutationFn: (updatedSnapshot: any) =>
-      RiskNotesService.updateRiskNote({
-        id: riskNote.id,
-        requestBody: { cover_snapshot: updatedSnapshot },
-      }),
-    onSuccess: () => {
-      showSuccessToast("Risk note snapshot updated successfully")
-      qClient.invalidateQueries({ queryKey: ["risk-notes", id] })
-      qClient.invalidateQueries({ queryKey: ["policies", riskNote.policy_id] })
-    },
-    onError: (err: any) => handleError.bind(showErrorToast)(err),
-  })
-
-  return (
-    <RiskNoteTemplate
-      riskNote={riskNote as EnhancedRiskNote}
-      client={client}
-      policy={policy as EnhancedPolicy}
-      isEditable={riskNote.status === "Draft"}
-      onSave={(snap) => mutation.mutate(snap)}
-    />
-  )
+  return <HTMLRiskNoteViewer riskNoteId={id} />
 }
 
 function PDFLoader({ id, type }: { id: string; type: "risknote" | "invoice" }) {

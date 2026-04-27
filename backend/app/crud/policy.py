@@ -4,8 +4,7 @@ from datetime import date, datetime, timedelta
 from typing import Any, cast
 
 from sqlalchemy.orm import selectinload
-from sqlmodel import Session, col, delete, func, select
-
+from sqlmodel import Session, col, func, select
 
 from app.models import (
     Insurer,

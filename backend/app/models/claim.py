@@ -4,7 +4,7 @@ from decimal import Decimal
 from enum import Enum
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, Numeric
+from sqlalchemy import Column, Index, Numeric
 from sqlmodel import Field, Relationship, SQLModel
 
 from .audit import AuditMixin
@@ -34,7 +34,7 @@ class ClaimBase(AuditMixin, SQLModel):
     date_of_loss: date
     date_reported: date = Field(default_factory=date.today)
     description: str
-    status: ClaimStatus = Field(default=ClaimStatus.REPORTED)
+    status: ClaimStatus = Field(default=ClaimStatus.REPORTED, index=True)
     reserve_amount: Decimal = Field(
         default=Decimal("0.0"), sa_column=Column(Numeric(precision=15, scale=2))
     )
@@ -59,6 +59,9 @@ class ClaimPublic(ClaimBase):
 
 
 class Claim(ClaimBase, table=True):
+    __table_args__ = (
+        Index("ix_claim_policy_status", "policy_id", "status"),
+    )
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     policy: "Policy" = Relationship(back_populates="claims")
     events: list["ClaimEvent"] = Relationship(back_populates="claim")

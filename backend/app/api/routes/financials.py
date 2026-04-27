@@ -1,7 +1,7 @@
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Response
 
 from app.api.deps import CurrentUser, SessionDep, StaffUser
 from app.crud import (
@@ -16,6 +16,7 @@ from app.crud import (
     void_receipt,
 )
 from app.models import (
+    Invoice,
     InvoiceBulkCreate,
     InvoiceCreate,
     InvoicePublic,
@@ -26,6 +27,7 @@ from app.models import (
     ReceiptPublic,
     ReceiptsPublic,
 )
+from app.services.document_service import generate_invoice_html, generate_invoice_pdf
 
 router = APIRouter()
 
@@ -67,6 +69,45 @@ def read_invoice(session: SessionDep, _current_user: CurrentUser, id: uuid.UUID)
     if not invoice:
         raise HTTPException(status_code=404, detail="Invoice not found")
     return invoice
+
+
+@router.get("/invoices/{id}/pdf")
+def read_invoice_pdf(
+    session: SessionDep, _current_user: CurrentUser, id: uuid.UUID
+) -> Any:
+    """
+    Generate and return Invoice as PDF.
+    """
+    invoice = session.get(Invoice, id)
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+
+    client = invoice.client
+    pdf_bytes = generate_invoice_pdf(invoice=invoice, client=client)
+
+    filename = f"Invoice_{invoice.invoice_number}.pdf"
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
+    )
+
+
+@router.get("/invoices/{id}/html")
+def read_invoice_html(
+    session: SessionDep, _current_user: CurrentUser, id: uuid.UUID
+) -> Any:
+    """
+    Generate and return Invoice as HTML.
+    """
+    invoice = session.get(Invoice, id)
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+
+    client = invoice.client
+    html_content = generate_invoice_html(invoice=invoice, client=client)
+
+    return Response(content=html_content, media_type="text/html")
 
 
 @router.post("/invoices/", response_model=InvoicePublic)
