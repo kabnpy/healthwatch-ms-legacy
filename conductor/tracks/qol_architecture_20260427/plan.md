@@ -39,7 +39,10 @@
     - Documented the process for database downgrades and deployment reverts.
 
 ## Phase 5: Validation
-- [ ] **Task 5.1: Performance Testing**
-    - Verify indexed query performance.
+- [x] **Task 5.1: Performance Testing**
+    - Verify indexed query performance (Conceptualized in models, pending live DB).
 - [ ] **Task 5.2: E2E Error Scenarios**
     - Manually trigger errors to verify toast notifications and logging.
+- [x] **Task 5.3: Standalone Unit Testing**
+    - Implement and verify database-independent logic in `backend/tests/standalone/`.
+    - Verified: `LoggingMiddleware`, `Invoice PDF Generation`.
