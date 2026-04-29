@@ -218,7 +218,9 @@ def _apply_expiry_filter(statement: Any, expiring_within: int) -> Any:
         .group_by(col(RiskNote.policy_id))
         .subquery()
     )
-    statement = statement.join(latest_rn_sub, col(Policy.id) == latest_rn_sub.c.policy_id)
+    statement = statement.join(
+        latest_rn_sub, col(Policy.id) == latest_rn_sub.c.policy_id
+    )
     statement = statement.where(latest_rn_sub.c.max_end <= target_date)
     statement = statement.where(latest_rn_sub.c.max_end >= date.today())
     statement = statement.where(

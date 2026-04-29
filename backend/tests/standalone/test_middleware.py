@@ -6,9 +6,11 @@ mock_engine = MagicMock()
 mock_session = MagicMock()
 sys.modules["app.core.db"] = MagicMock(engine=mock_engine, Session=mock_session)
 
-import pytest
-from fastapi.testclient import TestClient
-from app.main import app
+import pytest  # noqa: E402
+from fastapi.testclient import TestClient  # noqa: E402
+
+from app.main import app  # noqa: E402
+
 
 @pytest.fixture
 def client():
@@ -19,9 +21,10 @@ def test_logging_middleware_captures_request(client: TestClient):
     """Verify that LoggingMiddleware logs request details."""
     with patch("app.api.middleware.logger.info") as mock_logger:
         # health-check usually doesn't hit DB
-        response = client.get("/api/v1/utils/health-check")
-        
+        client.get("/api/v1/utils/health-check")
+
         assert mock_logger.called
+
         log_message = mock_logger.call_args[0][0]
         assert "Request:" in log_message
         assert "'method': 'GET'" in log_message

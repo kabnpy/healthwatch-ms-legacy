@@ -22,7 +22,7 @@ def test_policy_has_no_temporal_state(db: Session) -> None:
         client_id=client.id,
         product_id=product.id,
         status=PolicyStatus.ACTIVE,
-        inception_date=date.today()
+        inception_date=date.today(),
     )
     db.add(policy)
     db.commit()
@@ -30,6 +30,7 @@ def test_policy_has_no_temporal_state(db: Session) -> None:
 
     with pytest.raises(AttributeError):
         _ = policy.risk_details
+
 
 def test_risknote_chain_and_changelog(db: Session) -> None:
     """
@@ -45,7 +46,7 @@ def test_risknote_chain_and_changelog(db: Session) -> None:
         client_id=client.id,
         product_id=product.id,
         status=PolicyStatus.ACTIVE,
-        inception_date=date.today()
+        inception_date=date.today(),
     )
     db.add(policy)
     db.commit()
@@ -64,7 +65,7 @@ def test_risknote_chain_and_changelog(db: Session) -> None:
         net_premium=Decimal("10000.00"),
         commission_amount=Decimal("1000.00"),
         total_amount=Decimal("10500.00"),
-        cover_snapshot={"vehicle": {"value": 1000000}}
+        cover_snapshot={"vehicle": {"value": 1000000}},
     )
     db.add(rn_old)
 
@@ -82,7 +83,7 @@ def test_risknote_chain_and_changelog(db: Session) -> None:
         net_premium=Decimal("2000.00"),
         commission_amount=Decimal("200.00"),
         total_amount=Decimal("2100.00"),
-        cover_snapshot={"vehicle": {"value": 1200000}}
+        cover_snapshot={"vehicle": {"value": 1200000}},
     )
     db.add(rn_new)
 
@@ -94,6 +95,7 @@ def test_risknote_chain_and_changelog(db: Session) -> None:
     assert rn_new.previous_risk_note_id == rn_old.id
     assert rn_new.cover_snapshot["vehicle"]["value"] == 1200000
     assert len(policy.risk_notes) == 2
+
 
 def test_policy_has_no_duplicated_data(db: Session) -> None:
     """

@@ -20,9 +20,9 @@
         - `RiskNote`: `(policy_id, created_at)`
         - `Invoice`: `(client_id, status)`, `(client_id, date_issued)`
         - `Claim`: `(policy_id, status)`
-- [ ] **Task 2.2: Apply Migrations**
+- [x] **Task 2.2: Apply Migrations**
     - Generate and run Alembic migrations for new indices.
-    - *Note: Migration script generated code, but needs to be run against a live DB.*
+    - *Note: Migrations applied and confirmed.*
 
 ## Phase 3: Document Generation (Invoice & Renewals)
 - [x] **Task 3.1: Invoice PDF Template**
@@ -30,11 +30,21 @@
 - [x] **Task 3.2: Extend DocumentService**
     - Add `generate_invoice_pdf` method to `DocumentService`.
     - Update `backend/app/api/routes/financials.py` to trigger PDF generation.
-- [ ] **Task 3.3: Renewal Invitation PDF**
+- [x] **Task 3.3: Renewal Invitation PDF**
     - Create template and service method for renewal invitations.
 
 ## Phase 4: Rollback & Operations
-- [x] **Task 4.1: Documentation**
+...
+## Phase 6: Unify Document Generation
+- [x] **Task 6.1: Universal Document Viewer**
+    - Create a universal frontend component to render backend-generated HTML/PDF.
+- [x] **Task 6.2: Refactor Risk Note Print Page**
+    - Replace manual frontend rendering with the universal viewer fetching from the backend.
+- [x] **Task 6.3: Refactor Invoice Print Page**
+    - Replace manual frontend rendering with the universal viewer fetching from the backend.
+- [x] **Task 6.4: Cleanup Redundant Frontend Logic**
+    - Remove unused document rendering components in the frontend.
+
     - Create `docs/OPERATIONS.md` with the rollback protocol.
     - Documented the process for database downgrades and deployment reverts.
 

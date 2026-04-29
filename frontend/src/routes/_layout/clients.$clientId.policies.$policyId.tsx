@@ -8,7 +8,6 @@ import { DocumentManager } from "@/components/Common/DocumentManager"
 import { DocumentViewerModal } from "@/components/Common/DocumentViewerModal"
 import ErrorComponent from "@/components/Common/ErrorComponent"
 import { DocumentViewer } from "@/components/Documents/DocumentViewer"
-import { HTMLRiskNoteViewer } from "@/components/Insurance/HTMLRiskNoteViewer"
 import { RiskNoteForm } from "@/components/Insurance/RiskNoteForm"
 import { VersionHistory } from "@/components/Insurance/VersionHistory"
 import PendingItems from "@/components/Pending/PendingItems"
@@ -33,7 +32,7 @@ import {
   useSendRenewalReminder,
 } from "@/hooks/useInsurance"
 import { queryClient } from "@/queryClient"
-import type { EnhancedPolicy, EnhancedRiskNote } from "@/types/insurance"
+import type { EnhancedPolicy } from "@/types/insurance"
 import {
   downloadAuthenticatedFile,
   getPolicyDisplayName,
@@ -349,8 +348,10 @@ function PolicyDashboardContent({
                     </Tabs>
                   </div>
                   {viewMode === "digital" ? (
-                    <HTMLRiskNoteViewer
-                      riskNoteId={latestRiskNote.id}
+                    <DocumentViewer
+                      id={latestRiskNote.id}
+                      type="risknote"
+                      initialViewMode="digital"
                     />
                   ) : (
                     <div className="w-full bg-zinc-100 flex items-center justify-center p-4">

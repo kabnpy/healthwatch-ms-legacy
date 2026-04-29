@@ -1,36 +1,20 @@
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-  useSuspenseQuery,
-} from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import { AlertCircle, FileText, Loader2 } from "lucide-react"
 import { Suspense, useState } from "react"
 
 import {
-  type ClientPublic,
-  ClientsService,
   DocumentsService,
   FinancialsService,
-  type InvoicePublic,
   OpenAPI,
-  PoliciesService,
-  type PolicyPublic,
   type ReceiptPublic,
-  type RiskNotePublic,
-  RiskNotesService,
 } from "@/client"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import useCustomToast from "@/hooks/useCustomToast"
-import type { EnhancedPolicy, EnhancedRiskNote } from "@/types/insurance"
-import { handleError } from "@/utils"
-import { HTMLRiskNoteViewer } from "../Insurance/HTMLRiskNoteViewer"
 import { BlobPDFViewer } from "../Common/BlobPDFViewer"
-import { InvoiceTemplate } from "./templates/InvoiceTemplate"
+import { HTMLViewer } from "../Common/HTMLViewer"
 
 // --- Types ---
 
-type DocumentType = "risknote" | "invoice" | "receipt" | "external"
+type DocumentType = "risknote" | "invoice" | "receipt" | "external" | "renewal"
 
 interface DocumentViewerProps {
   id: string
@@ -92,65 +76,6 @@ function ErrorDisplay({ id, message }: { id: string; message?: string }) {
   )
 }
 
-// --- Loader Components (Internal) ---
-
-function RiskNoteLoader({ id }: { id: string }) {
-  return <HTMLRiskNoteViewer riskNoteId={id} />
-}
-
-function PDFLoader({ id, type }: { id: string; type: "risknote" | "invoice" }) {
-  const endpoint = type === "risknote" ? "risk-notes" : "financials/invoices"
-  const pdfUrl = `${(OpenAPI.BASE || "").replace(/\/$/, "")}/api/v1/${endpoint}/${id}/pdf`
-
-  return (
-    <div className="w-full h-full bg-zinc-100 flex items-center justify-center p-4">
-      <BlobPDFViewer url={pdfUrl} title={`${type} PDF`} />
-    </div>
-  )
-}
-
-function InvoiceLoader({ id }: { id: string }) {
-  const { data: invoice } = useSuspenseQuery({
-    queryFn: () => FinancialsService.readInvoice({ id }),
-    queryKey: ["invoices", id],
-  }) as { data: InvoicePublic }
-
-  const { data: client } = useSuspenseQuery({
-    queryFn: () => ClientsService.readClient({ id: invoice.client_id }),
-    queryKey: ["clients", invoice.client_id],
-  }) as { data: ClientPublic }
-
-  // Since InvoicePublic.line_items doesn't include the full risk_note object,
-  // we fetch them manually here to enrich the template data.
-  const { data: enrichedLineItems } = useSuspenseQuery({
-    queryKey: ["invoices", id, "enriched-items"],
-    queryFn: async () => {
-      const items = invoice.line_items || []
-      return Promise.all(
-        items.map(async (item) => {
-          try {
-            const riskNote = await RiskNotesService.readRiskNote({
-              id: item.risk_note_id,
-            })
-            return { ...item, risk_note: riskNote }
-          } catch (e) {
-            console.error(`Failed to fetch risk note for item ${item.id}`, e)
-            return item
-          }
-        }),
-      )
-    },
-  })
-
-  return (
-    <InvoiceTemplate
-      invoice={invoice}
-      client={client}
-      lineItems={enrichedLineItems}
-    />
-  )
-}
-
 // --- Loader Components (External) ---
 
 function FileLoader({ id, receiptId }: { id?: string; receiptId?: string }) {
@@ -162,7 +87,6 @@ function FileLoader({ id, receiptId }: { id?: string; receiptId?: string }) {
   } = useQuery({
     queryKey: ["document-metadata", id, receiptId],
     queryFn: async () => {
-      console.log("Fetching document metadata...", { id, receiptId })
       if (id) return DocumentsService.readDocumentById({ id })
       if (receiptId) {
         const docs = await DocumentsService.readDocuments({
@@ -197,22 +121,11 @@ function FileLoader({ id, receiptId }: { id?: string; receiptId?: string }) {
   }
 
   if (isDocError || !document) {
-    console.error("Document not found or error fetching metadata", {
-      isDocError,
-      document,
-    })
     return <ErrorDisplay id={id || receiptId || "N/A"} />
   }
 
-  // Ensure BASE URL is present and doesn't have double slashes
   const baseUrl = OpenAPI.BASE || "http://localhost:8000"
   const downloadUrl = `${baseUrl.replace(/\/$/, "")}/api/v1/documents/${document.id}/download`
-
-  console.log("Document Ready:", {
-    name: document.document_type,
-    mime: document.mime_type,
-    url: downloadUrl,
-  })
 
   const headerExtra = receipt ? (
     <div className="flex gap-6 text-right">
@@ -270,7 +183,6 @@ function FileLoader({ id, receiptId }: { id?: string; receiptId?: string }) {
           src={downloadUrl}
           alt={document.document_type}
           className="max-w-full h-auto shadow-2xl rounded-sm border bg-white"
-          onError={() => console.error("Image failed to load:", downloadUrl)}
         />
       ) : document.mime_type === "application/pdf" ? (
         <BlobPDFViewer url={downloadUrl} title="Document Viewer" />
@@ -294,11 +206,30 @@ export function DocumentViewer({
 }: DocumentViewerProps) {
   const [viewMode, setViewMode] = useState<"digital" | "pdf">(initialViewMode)
 
-  const showTabs = type === "risknote"
+  const baseUrl = (OpenAPI.BASE || "").replace(/\/$/, "")
+  const isInternal = ["risknote", "invoice", "renewal"].includes(type)
+
+  let htmlUrl = ""
+  let pdfUrl = ""
+  let title = ""
+
+  if (type === "risknote") {
+    htmlUrl = `${baseUrl}/api/v1/risk-notes/${id}/html`
+    pdfUrl = `${baseUrl}/api/v1/risk-notes/${id}/pdf`
+    title = "Risk Note"
+  } else if (type === "invoice") {
+    htmlUrl = `${baseUrl}/api/v1/financials/invoices/${id}/html`
+    pdfUrl = `${baseUrl}/api/v1/financials/invoices/${id}/pdf`
+    title = "Invoice"
+  } else if (type === "renewal") {
+    htmlUrl = `${baseUrl}/api/v1/policies/${id}/renewal-invitation/html`
+    pdfUrl = `${baseUrl}/api/v1/policies/${id}/renewal-invitation/pdf`
+    title = "Renewal Invitation"
+  }
 
   return (
     <div className="w-full h-full animate-in fade-in zoom-in-95 duration-300 flex flex-col gap-4">
-      {showTabs && (
+      {isInternal && (
         <div className="flex justify-center">
           <Tabs
             value={viewMode}
@@ -321,8 +252,7 @@ export function DocumentViewer({
       )}
 
       <div className="flex-1">
-        {/* Templates use Suspense */}
-        {(type === "risknote" || type === "invoice") && (
+        {isInternal && (
           <Suspense
             fallback={
               <div className="flex items-center justify-center p-24">
@@ -330,19 +260,22 @@ export function DocumentViewer({
               </div>
             }
           >
-            {type === "risknote" &&
-              (viewMode === "digital" ? (
-                <RiskNoteLoader id={id} />
-              ) : (
-                <PDFLoader id={id} type="risknote" />
-              ))}
-            {type === "invoice" && <InvoiceLoader id={id} />}
+            {viewMode === "digital" ? (
+              <HTMLViewer apiUrl={htmlUrl} title={title} />
+            ) : (
+              <div className="w-full h-full bg-zinc-100 flex items-center justify-center p-4">
+                <BlobPDFViewer url={pdfUrl} title={`${title} PDF`} />
+              </div>
+            )}
           </Suspense>
         )}
 
-        {/* External Files use internal state for better error handling */}
-        {type === "receipt" && <FileLoader receiptId={id} />}
-        {type === "external" && <FileLoader id={id} />}
+        {!isInternal && (
+          <>
+            {type === "receipt" && <FileLoader receiptId={id} />}
+            {type === "external" && <FileLoader id={id} />}
+          </>
+        )}
       </div>
     </div>
   )

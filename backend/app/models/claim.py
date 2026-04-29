@@ -59,9 +59,7 @@ class ClaimPublic(ClaimBase):
 
 
 class Claim(ClaimBase, table=True):
-    __table_args__ = (
-        Index("ix_claim_policy_status", "policy_id", "status"),
-    )
+    __table_args__ = (Index("ix_claim_policy_status", "policy_id", "status"),)
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     policy: "Policy" = Relationship(back_populates="claims")
     events: list["ClaimEvent"] = Relationship(back_populates="claim")

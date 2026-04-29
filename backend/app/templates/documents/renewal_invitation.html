@@ -1,0 +1,248 @@
+{% extends "documents/base.html" %} {% block extra_style %}
+<style>
+    body {
+        font-family: Georgia, serif;
+        font-size: 11px;
+    }
+
+    .doc-title-bar {
+        text-align: center;
+        font-size: 14px;
+        font-weight: 700;
+        padding: 8px 0;
+        margin-bottom: 20px;
+        text-decoration: underline;
+        text-transform: uppercase;
+    }
+
+    .notice-box {
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        padding: 15px;
+        margin-bottom: 25px;
+        border-radius: 4px;
+    }
+
+    .notice-box p {
+        margin-bottom: 10px;
+        line-height: 1.6;
+    }
+
+    .notice-box p:last-child {
+        margin-bottom: 0;
+    }
+
+    /* ── Main table ── */
+    .renewal-table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 1.5px solid #000;
+        margin-bottom: 20px;
+    }
+
+    .renewal-table th,
+    .renewal-table td {
+        border: 1px solid #000;
+        padding: 8px 10px;
+        vertical-align: top;
+        line-height: 1.55;
+    }
+
+    .renewal-table th[scope="row"] {
+        width: 25%;
+        font-weight: 700;
+        font-size: 10px;
+        letter-spacing: 0.2px;
+        text-transform: uppercase;
+        white-space: nowrap;
+        text-align: left;
+        background-color: #f1f5f9;
+    }
+
+    .client-name {
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .inner-table {
+        width: 100%;
+        border: none;
+        border-collapse: collapse;
+    }
+
+    .inner-table td {
+        border: none !important;
+        padding: 2px 0 !important;
+        font-size: 11px;
+    }
+
+    .inner-table.premium td:last-child {
+        font-weight: 700;
+        text-align: right;
+        width: 30%;
+    }
+
+    .premium-total td {
+        border-top: 1.5px solid #000 !important;
+        font-size: 12px;
+        padding-top: 8px !important;
+    }
+
+    .payment-instructions {
+        margin-top: 30px;
+        padding: 15px;
+        border: 1px dashed #475569;
+        border-radius: 4px;
+    }
+
+    .payment-instructions h3 {
+        font-size: 12px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        border-bottom: 1px solid #cbd5e1;
+        padding-bottom: 5px;
+    }
+
+    .payment-methods {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .method {
+        width: 48%;
+    }
+
+    .method p {
+        margin-bottom: 4px;
+        font-size: 10px;
+    }
+
+    .method strong {
+        color: #000;
+    }
+
+    .cta-box {
+        margin-top: 30px;
+        text-align: center;
+        padding: 15px;
+        border: 2px solid #000;
+    }
+
+    .cta-box p {
+        font-weight: 700;
+        font-size: 12px;
+    }
+</style>
+{% endblock %} {% block content %}
+<div class="doc-title-bar">Renewal Invitation</div>
+
+<div class="notice-box">
+    <p>Dear <strong>{{ client.name }}</strong>,</p>
+    <p>
+        We value your continued partnership with HealthWatch Insurance Agency.
+        Your insurance policy for <strong>{{ policy.policy_number }}</strong> is
+        due for renewal on <strong>{{ risk_note.coverage_start.strftime('%d %B %Y') }}</strong>.
+    </p>
+    <p>
+        To ensure uninterrupted protection, we invite you to renew your cover
+        based on the terms and premium outlined below.
+    </p>
+</div>
+
+<table class="renewal-table">
+    <tr>
+        <th scope="row">Insured</th>
+        <td>
+            <span class="client-name">{{ client.name }}</span><br />
+            {% if client.physical_address %}{{ client.physical_address }}{% elif
+            client.postal_number %}P.O. Box {{ client.postal_number }}{% endif
+            %} {% if client.postal_code %} - {{ client.postal_code }}{% endif %}
+        </td>
+    </tr>
+    <tr>
+        <th scope="row">Policy Number</th>
+        <td><strong>{{ policy.policy_number }}</strong></td>
+    </tr>
+    <tr>
+        <th scope="row">Class of Insurance</th>
+        <td>{{ policy.product.class_of_insurance }}</td>
+    </tr>
+    <tr>
+        <th scope="row">Renewal Period</th>
+        <td>
+            {{ risk_note.coverage_start.strftime('%d %B %Y') }} to {{
+            risk_note.coverage_end.strftime('%d %B %Y') }}
+        </td>
+    </tr>
+    <tr>
+        <th scope="row">Sum Insured</th>
+        <td>
+            {{ (risk_note.cover_snapshot.get('sum_insured') or
+            0)|format_currency }}
+        </td>
+    </tr>
+    <tr>
+        <th scope="row">Insurer</th>
+        <td>{{ policy.product.insurer.name }}</td>
+    </tr>
+    <tr class="inner-row">
+        <th scope="row">Premium Breakdown</th>
+        <td>
+            <table class="inner-table premium">
+                <tr>
+                    <td>Basic Premium</td>
+                    <td>{{ risk_note.net_premium|format_currency }}</td>
+                </tr>
+                {% for benefit in financial_breakdown.benefits %}
+                <tr>
+                    <td>{{ benefit.name }}</td>
+                    <td>{{ benefit.amount|format_currency }}</td>
+                </tr>
+                {% endfor %} {% if financial_breakdown.taxes %} {% for tax_name,
+                tax_amt in financial_breakdown.taxes.items() %}
+                <tr>
+                    <td>{{ tax_name|replace('_', ' ')|title }}</td>
+                    <td>{{ tax_amt|format_currency }}</td>
+                </tr>
+                {% endfor %} {% endif %}
+                <tr class="premium-total">
+                    <td><strong>TOTAL PAYABLE</strong></td>
+                    <td>
+                        <strong>{{ risk_note.total_amount|format_currency }}</strong>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+<div class="payment-instructions">
+    <h3>Payment Instructions</h3>
+    <div class="payment-methods">
+        <div class="method">
+            <p><strong>Option 1: MPESA Paybill</strong></p>
+            <p>Business Number: <strong>505800</strong></p>
+            <p>Account Number: <strong>{{ policy.policy_number }}</strong></p>
+        </div>
+        <div class="method">
+            <p><strong>Option 2: Bank Transfer / Cheque</strong></p>
+            <p>Payable to: <strong>HealthWatch Insurance Agency</strong></p>
+            <p>Bank: <strong>KCB Bank Kenya</strong></p>
+            <p>Account No: <strong>1100223344</strong></p>
+        </div>
+    </div>
+</div>
+
+<div class="cta-box">
+    <p>
+        Please remit payment before the expiry date to ensure your cover remains
+        active.
+    </p>
+</div>
+
+<div style="margin-top: 40px; font-size: 10px; color: #64748b">
+    <p>Yours Sincerely,</p>
+    <p style="margin-top: 20px"><strong>HealthWatch Management Team</strong></p>
+</div>
+{% endblock %}

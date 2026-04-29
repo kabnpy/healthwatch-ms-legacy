@@ -1,4 +1,4 @@
-# Project Status (Current Session: 2026-04-27)
+# Project Status (Current Session: 2026-04-28)
 
 ## Executive Summary
 The project has transitioned from a standard CRUD application into a robust **Document Generation & Insurance Management System**. Core foundations for policies, risk notes (snapshots), and financials are stable. Current focus is on production hardening, automated document production (PDFs), and system performance.
@@ -9,6 +9,7 @@ The project has transitioned from a standard CRUD application into a robust **Do
 - **Financial Layer**: Consolidated invoicing and receipting logic linked to risk note snapshots.
 - **Document Production**: High-fidelity A4 PDF generation (WeasyPrint) for Risk Notes and Invoices.
 - **System Hardening**: Global error handling, structured logging, and database query optimization (indexing).
+- **Database Synchronization**: Fixed `prestart` failure by syncing missing `Product` columns and converting rigid database Enums to `VARCHAR` to match Python `str` Enum values.
 
 ## Current Status (Ongoing)
 - **QoL & Architecture Hardening**: Implementing production-ready features (logging, error boundaries, indices).

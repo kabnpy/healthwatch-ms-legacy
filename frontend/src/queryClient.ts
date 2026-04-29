@@ -10,7 +10,10 @@ const handleApiError = (error: Error) => {
       return
     }
 
-    const message = (error.body as any)?.detail || error.message || "An unexpected error occurred"
+    const message =
+      (error.body as any)?.detail ||
+      error.message ||
+      "An unexpected error occurred"
     toast.error("API Error", {
       description: message,
     })
@@ -32,7 +35,10 @@ export const queryClient = new QueryClient({
     queries: {
       retry: (failureCount, error: any) => {
         // Don't retry on 401, 403, 404
-        if (error instanceof ApiError && [401, 403, 404].includes(error.status)) {
+        if (
+          error instanceof ApiError &&
+          [401, 403, 404].includes(error.status)
+        ) {
           return false
         }
         return failureCount < 2

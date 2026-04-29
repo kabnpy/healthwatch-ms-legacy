@@ -26,18 +26,12 @@ def test_policy_public_contains_active_note(db: Session) -> None:
     db.commit()
 
     product = Product(
-        name="API Product",
-        class_of_insurance="Motor Private",
-        insurer_id=insurer.id
+        name="API Product", class_of_insurance="Motor Private", insurer_id=insurer.id
     )
     db.add(product)
     db.commit()
 
-    client = Client(
-        name="API Client",
-        kra_pin="A111111111Z",
-        phone="0711111111"
-    )
+    client = Client(name="API Client", kra_pin="A111111111Z", phone="0711111111")
     db.add(client)
     db.commit()
 
@@ -46,7 +40,7 @@ def test_policy_public_contains_active_note(db: Session) -> None:
         client_id=client.id,
         product_id=product.id,
         status=PolicyStatus.ACTIVE,
-        inception_date=date.today()
+        inception_date=date.today(),
     )
     db.add(policy)
     db.commit()
@@ -62,7 +56,7 @@ def test_policy_public_contains_active_note(db: Session) -> None:
         net_premium=Decimal("1000.00"),
         commission_amount=Decimal("100.00"),
         total_amount=Decimal("1100.00"),
-        cover_snapshot=snapshot1
+        cover_snapshot=snapshot1,
     )
     db.add(rn1)
 
@@ -76,7 +70,7 @@ def test_policy_public_contains_active_note(db: Session) -> None:
         net_premium=Decimal("1200.00"),
         commission_amount=Decimal("120.00"),
         total_amount=Decimal("1320.00"),
-        cover_snapshot=snapshot2
+        cover_snapshot=snapshot2,
     )
     db.add(rn2)
     db.commit()
@@ -90,6 +84,7 @@ def test_policy_public_contains_active_note(db: Session) -> None:
     assert policy_public.active_note.cover_snapshot == snapshot2
     assert policy_public.active_note.status == RiskNoteStatus.ISSUED
 
+
 def test_motor_private_risk_details_reworked_terms() -> None:
     """
     Test that MotorPrivateRiskDetails correctly groups terms into a dictionary.
@@ -101,11 +96,11 @@ def test_motor_private_risk_details_reworked_terms() -> None:
             "registration_number": "KCM 123",
             "make": "Toyota",
             "year_of_manufacture": 2020,
-            "sum_insured": 1500000
+            "sum_insured": 1500000,
         },
         "benefits_and_limits": "Standard Benefits",
         "excesses": "Standard Excesses",
-        "special_clauses": "Annual Valuation Required"
+        "special_clauses": "Annual Valuation Required",
     }
 
     details = MotorPrivateRiskDetails(**data)

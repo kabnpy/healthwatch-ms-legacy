@@ -1,7 +1,7 @@
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Response
 
 from app.api.deps import CurrentUser, SessionDep, StaffUser
 from app.api.utils import prepare_policy_public
@@ -26,8 +26,13 @@ from app.models import (
     PolicyUpdate,
     Product,
     RiskNotesPublic,
+    RiskNoteStatus,
 )
 from app.schemas import QuoteRequest, QuoteResponse
+from app.services.document_service import (
+    generate_renewal_invitation_html,
+    generate_renewal_invitation_pdf,
+)
 from app.services.policy import policy_service
 from app.services.rating import RatingService
 
@@ -166,6 +171,69 @@ def read_policy_risk_notes(
     count = count_risk_notes(session=session, policy_id=id)
     risk_notes = get_risk_notes(session=session, policy_id=id)
     return RiskNotesPublic(data=risk_notes, count=count)
+
+
+@router.get("/{id}/renewal-invitation/pdf")
+def read_policy_renewal_invitation_pdf(
+    session: SessionDep, _current_user: CurrentUser, id: uuid.UUID
+) -> Any:
+    """
+    Generate and return Renewal Invitation as PDF.
+    """
+    policy = session.get(Policy, id)
+    if not policy:
+        raise HTTPException(status_code=404, detail="Policy not found")
+
+    # Find the renewal invited risk note
+    renewal_rn = next(
+        (rn for rn in policy.risk_notes if rn.status == RiskNoteStatus.RENEWAL_INVITED),
+        None,
+    )
+    if not renewal_rn:
+        raise HTTPException(
+            status_code=400,
+            detail="No 'Renewal Invited' risk note found for this policy.",
+        )
+
+    pdf_bytes = generate_renewal_invitation_pdf(
+        risk_note=renewal_rn, client=policy.client, policy=policy
+    )
+
+    filename = f"Renewal_Invitation_{policy.policy_number}.pdf"
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
+    )
+
+
+@router.get("/{id}/renewal-invitation/html")
+def read_policy_renewal_invitation_html(
+    session: SessionDep, _current_user: CurrentUser, id: uuid.UUID
+) -> Any:
+    """
+    Generate and return Renewal Invitation as HTML.
+    """
+    policy = session.get(Policy, id)
+    if not policy:
+        raise HTTPException(status_code=404, detail="Policy not found")
+
+    # Find the renewal invited risk note
+    renewal_rn = next(
+        (rn for rn in policy.risk_notes if rn.status == RiskNoteStatus.RENEWAL_INVITED),
+        None,
+    )
+    if not renewal_rn:
+        raise HTTPException(
+            status_code=400,
+            detail="No 'Renewal Invited' risk note found for this policy.",
+        )
+
+    html_content = generate_renewal_invitation_html(
+        risk_note=renewal_rn, client=policy.client, policy=policy
+    )
+
+    return Response(content=html_content, media_type="text/html")
 
 
 @router.post("/{id}/send-renewal-invitation", response_model=Message)

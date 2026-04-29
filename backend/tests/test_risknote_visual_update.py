@@ -2,7 +2,9 @@ import os
 from datetime import datetime
 from decimal import Decimal
 from unittest.mock import MagicMock
+
 from app.services.document_service import generate_risknote_pdf
+
 
 def test_generate_risknote_visual_verification():
     """
@@ -22,12 +24,9 @@ def test_generate_risknote_visual_verification():
         "benefits": [
             {"name": "Excess Waiver", "amount": 5050.00},
             {"name": "PVT", "amount": 4545.00},
-            {"name": "PLL", "amount": 1000.00}
+            {"name": "PLL", "amount": 1000.00},
         ],
-        "taxes": {
-            "Training_Levy": 122.00,
-            "PHCF_Levy": 153.00
-        }
+        "taxes": {"Training_Levy": 122.00, "PHCF_Levy": 153.00},
     }
     risk_note.cover_snapshot = {
         "VEHICLE": {
@@ -35,9 +34,9 @@ def test_generate_risknote_visual_verification():
             "Make": "Toyota Hilux",
             "Year": "2020",
         },
-        "sum_insured": Decimal("2700000.00")
+        "sum_insured": Decimal("2700000.00"),
     }
-    
+
     # Mock Client
     client = MagicMock()
     client.name = "John Doe"
@@ -46,7 +45,7 @@ def test_generate_risknote_visual_verification():
     client.postal_number = "12345"
     client.postal_code = "678"
     client.town = "Nairobi"
-    
+
     # Mock Policy/Product
     policy = MagicMock()
     policy.policy_number = "010/030/1/004071/2000"
@@ -56,18 +55,19 @@ def test_generate_risknote_visual_verification():
         "VEHICLE": {"Reg No": "", "Make": "", "Year": "", "Value Kshs.": 0}
     }
     policy.product.insurer.name = "Old Mutual General Insurance (K) Ltd"
-    
+
     # Execute
     pdf_bytes = generate_risknote_pdf(risk_note, client, policy)
-    
+
     # Save to file
     output_path = os.path.join(os.getcwd(), "risknote_test_output.pdf")
     with open(output_path, "wb") as f:
         f.write(pdf_bytes)
-    
-    print(f"\n[INFO] Risk Note PDF generated and saved to: {output_path}")
+
+    print(f"\n[INFO] Risk Note PDF generated and saved to: {output_path}")  # noqa: T201
     assert os.path.exists(output_path)
     assert len(pdf_bytes) > 0
+
 
 if __name__ == "__main__":
     test_generate_risknote_visual_verification()

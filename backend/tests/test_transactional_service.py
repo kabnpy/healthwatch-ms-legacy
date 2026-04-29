@@ -22,7 +22,12 @@ def test_atomic_policy_creation(db: Session) -> None:
     )
 
     # Singular Semantic Input
-    risk_details = {"sum_insured": 5000000, "registration_number": "KCM 123", "make": "Toyota", "year_of_manufacture": 2020}
+    risk_details = {
+        "sum_insured": 5000000,
+        "registration_number": "KCM 123",
+        "make": "Toyota",
+        "year_of_manufacture": 2020,
+    }
     start_date = date.today()
     end_date = start_date + timedelta(days=365)
 
@@ -32,7 +37,7 @@ def test_atomic_policy_creation(db: Session) -> None:
         policy_in=policy_in,
         cover_snapshot=risk_details,
         coverage_start=start_date,
-        coverage_end=end_date
+        coverage_end=end_date,
     )
 
     # Verify

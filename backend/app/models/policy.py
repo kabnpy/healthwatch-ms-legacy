@@ -188,9 +188,7 @@ class PolicyUpdate(SQLModel):
 
 
 class Policy(PolicyBase, table=True):
-    __table_args__ = (
-        Index("ix_policy_client_status", "client_id", "status"),
-    )
+    __table_args__ = (Index("ix_policy_client_status", "client_id", "status"),)
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     client: "Client" = Relationship(back_populates="policies")
     product: Optional["Product"] = Relationship(back_populates="policies")
@@ -251,9 +249,7 @@ class RiskNoteUpdate(SQLModel):
 
 
 class RiskNote(RiskNoteBase, table=True):
-    __table_args__ = (
-        Index("ix_risknote_policy_created", "policy_id", "created_at"),
-    )
+    __table_args__ = (Index("ix_risknote_policy_created", "policy_id", "created_at"),)
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     policy: Policy = Relationship(back_populates="risk_notes")
     created_by: "User" = Relationship(

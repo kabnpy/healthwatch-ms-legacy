@@ -9,6 +9,7 @@ from app.utils import format_currency
 
 RISK_NOTE_TEMPLATES = {
     "motor private": "documents/motor_private.html",
+    "motor": "documents/motor_private.html",
 }
 
 
@@ -139,7 +140,8 @@ def generate_invoice_html(invoice: Any, client: Any) -> str:
         line_items.append(
             {
                 "risk_note_number": rn.risk_note_number,
-                "description": li.description or f"Insurance Premium for {rn.transaction_type.value}",
+                "description": li.description
+                or f"Insurance Premium for {rn.transaction_type.value}",
                 "amount": li.amount,
                 "policy_number": rn.policy.policy_number,
                 "coverage_start": rn.coverage_start,
@@ -162,4 +164,41 @@ def generate_invoice_pdf(invoice: Any, client: Any) -> bytes:
     Generates an Invoice PDF using WeasyPrint and Jinja2.
     """
     html_content = generate_invoice_html(invoice, client)
+    return cast(bytes, HTML(string=html_content).write_pdf())
+
+def generate_renewal_invitation_html(
+    risk_note: Any, client: Any, policy: Any
+) -> str:
+    """
+    Generates the HTML content for a Renewal Invitation using Jinja2.
+    """
+    env = Environment(loader=FileSystemLoader(settings.TEMPLATES_DIR))
+    env.filters["format_currency"] = format_currency
+    template = env.get_template("documents/renewal_invitation.html")
+
+    # Financial Breakdown preparation (similar to Risk Note)
+    breakdown = risk_note.financial_breakdown or {}
+    financial_summary = {
+        "benefits": breakdown.get("benefits", []),
+        "taxes": breakdown.get("taxes", {}),
+    }
+
+    context = {
+        "risk_note": risk_note,
+        "client": client,
+        "policy": policy,
+        "financial_breakdown": financial_summary,
+        "current_date": datetime.now().strftime("%d/%m/%Y"),
+    }
+
+    return template.render(context)
+
+
+def generate_renewal_invitation_pdf(
+    risk_note: Any, client: Any, policy: Any
+) -> bytes:
+    """
+    Generates a Renewal Invitation PDF using WeasyPrint and Jinja2.
+    """
+    html_content = generate_renewal_invitation_html(risk_note, client, policy)
     return cast(bytes, HTML(string=html_content).write_pdf())

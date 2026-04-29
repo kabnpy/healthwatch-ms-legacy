@@ -1,16 +1,21 @@
 import { Loader2 } from "lucide-react"
 import { useEffect, useState } from "react"
-import { OpenAPI } from "@/client"
 
-interface HTMLRiskNoteViewerProps {
-  riskNoteId: string
+interface HTMLViewerProps {
+  apiUrl: string
+  title?: string
   className?: string
 }
 
-export function HTMLRiskNoteViewer({
-  riskNoteId,
+/**
+ * A universal component to render backend-generated HTML documents.
+ * Fetches HTML from the provided API URL and renders it safely.
+ */
+export function HTMLViewer({
+  apiUrl,
+  title = "Document",
   className = "w-full h-full min-h-[800px]",
-}: HTMLRiskNoteViewerProps) {
+}: HTMLViewerProps) {
   const [htmlContent, setHtmlContent] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -18,19 +23,18 @@ export function HTMLRiskNoteViewer({
   useEffect(() => {
     let active = true
     const token = localStorage.getItem("access_token")
-    const url = `${(OpenAPI.BASE || "").replace(/\/$/, "")}/api/v1/risk-notes/${riskNoteId}/html`
 
     const fetchHTML = async () => {
       try {
         setIsLoading(true)
-        const response = await fetch(url, {
+        const response = await fetch(apiUrl, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         })
 
         if (!response.ok) {
-          throw new Error(`Failed to fetch Risk Note: ${response.statusText}`)
+          throw new Error(`Failed to fetch ${title}: ${response.statusText}`)
         }
 
         const text = await response.text()
@@ -51,14 +55,14 @@ export function HTMLRiskNoteViewer({
     return () => {
       active = false
     }
-  }, [riskNoteId])
+  }, [apiUrl, title])
 
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center p-12 w-full h-full bg-muted/5 rounded-lg border border-dashed">
         <Loader2 className="size-8 animate-spin text-primary mb-4" />
         <p className="text-sm text-muted-foreground font-medium">
-          Loading Document...
+          Loading {title}...
         </p>
       </div>
     )
@@ -68,7 +72,7 @@ export function HTMLRiskNoteViewer({
     return (
       <div className="flex flex-col items-center justify-center p-12 w-full h-full bg-destructive/5 rounded-lg border border-destructive/20">
         <p className="text-sm text-destructive font-bold mb-2">
-          Error Loading Document
+          Error Loading {title}
         </p>
         <p className="text-xs text-muted-foreground text-center max-w-xs">
           {error}
@@ -80,9 +84,11 @@ export function HTMLRiskNoteViewer({
   if (!htmlContent) return null
 
   return (
-    <div className={`${className} bg-white shadow-sm border rounded-sm overflow-auto`}>
-      <div 
-        dangerouslySetInnerHTML={{ __html: htmlContent }} 
+    <div
+      className={`${className} bg-white shadow-sm border rounded-sm overflow-auto`}
+    >
+      <div
+        dangerouslySetInnerHTML={{ __html: htmlContent }}
         className="p-8 print:p-0"
       />
     </div>

@@ -40,10 +40,15 @@ class RenewalService:
             .join(latest_rn_sub, col(Policy.id) == latest_rn_sub.c.policy_id)
             .where(latest_rn_sub.c.max_end == target_date)
             .where(
-                col(Policy.status).in_([PolicyStatus.ACTIVE, PolicyStatus.RENEWAL_INVITED])
+                col(Policy.status).in_(
+                    [PolicyStatus.ACTIVE, PolicyStatus.RENEWAL_INVITED]
+                )
             )
             .where(col(Policy.deleted_at) == None)
-            .options(selectinload(cast(Any, Policy.risk_notes)), selectinload(cast(Any, Policy.client)))
+            .options(
+                selectinload(cast(Any, Policy.risk_notes)),
+                selectinload(cast(Any, Policy.client)),
+            )
         )
         return list(session.exec(statement).all())
 

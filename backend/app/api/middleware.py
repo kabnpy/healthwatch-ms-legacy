@@ -6,6 +6,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 logger = logging.getLogger("app.middleware")
 
+
 class LoggingMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         start_time = time.perf_counter()
@@ -20,7 +21,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             "method": request.method,
             "path": request.url.path,
             "status_code": response.status_code,
-            "duration": f"{process_time:.4f}s"
+            "duration": f"{process_time:.4f}s",
         }
 
         logger.info(f"Request: {log_dict}")

@@ -6,6 +6,7 @@ import { OpenAPI } from "./client"
 import ErrorBoundary from "./components/Common/ErrorBoundary"
 import { ThemeProvider } from "./components/theme-provider"
 import { Toaster } from "./components/ui/sonner"
+import { TooltipProvider } from "./components/ui/tooltip"
 import "./index.css"
 import { queryClient } from "./queryClient"
 import { routeTree } from "./routeTree.gen"
@@ -27,8 +28,10 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <QueryClientProvider client={queryClient}>
-          <RouterProvider router={router} />
-          <Toaster richColors closeButton />
+          <TooltipProvider>
+            <RouterProvider router={router} />
+            <Toaster richColors closeButton />
+          </TooltipProvider>
         </QueryClientProvider>
       </ThemeProvider>
     </ErrorBoundary>

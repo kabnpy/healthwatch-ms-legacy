@@ -21,10 +21,12 @@ def test_new_policy_statuses_exist():
     assert PolicyStatus.RENEWAL_CONFIRMED == "Renewal Confirmed"
     assert PolicyStatus.LAPSED == "Lapsed"
 
+
 def test_new_risknote_statuses_exist():
     # Maybe we want them here too for the draft notes
     assert RiskNoteStatus.RENEWAL_INVITED == "Renewal Invited"
     assert RiskNoteStatus.RENEWAL_CONFIRMED == "Renewal Confirmed"
+
 
 def test_get_policies_expiring_exactly_in_days(db: Session):
     # 1. Setup policies
@@ -57,6 +59,7 @@ def test_get_policies_expiring_exactly_in_days(db: Session):
     assert len(results_7) == 1
     assert results_7[0].id == p7.id
 
+
 def test_get_policies_expiring_within_days(db: Session):
     # Setup policies (re-using or adding more)
     p15 = create_random_policy(db)
@@ -70,6 +73,7 @@ def test_get_policies_expiring_within_days(db: Session):
     # Note: earlier tests might have left data if db is not cleaned,
     # but fixtures usually handle it. Assuming clean db.
     assert len(results_within_30) >= 3
+
 
 @patch("app.services.renewal.send_email")
 def test_send_renewal_invitation(mock_send_email, db: Session):
@@ -104,6 +108,7 @@ def test_send_renewal_invitation(mock_send_email, db: Session):
     assert "Renewal Invitation" in kwargs["subject"]
     assert policy.policy_number in kwargs["html_content"]
 
+
 @patch("app.services.renewal.send_email")
 def test_send_renewal_reminder(mock_send_email, db: Session):
     policy = create_random_policy(db)
@@ -115,6 +120,7 @@ def test_send_renewal_reminder(mock_send_email, db: Session):
 
     assert mock_send_email.called
     assert "Renewal Reminder" in mock_send_email.call_args[1]["subject"]
+
 
 @patch("app.services.renewal.send_email")
 def test_run_daily_renewal_checks(mock_send_email, db: Session):
@@ -155,7 +161,9 @@ def test_run_daily_renewal_checks(mock_send_email, db: Session):
 
     # 3. Verify
     # Extract all HTML contents from mock calls
-    sent_htmls = [call.kwargs["html_content"] for call in mock_send_email.call_args_list]
+    sent_htmls = [
+        call.kwargs["html_content"] for call in mock_send_email.call_args_list
+    ]
 
     # Verify our specific policies were notified
     assert any(p30.policy_number in html for html in sent_htmls)
@@ -165,7 +173,10 @@ def test_run_daily_renewal_checks(mock_send_email, db: Session):
     db.refresh(p30)
     assert p30.status == PolicyStatus.RENEWAL_INVITED
 
-def test_read_policies_expiring_soon(client: "TestClient", superuser_token_headers: dict, db: Session):
+
+def test_read_policies_expiring_soon(
+    client: "TestClient", superuser_token_headers: dict, db: Session
+):
     # 1. Setup policies
     p_soon = create_random_policy(db)
     rn = p_soon.risk_notes[0]
@@ -181,6 +192,7 @@ def test_read_policies_expiring_soon(client: "TestClient", superuser_token_heade
 
     # 2. Call API
     from app.core.config import settings
+
     response = client.get(
         f"{settings.API_V1_STR}/policies/?expiring_within=30",
         headers=superuser_token_headers,

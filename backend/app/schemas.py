@@ -169,7 +169,13 @@ class MotorPrivateRiskDetails(BaseModel):
                 if term_key in data:
                     data.pop(term_key)
 
-        # 7. Final assignment
+        # 7. Final assignment with strict satisfaction
+        # If we are missing required fields for the schema, we inject [ EMPTY ] placeholders
+        if "registration_number" not in final_vehicle:
+            final_vehicle["registration_number"] = "[ EMPTY ]"
+        if "make" not in final_vehicle:
+            final_vehicle["make"] = "[ EMPTY ]"
+
         data["vehicle"] = final_vehicle
         data["extensions"] = final_extensions
         data["terms"] = final_terms

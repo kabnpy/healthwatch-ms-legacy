@@ -16,7 +16,7 @@ def mock_auth():
     auth.reset()
 
 def test_read_clients_with_mock_user(
-    client: TestClient, mock_auth: MockAuth, db: Session
+    client: TestClient, mock_auth: MockAuth, _db: Session
 ) -> None:
     # Setup mock user
     mock_user = get_mock_user(role=UserRole.VIEWER)
@@ -29,7 +29,7 @@ def test_read_clients_with_mock_user(
     assert response.status_code == 200
 
 def test_create_client_with_unauthorized_role(
-    client: TestClient, mock_auth: MockAuth, db: Session
+    client: TestClient, mock_auth: MockAuth, _db: Session
 ) -> None:
     # Setup mock user with Viewer role (not Staff)
     mock_user = get_mock_user(role=UserRole.VIEWER)
@@ -48,9 +48,7 @@ def test_create_client_with_unauthorized_role(
     # Should fail with 403 because create_client requires StaffUser
     assert response.status_code == 403
 
-def test_document_endpoints_missing_auth(
-    client: TestClient, db: Session
-) -> None:
+def test_document_endpoints_missing_auth(client: TestClient, _db: Session) -> None:
     """
     Audit: Check if document endpoints are properly protected.
     """
@@ -59,9 +57,9 @@ def test_document_endpoints_missing_auth(
 
     assert response.status_code == 401
 
-def test_download_document_missing_auth(
-    client: TestClient, db: Session
-) -> None:
+
+def test_download_document_missing_auth(client: TestClient, _db: Session) -> None:
+
     """
     Audit: Check if download endpoint is protected.
     """

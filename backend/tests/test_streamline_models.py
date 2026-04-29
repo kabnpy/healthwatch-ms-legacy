@@ -25,9 +25,10 @@ def test_risknote_no_longer_has_policy_snapshot(db: Session) -> None:
             coverage_end=date.today(),
             net_premium=Decimal("1000.00"),
             commission_amount=Decimal("100.00"),
-            total_amount=Decimal("1100.00")
+            total_amount=Decimal("1100.00"),
         )
         _ = rn.policy_snapshot
+
 
 def test_risknote_no_longer_has_payment_status(db: Session) -> None:
     """
@@ -42,9 +43,10 @@ def test_risknote_no_longer_has_payment_status(db: Session) -> None:
             coverage_end=date.today(),
             net_premium=Decimal("1000.00"),
             commission_amount=Decimal("100.00"),
-            total_amount=Decimal("1100.00")
+            total_amount=Decimal("1100.00"),
         )
         _ = rn.payment_status
+
 
 def test_policy_no_longer_has_computed_traversal_properties() -> None:
     """
@@ -57,7 +59,7 @@ def test_policy_no_longer_has_computed_traversal_properties() -> None:
         "total_premium",
         "start_date",
         "end_date",
-        "display_name"
+        "display_name",
     ]
 
     for prop in redundant_props:
