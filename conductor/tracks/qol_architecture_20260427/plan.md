@@ -51,8 +51,9 @@
 ## Phase 5: Validation
 - [x] **Task 5.1: Performance Testing**
     - Verify indexed query performance (Conceptualized in models, pending live DB).
-- [ ] **Task 5.2: E2E Error Scenarios**
+- [x] **Task 5.2: E2E Error Scenarios & Linting**
     - Manually trigger errors to verify toast notifications and logging.
+    - Verified formatters and linters (Ruff, Mypy, Biome) run without error.
 - [x] **Task 5.3: Standalone Unit Testing**
     - Implement and verify database-independent logic in `backend/tests/standalone/`.
     - Verified: `LoggingMiddleware`, `Invoice PDF Generation`.

@@ -166,9 +166,8 @@ def generate_invoice_pdf(invoice: Any, client: Any) -> bytes:
     html_content = generate_invoice_html(invoice, client)
     return cast(bytes, HTML(string=html_content).write_pdf())
 
-def generate_renewal_invitation_html(
-    risk_note: Any, client: Any, policy: Any
-) -> str:
+
+def generate_renewal_invitation_html(risk_note: Any, client: Any, policy: Any) -> str:
     """
     Generates the HTML content for a Renewal Invitation using Jinja2.
     """
@@ -194,9 +193,7 @@ def generate_renewal_invitation_html(
     return template.render(context)
 
 
-def generate_renewal_invitation_pdf(
-    risk_note: Any, client: Any, policy: Any
-) -> bytes:
+def generate_renewal_invitation_pdf(risk_note: Any, client: Any, policy: Any) -> bytes:
     """
     Generates a Renewal Invitation PDF using WeasyPrint and Jinja2.
     """

@@ -5,12 +5,15 @@ import { Suspense } from "react"
 import { z } from "zod"
 
 import { OpenAPI, RiskNotesService } from "@/client"
+import { HTMLViewer } from "@/components/Common/HTMLViewer"
 import PendingItems from "@/components/Pending/PendingItems"
 import { Button } from "@/components/ui/button"
-import { HTMLViewer } from "@/components/Common/HTMLViewer"
 
 const searchSchema = z.object({
-  mode: z.enum(["invoice", "certificate", "renewal"]).default("invoice").optional(),
+  mode: z
+    .enum(["invoice", "certificate", "renewal"])
+    .default("invoice")
+    .optional(),
 })
 
 function getRiskNoteQueryOptions(id: string) {
@@ -31,7 +34,7 @@ function RiskNotePrintContent({ id }: { id: string }) {
   const { data: riskNote } = useSuspenseQuery(getRiskNoteQueryOptions(id))
 
   const currentMode = mode || "invoice"
-  
+
   // Construct URLs based on mode
   const baseUrl = (OpenAPI.BASE || "").replace(/\/$/, "")
   let htmlUrl = ""
@@ -54,26 +57,26 @@ function RiskNotePrintContent({ id }: { id: string }) {
     // Use a hidden link to trigger download with auth
     fetch(pdfUrl, {
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     })
-    .then(response => response.blob())
-    .then(blob => {
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${title.replace(/\s+/g, '_')}_${id.substring(0, 8)}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-    })
-    .catch(err => console.error("PDF Download Error:", err));
+      .then((response) => response.blob())
+      .then((blob) => {
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement("a")
+        a.href = url
+        a.download = `${title.replace(/\s+/g, "_")}_${id.substring(0, 8)}.pdf`
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+      })
+      .catch((err) => console.error("PDF Download Error:", err))
   }
 
   return (
     <div className="max-w-[850px] mx-auto bg-white shadow-lg print:shadow-none min-h-screen relative">
-      <HTMLViewer 
-        apiUrl={htmlUrl} 
+      <HTMLViewer
+        apiUrl={htmlUrl}
         title={title}
         className="w-full min-h-screen"
       />
@@ -109,7 +112,7 @@ function RiskNotePrintContent({ id }: { id: string }) {
             <Download className="size-5" />
             PDF
           </Button>
-          
+
           <Button
             onClick={() => window.print()}
             size="lg"

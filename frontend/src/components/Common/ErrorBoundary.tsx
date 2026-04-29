@@ -46,12 +46,11 @@ class ErrorBoundary extends Component<Props, State> {
             <Button
               variant="outline"
               onClick={() => {
-                window.location.href = "/";
+                window.location.href = "/"
               }}
             >
               Go to Dashboard
             </Button>
-
           </div>
           {process.env.NODE_ENV === "development" && (
             <div className="mt-8 max-w-2xl overflow-auto rounded-md bg-muted p-4 text-left font-mono text-sm">

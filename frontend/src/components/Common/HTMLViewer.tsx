@@ -88,6 +88,7 @@ export function HTMLViewer({
       className={`${className} bg-white shadow-sm border rounded-sm overflow-auto`}
     >
       <div
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: Trusted content from backend
         dangerouslySetInnerHTML={{ __html: htmlContent }}
         className="p-8 print:p-0"
       />

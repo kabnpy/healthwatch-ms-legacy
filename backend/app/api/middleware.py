@@ -1,14 +1,18 @@
 import logging
 import time
 
-from fastapi import Request
+from typing import Any, Callable, cast
+
+from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 
 logger = logging.getLogger("app.middleware")
 
 
 class LoggingMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next):
+    async def dispatch(
+        self, request: Request, call_next: Callable[[Request], Any]
+    ) -> Response:
         start_time = time.perf_counter()
 
         # Process the request
@@ -26,4 +30,4 @@ class LoggingMiddleware(BaseHTTPMiddleware):
 
         logger.info(f"Request: {log_dict}")
 
-        return response
+        return cast(Response, response)
