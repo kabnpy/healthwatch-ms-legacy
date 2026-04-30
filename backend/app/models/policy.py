@@ -2,7 +2,7 @@ import uuid
 from datetime import date
 from decimal import Decimal
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Optional, cast
+from typing import TYPE_CHECKING, Any, Optional
 
 from pydantic import ConfigDict
 from sqlalchemy import JSON, Column, Index, Numeric
@@ -133,20 +133,6 @@ class Product(ProductBase, table=True):
     insurer: "Insurer" = Relationship(back_populates="products")
     policies: list["Policy"] = Relationship(back_populates="product")
 
-    def validate_risk_details(self, risk_details: dict[str, Any]) -> dict[str, Any]:
-        if "motor private" in self.class_of_insurance.lower():
-            from app.schemas import MotorPrivateRiskDetails
-
-            validated = MotorPrivateRiskDetails(**risk_details)
-            return validated.model_dump(mode="python")
-        return risk_details
-
-    def calculate_premium(self, risk_details: dict[str, Any]) -> Decimal:
-        from app.services.rating import RatingService
-
-        breakdown = RatingService.calculate_breakdown(self, risk_details)
-        return breakdown.net_premium
-
 
 class ProductsPublic(SQLModel):
     data: list[ProductPublic]
@@ -265,27 +251,6 @@ class RiskNote(RiskNoteBase, table=True):
     special_clauses_raw: list[str] = Field(
         default_factory=list, sa_column=Column("special_clauses", JSON)
     )
-
-    @property
-    def special_clauses(self) -> list[str]:
-        snapshot_terms = self.cover_snapshot.get("terms", {})
-        if isinstance(snapshot_terms, dict):
-            snapshot_clauses = snapshot_terms.get("special_clauses")
-            if snapshot_clauses:
-                if isinstance(snapshot_clauses, str):
-                    return [snapshot_clauses]
-                return cast(list[str], snapshot_clauses)
-        return self.special_clauses_raw
-
-    @special_clauses.setter
-    def special_clauses(self, value: list[str]) -> None:
-        self.special_clauses_raw = value
-
-    @property
-    def invoice_number(self) -> str | None:
-        if self.invoice_line_items and self.invoice_line_items[0].invoice:
-            return self.invoice_line_items[0].invoice.invoice_number
-        return None
 
 
 class RiskNotePublic(RiskNoteBase):

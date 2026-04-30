@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { FileDown, Mail } from "lucide-react"
 import { Suspense, useCallback, useState } from "react"
-import { OpenAPI, PoliciesService, type RiskNotePublic } from "@/client"
+import { PoliciesService, type RiskNotePublic } from "@/client"
 import { DataTable } from "@/components/Common/DataTable"
 import { DocumentManager } from "@/components/Common/DocumentManager"
 import { DocumentViewerModal } from "@/components/Common/DocumentViewerModal"
@@ -31,11 +31,9 @@ import {
   useSendRenewalReminder,
 } from "@/hooks/useInsurance"
 import { queryClient } from "@/queryClient"
+import { DocumentService } from "@/services/document"
 import type { EnhancedPolicy } from "@/types/insurance"
-import {
-  downloadAuthenticatedFile,
-  getPolicyDisplayName,
-} from "@/utils/insurance"
+import { getPolicyDisplayName } from "@/utils/insurance"
 
 // --- Route Definition ---
 
@@ -136,10 +134,13 @@ function PolicyDashboardContent({
 
   const handleDownloadPdf = useCallback(
     async (riskNote: RiskNotePublic) => {
-      const url = `${(OpenAPI.BASE || "").replace(/\/$/, "")}/api/v1/risk-notes/${riskNote.id}/pdf`
-      const filename = `RiskNote_${riskNote.risk_note_number || riskNote.id}.pdf`
       try {
-        await downloadAuthenticatedFile(url, filename)
+        await DocumentService.download({
+          id: riskNote.id,
+          type: "risknote",
+          title: "Risk Note",
+          filename: `RiskNote_${riskNote.risk_note_number || riskNote.id}.pdf`,
+        })
       } catch (_error) {
         showErrorToast("Failed to download PDF")
       }
@@ -370,8 +371,9 @@ function PolicyDashboardContent({
               >
                 <VersionHistory
                   riskNotes={riskNotes}
-                  onView={(rn) => handleViewDocument(rn.id, "risknote")}
-                  onViewPdf={(rn) => handleViewDocument(rn.id, "risknote")}
+                  onView={(rn: RiskNotePublic) =>
+                    handleViewDocument(rn.id, "risknote")
+                  }
                 />
               </TabsContent>
 
@@ -382,9 +384,9 @@ function PolicyDashboardContent({
                 <div className="border rounded-xl bg-card overflow-hidden shadow-sm">
                   <DataTable
                     columns={getRiskNoteColumns(
-                      (rn) => handleViewDocument(rn.id, "risknote"),
-                      (rn) => handleViewDocument(rn.id, "risknote"),
-                      (rn) => handleDownloadPdf(rn),
+                      (rn: RiskNotePublic) =>
+                        handleViewDocument(rn.id, "risknote"),
+                      (rn: RiskNotePublic) => handleDownloadPdf(rn),
                     )}
                     data={riskNotes}
                   />

@@ -50,6 +50,13 @@ class MotorVehicleDetails(BaseModel):
     year_of_manufacture: int | None = None
     sum_insured: Decimal = Field(default=Decimal("0"))
 
+    @field_validator("registration_number", "make")
+    @classmethod
+    def reject_empty_placeholder(cls, v: str) -> str:
+        if v == "[ EMPTY ]":
+            raise ValueError("Field cannot be empty")
+        return v
+
     @field_validator("sum_insured", mode="before")
     @classmethod
     def parse_sum_insured(cls, v: Any) -> Decimal:

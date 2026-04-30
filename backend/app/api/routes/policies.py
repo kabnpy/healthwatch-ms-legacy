@@ -34,6 +34,7 @@ from app.services.document_service import (
     generate_renewal_invitation_pdf,
 )
 from app.services.policy import policy_service
+from app.services.product import product_service
 from app.services.rating import RatingService
 
 router = APIRouter()
@@ -92,7 +93,9 @@ def get_policy_quote(
         raise HTTPException(status_code=404, detail="Product not found")
 
     try:
-        validated_risk = product.validate_risk_details(quote_in.risk_details)
+        validated_risk = product_service.validate_risk_details(
+            product, quote_in.risk_details
+        )
         breakdown = RatingService.calculate_breakdown(product, validated_risk)
         return QuoteResponse(breakdown=breakdown)
     except Exception as e:

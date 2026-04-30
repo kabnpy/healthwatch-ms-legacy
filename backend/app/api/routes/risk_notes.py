@@ -4,6 +4,7 @@ from typing import Any
 from fastapi import APIRouter, HTTPException, Response
 
 from app.api.deps import CurrentUser, SessionDep, StaffUser
+from app.api.utils import prepare_risknote_public
 from app.crud import (
     count_risk_notes,
     get_risk_notes,
@@ -55,7 +56,9 @@ def read_risk_notes(
         client_id=client_id,
         uninvoiced_only=uninvoiced_only,
     )
-    return RiskNotesPublic(data=risk_notes, count=count)
+    return RiskNotesPublic(
+        data=[prepare_risknote_public(rn) for rn in risk_notes], count=count
+    )
 
 
 @router.get("/{id}", response_model=RiskNotePublic)
@@ -68,7 +71,7 @@ def read_risk_note(
     risk_note = session.get(RiskNote, id)
     if not risk_note:
         raise HTTPException(status_code=404, detail="Risk note not found")
-    return risk_note
+    return prepare_risknote_public(risk_note)
 
 
 @router.get("/{id}/pdf")
@@ -140,7 +143,7 @@ def create_risk_note(
     risk_note = policy_service.create_risk_note(
         session=session, risk_note_in=risk_note_in, created_by_id=_current_user.id
     )
-    return risk_note
+    return prepare_risknote_public(risk_note)
 
 
 @router.put("/{id}", response_model=RiskNotePublic)
@@ -161,7 +164,7 @@ def update_risk_note(
     risk_note = crud_update_risk_note(
         session=session, db_risk_note=risk_note, risk_note_in=risk_note_in
     )
-    return risk_note
+    return prepare_risknote_public(risk_note)
 
 
 @router.delete("/{id}", response_model=Message)

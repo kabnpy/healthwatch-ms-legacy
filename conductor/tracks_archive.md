@@ -4,23 +4,28 @@ This file contains the history of completed development tracks.
 
 ---
 
+- [x] **Track: Document Generation & QoL Hardening** (April 2026)
+*Link: [./archive/qol_architecture_20260427/](./archive/qol_architecture_20260427/)*
+
+---
+
 - [x] **Track: breakdown crud.py and models.py into modules** (March 2026)
-*Link: [./tracks/modularize_crud_models_20260306/](./tracks/modularize_crud_models_20260306/)*
+*Link: [./archive/modularize_crud_models_20260306/](./archive/modularize_crud_models_20260306/)*
 
 ---
 
 - [x] **Track: One-page A4 Risk Note PDF Generation** (March 2026)
-*Link: [./tracks/one_page_risknote_20260310/](./tracks/one_page_risknote_20260310/)*
+*Link: [./archive/one_page_risknote_20260310/](./archive/one_page_risknote_20260310/)*
 
 ---
 
 - [x] **Track: update the risknote template to match the risknote in ./planning/motor_private-risknote-template.html** (March 2026)
-*Link: [./tracks/risknote_template_update_20260319/](./tracks/risknote_template_update_20260319/)*
+*Link: [./archive/risknote_template_update_20260319/](./archive/risknote_template_update_20260319/)*
 
 ---
 
 - [x] **Track: Unify Risk Note digital and PDF views using a shared HTML source and fix PDF loading bug.** (March 2026)
-*Link: [./tracks/risknote_view_unification_20260323/](./tracks/risknote_view_unification_20260323/)*
+*Link: [./archive/risknote_view_unification_20260323/](./archive/risknote_view_unification_20260323/)*
 
 ---
 

@@ -17,6 +17,7 @@ from app.models import (
     RiskNoteStatus,
     TransactionType,
 )
+from app.services.product import product_service
 from app.services.rating import RatingService
 
 logger = logging.getLogger(__name__)
@@ -56,7 +57,9 @@ class PolicyService:
             raise HTTPException(status_code=404, detail="Product not found")
 
         try:
-            validated_risk = product.validate_risk_details(cover_snapshot)
+            validated_risk = product_service.validate_risk_details(
+                product, cover_snapshot
+            )
             breakdown = RatingService.calculate_breakdown(product, validated_risk)
         except Exception as e:
             logger.exception("Validation or Rating failure")

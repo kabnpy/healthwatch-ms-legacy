@@ -1,30 +1,31 @@
 # Implementation Plan: System Architecture Refinement & Hardening
 
 ## Phase 1: Backend Decoupling (Strict Services)
-- [ ] Task: Refactor Product Model
-    - [ ] Create `backend/app/services/product.py` and implement `ProductService`.
-    - [ ] Move `validate_risk_details` and `calculate_premium` from `Product` model to `ProductService`.
-    - [ ] Update `backend/app/api/routes/policies.py` and `backend/app/seed_mock_data.py` to use `ProductService`.
-- [ ] Task: Refactor Policy & RiskNote Models
-    - [ ] Audit `Policy` and `RiskNote` models for lingering business logic.
-    - [ ] Consolidate orchestration into `PolicyService` and `RiskNoteService` as needed.
-- [ ] Task: Verify Service Layer Unit Tests
-    - [ ] Update existing tests in `backend/tests/test_rating_service.py` and others to reflect the new service structure.
-    - [ ] Ensure all backend tests pass.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)
+- [x] Task: Refactor Product Model
+    - [x] Create `backend/app/services/product.py` and implement `ProductService`.
+    - [x] Move `validate_risk_details` and `calculate_premium` from `Product` model to `ProductService`.
+    - [x] Update `backend/app/api/routes/policies.py` and `backend/app/seed_mock_data.py` to use `ProductService`.
+- [x] Task: Refactor Policy & RiskNote Models
+    - [x] Audit `Policy` and `RiskNote` models for lingering business logic.
+    - [x] Consolidate orchestration into `PolicyService` and `RiskNoteService` as needed.
+- [x] Task: Verify Service Layer Unit Tests
+    - [x] Update existing tests in `backend/tests/test_rating_service.py` and others to reflect the new service structure.
+    - [x] Ensure all backend tests pass.
+- [~] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)
 
 ## Phase 2: Frontend Utilities & Error Boundaries
-- [ ] Task: Centralize Document Service
-    - [ ] Create `frontend/src/services/document.ts`.
-    - [ ] Implement URL construction and `downloadAuthenticatedFile` orchestration.
-    - [ ] Update `DocumentViewer.tsx` and `risk-notes.$id.tsx` to use this service.
-- [ ] Task: Standardize Error Boundaries
-    - [ ] Create specialized Error Fallback components for different layout areas.
-    - [ ] Audit and wrap major routes with consistent `ErrorBoundary` treatments.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
+- [x] Task: Centralize Document Service
+    - [x] Create `frontend/src/services/document.ts`.
+    - [x] Implement URL construction and `downloadAuthenticatedFile` orchestration.
+    - [x] Update `DocumentViewer.tsx` and `risk-notes.$id.tsx` to use this service.
+- [x] Task: Standardize Error Boundaries
+    - [x] Create specialized Error Fallback components for different layout areas.
+    - [x] Audit and wrap major routes with consistent `ErrorBoundary` treatments.
+- [~] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
 
 ## Phase 3: Frontend Route Modularization
 - [ ] Task: Decompose Policy Dashboard
+    - [x] Extract `ActionToolbar` into a separate component.
     - [ ] Extract `TransactionHistory` timeline into a separate component.
     - [ ] Extract `PolicyFinancialOverview` and `ActionToolbar`.
     - [ ] Refactor `clients.$clientId.policies.$policyId.tsx` to orchestrate these sub-components.

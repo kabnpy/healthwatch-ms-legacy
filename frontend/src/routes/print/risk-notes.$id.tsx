@@ -4,10 +4,11 @@ import { Download, Printer } from "lucide-react"
 import { Suspense } from "react"
 import { z } from "zod"
 
-import { OpenAPI, RiskNotesService } from "@/client"
+import { RiskNotesService } from "@/client"
 import { HTMLViewer } from "@/components/Common/HTMLViewer"
 import PendingItems from "@/components/Pending/PendingItems"
 import { Button } from "@/components/ui/button"
+import { DocumentService } from "@/services/document"
 
 const searchSchema = z.object({
   mode: z
@@ -36,41 +37,19 @@ function RiskNotePrintContent({ id }: { id: string }) {
   const currentMode = mode || "invoice"
 
   // Construct URLs based on mode
-  const baseUrl = (OpenAPI.BASE || "").replace(/\/$/, "")
-  let htmlUrl = ""
-  let pdfUrl = ""
-  let title = ""
-
-  if (currentMode === "renewal") {
-    htmlUrl = `${baseUrl}/api/v1/policies/${riskNote.policy_id}/renewal-invitation/html`
-    pdfUrl = `${baseUrl}/api/v1/policies/${riskNote.policy_id}/renewal-invitation/pdf`
-    title = "Renewal Invitation"
-  } else {
-    // Risk Note (Invoice mode in frontend = Risk Note in backend)
-    htmlUrl = `${baseUrl}/api/v1/risk-notes/${id}/html`
-    pdfUrl = `${baseUrl}/api/v1/risk-notes/${id}/pdf`
-    title = "Risk Note"
-  }
+  const docType = currentMode === "renewal" ? "renewal" : "risknote"
+  const htmlUrl = DocumentService.getHtmlUrl(
+    docType === "renewal" ? riskNote.policy_id : id,
+    docType,
+  )
+  const title = docType === "renewal" ? "Renewal Invitation" : "Risk Note"
 
   const handleDownloadPDF = () => {
-    const token = localStorage.getItem("access_token")
-    // Use a hidden link to trigger download with auth
-    fetch(pdfUrl, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    DocumentService.download({
+      id: docType === "renewal" ? riskNote.policy_id : id,
+      type: docType,
+      title,
     })
-      .then((response) => response.blob())
-      .then((blob) => {
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement("a")
-        a.href = url
-        a.download = `${title.replace(/\s+/g, "_")}_${id.substring(0, 8)}.pdf`
-        document.body.appendChild(a)
-        a.click()
-        window.URL.revokeObjectURL(url)
-      })
-      .catch((err) => console.error("PDF Download Error:", err))
   }
 
   return (

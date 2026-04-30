@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router"
-
+import { PageErrorFallback } from "@/components/Common/ErrorFallbacks"
 import { Footer } from "@/components/Common/Footer"
 import { Header } from "@/components/layout/Header"
 import AppSidebar from "@/components/Sidebar/AppSidebar"
@@ -8,6 +8,7 @@ import { isLoggedIn } from "@/hooks/useAuth"
 
 export const Route = createFileRoute("/_layout")({
   component: Layout,
+  errorComponent: () => <PageErrorFallback />,
   beforeLoad: async () => {
     if (!isLoggedIn()) {
       throw redirect({

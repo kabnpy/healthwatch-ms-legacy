@@ -1,14 +1,14 @@
 import { useQuery } from "@tanstack/react-query"
-import { AlertCircle, Download, FileText, Loader2, Printer } from "lucide-react"
+import { Download, FileText, Loader2, Printer } from "lucide-react"
 import { Suspense } from "react"
 
 import {
   DocumentsService,
   FinancialsService,
-  OpenAPI,
   type ReceiptPublic,
 } from "@/client"
-import { downloadAuthenticatedFile } from "@/utils/insurance"
+import { DocumentService, type DocumentSourceType } from "@/services/document"
+import { InlineErrorFallback } from "../Common/ErrorFallbacks"
 import { HTMLViewer } from "../Common/HTMLViewer"
 import { Button } from "../ui/button"
 
@@ -59,19 +59,13 @@ function DocumentShell({
 
 function ErrorDisplay({ id, message }: { id: string; message?: string }) {
   return (
-    <div className="flex flex-col items-center justify-center p-12 text-center bg-white rounded-lg shadow-inner border border-dashed m-8 w-full">
-      <div className="p-4 rounded-full bg-destructive/10 text-destructive mb-4">
-        <AlertCircle className="size-8" />
-      </div>
-      <h3 className="text-lg font-bold">Document Not Found</h3>
-      <p className="text-muted-foreground max-w-xs mx-auto">
-        {message ||
-          "We couldn't find the requested file. It may have been deleted or the link is invalid."}
-      </p>
-      <p className="text-[10px] text-muted-foreground mt-4 font-mono">
-        Reference ID: {id}
-      </p>
-    </div>
+    <InlineErrorFallback
+      title="Document Not Found"
+      message={
+        message ||
+        `We couldn't find the requested file (Ref: ${id}). It may have been deleted or the link is invalid.`
+      }
+    />
   )
 }
 
@@ -123,8 +117,7 @@ function FileLoader({ id, receiptId }: { id?: string; receiptId?: string }) {
     return <ErrorDisplay id={id || receiptId || "N/A"} />
   }
 
-  const baseUrl = OpenAPI.BASE || "http://localhost:8000"
-  const downloadUrl = `${baseUrl.replace(/\/$/, "")}/api/v1/documents/${document.id}/download`
+  const downloadUrl = DocumentService.getPdfUrl(document.id, "generic")
 
   const headerExtra = (
     <div className="flex items-center gap-4">
@@ -152,10 +145,11 @@ function FileLoader({ id, receiptId }: { id?: string; receiptId?: string }) {
           size="sm"
           className="gap-2"
           onClick={() =>
-            downloadAuthenticatedFile(
-              downloadUrl,
-              document.document_type || "document",
-            )
+            DocumentService.download({
+              id: document.id,
+              type: "generic",
+              filename: document.document_type || "document",
+            })
           }
         >
           <Download className="size-4" />
@@ -226,30 +220,21 @@ function FileLoader({ id, receiptId }: { id?: string; receiptId?: string }) {
 // --- Main Component ---
 
 export function DocumentViewer({ id, type }: DocumentViewerProps) {
-  const baseUrl = (OpenAPI.BASE || "").replace(/\/$/, "")
   const isInternal = ["risknote", "invoice", "renewal"].includes(type)
 
-  let htmlUrl = ""
-  let pdfUrl = ""
-  let title = ""
-
-  if (type === "risknote") {
-    htmlUrl = `${baseUrl}/api/v1/risk-notes/${id}/html`
-    pdfUrl = `${baseUrl}/api/v1/risk-notes/${id}/pdf`
-    title = "Risk Note"
-  } else if (type === "invoice") {
-    htmlUrl = `${baseUrl}/api/v1/financials/invoices/${id}/html`
-    pdfUrl = `${baseUrl}/api/v1/financials/invoices/${id}/pdf`
-    title = "Invoice"
-  } else if (type === "renewal") {
-    htmlUrl = `${baseUrl}/api/v1/policies/${id}/renewal-invitation/html`
-    pdfUrl = `${baseUrl}/api/v1/policies/${id}/renewal-invitation/pdf`
-    title = "Renewal Invitation"
-  }
+  const docType = type as DocumentSourceType
+  const htmlUrl = isInternal ? DocumentService.getHtmlUrl(id, docType) : ""
+  const title =
+    type === "risknote"
+      ? "Risk Note"
+      : type === "invoice"
+        ? "Invoice"
+        : type === "renewal"
+          ? "Renewal Invitation"
+          : "Document"
 
   const handleDownload = () => {
-    const filename = `${title.replace(/\s+/g, "_")}_${id.substring(0, 8)}.pdf`
-    downloadAuthenticatedFile(pdfUrl, filename)
+    DocumentService.download({ id, type: docType, title })
   }
 
   const headerExtra = isInternal ? (
