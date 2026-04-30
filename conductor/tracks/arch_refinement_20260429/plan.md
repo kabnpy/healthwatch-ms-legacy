@@ -11,7 +11,7 @@
 - [x] Task: Verify Service Layer Unit Tests
     - [x] Update existing tests in `backend/tests/test_rating_service.py` and others to reflect the new service structure.
     - [x] Ensure all backend tests pass.
-- [~] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)
 
 ## Phase 2: Frontend Utilities & Error Boundaries
 - [x] Task: Centralize Document Service
@@ -21,7 +21,7 @@
 - [x] Task: Standardize Error Boundaries
     - [x] Create specialized Error Fallback components for different layout areas.
     - [x] Audit and wrap major routes with consistent `ErrorBoundary` treatments.
-- [~] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
 
 ## Phase 3: Frontend Route Modularization
 - [ ] Task: Decompose Policy Dashboard

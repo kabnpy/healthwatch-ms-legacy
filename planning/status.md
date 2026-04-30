@@ -1,26 +1,25 @@
-# Project Status (Current Session: 2026-04-28)
+# Project Status (Current Session: 2026-04-30)
 
 ## Executive Summary
-The project has transitioned from a standard CRUD application into a robust **Document Generation & Insurance Management System**. Core foundations for policies, risk notes (snapshots), and financials are stable. Current focus is on production hardening, automated document production (PDFs), and system performance.
+The project has moved into a **System Architecture Refinement** phase, focusing on strict decoupling of business logic from data models, centralization of frontend utilities, and route modularization. Core document generation is stable and unified across the stack.
 
 ## Major Milestones (Completed)
-- **Core Engine (Foundation)**: Unified database/model schema, temporal versioning for risk items, and atomic snapshots for risk notes.
-- **Insurance Workflows**: End-to-end renewal system, rating engine consolidation (Motor & Manual), and dynamic policy wizard.
-- **Financial Layer**: Consolidated invoicing and receipting logic linked to risk note snapshots.
-- **Document Production**: High-fidelity A4 PDF generation (WeasyPrint) for Risk Notes and Invoices.
-- **System Hardening**: Global error handling, structured logging, and database query optimization (indexing).
-- **Database Synchronization**: Fixed `prestart` failure by syncing missing `Product` columns and converting rigid database Enums to `VARCHAR` to match Python `str` Enum values.
+- **Backend Decoupling**: Business logic moved from SQLModel classes (Product, RiskNote) to dedicated Service layers (`ProductService`, `RiskNoteService`).
+- **Frontend Centralization**: Document URL generation and download orchestration unified in `DocumentService`.
+- **Error Boundary Standardization**: Implemented standard `ErrorFallback` components and route-level error boundaries.
+- **Model Hardening**: Added strict schema validation for Motor Private risk details to prevent data corruption.
+- **Dashboard Modularization**: Extracted `ActionToolbar` as part of the decomposition of the Policy Dashboard "God" file.
 
 ## Current Status (Ongoing)
-- **QoL & Architecture Hardening**: Implementing production-ready features (logging, error boundaries, indices).
-- **Document Extension**: Extending PDF generation to Renewal Invitations and finalizing Invoice layouts.
+- **Phase 3: Frontend Route Modularization**: Further decomposing the Policy Dashboard into domain-specific components (`TransactionHistory`, `FinancialOverview`).
+- **Phase 4: E2E Test Suite**: Preparing Playwright foundation for full workflow verification.
 
 ## Immediate Next Steps
-1. **Apply Production Indices**: Execute Alembic migrations for new performance indices.
-2. **Renewal Invitation PDF**: Implement the template and service logic for renewal invitations.
-3. **Receipt PDF Evaluation**: Determine if high-fidelity PDFs are required for receipts.
+1. **Decompose Policy Dashboard**: Complete extraction of `TransactionHistory` and refactor the main dashboard route.
+2. **Audit "God" Files**: Review and modularize `NewPolicyWizard.tsx` and `ClientInvoices.tsx`.
+3. **E2E Foundation**: Setup Playwright fixtures for authenticated user states.
 
-## Key Architectural Principles
-*Detailed definitions moved to [docs/02_tech_architecture.md](../docs/02_tech_architecture.md)*
-- **Atomic Snapshots**: RiskNotes are immutable records of coverage state at a point in time.
-- **Temporal Integrity**: Risk Items maintain history via versioning, not in-place updates.
+## Key Architectural Decisions
+- **Anemic Models**: SQLModel classes are strictly for data definition and relationships. All business logic must reside in services.
+- **Service-Driven UI**: Frontend components use dedicated service classes for complex orchestrations (e.g., DocumentService) instead of scattered utility functions.
+- **Standardized Fallbacks**: Every major UI section must have a corresponding error fallback to ensure graceful degradation.
