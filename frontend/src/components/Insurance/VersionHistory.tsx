@@ -1,5 +1,5 @@
 import { format, parseISO } from "date-fns"
-import { Clock, Eye, FileText, Info } from "lucide-react"
+import { Clock, Eye, Info } from "lucide-react"
 import type { RiskNotePublic } from "@/client"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -9,14 +9,9 @@ import { formatCurrency } from "@/utils"
 interface VersionHistoryProps {
   riskNotes: RiskNotePublic[]
   onView: (riskNote: RiskNotePublic) => void
-  onViewPdf?: (riskNote: RiskNotePublic) => void
 }
 
-export function VersionHistory({
-  riskNotes,
-  onView,
-  onViewPdf,
-}: VersionHistoryProps) {
+export function VersionHistory({ riskNotes, onView }: VersionHistoryProps) {
   if (!riskNotes || riskNotes.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-12 text-center bg-muted/10 border-2 border-dashed rounded-xl">
@@ -123,19 +118,8 @@ export function VersionHistory({
                         onClick={() => onView(note)}
                       >
                         <Eye className="size-3" />
-                        Digital
+                        View Document
                       </Button>
-                      {onViewPdf && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 gap-2 text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-100"
-                          onClick={() => onViewPdf(note)}
-                        >
-                          <FileText className="size-3" />
-                          PDF
-                        </Button>
-                      )}
                     </div>
                   </div>
                 </div>

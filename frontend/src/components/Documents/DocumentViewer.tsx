@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
-import { AlertCircle, FileText, Loader2 } from "lucide-react"
-import { Suspense, useState } from "react"
+import { AlertCircle, Download, FileText, Loader2, Printer } from "lucide-react"
+import { Suspense } from "react"
 
 import {
   DocumentsService,
@@ -8,9 +8,9 @@ import {
   OpenAPI,
   type ReceiptPublic,
 } from "@/client"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { BlobPDFViewer } from "../Common/BlobPDFViewer"
+import { downloadAuthenticatedFile } from "@/utils/insurance"
 import { HTMLViewer } from "../Common/HTMLViewer"
+import { Button } from "../ui/button"
 
 // --- Types ---
 
@@ -19,7 +19,6 @@ type DocumentType = "risknote" | "invoice" | "receipt" | "external" | "renewal"
 interface DocumentViewerProps {
   id: string
   type: DocumentType
-  initialViewMode?: "digital" | "pdf"
 }
 
 // --- Shared Components ---
@@ -46,7 +45,7 @@ function DocumentShell({
           </p>
           <h3 className="text-sm font-bold font-mono">{title}</h3>
         </div>
-        {headerExtra}
+        <div className="flex items-center gap-2">{headerExtra}</div>
       </div>
 
       <div className="flex-1 min-h-[600px] bg-zinc-100 p-4 flex items-center justify-center overflow-auto">
@@ -127,24 +126,53 @@ function FileLoader({ id, receiptId }: { id?: string; receiptId?: string }) {
   const baseUrl = OpenAPI.BASE || "http://localhost:8000"
   const downloadUrl = `${baseUrl.replace(/\/$/, "")}/api/v1/documents/${document.id}/download`
 
-  const headerExtra = receipt ? (
-    <div className="flex gap-6 text-right">
-      <div>
-        <p className="text-[10px] font-bold uppercase text-muted-foreground">
-          Amount
-        </p>
-        <p className="font-bold text-xs">
-          KES {receipt.amount.toLocaleString()}
-        </p>
-      </div>
-      <div>
-        <p className="text-[10px] font-bold uppercase text-muted-foreground">
-          Mode
-        </p>
-        <p className="font-bold text-xs">{receipt.mode}</p>
+  const headerExtra = (
+    <div className="flex items-center gap-4">
+      {receipt && (
+        <div className="flex gap-6 text-right border-r pr-4">
+          <div>
+            <p className="text-[10px] font-bold uppercase text-muted-foreground">
+              Amount
+            </p>
+            <p className="font-bold text-xs">
+              KES {receipt.amount.toLocaleString()}
+            </p>
+          </div>
+          <div>
+            <p className="text-[10px] font-bold uppercase text-muted-foreground">
+              Mode
+            </p>
+            <p className="font-bold text-xs">{receipt.mode}</p>
+          </div>
+        </div>
+      )}
+      <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-2"
+          onClick={() =>
+            downloadAuthenticatedFile(
+              downloadUrl,
+              document.document_type || "document",
+            )
+          }
+        >
+          <Download className="size-4" />
+          Download
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-2"
+          onClick={() => window.print()}
+        >
+          <Printer className="size-4" />
+          Print
+        </Button>
       </div>
     </div>
-  ) : null
+  )
 
   const footer =
     receipt?.allocations && receipt.allocations.length > 0 ? (
@@ -184,8 +212,6 @@ function FileLoader({ id, receiptId }: { id?: string; receiptId?: string }) {
           alt={document.document_type}
           className="max-w-full h-auto shadow-2xl rounded-sm border bg-white"
         />
-      ) : document.mime_type === "application/pdf" ? (
-        <BlobPDFViewer url={downloadUrl} title="Document Viewer" />
       ) : (
         <iframe
           src={downloadUrl}
@@ -199,13 +225,7 @@ function FileLoader({ id, receiptId }: { id?: string; receiptId?: string }) {
 
 // --- Main Component ---
 
-export function DocumentViewer({
-  id,
-  type,
-  initialViewMode = "digital",
-}: DocumentViewerProps) {
-  const [viewMode, setViewMode] = useState<"digital" | "pdf">(initialViewMode)
-
+export function DocumentViewer({ id, type }: DocumentViewerProps) {
   const baseUrl = (OpenAPI.BASE || "").replace(/\/$/, "")
   const isInternal = ["risknote", "invoice", "renewal"].includes(type)
 
@@ -227,47 +247,53 @@ export function DocumentViewer({
     title = "Renewal Invitation"
   }
 
+  const handleDownload = () => {
+    const filename = `${title.replace(/\s+/g, "_")}_${id.substring(0, 8)}.pdf`
+    downloadAuthenticatedFile(pdfUrl, filename)
+  }
+
+  const headerExtra = isInternal ? (
+    <div className="flex items-center gap-2">
+      <Button
+        variant="outline"
+        size="sm"
+        className="gap-2"
+        onClick={handleDownload}
+      >
+        <Download className="size-4" />
+        Download PDF
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        className="gap-2"
+        onClick={() => window.print()}
+      >
+        <Printer className="size-4" />
+        Print
+      </Button>
+    </div>
+  ) : null
+
   return (
     <div className="w-full h-full animate-in fade-in zoom-in-95 duration-300 flex flex-col gap-4">
-      {isInternal && (
-        <div className="flex justify-center">
-          <Tabs
-            value={viewMode}
-            onValueChange={(v) => setViewMode(v as any)}
-            className="w-auto"
-          >
-            <TabsList>
-              <TabsTrigger
-                value="digital"
-                className="text-xs font-bold uppercase"
-              >
-                Digital Version
-              </TabsTrigger>
-              <TabsTrigger value="pdf" className="text-xs font-bold uppercase">
-                PDF Version (Official)
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
-      )}
-
       <div className="flex-1">
         {isInternal && (
-          <Suspense
-            fallback={
-              <div className="flex items-center justify-center p-24">
-                <Loader2 className="size-8 animate-spin text-primary" />
-              </div>
-            }
+          <DocumentShell
+            title={title}
+            subtitle="Internal Document"
+            headerExtra={headerExtra}
           >
-            {viewMode === "digital" ? (
+            <Suspense
+              fallback={
+                <div className="flex items-center justify-center p-24">
+                  <Loader2 className="size-8 animate-spin text-primary" />
+                </div>
+              }
+            >
               <HTMLViewer apiUrl={htmlUrl} title={title} />
-            ) : (
-              <div className="w-full h-full bg-zinc-100 flex items-center justify-center p-4">
-                <BlobPDFViewer url={pdfUrl} title={`${title} PDF`} />
-              </div>
-            )}
-          </Suspense>
+            </Suspense>
+          </DocumentShell>
         )}
 
         {!isInternal && (

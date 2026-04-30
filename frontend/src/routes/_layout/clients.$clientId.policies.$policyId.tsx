@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router"
 import { FileDown, Mail } from "lucide-react"
 import { Suspense, useCallback, useState } from "react"
 import { OpenAPI, PoliciesService, type RiskNotePublic } from "@/client"
-import { BlobPDFViewer } from "@/components/Common/BlobPDFViewer"
 import { DataTable } from "@/components/Common/DataTable"
 import { DocumentManager } from "@/components/Common/DocumentManager"
 import { DocumentViewerModal } from "@/components/Common/DocumentViewerModal"
@@ -84,11 +83,10 @@ function PolicyDashboardContent({
 
   // State for Document Viewer
   const [viewerOpen, setViewerOpen] = useState(false)
-  const [selectedRiskNoteId, setSelectedRiskNoteId] = useState<string | null>(
-    null,
-  )
-  const [viewType, setViewType] = useState<"risknote" | "invoice">("risknote")
-  const [viewMode, setViewMode] = useState<"digital" | "pdf">("digital")
+  const [selectedDocId, setSelectedDocId] = useState<string | null>(null)
+  const [viewType, setViewType] = useState<
+    "risknote" | "invoice" | "renewal" | "receipt" | "external"
+  >("risknote")
 
   // State for Risk Note Form
   const [riskNoteFormOpen, setRiskNoteFormOpen] = useState(false)
@@ -119,15 +117,18 @@ function PolicyDashboardContent({
     })
   }
 
-  const handleViewRiskNote = useCallback(
+  const handleViewDocument = useCallback(
     (
       id: string,
-      type: "risknote" | "invoice" = "risknote",
-      mode: "digital" | "pdf" = "digital",
+      type:
+        | "risknote"
+        | "invoice"
+        | "renewal"
+        | "receipt"
+        | "external" = "risknote",
     ) => {
-      setSelectedRiskNoteId(id)
+      setSelectedDocId(id)
       setViewType(type)
-      setViewMode(mode)
       setViewerOpen(true)
     },
     [],
@@ -321,46 +322,8 @@ function PolicyDashboardContent({
               )}
 
               {latestRiskNote ? (
-                <div className="border rounded-lg shadow-2xl overflow-hidden bg-white dark:bg-zinc-950">
-                  <div className="p-1 bg-muted/20 border-b flex justify-between items-center px-4">
-                    <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">
-                      Current Master Risk Note
-                    </span>
-                    <Tabs
-                      value={viewMode}
-                      onValueChange={(v) => setViewMode(v as any)}
-                      className="h-7"
-                    >
-                      <TabsList className="h-7 p-0.5 bg-muted">
-                        <TabsTrigger
-                          value="digital"
-                          className="text-[10px] h-6 px-2"
-                        >
-                          Digital View
-                        </TabsTrigger>
-                        <TabsTrigger
-                          value="pdf"
-                          className="text-[10px] h-6 px-2"
-                        >
-                          PDF View
-                        </TabsTrigger>
-                      </TabsList>
-                    </Tabs>
-                  </div>
-                  {viewMode === "digital" ? (
-                    <DocumentViewer
-                      id={latestRiskNote.id}
-                      type="risknote"
-                      initialViewMode="digital"
-                    />
-                  ) : (
-                    <div className="w-full bg-zinc-100 flex items-center justify-center p-4">
-                      <BlobPDFViewer
-                        url={`${(OpenAPI.BASE || "").replace(/\/$/, "")}/api/v1/risk-notes/${latestRiskNote.id}/pdf`}
-                        title="Risk Note PDF"
-                      />
-                    </div>
-                  )}
+                <div className="overflow-hidden bg-white dark:bg-zinc-950">
+                  <DocumentViewer id={latestRiskNote.id} type="risknote" />
                 </div>
               ) : (
                 <div className="p-12 text-center border-2 border-dashed rounded-lg bg-muted/10">
@@ -407,12 +370,8 @@ function PolicyDashboardContent({
               >
                 <VersionHistory
                   riskNotes={riskNotes}
-                  onView={(rn) =>
-                    handleViewRiskNote(rn.id, "risknote", "digital")
-                  }
-                  onViewPdf={(rn) =>
-                    handleViewRiskNote(rn.id, "risknote", "pdf")
-                  }
+                  onView={(rn) => handleViewDocument(rn.id, "risknote")}
+                  onViewPdf={(rn) => handleViewDocument(rn.id, "risknote")}
                 />
               </TabsContent>
 
@@ -423,8 +382,8 @@ function PolicyDashboardContent({
                 <div className="border rounded-xl bg-card overflow-hidden shadow-sm">
                   <DataTable
                     columns={getRiskNoteColumns(
-                      (rn) => handleViewRiskNote(rn.id, "risknote", "digital"),
-                      (rn) => handleViewRiskNote(rn.id, "risknote", "pdf"),
+                      (rn) => handleViewDocument(rn.id, "risknote"),
+                      (rn) => handleViewDocument(rn.id, "risknote"),
                       (rn) => handleDownloadPdf(rn),
                     )}
                     data={riskNotes}
@@ -446,18 +405,14 @@ function PolicyDashboardContent({
       </Tabs>
 
       {/* Document Viewer Modal */}
-      {selectedRiskNoteId && (
+      {selectedDocId && (
         <DocumentViewerModal
           isOpen={viewerOpen}
           onClose={() => setViewerOpen(false)}
-          title={`Document: ${selectedRiskNoteId}`}
+          title={`Document: ${selectedDocId}`}
         >
           <Suspense fallback={<PendingItems />}>
-            <DocumentViewer
-              id={selectedRiskNoteId}
-              type={viewType}
-              initialViewMode={viewMode}
-            />
+            <DocumentViewer id={selectedDocId} type={viewType} />
           </Suspense>
         </DocumentViewerModal>
       )}

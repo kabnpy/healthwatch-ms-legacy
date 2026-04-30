@@ -1,12 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import {
-  Copy,
-  Eye,
-  FileDown,
-  FileText,
-  Mail,
-  MoreHorizontal,
-} from "lucide-react"
+import { Copy, Eye, FileDown, Mail, MoreHorizontal } from "lucide-react"
 import { toast } from "sonner"
 
 import type { RiskNotePublic } from "@/client"
@@ -23,7 +16,6 @@ import { getPolicyDisplayName } from "@/utils/insurance"
 
 export const getColumns = (
   onView: (riskNote: RiskNotePublic) => void,
-  onViewPdf?: (riskNote: RiskNotePublic) => void,
   onDownloadPdf?: (riskNote: RiskNotePublic) => void,
 ): ColumnDef<RiskNotePublic>[] => [
   {
@@ -104,14 +96,8 @@ export const getColumns = (
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => onView(riskNote)}>
               <Eye className="mr-2 h-4 w-4" />
-              Digital View
+              View Document
             </DropdownMenuItem>
-            {onViewPdf && (
-              <DropdownMenuItem onClick={() => onViewPdf(riskNote)}>
-                <FileText className="mr-2 h-4 w-4" />
-                PDF View
-              </DropdownMenuItem>
-            )}
             {onDownloadPdf && (
               <DropdownMenuItem onClick={() => onDownloadPdf(riskNote)}>
                 <FileDown className="mr-2 h-4 w-4" />
