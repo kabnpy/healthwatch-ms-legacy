@@ -16,3 +16,8 @@ This file tracks the active and upcoming development tracks for the project. For
 
 - [ ] **Track: Receipt PDF Evaluation & Implementation**
 *Link: (Pending Creation)*
+
+---
+
+- [ ] **Track: System Architecture Refinement & Hardening**
+*Link: [./tracks/arch_refinement_20260429/](./tracks/arch_refinement_20260429/)*

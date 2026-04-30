@@ -1,0 +1,8 @@
+{
+  "track_id": "arch_refinement_20260429",
+  "type": "refactor",
+  "status": "new",
+  "created_at": "2026-04-29T10:00:00Z",
+  "updated_at": "2026-04-29T10:00:00Z",
+  "description": "System Architecture Refinement & Hardening: Decoupling logic, modularizing frontend routes, centralizing utilities, and expanding E2E coverage."
+}
